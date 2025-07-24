@@ -6,8 +6,8 @@ import { firebaseConfig } from './firebase-config';
 
 let app: FirebaseApp;
 
-// This function ensures that Firebase is initialized only once and only on the client-side.
-if (typeof window !== 'undefined' && !getApps().length) {
+// This ensures Firebase is initialized only once.
+if (!getApps().length) {
   app = initializeApp(firebaseConfig);
 } else {
   app = getApp();
