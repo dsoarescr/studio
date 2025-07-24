@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,6 +43,7 @@ import { useAuth } from '@/lib/auth-context';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
+import '@/lib/i18n';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },

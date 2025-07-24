@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/lib/auth-context';
 import { StripeProvider } from '@/components/payment/StripePaymentProvider';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
@@ -47,7 +48,9 @@ export default function RootLayout({
       <body className="font-body antialiased h-full bg-background">
         <AuthProvider>
           <StripeProvider>
-            {children}
+            <SidebarProvider>
+              {children}
+            </SidebarProvider>
             <Toaster />
           </StripeProvider>
         </AuthProvider>
