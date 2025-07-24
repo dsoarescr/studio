@@ -6,9 +6,9 @@ To get started, take a look at src/app/page.tsx.
 
 ## 🚀 Important: Firebase Setup
 
-For user login and registration to work, you MUST enable the authentication methods in your Firebase project.
+For user login and data storage to work, you MUST enable the necessary Firebase services for your project.
 
-### How to Enable Authentication:
+### Step 1: Enable Authentication Methods
 
 1.  **Go to the Firebase Console**: Open your project in the [Firebase Console](https://console.firebase.google.com/).
 2.  **Select Your Project**: Click on `pixel-universe-ub7uk`.
@@ -18,6 +18,17 @@ For user login and registration to work, you MUST enable the authentication meth
     *   Go to the **"Sign-in method"** tab.
     *   Click on **"Email/Password"** from the list of providers.
     *   Enable the first toggle switch and click **"Save"**.
-    *   (Optional) You can also enable other providers like Google, Facebook, etc., by following the same process.
+    *   (Optional) You can also enable other providers like Google, Facebook, etc.
 
-**Without completing these steps, user registration and login will not work.**
+**Without this, user registration and login will fail.**
+
+### Step 2: Create a Firestore Database (CRITICAL)
+
+The application requires a Firestore database to store user data and other information.
+
+1.  **Navigate to Firestore**: In the left-hand menu, under the "Build" section, click on **Firestore Database**.
+2.  **Create Database**: Click the **"Create database"** button.
+3.  **Select Production Mode**: Choose **"Start in production mode"** and click **"Next"**.
+4.  **Choose Location**: Select a Firestore location (e.g., `eur3 (europe-west)`). **This cannot be changed later.** Click **"Enable"**.
+
+**The application will not start correctly without a Firestore database.**
