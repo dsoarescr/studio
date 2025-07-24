@@ -1,4 +1,3 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -6,16 +5,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
       },
     ],
   },
-  // We recommend to set experimental.serverActions.allowedOrigins
-  // for server actions to protect against CSRF attacks.
-  // experimental: {
-  //   serverActions: {
-  //     allowedOrigins: ["my-proxy.com", "*.my-proxy.com"],
-  //   },
-  // },
 };
 
 export default nextConfig;
