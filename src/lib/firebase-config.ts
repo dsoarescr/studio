@@ -12,10 +12,10 @@ import type { FirebaseOptions } from 'firebase/app';
  * https://console.firebase.google.com/project/pixel-universe-ub7uk/settings/general/
  */
 export const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyCNBaLeKTbE1gY1TX5kwebz63kbhIUR9ug",
+  apiKey: "AIzaSyCN0aLeKTbE1gYlTX5kwebz63kbhIUR9ug",
   authDomain: "pixel-universe-ub7uk.firebaseapp.com",
   projectId: "pixel-universe-ub7uk",
-  storageBucket: "pixel-universe-ub7uk.firebasestorage.app",
+  storageBucket: "pixel-universe-ub7uk.appspot.com",
   messagingSenderId: "973812314333",
   appId: "1:973812314333:web:f6e74922db1673d2d62b34"
 };
