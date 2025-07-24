@@ -17,13 +17,7 @@ function getFirebaseApp() {
       return getApp();
     }
   }
-  // This is a simplified server-side fallback.
-  // In a real app, you might use firebase-admin for server-side operations.
-  if (getApps().length === 0) {
-    return initializeApp(firebaseConfig);
-  } else {
-    return getApp();
-  }
+  return null; // Return null on the server
 }
 
 const clientApp = getFirebaseApp();
