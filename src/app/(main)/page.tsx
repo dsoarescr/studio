@@ -1,24 +1,6 @@
-// src/app/(main)/page.tsx
-'use client';
-
-import React from 'react';
-import PixelGrid from '@/components/pixel-grid/PixelGrid';
-import MapSidebar from '@/components/layout/MapSidebar';
-import { PerformanceMonitor } from '@/components/ui/performance-monitor';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { useTranslation } from 'react-i18next';
-
-export default function HomePage() {
-  const { t } = useTranslation();
-  return (
-    <SidebarProvider>
-      <div className="relative h-full w-full flex">
-        <MapSidebar />
-        <div className="flex-1 h-full">
-          <PixelGrid />
-        </div>
-        <PerformanceMonitor />
-      </div>
-    </SidebarProvider>
-  );
+// This file is no longer needed as the logic has been moved to app/page.tsx
+// to resolve the layout conflict. It can be safely deleted.
+// For now, it will be empty to prevent build errors.
+export default function DeprecatedHomePage() {
+  return null;
 }

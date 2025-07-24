@@ -1,4 +1,3 @@
-
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, GithubAuthProvider } from 'firebase/auth';
@@ -18,7 +17,13 @@ function getFirebaseApp() {
       return getApp();
     }
   }
-  return null; // Return null on the server
+  // This is a simplified server-side fallback.
+  // In a real app, you might use firebase-admin for server-side operations.
+  if (getApps().length === 0) {
+    return initializeApp(firebaseConfig);
+  } else {
+    return getApp();
+  }
 }
 
 const clientApp = getFirebaseApp();
