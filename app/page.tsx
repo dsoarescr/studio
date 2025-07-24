@@ -1,20 +1,18 @@
 
 'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import PixelGrid from '@/components/pixel-grid/PixelGrid';
+import MapSidebar from '@/components/layout/MapSidebar';
+import { PerformanceMonitor } from '@/components/ui/performance-monitor';
 
-export default function LandingPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/community');
-  }, [router]);
-
+export default function HomePage() {
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <p className="text-primary">A redirecionar...</p>
+    <div className="flex-1 h-full relative flex">
+      <MapSidebar />
+      <div className="flex-1 h-full relative">
+        <PixelGrid />
       </div>
+      <PerformanceMonitor />
     </div>
   );
 }
