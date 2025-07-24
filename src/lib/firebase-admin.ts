@@ -1,11 +1,6 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 
-// This is for server-side Genkit, which uses the GenAI key.
-// The key is hardcoded here for simplicity in this environment.
-// In a production app, use environment variables.
-process.env.GOOGLE_API_KEY = "AIzaSyDPbqjR3o8mSQ1itdaoUQzyOmPEaUtaTI8";
-
 if (typeof window === 'undefined') {
   if (admin.apps.length === 0) {
     try {
