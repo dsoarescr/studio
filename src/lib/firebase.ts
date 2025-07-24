@@ -2,29 +2,21 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, GithubAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { firebaseConfig } from './firebase-config'; // Import the configuration directly
+import { firebaseConfig } from './firebase-config';
 
-let app: FirebaseApp;
-
-// Since this file can be imported on the server, we need to be careful
-// not to execute client-side Firebase logic there.
-// getFirebaseApp ensures we only initialize on the client.
-function getFirebaseApp() {
-  if (typeof window !== 'undefined') {
-    if (!getApps().length) {
-      return initializeApp(firebaseConfig);
-    } else {
-      return getApp();
-    }
+// Function to initialize the Firebase app, ensuring it's only done once
+function initializeFirebaseApp(): FirebaseApp {
+  if (!getApps().length) {
+    return initializeApp(firebaseConfig);
   }
-  return null; // Return null on the server
+  return getApp();
 }
 
-const clientApp = getFirebaseApp();
+const app = initializeFirebaseApp();
 
-// We need to handle the case where app might not be fully initialized on the server
-const auth = clientApp ? getAuth(clientApp) : ({} as any); 
-const db = clientApp ? getFirestore(clientApp) : ({} as any);
+// Initialize services
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Initialize providers for social login
 const googleProvider = new GoogleAuthProvider();
@@ -33,6 +25,7 @@ const twitterProvider = new TwitterAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 export { 
+  app,
   auth, 
   db, 
   googleProvider, 
