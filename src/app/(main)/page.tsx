@@ -1,3 +1,4 @@
+
 import PixelGrid from '@/components/pixel-grid/PixelGrid';
 import { SidebarInset } from '@/components/ui/sidebar';
 import MapSidebar from '@/components/layout/MapSidebar';
@@ -32,15 +33,13 @@ function LoadingScreen() {
 
 export default function HomePage() {
   return (
-    <>
-        <div className="min-h-full">
-          <MapSidebar />
-          <SidebarInset>
-            <Suspense fallback={<LoadingScreen />}>
-              <PixelGrid />
-            </Suspense>
-          </SidebarInset>
-        </div>
-    </>
+    <div className="h-full flex">
+      <MapSidebar />
+      <SidebarInset>
+        <Suspense fallback={<LoadingScreen />}>
+          <PixelGrid />
+        </Suspense>
+      </SidebarInset>
+    </div>
   );
 }
