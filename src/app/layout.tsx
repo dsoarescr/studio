@@ -3,6 +3,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider } from '@/components/ui/sidebar';
+import BottomNavBar from '@/components/layout/BottomNavBar';
+import UserProfileHeader from '@/components/layout/UserProfileHeader';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe',
@@ -24,7 +26,15 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full">
         <SidebarProvider defaultOpen={true}>
-          {children}
+            <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5">
+                <UserProfileHeader /> 
+                <main className="flex-1 pt-14 pb-[var(--bottom-nav-height)] overflow-y-auto">
+                    <div className="min-h-full">
+                    {children}
+                    </div>
+                </main>
+                <BottomNavBar />
+            </div>
         </SidebarProvider>
         <Toaster />
       </body>

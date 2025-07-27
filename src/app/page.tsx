@@ -1,4 +1,3 @@
-
 import PixelGrid from '@/components/pixel-grid/PixelGrid';
 import { SidebarInset } from '@/components/ui/sidebar';
 import MapSidebar from '@/components/layout/MapSidebar';
@@ -35,9 +34,7 @@ function LoadingScreen() {
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5">
-      <UserProfileHeader />
-      <main className="flex-1 pt-14 pb-[var(--bottom-nav-height)] overflow-y-auto">
+    <>
         <div className="min-h-full">
           <MapSidebar />
           <SidebarInset>
@@ -46,8 +43,6 @@ export default function HomePage() {
             </Suspense>
           </SidebarInset>
         </div>
-      </main>
-      <BottomNavBar />
-    </div>
+    </>
   );
 }
