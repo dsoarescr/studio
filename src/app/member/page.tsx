@@ -26,6 +26,8 @@ import {
 import { achievementsData } from '@/data/achievements-data';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import BottomNavBar from '@/components/layout/BottomNavBar';
+import UserProfileHeader from '@/components/layout/UserProfileHeader';
 
 // Enhanced user data with more complete profile information
 const mockUserData = {
@@ -117,7 +119,7 @@ const activityIcons = {
   sale: <DollarSign className="h-4 w-4 text-green-600" />,
 };
 
-export default function MemberPage() {
+function MemberContent() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedBio, setEditedBio] = useState(mockUserData.bio);
   const [editedLocation, setEditedLocation] = useState(mockUserData.location);
@@ -145,8 +147,7 @@ export default function MemberPage() {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-background via-card/50 to-background">
-      <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-6xl">
+    <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-6xl">
         {/* Enhanced Profile Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
@@ -951,6 +952,19 @@ export default function MemberPage() {
           </TabsContent>
         </Tabs>
       </div>
+  );
+}
+
+export default function MemberPage() {
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5">
+      <UserProfileHeader />
+      <main className="flex-1 pt-14 pb-[var(--bottom-nav-height)] overflow-y-auto">
+        <div className="min-h-full">
+          <MemberContent />
+        </div>
+      </main>
+      <BottomNavBar />
     </div>
   );
 }

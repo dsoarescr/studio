@@ -1,3 +1,4 @@
+
 import PixelGrid from '@/components/pixel-grid/PixelGrid';
 import { SidebarInset } from '@/components/ui/sidebar';
 import MapSidebar from '@/components/layout/MapSidebar';

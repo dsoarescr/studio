@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -28,9 +29,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { VirtualizedList } from '@/components/ui/virtualized-list';
-import { useTranslation } from 'react-i18next';
 
 // Types and data from ActivityFeedPanel
 type ActivityItem = {
@@ -109,9 +107,7 @@ const FormattedStatValue: React.FC<{ value: number | string }> = ({ value }) => 
 
 export default function MapSidebar() {
   const [activities, setActivities] = useState<ActivityItem[]>(initialActivities);
-  const { t } = useTranslation();
   const [stats, setStats] = useState<StatItem[]>(initialStats);
-  const [playHoverSound, setPlayHoverSound] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
@@ -162,7 +158,6 @@ export default function MapSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="animate-slide-in-up">
-      <SoundEffect src={SOUND_EFFECTS.HOVER} play={playHoverSound} onEnd={() => setPlayHoverSound(false)} volume={0.15} rate={1.5} />
       <SidebarHeader>
         <div className="flex items-center space-x-2">
           <SidebarTrigger className="button-hover-lift" />
@@ -181,22 +176,13 @@ export default function MapSidebar() {
           <div className="space-y-1">
             <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 group-data-[collapsible=icon]:hidden flex items-center">
               <TrendingUp className="h-3 w-3 mr-1 text-primary" />
-              {t('stats.title')}
+              Estatísticas
             </h3>
-            <div className="group-data-[collapsible=icon]:hidden text-xs text-muted-foreground px-2 mb-2">
-              <span className="flex items-center">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-1.5"></div>
-                {t('stats.realtime')}
-              </span>
-            </div>
             {stats.map((stat) => (
               <TooltipProvider key={stat.label} delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div 
-                      className="flex items-center justify-start h-9 rounded-md hover:bg-muted/60 cursor-default px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center transition-all duration-200 hover:scale-105 card-hover-glow"
-                      onMouseEnter={() => setPlayHoverSound(true)}
-                    >
+                    <div className="flex items-center justify-start h-9 rounded-md hover:bg-muted/60 cursor-default px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center transition-all duration-200 hover:scale-105 card-hover-glow">
                       <div className="flex-shrink-0 animate-pulse-slow">{stat.icon}</div>
                       <div className="ml-2.5 flex-1 overflow-hidden group-data-[collapsible=icon]:hidden">
                         <p className="text-sm font-medium truncate">{stat.label}</p>
@@ -214,7 +200,7 @@ export default function MapSidebar() {
                   <TooltipContent side="right" align="center">
                     <div className="flex flex-col gap-1 text-center card-glass">
                       <p className="font-semibold">{stat.label}</p>
-                      <p className="text-lg font-bold text-primary text-glow animate-pulse"><FormattedStatValue value={stat.value} /></p>
+                      <p className="text-lg font-bold text-primary text-glow"><FormattedStatValue value={stat.value} /></p>
                       {stat.tooltip && <p className="text-xs text-muted-foreground">{stat.tooltip}</p>}
                     </div>
                   </TooltipContent>
@@ -226,7 +212,7 @@ export default function MapSidebar() {
           <div className="px-2 py-1 group-data-[collapsible=icon]:hidden animate-fade-in animation-delay-300">
             <div className="bg-card-foreground/5 p-3 rounded-lg mt-2 space-y-2 card-hover-glow">
               <h4 className="text-xs font-medium text-muted-foreground flex items-center">
-                <Grid3X3 className="h-3 w-3 mr-1 text-primary animate-pulse" />
+                <Grid3X3 className="h-3 w-3 mr-1 text-primary" />
                 Densidade de Pixels
               </h4>
               <div>
@@ -246,52 +232,41 @@ export default function MapSidebar() {
           <div className="space-y-1">
             <h3 className="text-xs font-medium text-muted-foreground px-2 mb-2 group-data-[collapsible=icon]:hidden flex items-center">
               <Activity className="h-3 w-3 mr-1 text-primary animate-pulse" />
-              {t('activity.global')}
+              Atividade Global
             </h3>
-            <div className="h-[calc(100vh-300px)]">
-              <VirtualizedList
-                items={activities}
-                itemSize={50}
-                height={Math.min(activities.length * 50, 400)}
-                width="100%"
-                renderItem={(activity) => (
-                  <TooltipProvider key={activity.id} delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center h-10 rounded-md hover:bg-muted/60 cursor-default px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center transition-all duration-200 hover:scale-105 card-hover-glow animate-fade-in">
-                            <div 
-                              className="relative"
-                              onMouseEnter={() => setPlayHoverSound(true)}
-                            >
-                              <Avatar className="h-8 w-8 border-2 border-border animate-glow">
-                                <AvatarImage src={activity.user.avatarUrl || `https://placehold.co/40x40.png?text=${activity.user.name.substring(0,1)}`} alt={activity.user.name} data-ai-hint={activity.user.dataAiHint || "avatar user"}/>
-                                <AvatarFallback>{activity.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                              <span className="absolute -bottom-1 -right-1 p-0.5 bg-background rounded-full animate-bounce-slow">
-                                {activityIcons[activity.type]}
-                              </span>
-                            </div>
-                            <div className="ml-3 flex-1 overflow-hidden group-data-[collapsible=icon]:hidden">
-                              <p className="text-sm leading-tight truncate">
-                                <span className="font-semibold text-primary text-glow">{activity.user.name}</span>
-                              </p>
-                              <p className="text-xs text-muted-foreground font-code truncate">
-                                {activityLabels[activity.type]}
-                              </p>
-                            </div>
+            {activities.map((activity) => (
+              <TooltipProvider key={activity.id} delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center h-10 rounded-md hover:bg-muted/60 cursor-default px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center transition-all duration-200 hover:scale-105 card-hover-glow animate-fade-in">
+                        <div className="relative">
+                          <Avatar className="h-8 w-8 border-2 border-border animate-glow">
+                            <AvatarImage src={activity.user.avatarUrl || `https://placehold.co/40x40.png?text=${activity.user.name.substring(0,1)}`} alt={activity.user.name} data-ai-hint={activity.user.dataAiHint || "avatar user"}/>
+                            <AvatarFallback>{activity.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="absolute -bottom-1 -right-1 p-0.5 bg-background rounded-full animate-bounce-slow">
+                            {activityIcons[activity.type]}
+                          </span>
                         </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" align="center">
-                          <div className="card-glass">
-                            <p><span className="font-semibold text-primary">{activity.user.name}</span> {activityLabels[activity.type].toLowerCase()}.</p>
-                          </div>
-                          {activity.details && <p className="text-xs text-muted-foreground">{activity.details}</p>}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              />
-            </div>
+                        <div className="ml-3 flex-1 overflow-hidden group-data-[collapsible=icon]:hidden">
+                          <p className="text-sm leading-tight truncate">
+                            <span className="font-semibold text-primary text-glow">{activity.user.name}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground font-code truncate">
+                            {activityLabels[activity.type]}
+                          </p>
+                        </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center">
+                      <div className="card-glass">
+                        <p><span className="font-semibold text-primary">{activity.user.name}</span> {activityLabels[activity.type].toLowerCase()}.</p>
+                      </div>
+                      {activity.details && <p className="text-xs text-muted-foreground">{activity.details}</p>}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
           </div>
         </ScrollArea>
       </SidebarContent>

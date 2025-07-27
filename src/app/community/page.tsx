@@ -47,6 +47,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import BottomNavBar from '@/components/layout/BottomNavBar';
+import UserProfileHeader from '@/components/layout/UserProfileHeader';
 
 type PostType = 'text' | 'image' | 'video' | 'pixel_showcase' | 'achievement' | 'poll' | 'event' | 'tutorial' | 'question';
 type PostCategory = 'general' | 'showcase' | 'help' | 'events' | 'trading' | 'feedback' | 'tutorials' | 'news';
@@ -443,7 +445,7 @@ const categoryFilters = [
   { key: 'news', label: 'Notícias', icon: <Megaphone className="h-4 w-4" />, color: 'text-red-500' }
 ];
 
-export default function CommunityPage() {
+function CommunityContent() {
   const [posts, setPosts] = useState<CommunityPost[]>(mockPosts);
   const [events, setEvents] = useState<CommunityEvent[]>(mockEvents);
   const [activeCategory, setActiveCategory] = useState<PostCategory | 'all'>('all');
@@ -658,8 +660,7 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-6xl">
+    <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-6xl">
         {/* Enhanced Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
@@ -1758,6 +1759,19 @@ export default function CommunityPage() {
           </TabsContent>
         </Tabs>
       </div>
+  );
+}
+
+export default function CommunityPage() {
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5">
+      <UserProfileHeader />
+      <main className="flex-1 pt-14 pb-[var(--bottom-nav-height)] overflow-y-auto">
+        <div className="min-h-full">
+          <CommunityContent />
+        </div>
+      </main>
+      <BottomNavBar />
     </div>
   );
 }
