@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -658,8 +659,7 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-6xl">
+    <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-6xl">
         {/* Enhanced Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
@@ -1758,6 +1758,5 @@ export default function CommunityPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
   );
 }

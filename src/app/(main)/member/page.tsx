@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -145,8 +146,7 @@ export default function MemberPage() {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-background via-card/50 to-background">
-      <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-6xl">
+    <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-6xl">
         {/* Enhanced Profile Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
@@ -951,6 +951,5 @@ export default function MemberPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
   );
 }
