@@ -21,3 +21,71 @@ For user login and registration to work, you MUST enable the authentication meth
     *   (Optional) You can also enable other providers like Google, Facebook, etc., by following the same process.
 
 **Without completing these steps, user registration and login will not work.**
+
+## 🚀 Novas Funcionalidades Mobile
+
+### Realidade Aumentada (AR)
+- **Pixel AR**: Descubra pixels próximos usando a câmara do smartphone
+- **Captura AR**: Tire fotos com overlay de pixels em tempo real
+- **Localização GPS**: Encontre pixels baseados na sua localização atual
+
+### Stories de Pixels
+- **Pixel Stories**: Crie e visualize histórias curtas sobre seus pixels
+- **Timelapse**: Mostre a evolução da criação do seu pixel art
+- **Música**: Adicione trilhas sonoras às suas histórias
+- **Interação**: Curta, comente e partilhe stories de outros utilizadores
+
+### Live Streaming
+- **Transmissão ao Vivo**: Faça stream da criação dos seus pixels em tempo real
+- **Chat Interativo**: Interaja com espectadores através de chat ao vivo
+- **Presentes Virtuais**: Receba créditos dos espectadores durante a stream
+- **Multi-câmara**: Alterne entre diferentes ângulos durante a transmissão
+
+### Gestos de Swipe
+- **Swipe para Curtir**: Deslize para a esquerda para curtir pixels
+- **Swipe para Salvar**: Deslize para a direita para guardar nos favoritos
+- **Swipe para Partilhar**: Deslize para cima para partilhar
+- **Swipe para Comprar**: Deslize para baixo para compra rápida
+
+### Feedback Háptico
+- **Vibrações Contextuais**: Feedback tátil para diferentes ações
+- **Padrões Personalizados**: Diferentes vibrações para diferentes eventos
+- **Configurável**: Pode ser ativado/desativado nas definições
+
+### Otimizações Mobile
+- **Deteção Automática**: Identifica dispositivos de baixo desempenho
+- **Modo Economia**: Ativa automaticamente com bateria baixa
+- **Economia de Dados**: Reduz qualidade quando em redes lentas
+- **Performance Adaptativa**: Ajusta automaticamente a qualidade visual
+
+### Experiência Táctil Melhorada
+- **Targets de Toque**: Todos os elementos têm pelo menos 44px para fácil toque
+- **Gestos Naturais**: Navegação intuitiva com gestos familiares
+- **Feedback Visual**: Animações e transições otimizadas para mobile
+- **Modo Paisagem**: Suporte completo para orientação horizontal
+
+## 📱 Funcionalidades Específicas para Smartphones
+
+### Interface Adaptativa
+- Design responsivo otimizado para ecrãs pequenos
+- Navegação por gestos intuitiva
+- Controlos de toque ampliados
+- Modo escuro/claro automático
+
+### Monetização Mobile
+- Compras in-app simplificadas
+- Pagamentos móveis integrados
+- Subscrições premium mobile-first
+- Recompensas por engagement
+
+### Social Mobile
+- Partilha nativa do sistema
+- Integração com redes sociais
+- Stories efémeras
+- Live streaming integrado
+
+### Performance Mobile
+- Carregamento progressivo
+- Cache inteligente
+- Modo offline básico
+- Otimização automática de recursos

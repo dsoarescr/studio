@@ -42,6 +42,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '../ui/separator';
 import { mapPixelToApproxGps, cn } from '@/lib/utils';
 import EnhancedPixelPurchaseModal from './EnhancedPixelPurchaseModal';
+import PixelAR from './PixelAR';
+import PixelStories from './PixelStories';
+import PixelLiveStream from './PixelLiveStream';
+import SwipeGestures from '../mobile/SwipeGestures';
+import MobileOptimizations from '../mobile/MobileOptimizations';
+import { useHapticFeedback } from '../mobile/HapticFeedback';
 
 
 // Configuration constants
@@ -177,6 +183,7 @@ export default function PixelGrid() {
   const [loadedPixelImages, setLoadedPixelImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const containerSizeRef = useRef({ width: 0, height: 0 });
+  const { vibrate } = useHapticFeedback();
 
   const clearAutoResetTimeout = useCallback(() => {
     if (autoResetTimeoutRef.current) {
@@ -507,6 +514,9 @@ export default function PixelGrid() {
   const handleCanvasClick = (event: React.MouseEvent) => {
     clearAutoResetTimeout();
 
+    // Feedback háptico ao clicar
+    vibrate('selection');
+
     if (!isOnline) {
       toast({ title: "Sem Conexão", description: "Você está offline.", variant: "destructive" });
     }
@@ -742,222 +752,269 @@ export default function PixelGrid() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden relative animate-fade-in">
-      {/* Enhanced loading overlay */}
-      <LoadingOverlay 
-        isLoading={isLoadingMap} 
-        text={progressMessage}
-        progress={loadingProgress}
-      >
-        <div />
-      </LoadingOverlay>
-      
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
-        <EnhancedTooltip
-          title="Controles do Mapa"
-          description="Use estes controles para navegar pelo mapa"
-          stats={[
-            { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-            { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
-          ]}
+
+    <MobileOptimizations>
+      <div className="flex flex-col h-full w-full overflow-hidden relative animate-fade-in">
+        {/* Enhanced loading overlay */}
+        <LoadingOverlay 
+          isLoading={isLoadingMap} 
+          text={progressMessage}
+          progress={loadingProgress}
         >
-          <div className="space-y-2">
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Ampliar</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Reduzir</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                    <Expand className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Resetar Vista</p></TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </EnhancedTooltip>
+          <div />
+        </LoadingOverlay>
         
-        {/* Enhanced info panel */}
-        <div className="mt-2 p-3 bg-background/90 rounded-md text-xs font-code border border-primary/20 space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Zoom:</span>
-            <span className="text-primary font-bold">{zoom.toFixed(2)}x</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Posição:</span>
-            <span className="text-accent">({Math.round(position.x)}, {Math.round(position.y)})</span>
-          </div>
-          {highlightedPixel && (
-            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-              <span className="text-muted-foreground">Pixel:</span>
-              <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
+          <EnhancedTooltip
+            title="Controles do Mapa"
+            description="Use estes controles para navegar pelo mapa"
+            stats={[
+              { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
+              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
+            ]}
+          >
+            <div className="space-y-2">
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Ampliar</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Reduzir</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
+                      <Expand className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Resetar Vista</p></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
-          )}
-          <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-            <span className="text-muted-foreground">Pixels Ativos:</span>
-            <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
-          </div>
+          </EnhancedTooltip>
           
-          {/* Online status indicator */}
-          <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-            <span className="text-muted-foreground">Status:</span>
-            <div className="flex items-center gap-1">
-              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className={`text-xs ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
+          {/* Enhanced info panel */}
+          <div className="mt-2 p-3 bg-background/90 rounded-md text-xs font-code border border-primary/20 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Zoom:</span>
+              <span className="text-primary font-bold">{zoom.toFixed(2)}x</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Posição:</span>
+              <span className="text-accent">({Math.round(position.x)}, {Math.round(position.y)})</span>
+            </div>
+            {highlightedPixel && (
+              <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+                <span className="text-muted-foreground">Pixel:</span>
+                <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+              <span className="text-muted-foreground">Pixels Ativos:</span>
+              <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
+            </div>
+            
+            {/* Online status indicator */}
+            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+              <span className="text-muted-foreground">Status:</span>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                <span className={`text-xs ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Remove old progress indicator since we now use LoadingOverlay */}
-      {/* {showProgressIndicator && (...)} */}
-      
-      <EnhancedPixelPurchaseModal
-        isOpen={showPixelModal}
-        onClose={() => setShowPixelModal(false)}
-        pixelData={selectedPixelDetails}
-        userCredits={12500} // Mocked value, ideally from user store
-        userSpecialCredits={120} // Mocked value
-        onPurchase={handlePurchase}
-      />
+        
+        <EnhancedPixelPurchaseModal
+          isOpen={showPixelModal}
+          onClose={() => setShowPixelModal(false)}
+          pixelData={selectedPixelDetails}
+          userCredits={12500} // Mocked value, ideally from user store
+          userSpecialCredits={120} // Mocked value
+          onPurchase={handlePurchase}
+        />
 
-      <div className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center">
-        <div
-            ref={containerRef}
-            className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
-            onMouseDown={handleMouseDown} 
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUpOrLeave}
-            onMouseLeave={handleMouseUpOrLeave}
-        >
-            <div
-            style={{
-                transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                width: `${canvasDrawWidth}px`,
-                height: `${canvasDrawHeight}px`,
-                transformOrigin: 'top left',
-                position: 'relative', 
-            }}
-            >
-            <canvas
-                ref={pixelCanvasRef}
-                className="absolute top-0 left-0 w-full h-full z-10" 
-                style={{ imageRendering: 'pixelated' }} 
-            />
-            {(!mapData && isClient) && <PortugalMapSvg onMapDataLoaded={handleMapDataLoaded} className="invisible absolute" />}
-            </div>
-            <canvas
-                ref={outlineCanvasRef}
-                className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
-                style={{ imageRendering: 'auto' }}
-            />
-        </div>
-      </div>
-      
-      {/* Zoom Controls */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                <ZoomIn className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>Aproximar</p></TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                <ZoomOut className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>Afastar</p></TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                <Expand className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>Resetar Vista</p></TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {/* Enhanced Floating Action Button with better tooltip */}
-      <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500" style={{ pointerEvents: 'auto' }}>
-        <EnhancedTooltip
-          title="Ações Rápidas"
-          description="Acesso rápido às funcionalidades principais"
-          actions={[
-            { 
-              label: 'Explorar', 
-              onClick: () => {}, 
-              icon: <Search className="h-4 w-4" /> 
-            },
-            { 
-              label: 'Filtros', 
-              onClick: () => {}, 
-              icon: <PaletteIconLucide className="h-4 w-4" /> 
+        <SwipeGestures
+          onSwipeLeft={() => {
+            vibrate('light');
+            toast({ title: "❤️ Pixel Curtido!", description: "Adicionado aos seus favoritos." });
+          }}
+          onSwipeRight={() => {
+            vibrate('light');
+            toast({ title: "🔖 Pixel Salvo!", description: "Guardado para visualização posterior." });
+          }}
+          onSwipeUp={() => {
+            vibrate('medium');
+            if (navigator.share) {
+              navigator.share({
+                title: 'Pixel Universe',
+                text: 'Confira este mapa incrível de pixels!',
+                url: window.location.href
+              });
             }
-          ]}
-          interactive={true}
+          }}
+          onSwipeDown={() => {
+            vibrate('medium');
+            if (selectedPixelDetails) {
+              setShowPixelModal(true);
+            }
+          }}
+          className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center"
         >
-          <Dialog>
-            <DialogTrigger asChild>
-               <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
-                  <Star className="h-7 w-7" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
-              <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
-                <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
-                <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
-                  Explore, filtre e interaja com o mapa de pixels.
-                </DialogDescriptionElement>
-              </DialogHeader>
-              <div className="grid gap-3 py-4">
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
-                  <Crosshair className="mr-2 h-4 w-4" />
-                  Modo Precisão
-                </Button>
-                <Separator />
-                <Link href="/premium" className="w-full">
-                  <Button style={{ pointerEvents: 'auto' }} variant="default" className="w-full button-gradient-gold button-3d-effect">
-                    <Crown className="mr-2 h-4 w-4" />Tornar-se Premium
-                  </Button>
-                </Link>
+          <div
+              ref={containerRef}
+              className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
+              onMouseDown={handleMouseDown} 
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+          >
+              <div
+              style={{
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                  width: `${canvasDrawWidth}px`,
+                  height: `${canvasDrawHeight}px`,
+                  transformOrigin: 'top left',
+                  position: 'relative', 
+              }}
+              >
+              <canvas
+                  ref={pixelCanvasRef}
+                  className="absolute top-0 left-0 w-full h-full z-10" 
+                  style={{ imageRendering: 'pixelated' }} 
+              />
+              {(!mapData && isClient) && <PortugalMapSvg onMapDataLoaded={handleMapDataLoaded} className="invisible absolute" />}
               </div>
-              <DialogFooter className="dialog-footer-gold-accent rounded-b-lg">
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </EnhancedTooltip>
-      </div>
-    </div>
+              <canvas
+                  ref={outlineCanvasRef}
+                  className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
+                  style={{ imageRendering: 'auto' }}
+              />
+          </div>
+        </SwipeGestures>
+        
+        {/* Zoom Controls */}
+        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
+                  <ZoomIn className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Aproximar</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
+                  <ZoomOut className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Afastar</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
+                  <Expand className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Resetar Vista</p></TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
   );
 }
 
+        {/* Enhanced Mobile Action Menu */}
+        <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
+          {/* AR Button */}
+          <PixelAR>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+              <Camera className="h-6 w-6" />
+            </Button>
+          </PixelAR>
+          
+          {/* Stories Button */}
+          <PixelStories>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+              <Play className="h-6 w-6" />
+            </Button>
+          </PixelStories>
+          
+          {/* Live Stream Button */}
+          <PixelLiveStream>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+              <Radio className="h-6 w-6" />
+            </Button>
+          </PixelLiveStream>
+          
+          {/* Main Action Button */}
+          <EnhancedTooltip
+            title="Ações Rápidas"
+            description="Acesso rápido às funcionalidades principais"
+            actions={[
+              { 
+                label: 'Explorar', 
+                onClick: () => {}, 
+                icon: <Search className="h-4 w-4" /> 
+              },
+              { 
+                label: 'Filtros', 
+                onClick: () => {}, 
+                icon: <PaletteIconLucide className="h-4 w-4" /> 
+              }
+            ]}
+            interactive={true}
+          >
+            <Dialog>
+              <DialogTrigger asChild>
+                 <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
+                    <Star className="h-7 w-7" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
+                <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
+                  <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
+                  <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
+                    Explore, filtre e interaja com o mapa de pixels.
+                  </DialogDescriptionElement>
+                </DialogHeader>
+                <div className="grid gap-3 py-4">
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
+                    <Crosshair className="mr-2 h-4 w-4" />
+                    Modo Precisão
+                  </Button>
+                  <Separator />
+                  <Link href="/premium" className="w-full">
+                    <Button style={{ pointerEvents: 'auto' }} variant="default" className="w-full button-gradient-gold button-3d-effect">
+                      <Crown className="mr-2 h-4 w-4" />Tornar-se Premium
+                    </Button>
+                  </Link>
+                </div>
+                <DialogFooter className="dialog-footer-gold-accent rounded-b-lg">
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </EnhancedTooltip>
+        </div>
+      </div>
+    </MobileOptimizations>
 // Enhanced cursor styles for different tools
 const getCursorStyle = (tool: string) => {
   switch (tool) {

@@ -30,6 +30,7 @@ import {
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { UserPlus, LogIn, Crown } from 'lucide-react';
 import '@/lib/i18n';
+import { HapticButton } from '@/components/mobile/HapticFeedback';
 import type { Achievement } from '@/data/achievements-data';
 
 const navLinks = [
@@ -181,99 +182,103 @@ export default function BottomNavBar() {
               <Link 
                 key={link.label}
                 href={link.href}
-                className={cn(
-                  "flex flex-col items-center justify-center text-xs font-medium rounded-2xl w-1/5 h-16 transition-all duration-300 relative group overflow-hidden",
-                  "hover:bg-primary/10 active:scale-95 transform-gpu",
-                  isActive
-                    ? "text-primary scale-110 bg-primary/15 shadow-lg shadow-primary/20" 
-                    : "text-muted-foreground hover:text-foreground hover:scale-105"
-                )}
-                onClick={() => {
-                  setActiveIndex(index);
-                  // Small reward for navigation
-                  if (Math.random() > 0.8) {
-                    addCredits(1);
-                  }
-                }}
-                onMouseEnter={handleNavHover}
               >
-                <EnhancedTooltip
-                  title={link.label}
-                  description={link.description}
-                  badges={link.badge ? [{ label: `${link.badge} novos`, variant: 'destructive' }] : []}
-                  side="top"
-                >
-                  <div className="w-full h-full flex flex-col items-center justify-center">
-                {/* Active Background */}
-                {isActive && (
-                  <>
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-primary/20 to-transparent rounded-2xl animate-pulse" style={{ animationDuration: '3s' }} />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/15 to-transparent rounded-2xl animate-shimmer" 
-                         style={{ backgroundSize: '200% 100%' }} />
-                  </>
-                )}
-                
-                {/* Icon Container */}
-                <div className="relative mb-1 z-10">
-                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className={cn( 
-                    "p-2.5 rounded-2xl transition-all duration-500 relative overflow-hidden",
+                <HapticButton
+                  hapticPattern={isActive ? 'medium' : 'light'}
+                  className={cn(
+                    "flex flex-col items-center justify-center text-xs font-medium rounded-2xl w-full h-16 transition-all duration-300 relative group overflow-hidden border-none bg-transparent",
+                    "hover:bg-primary/10 active:scale-95 transform-gpu",
                     isActive
-                      ? "bg-primary/25 shadow-lg shadow-primary/40 ring-2 ring-primary/40"
-                      : "group-hover:bg-muted/40 group-hover:scale-110 hover:rotate-3"
-                  )}>
-                    <link.icon className={cn(
-                      "h-6 w-6 transition-all duration-500 transform-gpu",
-                      isActive 
-                        ? `${link.color} drop-shadow-lg scale-110` 
-                        : "text-muted-foreground group-hover:text-foreground group-hover:scale-105"
-                    )} />
-                    
-                    {/* Glow Effect for Active */}
-                    {isActive && (
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 to-accent/30 blur-sm animate-pulse" />
-                    )} 
-                  </motion.div>
-                  
-                  {/* Pulse Ring for Active */}
+                      ? "text-primary scale-110 bg-primary/15 shadow-lg shadow-primary/20" 
+                      : "text-muted-foreground hover:text-foreground hover:scale-105"
+                  )}
+                  onClick={() => {
+                    setActiveIndex(index);
+                    // Small reward for navigation
+                    if (Math.random() > 0.8) {
+                      addCredits(1);
+                    }
+                  }}
+                  onMouseEnter={handleNavHover}
+                >
+                  <EnhancedTooltip
+                    title={link.label}
+                    description={link.description}
+                    badges={link.badge ? [{ label: `${link.badge} novos`, variant: 'destructive' }] : []}
+                    side="top"
+                  >
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                  {/* Active Background */}
                   {isActive && (
-                    <div className="absolute inset-0 rounded-2xl border-2 border-primary/40 animate-ping" 
-                         style={{ animationDuration: '2s' }} />
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-primary/20 to-transparent rounded-2xl animate-pulse" style={{ animationDuration: '3s' }} />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/15 to-transparent rounded-2xl animate-shimmer" 
+                           style={{ backgroundSize: '200% 100%' }} />
+                    </>
                   )}
                   
-                  {/* Hover Glow */}
-                  <div className={cn(
-                    "absolute inset-0 rounded-2xl transition-all duration-300 -z-10 blur-lg",
-                    isActive
-                      ? "bg-primary/30 opacity-100" 
-                      : "bg-primary/20 opacity-0 group-hover:opacity-60 scale-125"
-                  )} />
-                </div>
-                
-                {/* Label with Enhanced Typography */}
-                <motion.span animate={isActive ? { y: [0, -2, 0] } : {}} transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }} className={cn( 
-                  "transition-all duration-500 font-medium text-xs leading-tight text-center px-1 z-10",
-                  isActive && "text-gradient-gold-animated font-bold drop-shadow-sm scale-105"
-                )}>
-                  {link.label}
-                </motion.span>
-                
-                {/* Notification Badge */}
-                {link.badge && notifications > 0 && link.href === "/member" && ( 
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 flex items-center justify-center animate-heartbeat shadow-lg">
-                    <span className="animate-pulse">
-                      {notifications > 9 ? '9+' : notifications}
-                    </span>
-                    </Badge>
-                  </motion.div>
-                )}
-
-                {/* Interaction Ripple */}
-                <div className="absolute inset-0 rounded-2xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/40 via-accent/40 to-primary/40 transform scale-0 group-active:scale-100 transition-transform duration-300 rounded-2xl blur-sm" />
-                </div>
+                  {/* Icon Container */}
+                  <div className="relative mb-1 z-10">
+                    <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className={cn( 
+                      "p-2.5 rounded-2xl transition-all duration-500 relative overflow-hidden",
+                      isActive
+                        ? "bg-primary/25 shadow-lg shadow-primary/40 ring-2 ring-primary/40"
+                        : "group-hover:bg-muted/40 group-hover:scale-110 hover:rotate-3"
+                    )}>
+                      <link.icon className={cn(
+                        "h-6 w-6 transition-all duration-500 transform-gpu",
+                        isActive 
+                          ? `${link.color} drop-shadow-lg scale-110` 
+                          : "text-muted-foreground group-hover:text-foreground group-hover:scale-105"
+                      )} />
+                      
+                      {/* Glow Effect for Active */}
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 to-accent/30 blur-sm animate-pulse" />
+                      )} 
+                    </motion.div>
+                    
+                    {/* Pulse Ring for Active */}
+                    {isActive && (
+                      <div className="absolute inset-0 rounded-2xl border-2 border-primary/40 animate-ping" 
+                           style={{ animationDuration: '2s' }} />
+                    )}
+                    
+                    {/* Hover Glow */}
+                    <div className={cn(
+                      "absolute inset-0 rounded-2xl transition-all duration-300 -z-10 blur-lg",
+                      isActive
+                        ? "bg-primary/30 opacity-100" 
+                        : "bg-primary/20 opacity-0 group-hover:opacity-60 scale-125"
+                    )} />
                   </div>
-                </EnhancedTooltip>
+                  
+                  {/* Label with Enhanced Typography */}
+                  <motion.span animate={isActive ? { y: [0, -2, 0] } : {}} transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }} className={cn( 
+                    "transition-all duration-500 font-medium text-xs leading-tight text-center px-1 z-10",
+                    isActive && "text-gradient-gold-animated font-bold drop-shadow-sm scale-105"
+                  )}>
+                    {link.label}
+                  </motion.span>
+                  
+                  {/* Notification Badge */}
+                  {link.badge && notifications > 0 && link.href === "/member" && ( 
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 flex items-center justify-center animate-heartbeat shadow-lg">
+                      <span className="animate-pulse">
+                        {notifications > 9 ? '9+' : notifications}
+                      </span>
+                      </Badge>
+                    </motion.div>
+                  )}
+
+                  {/* Interaction Ripple */}
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/40 via-accent/40 to-primary/40 transform scale-0 group-active:scale-100 transition-transform duration-300 rounded-2xl blur-sm" />
+                  </div>
+                    </div>
+                  </EnhancedTooltip>
+                </HapticButton>
               </Link>
             );
           })}
