@@ -1,955 +1,672 @@
-
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from '@/components/ui/switch';
-import { 
-  Award, Gem, MapPin as MapPinIcon, Coins, Gift, Trophy, BookImage, FolderPlus, 
-  Link as LinkIcon, Twitter, Instagram, Github, UserCircle, Edit3, Save, X,
-  Eye, Heart, MessageSquare, Share2, Calendar, Clock, TrendingUp, TrendingDown,
-  BarChart3, PieChart, Activity, Star, Crown, Sparkles, Zap, Target, Palette,
-  Settings, Bell, Shield, Download, Upload, Camera, Plus, ChevronRight,
-  LineChart, Globe, Users, DollarSign, Flame, History, Package, Grid3X3, ShoppingCart,
-  Filter, SortAsc
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUserStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
+import { Confetti } from "@/components/ui/confetti";
+import { motion } from "framer-motion";
+import {
+  User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, 
+  Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2,
+  Settings, Bell, Shield, Palette, Users, Globe, Link2, Save,
+  Upload, Download, RefreshCw, Plus, Minus, X, Check, Info,
+  BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock,
+  Bookmark, Tag, Image as ImageIcon, Video, Music, FileText,
+  Zap, Target, Flame, Sparkles, Rocket, Lightning, Megaphone
 } from "lucide-react";
-import { achievementsData } from '@/data/achievements-data';
-import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 
-// Enhanced user data with more complete profile information
-const mockUserData = {
-  id: 'user_pixel_master_pt',
-  name: 'PixelMasterPT',
-  username: '@pixelmaster_pt',
-  avatarUrl: 'https://placehold.co/128x128.png',
-  dataAiHint: 'profile avatar',
-  level: 8,
+interface UserStats {
+  totalPixels: number;
+  totalSpent: number;
+  totalEarned: number;
+  favoriteColor: string;
+  mostActiveRegion: string;
+  joinDate: string;
+  lastActive: string;
+  achievements: number;
+  level: number;
+  xp: number;
+  xpMax: number;
+  streak: number;
+  rank: number;
+}
+
+interface PixelActivity {
+  id: string;
+  type: 'purchase' | 'sale' | 'edit' | 'like' | 'comment';
+  description: string;
+  timestamp: string;
+  value?: number;
+  coordinates?: { x: number; y: number };
+}
+
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  unlockedAt: string;
+  xpReward: number;
+  creditsReward: number;
+}
+
+const mockUserStats: UserStats = {
+  totalPixels: 42,
+  totalSpent: 1250,
+  totalEarned: 890,
+  favoriteColor: '#D4A757',
+  mostActiveRegion: 'Lisboa',
+  joinDate: '2024-01-15',
+  lastActive: '2024-03-15T14:30:00Z',
+  achievements: 8,
+  level: 12,
   xp: 2450,
   xpMax: 3000,
-  credits: 12500,
-  specialCredits: 120,
-  bio: 'Explorador do universo digital, pixel a pixel. A transformar o mapa de Portugal numa obra de arte colaborativa 🎨✨',
-  pixelsOwned: 42,
-  achievementsUnlocked: 5,
-  unlockedAchievementIds: [
-    'pixel_initiate',
-    'pixel_artisan', 
-    'color_master',
-    'community_voice',
-    'time_virtuoso',
-  ],
-  rank: 1,
-  location: 'Lisboa, Portugal',
-  joinDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000),
-  lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  socials: [
-    { platform: 'Twitter', handle: '@pixelmaster_pt', icon: <Twitter />, url: 'https://twitter.com' },
-    { platform: 'Instagram', handle: 'pixel.master.pt', icon: <Instagram />, url: 'https://instagram.com' },
-    { platform: 'GitHub', handle: 'PixelMasterPT', icon: <Github />, url: 'https://github.com' },
-  ],
-  albums: [
-    {
-      id: 'album1',
-      name: 'Paisagens de Portugal',
-      description: 'As mais belas paisagens portuguesas em pixel art.',
-      coverPixelUrl: 'https://placehold.co/64x64.png',
-      dataAiHint: 'album cover landscape',
-      pixelCount: 18,
-      likes: 156,
-      views: 2340,
-    },
-    {
-      id: 'album2',
-      name: 'Monumentos Históricos',
-      description: 'Uma viagem pixelizada pela história de Portugal.',
-      coverPixelUrl: 'https://placehold.co/64x64.png',
-      dataAiHint: 'album cover monuments',
-      pixelCount: 12,
-      likes: 89,
-      views: 1250,
-    },
-  ],
-  statistics: {
-    totalSpent: 8450,
-    totalEarned: 3200,
-    favoriteRegion: 'Lisboa',
-    mostUsedColor: '#D4A757',
-    pixelsThisMonth: 12,
-    rankingChange: 2,
-    streakDays: 15,
-    totalLogin: 89,
-  },
-  recentActivity: [
-    { type: 'pixel_purchase', description: 'Comprou pixel em Lisboa', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), value: 150 },
-    { type: 'achievement', description: 'Desbloqueou "Mestre das Cores"', timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) },
-    { type: 'pixel_edit', description: 'Editou pixel (245, 156)', timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000) },
-    { type: 'social', description: 'Recebeu 23 novos gostos', timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000) },
-  ],
-  preferences: {
-    theme: 'dark',
-    language: 'pt-PT',
-    notifications: true,
-    newsletter: true,
-    publicProfile: true,
-  },
-  isPremium: true,
-  isVerified: true,
+  streak: 15,
+  rank: 156
 };
 
-// Activity type icons
-const activityIcons = {
-  pixel_purchase: <ShoppingCart className="h-4 w-4 text-green-500" />,
-  achievement: <Trophy className="h-4 w-4 text-yellow-500" />,
-  pixel_edit: <Edit3 className="h-4 w-4 text-blue-500" />,
-  social: <Heart className="h-4 w-4 text-red-500" />,
-  login: <UserCircle className="h-4 w-4 text-purple-500" />,
-  sale: <DollarSign className="h-4 w-4 text-green-600" />,
-};
+const mockRecentActivity: PixelActivity[] = [
+  {
+    id: '1',
+    type: 'purchase',
+    description: 'Comprou pixel em Lisboa',
+    timestamp: '2024-03-15T10:30:00Z',
+    value: 150,
+    coordinates: { x: 245, y: 156 }
+  },
+  {
+    id: '2',
+    type: 'edit',
+    description: 'Editou cor do pixel no Porto',
+    timestamp: '2024-03-14T16:20:00Z',
+    coordinates: { x: 123, y: 89 }
+  },
+  {
+    id: '3',
+    type: 'sale',
+    description: 'Vendeu pixel em Coimbra',
+    timestamp: '2024-03-13T09:15:00Z',
+    value: 200,
+    coordinates: { x: 178, y: 234 }
+  }
+];
+
+const mockAchievements: Achievement[] = [
+  {
+    id: '1',
+    name: 'Primeiro Pixel',
+    description: 'Comprou seu primeiro pixel',
+    icon: <MapPin className="h-6 w-6" />,
+    rarity: 'common',
+    unlockedAt: '2024-01-15T12:00:00Z',
+    xpReward: 50,
+    creditsReward: 10
+  },
+  {
+    id: '2',
+    name: 'Mestre das Cores',
+    description: 'Usou 20 cores diferentes',
+    icon: <Palette className="h-6 w-6" />,
+    rarity: 'rare',
+    unlockedAt: '2024-02-20T15:30:00Z',
+    xpReward: 150,
+    creditsReward: 50
+  },
+  {
+    id: '3',
+    name: 'Colecionador',
+    description: 'Possui 25 pixels',
+    icon: <Trophy className="h-6 w-6" />,
+    rarity: 'epic',
+    unlockedAt: '2024-03-10T11:45:00Z',
+    xpReward: 300,
+    creditsReward: 100
+  }
+];
 
 export default function MemberPage() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedBio, setEditedBio] = useState(mockUserData.bio);
-  const [editedLocation, setEditedLocation] = useState(mockUserData.location);
-  const [activeTab, setActiveTab] = useState('overview');
+  const { user } = useAuth();
+  const { credits, specialCredits, level, xp, xpMax, pixels, achievements, isPremium } = useUserStore();
   const { toast } = useToast();
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    displayName: user?.displayName || 'PixelMaster',
+    bio: 'Artista digital apaixonado por pixel art e criação colaborativa.',
+    location: 'Lisboa, Portugal',
+    website: 'https://meusite.com',
+    favoriteColor: '#D4A757'
+  });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [playSuccessSound, setPlaySuccessSound] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const xpPercentage = (xp / xpMax) * 100;
 
   const handleSaveProfile = () => {
     setIsEditing(false);
+    setShowConfetti(true);
+    setPlaySuccessSound(true);
+    
     toast({
       title: "Perfil Atualizado",
-      description: "As alterações ao seu perfil foram guardadas com sucesso.",
+      description: "Suas informações foram salvas com sucesso!",
     });
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-    
-    if (diffMins < 60) return `${diffMins}m atrás`;
-    if (diffHours < 24) return `${diffHours}h atrás`;
-    return `${diffDays}d atrás`;
+  const handleShareProfile = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link Copiado",
+      description: "Link do seu perfil foi copiado para a área de transferência.",
+    });
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'purchase': return <Coins className="h-4 w-4 text-green-500" />;
+      case 'sale': return <TrendingUp className="h-4 w-4 text-blue-500" />;
+      case 'edit': return <Edit3 className="h-4 w-4 text-purple-500" />;
+      case 'like': return <Heart className="h-4 w-4 text-red-500" />;
+      case 'comment': return <MessageSquare className="h-4 w-4 text-orange-500" />;
+      default: return <Activity className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'text-gray-500 border-gray-500/50';
+      case 'rare': return 'text-blue-500 border-blue-500/50';
+      case 'epic': return 'text-purple-500 border-purple-500/50';
+      case 'legendary': return 'text-amber-500 border-amber-500/50';
+      default: return 'text-gray-500 border-gray-500/50';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-PT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
-    <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-6xl">
-        {/* Enhanced Profile Header */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
+      
+      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl mb-16">
+        {/* Profile Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
-          <CardContent className="p-6 relative">
-            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-              {/* Avatar Section */}
-              <div className="relative">
-                <div className="relative group">
-                  <Avatar className="h-32 w-32 border-4 border-primary shadow-xl group-hover:border-accent transition-colors duration-300">
-                    <AvatarImage src={mockUserData.avatarUrl} alt={mockUserData.name} data-ai-hint={mockUserData.dataAiHint} />
-                    <AvatarFallback className="text-4xl font-headline">
-                      {mockUserData.name.substring(0, 1)}
+          <CardContent className="p-6 relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="relative">
+                  <Avatar className="h-24 w-24 border-4 border-primary shadow-lg">
+                    <AvatarImage 
+                      src={user?.photoURL || `https://placehold.co/96x96/D4A757/FFFFFF?text=${profileData.displayName.charAt(0)}`} 
+                      alt={profileData.displayName} 
+                    />
+                    <AvatarFallback className="text-2xl font-headline">
+                      {profileData.displayName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <Camera className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                
-                {/* Badges */}
-                <div className="absolute -top-2 -right-2 flex flex-col gap-1">
-                  {mockUserData.isPremium && (
-                    <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg">
-                      <Crown className="h-3 w-3 mr-1" />
-                      Premium
-                    </Badge>
-                  )}
-                  {mockUserData.isVerified && (
-                    <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg">
-                      <Shield className="h-3 w-3 mr-1" />
-                      Verificado
-                    </Badge>
+                  <Button 
+                    size="icon" 
+                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? <Check className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+                  </Button>
+                  {isPremium && (
+                    <Crown className="absolute -top-2 -left-2 h-6 w-6 text-amber-400" />
                   )}
                 </div>
                 
-                {/* Rank Badge */}
-                {mockUserData.rank > 0 && (
-                  <Badge className="absolute -bottom-2 -left-2 bg-gradient-to-r from-primary to-accent text-white shadow-lg px-3 py-1">
-                    <Trophy className="h-3 w-3 mr-1" />
-                    Top {mockUserData.rank}
-                  </Badge>
-                )}
-              </div>
-              
-              {/* Profile Info */}
-              <div className="flex-1 text-center md:text-left space-y-3">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                  <div>
-                    <h1 className="text-3xl font-headline font-bold text-gradient-gold">
-                      {mockUserData.name}
+                <div className="text-center sm:text-left space-y-2">
+                  {isEditing ? (
+                    <Input
+                      value={profileData.displayName}
+                      onChange={(e) => setProfileData({...profileData, displayName: e.target.value})}
+                      className="text-2xl font-headline font-bold"
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-headline font-bold text-gradient-gold">
+                      {profileData.displayName}
                     </h1>
-                    <p className="text-sm text-muted-foreground font-code">{mockUserData.username}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <Badge variant="secondary" className="font-code">
+                      Nível {level}
+                    </Badge>
+                    <Badge variant="outline" className="text-primary border-primary/50">
+                      Rank #{mockUserStats.rank}
+                    </Badge>
+                    {isPremium && (
+                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500">
+                        Premium
+                      </Badge>
+                    )}
                   </div>
                   
-                  {!isEditing ? (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setIsEditing(true)}
-                      className="self-center md:self-start"
-                    >
-                      <Edit3 className="h-4 w-4 mr-2" />
-                      Editar Perfil
-                    </Button>
-                  ) : (
-                    <div className="flex gap-2 self-center md:self-start">
-                      <Button 
-                        variant="default" 
-                        size="sm" 
-                        onClick={handleSaveProfile}
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Guardar
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                          setIsEditing(false);
-                          setEditedBio(mockUserData.bio);
-                          setEditedLocation(mockUserData.location);
-                        }}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Cancelar
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Location & Bio */}
-                <div className="space-y-2">
-                  {!isEditing ? (
-                    <>
-                      {mockUserData.location && (
-                        <div className="flex items-center justify-center md:justify-start text-sm text-muted-foreground">
-                          <MapPinIcon className="h-4 w-4 mr-1 text-primary" />
-                          <span>{mockUserData.location}</span>
-                        </div>
-                      )}
-                      <p className="text-sm text-foreground italic">
-                        "{mockUserData.bio}"
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-1">
-                        <Label htmlFor="location" className="text-xs">Localização</Label>
-                        <div className="flex items-center">
-                          <MapPinIcon className="h-4 w-4 mr-2 text-primary" />
-                          <Input 
-                            id="location" 
-                            value={editedLocation} 
-                            onChange={(e) => setEditedLocation(e.target.value)}
-                            className="h-8"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="bio" className="text-xs">Biografia</Label>
-                        <Textarea 
-                          id="bio" 
-                          value={editedBio} 
-                          onChange={(e) => setEditedBio(e.target.value)}
-                          className="resize-none"
-                          rows={3}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      {isEditing ? (
+                        <Input
+                          value={profileData.location}
+                          onChange={(e) => setProfileData({...profileData, location: e.target.value})}
+                          className="h-6 text-sm"
                         />
-                      </div>
-                    </>
-                  )}
-                </div>
-                
-                {/* Stats Row */}
-                <div className="grid grid-cols-3 gap-4 pt-2">
-                  <div className="text-center p-2 bg-primary/10 rounded-lg">
-                    <p className="text-2xl font-bold text-primary">{mockUserData.pixelsOwned}</p>
-                    <p className="text-xs text-muted-foreground">Píxeis</p>
+                      ) : (
+                        profileData.location
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Desde {new Date(mockUserStats.joinDate).toLocaleDateString('pt-PT')}
+                    </span>
                   </div>
-                  <div className="text-center p-2 bg-accent/10 rounded-lg">
-                    <p className="text-2xl font-bold text-accent">{mockUserData.achievementsUnlocked}</p>
+                </div>
+              </div>
+              
+              <div className="flex-1 lg:text-right space-y-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary">{pixels}</p>
+                    <p className="text-xs text-muted-foreground">Pixels</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-accent">{achievements}</p>
                     <p className="text-xs text-muted-foreground">Conquistas</p>
                   </div>
-                  <div className="text-center p-2 bg-green-500/10 rounded-lg">
-                    <p className="text-2xl font-bold text-green-500">{mockUserData.statistics.streakDays}</p>
-                    <p className="text-xs text-muted-foreground">Dias Seguidos</p>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-500">{mockUserStats.streak}</p>
+                    <p className="text-xs text-muted-foreground">Sequência</p>
                   </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-500">{credits.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Créditos</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progresso XP</span>
+                    <span className="font-code">{xp}/{xpMax}</span>
+                  </div>
+                  <Progress value={xpPercentage} className="h-2" />
+                </div>
+                
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <Button onClick={handleSaveProfile} className="flex-1">
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" onClick={() => setIsEditing(true)}>
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Button variant="outline" onClick={handleShareProfile}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Partilhar
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
             
-            {/* Level Progress */}
-            <div className="mt-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium">Nível {mockUserData.level}</span>
-                <span className="font-code">{mockUserData.xp}/{mockUserData.xpMax} XP</span>
-              </div>
-              <Progress 
-                value={(mockUserData.xp / mockUserData.xpMax) * 100} 
-                className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-accent"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Próximo nível: {mockUserData.xpMax - mockUserData.xp} XP</span>
-                <span>Bónus: +10% créditos</span>
-              </div>
+            {/* Bio Section */}
+            <div className="mt-6 pt-6 border-t border-primary/20">
+              {isEditing ? (
+                <Textarea
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                  placeholder="Conte-nos sobre você..."
+                  className="resize-none"
+                  rows={3}
+                />
+              ) : (
+                <p className="text-muted-foreground italic">"{profileData.bio}"</p>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Enhanced Tabs */}
+        {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-12 bg-card/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-12 bg-card/50 backdrop-blur-sm shadow-md">
             <TabsTrigger value="overview" className="font-headline">
-              <UserCircle className="h-4 w-4 mr-2"/>
+              <BarChart3 className="h-4 w-4 mr-2" />
               Visão Geral
             </TabsTrigger>
             <TabsTrigger value="pixels" className="font-headline">
-              <Grid3X3 className="h-4 w-4 mr-2"/>
-              Meus Píxeis
+              <MapPin className="h-4 w-4 mr-2" />
+              Meus Pixels
             </TabsTrigger>
             <TabsTrigger value="achievements" className="font-headline">
-              <Trophy className="h-4 w-4 mr-2"/>
+              <Trophy className="h-4 w-4 mr-2" />
               Conquistas
             </TabsTrigger>
-            <TabsTrigger value="statistics" className="font-headline">
-              <BarChart3 className="h-4 w-4 mr-2"/>
-              Estatísticas
+            <TabsTrigger value="activity" className="font-headline">
+              <Activity className="h-4 w-4 mr-2" />
+              Atividade
             </TabsTrigger>
-            <TabsTrigger value="settings" className="font-headline">
-              <Settings className="h-4 w-4 mr-2"/>
-              Definições
+            <TabsTrigger value="stats" className="font-headline">
+              <PieChart className="h-4 w-4 mr-2" />
+              Estatísticas
             </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Wallet Card */}
-              <Card className="md:col-span-2 card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Coins className="h-5 w-5 mr-2" />
-                    Carteira Digital
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card className="bg-gradient-to-br from-primary/10 to-primary/5 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Créditos</p>
-                          <p className="text-2xl font-bold text-primary">
-                            {mockUserData.credits.toLocaleString('pt-PT')}
-                          </p>
-                        </div>
-                        <Coins className="h-8 w-8 text-primary" />
-                      </div>
-                      <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                        <span>Ganhos: +{mockUserData.statistics.totalEarned.toLocaleString('pt-PT')}</span>
-                        <span>Gastos: -{mockUserData.statistics.totalSpent.toLocaleString('pt-PT')}</span>
-                      </div>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-accent/10 to-accent/5 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Especiais</p>
-                          <p className="text-2xl font-bold text-accent">
-                            {mockUserData.specialCredits.toLocaleString('pt-PT')}
-                          </p>
-                        </div>
-                        <Gift className="h-8 w-8 text-accent" />
-                      </div>
-                      <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                        <span>Expira em: 30 dias</span>
-                        <span>Bónus: +10%</span>
-                      </div>
-                    </Card>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <Button className="flex-1 bg-gradient-to-r from-primary to-primary/80">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Créditos
-                    </Button>
-                    <Button variant="outline" className="flex-1">
-                      <History className="h-4 w-4 mr-2" />
-                      Histórico
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Activity className="h-5 w-5 mr-2" />
-                    Atividade Recente
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[200px]">
-                    <div className="space-y-3">
-                      {mockUserData.recentActivity.map((activity, index) => (
-                        <div key={index} className="flex items-start gap-3 p-2 hover:bg-muted/30 rounded-lg transition-colors">
-                          <div className="p-2 rounded-full bg-muted/50">
-                            {activityIcons[activity.type as keyof typeof activityIcons]}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{activity.description}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatTimeAgo(activity.timestamp)}
-                              {activity.value && ` • ${activity.value} créditos`}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Albums Section */}
-            <Card className="card-hover-glow">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center text-primary">
-                  <BookImage className="h-5 w-5 mr-2" />
-                  Álbuns de Píxeis
-                </CardTitle>
-                <Button variant="outline" size="sm">
-                  <FolderPlus className="h-4 w-4 mr-2" />
-                  Novo Álbum
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockUserData.albums.map((album) => (
-                    <Card key={album.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      <div className="aspect-video relative bg-muted">
-                        <img 
-                          src={album.coverPixelUrl} 
-                          alt={album.name}
-                          className="w-full h-full object-cover"
-                          data-ai-hint={album.dataAiHint}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                          <h3 className="text-white font-semibold">{album.name}</h3>
-                          <p className="text-white/80 text-xs">{album.pixelCount} píxeis</p>
-                        </div>
-                      </div>
-                      <CardContent className="p-3">
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span className="flex items-center">
-                            <Eye className="h-3 w-3 mr-1" />
-                            {album.views}
-                          </span>
-                          <span className="flex items-center">
-                            <Heart className="h-3 w-3 mr-1" />
-                            {album.likes}
-                          </span>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  {/* Create New Album Card */}
-                  <Card className="border-dashed border-2 flex items-center justify-center aspect-[4/3] hover:border-primary/50 transition-colors cursor-pointer">
-                    <div className="text-center p-6">
-                      <FolderPlus className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                      <p className="font-medium">Criar Novo Álbum</p>
-                      <p className="text-xs text-muted-foreground mt-1">Organize os seus píxeis</p>
-                    </div>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Social Links */}
-            <Card className="card-hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <LinkIcon className="h-5 w-5 mr-2" />
-                  Redes Sociais
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {mockUserData.socials.map((social) => (
-                    <Button key={social.platform} variant="outline" className="justify-start" asChild>
-                      <a href={social.url} target="_blank" rel="noopener noreferrer">
-                        {React.cloneElement(social.icon as React.ReactElement, { className: "h-4 w-4 mr-2" })}
-                        <span className="font-medium">{social.platform}:</span>
-                        <span className="ml-2 text-muted-foreground truncate">{social.handle}</span>
-                      </a>
-                    </Button>
-                  ))}
-                  
-                  {isEditing && (
-                    <Button variant="outline" className="border-dashed">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Rede
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Pixels Tab */}
-          <TabsContent value="pixels" className="space-y-6">
-            <Card className="card-hover-glow">
-              <CardHeader>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <CardTitle className="flex items-center text-primary">
-                    <Grid3X3 className="h-5 w-5 mr-2" />
-                    Meus Píxeis ({mockUserData.pixelsOwned})
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filtrar
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <SortAsc className="h-4 w-4 mr-2" />
-                      Ordenar
-                    </Button>
-                    <Button className="bg-gradient-to-r from-primary to-accent">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Comprar Píxel
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <Card key={i} className="overflow-hidden hover:shadow-lg transition-all hover:scale-105">
-                      <div className="aspect-square relative bg-gradient-to-br from-primary/20 to-accent/20">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-lg font-bold">({Math.floor(Math.random() * 1000)}, {Math.floor(Math.random() * 1000)})</div>
-                            <div className="text-xs text-muted-foreground">Lisboa</div>
-                          </div>
-                        </div>
-                        <div className="absolute top-2 right-2">
-                          <Badge variant="outline" className={cn(
-                            i % 5 === 0 ? "text-orange-500 border-orange-500/50 bg-orange-500/10" :
-                            i % 5 === 1 ? "text-purple-500 border-purple-500/50 bg-purple-500/10" :
-                            i % 5 === 2 ? "text-blue-500 border-blue-500/50 bg-blue-500/10" :
-                            i % 5 === 3 ? "text-green-500 border-green-500/50 bg-green-500/10" :
-                            "text-gray-500 border-gray-500/50 bg-gray-500/10"
-                          )}>
-                            {i % 5 === 0 ? "Lendário" :
-                             i % 5 === 1 ? "Épico" :
-                             i % 5 === 2 ? "Raro" :
-                             i % 5 === 3 ? "Incomum" :
-                             "Comum"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <CardContent className="p-3">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-medium text-sm">Pixel #{i+1}</h3>
-                            <p className="text-xs text-muted-foreground">Adquirido: {new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-PT')}</p>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                              <Edit3 className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                              <Share2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  {/* Add New Pixel Card */}
-                  <Card className="border-dashed border-2 flex items-center justify-center aspect-square hover:border-primary/50 transition-colors cursor-pointer">
-                    <div className="text-center p-6">
-                      <Plus className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                      <p className="font-medium">Comprar Novo</p>
-                      <p className="text-xs text-muted-foreground mt-1">Adicionar à coleção</p>
-                    </div>
-                  </Card>
-                </div>
-                
-                <Button variant="outline" className="w-full mt-6">
-                  <Eye className="h-4 w-4 mr-2" />
-                  Ver Todos os Píxeis
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-6">
-            <Card className="card-hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Trophy className="h-5 w-5 mr-2" />
-                  Conquistas Desbloqueadas ({mockUserData.achievementsUnlocked}/{achievementsData.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Progress 
-                    value={(mockUserData.achievementsUnlocked / achievementsData.length) * 100} 
-                    className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-accent"
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievementsData
-                      .filter(ach => mockUserData.unlockedAchievementIds.includes(ach.id))
-                      .map((achievement) => {
-                        const unlockedTiers = achievement.tiers.filter(t => t.isUnlocked).length;
-                        const totalTiers = achievement.tiers.length;
-                        const progressPercentage = (unlockedTiers / totalTiers) * 100;
-                        
-                        return (
-                          <Card key={achievement.id} className={cn(
-                            "border-2 transition-all duration-300 hover:shadow-xl",
-                            achievement.rarity === 'legendary' ? "border-amber-400/60 bg-amber-500/5" :
-                            achievement.rarity === 'epic' ? "border-purple-500/60 bg-purple-500/5" :
-                            achievement.rarity === 'rare' ? "border-blue-500/60 bg-blue-500/5" :
-                            achievement.rarity === 'uncommon' ? "border-green-500/60 bg-green-500/5" :
-                            "border-gray-500/60 bg-gray-500/5"
-                          )}>
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-4">
-                                <div className={cn(
-                                  "p-3 rounded-xl",
-                                  achievement.rarity === 'legendary' ? "bg-amber-500/20 text-amber-500" :
-                                  achievement.rarity === 'epic' ? "bg-purple-500/20 text-purple-500" :
-                                  achievement.rarity === 'rare' ? "bg-blue-500/20 text-blue-500" :
-                                  achievement.rarity === 'uncommon' ? "bg-green-500/20 text-green-500" :
-                                  "bg-gray-500/20 text-gray-500"
-                                )}>
-                                  {React.cloneElement(achievement.icon as React.ReactElement, { className: "h-8 w-8" })}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="text-lg font-semibold">{achievement.name}</h3>
-                                    <Badge className={cn(
-                                      "text-xs",
-                                      achievement.rarity === 'legendary' ? "bg-amber-500/20 text-amber-500 border-amber-500/50" :
-                                      achievement.rarity === 'epic' ? "bg-purple-500/20 text-purple-500 border-purple-500/50" :
-                                      achievement.rarity === 'rare' ? "bg-blue-500/20 text-blue-500 border-blue-500/50" :
-                                      achievement.rarity === 'uncommon' ? "bg-green-500/20 text-green-500 border-green-500/50" :
-                                      "bg-gray-500/20 text-gray-500 border-gray-500/50"
-                                    )}>
-                                      {achievement.rarity}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground mt-1">{achievement.overallDescription}</p>
-                                  
-                                  <div className="mt-3">
-                                    <div className="flex justify-between text-xs mb-1">
-                                      <span>Progresso</span>
-                                      <span>{unlockedTiers}/{totalTiers} Níveis</span>
-                                    </div>
-                                    <Progress value={progressPercentage} className="h-2" />
-                                  </div>
-                                  
-                                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                    <div className="flex items-center gap-1">
-                                      <Zap className="h-3 w-3 text-primary" />
-                                      <span>+{achievement.tiers.reduce((sum, tier) => sum + (tier.isUnlocked ? tier.xpReward : 0), 0)} XP</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Coins className="h-3 w-3 text-accent" />
-                                      <span>+{achievement.tiers.reduce((sum, tier) => sum + (tier.isUnlocked ? tier.creditsReward : 0), 0)} créditos</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                  </div>
-                  
-                  <Button variant="outline" className="w-full">
-                    <Trophy className="h-4 w-4 mr-2" />
-                    Ver Todas as Conquistas
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Statistics Tab */}
-          <TabsContent value="statistics" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* General Stats */}
-              <Card className="card-hover-glow">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Quick Stats */}
+              <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
                     <BarChart3 className="h-5 w-5 mr-2" />
-                    Estatísticas Gerais
+                    Resumo da Conta
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Total Gasto</p>
-                      <p className="text-xl font-bold text-primary">{mockUserData.statistics.totalSpent.toLocaleString('pt-PT')}€</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-primary/10 rounded-lg">
+                      <MapPin className="h-8 w-8 text-primary mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.totalPixels}</p>
+                      <p className="text-sm text-muted-foreground">Total de Pixels</p>
                     </div>
-                    <div className="space-y-1">
+                    <div className="text-center p-4 bg-green-500/10 rounded-lg">
+                      <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.totalEarned}€</p>
                       <p className="text-sm text-muted-foreground">Total Ganho</p>
-                      <p className="text-xl font-bold text-green-500">{mockUserData.statistics.totalEarned.toLocaleString('pt-PT')}€</p>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Região Favorita</p>
-                      <p className="text-xl font-bold text-blue-500">{mockUserData.statistics.favoriteRegion}</p>
+                    <div className="text-center p-4 bg-red-500/10 rounded-lg">
+                      <Coins className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.totalSpent}€</p>
+                      <p className="text-sm text-muted-foreground">Total Gasto</p>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Cor Mais Usada</p>
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full" style={{ backgroundColor: mockUserData.statistics.mostUsedColor }} />
-                        <p className="text-lg font-bold font-code">{mockUserData.statistics.mostUsedColor}</p>
-                      </div>
+                    <div className="text-center p-4 bg-purple-500/10 rounded-lg">
+                      <Award className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.achievements}</p>
+                      <p className="text-sm text-muted-foreground">Conquistas</p>
                     </div>
                   </div>
                   
                   <Separator />
                   
                   <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Píxeis Este Mês</span>
-                      <span className="font-semibold">{mockUserData.statistics.pixelsThisMonth}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Cor Favorita</span>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-6 h-6 rounded-full border-2 border-border"
+                          style={{ backgroundColor: mockUserStats.favoriteColor }}
+                        />
+                        <span className="font-code text-sm">{mockUserStats.favoriteColor}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Mudança no Ranking</span>
-                      <span className="font-semibold text-green-500 flex items-center">
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                        +{mockUserData.statistics.rankingChange}
-                      </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Região Mais Ativa</span>
+                      <span className="font-medium">{mockUserStats.mostActiveRegion}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Dias Seguidos</span>
-                      <span className="font-semibold text-orange-500 flex items-center">
-                        <Flame className="h-4 w-4 mr-1" />
-                        {mockUserData.statistics.streakDays}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Total de Logins</span>
-                      <span className="font-semibold">{mockUserData.statistics.totalLogin}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Última Atividade</span>
+                      <span className="font-medium">{formatDate(mockUserStats.lastActive)}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Activity Chart */}
-              <Card className="card-hover-glow">
+              {/* Recent Achievements */}
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
-                    <LineChart className="h-5 w-5 mr-2" />
-                    Atividade ao Longo do Tempo
+                    <Trophy className="h-5 w-5 mr-2" />
+                    Conquistas Recentes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 bg-muted/20 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-muted-foreground">
-                      <LineChart className="h-10 w-10 mx-auto mb-2" />
-                      <p>Gráfico de atividade ao longo do tempo</p>
-                      <p className="text-xs mt-1">Mostrando dados dos últimos 30 dias</p>
-                    </div>
+                  <div className="space-y-3">
+                    {mockAchievements.slice(0, 3).map((achievement) => (
+                      <div key={achievement.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                        <div className={cn("p-2 rounded-full", getRarityColor(achievement.rarity))}>
+                          {achievement.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{achievement.name}</p>
+                          <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  
-                  <div className="grid grid-cols-3 gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      7 Dias
-                    </Button>
-                    <Button variant="default" size="sm" className="text-xs">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      30 Dias
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-xs">
-                      <BarChart3 className="h-3 w-3 mr-1" />
-                      1 Ano
-                    </Button>
-                  </div>
+                  <Button variant="outline" className="w-full mt-4">
+                    Ver Todas
+                  </Button>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
 
-            {/* Achievements Progress */}
-            <Card className="card-hover-glow">
+          {/* Pixels Tab */}
+          <TabsContent value="pixels" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center text-primary">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    Meus Pixels ({mockUserStats.totalPixels})
+                  </span>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filtrar
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <MapPin className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Galeria de pixels em desenvolvimento
+                  </p>
+                  <Button className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Comprar Primeiro Pixel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Achievements Tab */}
+          <TabsContent value="achievements" className="space-y-6">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-primary">
                   <Trophy className="h-5 w-5 mr-2" />
-                  Progresso de Conquistas
+                  Minhas Conquistas ({mockAchievements.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mockAchievements.map((achievement) => (
+                    <Card key={achievement.id} className={cn(
+                      "border-2 transition-all hover:shadow-lg",
+                      getRarityColor(achievement.rarity)
+                    )}>
+                      <CardContent className="p-4 text-center">
+                        <div className="mb-3">
+                          {achievement.icon}
+                        </div>
+                        <h3 className="font-semibold mb-2">{achievement.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
+                        <div className="flex justify-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            +{achievement.xpReward} XP
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            +{achievement.creditsReward} Créditos
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {formatDate(achievement.unlockedAt)}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Activity Tab */}
+          <TabsContent value="activity" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  <Activity className="h-5 w-5 mr-2" />
+                  Atividade Recente
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Conquistas Desbloqueadas</p>
-                      <p className="text-sm text-muted-foreground">Progresso total</p>
+                  {mockRecentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-center gap-4 p-4 bg-muted/20 rounded-lg">
+                      <div className="p-2 bg-background rounded-full">
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{activity.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{formatDate(activity.timestamp)}</span>
+                          {activity.coordinates && (
+                            <span className="font-code">
+                              ({activity.coordinates.x}, {activity.coordinates.y})
+                            </span>
+                          )}
+                          {activity.value && (
+                            <span className="text-primary font-medium">
+                              {activity.value}€
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold">{mockUserData.achievementsUnlocked}/{achievementsData.length}</p>
-                      <p className="text-sm text-muted-foreground">{Math.round((mockUserData.achievementsUnlocked / achievementsData.length) * 100)}%</p>
-                    </div>
-                  </div>
-                  
-                  <Progress 
-                    value={(mockUserData.achievementsUnlocked / achievementsData.length) * 100} 
-                    className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-accent"
-                  />
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-                    {['common', 'uncommon', 'rare', 'epic', 'legendary'].map((rarity) => {
-                      const count = mockUserData.unlockedAchievementIds.filter(id => 
-                        achievementsData.find(a => a.id === id)?.rarity === rarity
-                      ).length;
-                      const total = achievementsData.filter(a => a.rarity === rarity).length;
-                      
-                      return (
-                        <Card key={rarity} className={cn(
-                          "p-2",
-                          rarity === 'legendary' ? "bg-amber-500/10 border-amber-500/30" :
-                          rarity === 'epic' ? "bg-purple-500/10 border-purple-500/30" :
-                          rarity === 'rare' ? "bg-blue-500/10 border-blue-500/30" :
-                          rarity === 'uncommon' ? "bg-green-500/10 border-green-500/30" :
-                          "bg-gray-500/10 border-gray-500/30"
-                        )}>
-                          <p className={cn(
-                            "font-medium text-sm capitalize",
-                            rarity === 'legendary' ? "text-amber-500" :
-                            rarity === 'epic' ? "text-purple-500" :
-                            rarity === 'rare' ? "text-blue-500" :
-                            rarity === 'uncommon' ? "text-green-500" :
-                            "text-gray-500"
-                          )}>
-                            {rarity}
-                          </p>
-                          <p className="text-xs">
-                            {count}/{total}
-                          </p>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <Card className="card-hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Settings className="h-5 w-5 mr-2" />
-                  Preferências da Conta
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium">Notificações</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify-purchases" className="flex items-center gap-2">
-                        <ShoppingCart className="h-4 w-4 text-primary" />
-                        <span>Compras e Vendas</span>
-                      </Label>
-                      <Switch id="notify-purchases" defaultChecked={mockUserData.preferences.notifications} />
+          {/* Stats Tab */}
+          <TabsContent value="stats" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <PieChart className="h-5 w-5 mr-2" />
+                    Estatísticas Financeiras
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-green-500">
+                      +{(mockUserStats.totalEarned - mockUserStats.totalSpent).toFixed(0)}€
+                    </p>
+                    <p className="text-sm text-muted-foreground">Lucro Total</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Total Ganho</span>
+                      <span className="text-green-500 font-medium">+{mockUserStats.totalEarned}€</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify-achievements" className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-primary" />
-                        <span>Conquistas</span>
-                      </Label>
-                      <Switch id="notify-achievements" defaultChecked={mockUserData.preferences.notifications} />
+                    <div className="flex justify-between">
+                      <span>Total Gasto</span>
+                      <span className="text-red-500 font-medium">-{mockUserStats.totalSpent}€</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify-social" className="flex items-center gap-2">
-                        <Heart className="h-4 w-4 text-primary" />
-                        <span>Interações Sociais</span>
-                      </Label>
-                      <Switch id="notify-social" defaultChecked={mockUserData.preferences.notifications} />
+                    <div className="flex justify-between">
+                      <span>ROI</span>
+                      <span className="text-primary font-medium">
+                        {((mockUserStats.totalEarned / mockUserStats.totalSpent - 1) * 100).toFixed(1)}%
+                      </span>
                     </div>
                   </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium">Privacidade</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="public-profile" className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-primary" />
-                        <span>Perfil Público</span>
-                      </Label>
-                      <Switch id="public-profile" defaultChecked={mockUserData.preferences.publicProfile} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Estatísticas de Atividade
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{mockUserStats.totalPixels}</p>
+                      <p className="text-sm text-muted-foreground">Pixels Possuídos</p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="show-activity" className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-primary" />
-                        <span>Mostrar Atividade</span>
-                      </Label>
-                      <Switch id="show-activity" defaultChecked={true} />
+                    <div>
+                      <p className="text-2xl font-bold text-accent">{mockUserStats.streak}</p>
+                      <p className="text-sm text-muted-foreground">Dias Consecutivos</p>
                     </div>
                   </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium">Conta</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button variant="outline">
-                        <Download className="h-4 w-4 mr-2" />
-                        Exportar Dados
-                      </Button>
-                      <Button variant="outline">
-                        <Shield className="h-4 w-4 mr-2" />
-                        Segurança
-                      </Button>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Rank Global</span>
+                      <span className="font-medium">#{mockUserStats.rank}</span>
                     </div>
-                    <Button variant="destructive" className="w-full">
-                      Terminar Sessão
-                    </Button>
+                    <div className="flex justify-between">
+                      <span>Região Favorita</span>
+                      <span className="font-medium">{mockUserStats.mostActiveRegion}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tempo no Pixel Universe</span>
+                      <span className="font-medium">
+                        {Math.floor((Date.now() - new Date(mockUserStats.joinDate).getTime()) / (1000 * 60 * 60 * 24))} dias
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
+    </div>
   );
 }

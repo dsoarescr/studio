@@ -1,8 +1,5 @@
-
-import type {NextConfig} from 'next';
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -19,9 +16,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@genkit-ai/ai', 'genkit'],
-  },
+  serverExternalPackages: ['@genkit-ai/ai', 'genkit'],
 };
 
-export default nextConfig;
+module.exports = nextConfig;

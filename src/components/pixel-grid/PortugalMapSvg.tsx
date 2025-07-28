@@ -9,14 +9,12 @@ export interface MapData {
 }
 
 type PortugalMapSvgProps = {
-  onMapDataLoaded?: (data: MapData) => void;
+  onMapDataLoaded: (data: MapData) => void;
   className?: string; // className is optional
-  width?: number;
-  height?: number;
 };
 
 // CC-BY-SA-4.0 Por: Afonso Gomes http://afonsogomes.com https://github.com/AfonsoFG/PortugalSVG
-export default function PortugalMapSvg({ onMapDataLoaded, className, width, height }: PortugalMapSvgProps) {
+export default function PortugalMapSvg({ onMapDataLoaded, className }: PortugalMapSvgProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const landmassPathsRef = useRef<SVGGElement>(null);
 
@@ -41,7 +39,7 @@ export default function PortugalMapSvg({ onMapDataLoaded, className, width, heig
   }, [onMapDataLoaded]);
 
   return (
-    <svg ref={svgRef} width={width || "100%"} height={height || "100%"} viewBox="0 0 12969 26674" preserveAspectRatio="xMidYMid meet">
+    <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 12969 26674" preserveAspectRatio="xMidYMid meet">
        <defs>
         <linearGradient id="mapGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" style={{ stopColor: "hsl(var(--accent))", stopOpacity: 1 }} />
