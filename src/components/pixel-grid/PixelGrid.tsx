@@ -8,7 +8,7 @@ import {
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair,
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio,
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -934,8 +934,6 @@ export default function PixelGrid() {
             </Tooltip>
           </TooltipProvider>
         </div>
-  );
-}
 
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
@@ -1015,6 +1013,9 @@ export default function PixelGrid() {
         </div>
       </div>
     </MobileOptimizations>
+  );
+}
+
 // Enhanced cursor styles for different tools
 const getCursorStyle = (tool: string) => {
   switch (tool) {
