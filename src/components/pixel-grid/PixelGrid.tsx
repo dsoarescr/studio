@@ -45,6 +45,11 @@ import EnhancedPixelPurchaseModal from './EnhancedPixelPurchaseModal';
 import PixelAR from './PixelAR';
 import PixelStories from './PixelStories';
 import PixelLiveStream from './PixelLiveStream';
+import PixelCollaborativeEditor from './PixelCollaborativeEditor';
+import PixelAuction from './PixelAuction';
+import PixelGameification from './PixelGameification';
+import PixelAI from './PixelAI';
+import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
@@ -937,6 +942,41 @@ export default function PixelGrid() {
 
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
+          {/* IA Assistant */}
+          <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+              <Brain className="h-6 w-6" />
+            </Button>
+          </PixelAI>
+          
+          {/* Social Features */}
+          <PixelSocialFeatures>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
+              <Users className="h-6 w-6" />
+            </Button>
+          </PixelSocialFeatures>
+          
+          {/* Gamification */}
+          <PixelGameification>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+              <Trophy className="h-6 w-6" />
+            </Button>
+          </PixelGameification>
+          
+          {/* Auction */}
+          <PixelAuction>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+              <Gavel className="h-6 w-6" />
+            </Button>
+          </PixelAuction>
+          
+          {/* Collaborative Editor */}
+          <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
+              <Users className="h-6 w-6" />
+            </Button>
+          </PixelCollaborativeEditor>
+          
           {/* AR Button */}
           <PixelAR>
             <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
@@ -994,6 +1034,10 @@ export default function PixelGrid() {
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
+                    <Brain className="mr-2 h-4 w-4" />
+                    Assistente IA
+                  </Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
                     <Crosshair className="mr-2 h-4 w-4" />
                     Modo Precisão
