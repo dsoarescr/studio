@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -19,7 +20,9 @@ import { useToast } from '@/hooks/use-toast';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Coins, Gift, CreditCard, Palette, Brush, Eraser, PaintBucket, Sparkles, Star, Heart, Eye, MapPin, Globe, Clock, User, Tag, Link2, Download, Upload, Save, Undo, Redo, RotateCcw, ZoomIn, ZoomOut, Layers, Grid, Move, Copy, Scissors, Square, Circle, Triangle, Pen, Pencil, Plus, Minus, X, Check, Info, AlertTriangle, Crown, Gem, Flame, Snowflake, Sun, Moon, Droplets, Wind, Zap, Shield, Lock, Unlock, Settings, Maximize, Minimize, MoreHorizontal, ChevronDown, ChevronUp, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Mic, Camera, Video, Music, Headphones, Speaker, Type, AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline, Strikethrough, Contrast, Copyright as Brightness, IterationCw as Saturation, Bluetooth as Blur, Share as Sharpen, Crop, Rotate3D as Rotate, Eclipse as Flip, Carrot as Mirror, Wand2, Paintbrush2, SprayCan as Spray, Feather, Magnet, Crosshair, Target, Rainbow, BadgeCent as Gradient, Battery as Pattern, Text as Texture, Filter, ListPlus as Adjust, Transgender as Transform, History, Bookmark, Share2, Send, MessageSquare, Users, Award, Lightbulb, Rocket, Fingerprint, Scan, QrCode, Wifi, Bluetooth } from 'lucide-react';
+import { 
+  ShoppingCart, Coins, Gift, CreditCard, Palette, Brush, Eraser, PaintBucket, Sparkles, Star, Heart, Eye, MapPin, Globe, Clock, User, Tag, Link2, Download, Upload, Save, Undo, Redo, RotateCcw, ZoomIn, ZoomOut, Layers, Grid, Move, Copy, Scissors, Square, Circle, Triangle, Pen, Pencil, Plus, Minus, X, Check, Info, AlertTriangle, Crown, Gem, Flame, Snowflake, Sun, Moon, Droplets, Wind, Zap, Shield, Lock, Unlock, Settings, Maximize, Minimize, MoreHorizontal, ChevronDown, ChevronUp, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Mic, Camera, Video, Music, Headphones, Speaker, Type, AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline, Strikethrough, Contrast, Copyright as Brightness, IterationCw as Saturation, Bluetooth as Blur, Share as Sharpen, Crop, Rotate3D as Rotate, Eclipse as Flip, Carrot as Mirror, Wand2, Paintbrush2, SprayCan as Spray, Feather, Magnet, Crosshair, Target, Rainbow, BadgeCent as Gradient, Battery as Pattern, Text as Texture, Filter, ListPlus as Adjust, Transgender as Transform, History, Bookmark, Share2, Send, MessageSquare, Users, Award, Lightbulb, Rocket, Fingerprint, Scan, QrCode, Wifi, Bluetooth, ImageIcon
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PixelData {
@@ -2025,3 +2028,4 @@ export default function EnhancedPixelPurchaseModal({
     </Dialog>
   );
 }
+
