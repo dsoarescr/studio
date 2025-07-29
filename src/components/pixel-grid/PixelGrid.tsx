@@ -8,7 +8,7 @@ import {
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel,
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -1079,3 +1079,5 @@ const getCursorStyle = (tool: string) => {
       return 'cursor-default';
   }
 };
+
+    
