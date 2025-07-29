@@ -16,6 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { generatePixelDescription } from '@/ai/flows/generate-pixel-description';
+import { cn } from '@/lib/utils';
 
 interface AIFeature {
   id: string;
