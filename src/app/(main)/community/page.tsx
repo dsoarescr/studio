@@ -15,19 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Users, MessageSquare, Heart, Share2, Eye, Clock, Star, Crown,
-  Plus, Send, Image as ImageIcon, Video, Link2, Bookmark, Flag,
-  ThumbsUp, ThumbsDown, Reply, Edit3, Trash2, MoreHorizontal,
-  Palette, MapPin, Globe, Calendar, Award, Gem, Sparkles, Flame,
-  Target, Zap, Activity, TrendingUp, Filter, Search, SortAsc,
-  UserPlus, Settings, Bell, Shield, Info, ExternalLink, Download,
-  Camera, Mic, Smile, Paperclip, Gift, Coins, Music, Play, Pause,
-  Volume2, VolumeX, Maximize, Minimize, RotateCcw, Copy, Save,
-  Hash, AtSign, Phone, Mail, MessageCircle, Headphones, Radio,
-  Tv, Monitor, Smartphone, Tablet, Laptop, Watch, Gamepad2,
-  Joystick, Keyboard, Mouse, Printer, Scanner, Webcam, Microphone
-} from "lucide-react";
+import { Users, MessageSquare, Heart, Share2, Eye, Clock, Star, Crown, Plus, Send, Image as ImageIcon, Video, Link2, Bookmark, Flag, ThumbsUp, ThumbsDown, Reply, Edit3, Trash2, MoreHorizontal, Palette, MapPin, Globe, Calendar, Award, Gem, Sparkles, Flame, Target, Zap, Activity, TrendingUp, Filter, Search, SortAsc, UserPlus, Settings, Bell, Shield, Info, ExternalLink, Download, Camera, Mic, Smile, Paperclip, Gift, Coins, Music, Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, Copy, Save, Hash, AtSign, Phone, Mail, MessageCircle, Headphones, Radio, Tv, Monitor, Smartphone, Tablet, Laptop, Watch, Gamepad2, Joystick, Keyboard, Mouse, Printer, Scan as Scanner, Webcam, Microscope as Microphone } from "lucide-react";
 import {
   Dialog,
   DialogContent,
