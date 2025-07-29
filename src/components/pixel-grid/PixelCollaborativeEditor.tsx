@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Users, Palette, Brush, Eraser, PaintBucket, Undo, Redo, Save, Share2, Crown, Star, Zap, Eye, MessageSquare, Hand, TextCursor as Cursor, Play, Pause, SkipForward, SkipBack, Volume2, Settings, X } from 'lucide-react';
+import { Users, Palette, Brush, Eraser, PaintBucket, Undo, Redo, Save, Share2, Crown, Star, Zap, Eye, MessageSquare, Hand, TextCursor, Play, Pause, SkipForward, SkipBack, Volume2, Settings, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
