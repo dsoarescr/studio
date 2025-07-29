@@ -18,15 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
 import { Confetti } from "@/components/ui/confetti";
 import { motion } from "framer-motion";
-import {
-  User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, 
-  Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2,
-  Settings, Bell, Shield, Palette, Users, Globe, Link2, Save,
-  Upload, Download, RefreshCw, Plus, Minus, X, Check, Info,
-  BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock,
-  Bookmark, Tag, Image as ImageIcon, Video, Music, FileText,
-  Zap, Target, Flame, Sparkles, Rocket, Lightning, Megaphone
-} from "lucide-react";
+import { User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2, Settings, Bell, Shield, Palette, Users, Globe, Link2, Save, Upload, Download, RefreshCw, Plus, Minus, X, Check, Info, BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock, Bookmark, Tag, Image as ImageIcon, Video, Music, FileText, Zap, Target, Flame, Sparkles, Rocket, CloudLightning as Lightning, Megaphone } from "lucide-react";
 
 interface UserStats {
   totalPixels: number;
