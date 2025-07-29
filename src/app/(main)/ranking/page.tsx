@@ -302,15 +302,15 @@ export default function StatisticsPage() {
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative animate-slide-in-down">
+          <CardHeader className="relative z-10 animate-slide-in-down">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
                 <CardTitle className="font-headline text-3xl text-gradient-gold-animated flex items-center">
                   <BarChartHorizontalBig className="h-8 w-8 mr-3 animate-glow" />
-                  Estatísticas do Universo
+                  Centro de Rankings Global
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  Análise completa e em tempo real do ecossistema Pixel Universe
+                  Rankings em tempo real, competições e estatísticas globais
                 </CardDescription>
               </div>
               
@@ -321,9 +321,17 @@ export default function StatisticsPage() {
                     Atualizado: {lastUpdated || '--:--'}
                   </span>
                 </div>
+                <Button variant="outline" size="sm" className="button-hover-lift">
+                  <Trophy className="h-4 w-4 mr-2 text-yellow-500" />
+                  Competições
+                </Button>
                 <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
                   <Download className="h-4 w-4 mr-2 text-green-500" />
                   Exportar
+                </Button>
+                <Button variant="outline" size="sm" className="button-hover-lift">
+                  <Users className="h-4 w-4 mr-2 text-blue-500" />
+                  Ligas
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
                   <Share2 className="h-4 w-4 mr-2 text-blue-500" />
@@ -353,12 +361,28 @@ export default function StatisticsPage() {
                 </Button>
               ))}
             </div>
+            
+            {/* Live Competition Banner */}
+            <div className="mt-4 p-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-lg animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-ping" />
+                  <div>
+                    <h3 className="font-semibold text-red-500">🏆 Competição Ativa: "Mestre dos Pixels"</h3>
+                    <p className="text-sm text-muted-foreground">Termina em 2 dias • Prémio: 5000€ + Pixel Lendário</p>
+                  </div>
+                </div>
+                <Button size="sm" className="bg-red-500 hover:bg-red-600">
+                  Participar
+                </Button>
+              </div>
+            </div>
           </CardHeader>
         </Card>
 
         {/* Enhanced Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-12 bg-card/50 backdrop-blur-sm shadow-md">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 h-12 bg-card/50 backdrop-blur-sm shadow-md">
             <TabsTrigger value="overview" className="font-headline transition-all duration-300">
               <Globe className="h-4 w-4 mr-2"/>
               Visão Geral
@@ -366,6 +390,14 @@ export default function StatisticsPage() {
             <TabsTrigger value="leaderboard" className="font-headline">
               <Trophy className="h-4 w-4 mr-2"/>
               Classificação
+            </TabsTrigger>
+            <TabsTrigger value="competitions" className="font-headline">
+              <Award className="h-4 w-4 mr-2"/>
+              Competições
+            </TabsTrigger>
+            <TabsTrigger value="leagues" className="font-headline">
+              <Crown className="h-4 w-4 mr-2"/>
+              Ligas
             </TabsTrigger>
             <TabsTrigger value="regions" className="font-headline">
               <Map className="h-4 w-4 mr-2"/>

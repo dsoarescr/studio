@@ -170,6 +170,17 @@ export default function PixelsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [likedPixels, setLikedPixels] = useState<string[]>([]);
   const [selectedPixels, setSelectedPixels] = useState<string[]>([]);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [pixelTemplates, setPixelTemplates] = useState([
+    { id: 1, name: 'Paisagem Portuguesa', preview: '🏞️', difficulty: 'Médio' },
+    { id: 2, name: 'Arte Abstrata', preview: '🎨', difficulty: 'Avançado' },
+    { id: 3, name: 'Pixel Minimalista', preview: '⬜', difficulty: 'Fácil' }
+  ]);
+  const [collaborativeProjects, setCollaborativeProjects] = useState([
+    { id: 1, name: 'Mural de Lisboa', participants: 12, progress: 65 },
+    { id: 2, name: 'Bandeira Pixel', participants: 8, progress: 40 }
+  ]);
   
   const { toast } = useToast();
   const { addCredits, addXp } = useUserStore();
@@ -297,24 +308,32 @@ export default function PixelsPage() {
               <Grid3X3 className="h-4 w-4 mr-2"/>
               Galeria
             </TabsTrigger>
+            <TabsTrigger value="create" className="font-headline">
+              <Plus className="h-4 w-4 mr-2"/>
+              Criar
+            </TabsTrigger>
             <TabsTrigger value="collections" className="font-headline">
               <FolderPlus className="h-4 w-4 mr-2"/>
               Coleções
+            </TabsTrigger>
+            <TabsTrigger value="collaborate" className="font-headline">
+              <Users className="h-4 w-4 mr-2"/>
+              Colaborar
             </TabsTrigger>
             <TabsTrigger value="analytics" className="font-headline">
               <BarChart3 className="h-4 w-4 mr-2"/>
               Análises
             </TabsTrigger>
-            <TabsTrigger value="marketplace" className="font-headline">
-              <Trophy className="h-4 w-4 mr-2"/>
-              Marketplace
+            <TabsTrigger value="ai" className="font-headline">
+              <Sparkles className="h-4 w-4 mr-2"/>
+              IA Assistant
             </TabsTrigger>
           </TabsList>
 
           {/* Gallery Tab */}
           <TabsContent value="gallery" className="space-y-6">
             {/* Controls */}
-            <Card>
+            <Card className="bg-gradient-to-r from-card to-primary/5">
               <CardContent className="p-4">
                 <div className="flex flex-col lg:flex-row gap-4">
                   <div className="relative flex-1">
@@ -328,6 +347,10 @@ export default function PixelsPage() {
                   </div>
                   
                   <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      IA Sugestões
+                    </Button>
                     <select
                       value={selectedFilter}
                       onChange={(e) => setSelectedFilter(e.target.value)}
@@ -338,6 +361,8 @@ export default function PixelsPage() {
                       <option value="private">Privados</option>
                       <option value="for-sale">À Venda</option>
                       <option value="liked">Curtidos</option>
+                      <option value="trending">Em Tendência</option>
+                      <option value="collaborative">Colaborativos</option>
                     </select>
                     
                     <select
@@ -349,6 +374,8 @@ export default function PixelsPage() {
                       <option value="oldest">Mais Antigos</option>
                       <option value="most-liked">Mais Curtidos</option>
                       <option value="most-viewed">Mais Vistos</option>
+                      <option value="most-valuable">Mais Valiosos</option>
+                      <option value="trending">Tendência</option>
                     </select>
                     
                     <Button
@@ -371,8 +398,16 @@ export default function PixelsPage() {
                         Adicionar à Coleção
                       </Button>
                       <Button size="sm" variant="outline">
+                        <Users className="h-4 w-4 mr-2" />
+                        Colaborar
+                      </Button>
+                      <Button size="sm" variant="outline">
                         <Share2 className="h-4 w-4 mr-2" />
                         Partilhar
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        IA Melhorar
                       </Button>
                       <Button size="sm" variant="outline">
                         <Download className="h-4 w-4 mr-2" />

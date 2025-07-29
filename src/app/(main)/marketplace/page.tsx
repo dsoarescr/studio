@@ -204,6 +204,11 @@ export default function MarketplacePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [likedItems, setLikedItems] = useState<string[]>([]);
   const [cartItems, setCartItems] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [compareList, setCompareList] = useState<string[]>([]);
   
   const { toast } = useToast();
   const { credits, specialCredits, addCredits, removeCredits } = useUserStore();
@@ -348,11 +353,20 @@ export default function MarketplacePage() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => setShowFilters(!showFilters)}
+                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                     className="flex items-center gap-2"
                   >
                     <Filter className="h-4 w-4" />
-                    Filtros
+                    Filtros Avançados
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                    className="flex items-center gap-2"
+                  >
+                    {viewMode === 'grid' ? <BarChart3 className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                    {viewMode === 'grid' ? 'Lista' : 'Grelha'}
                   </Button>
                   
                   <select
@@ -386,7 +400,105 @@ export default function MarketplacePage() {
               </div>
             </div>
           </CardContent>
+          
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <Card className="bg-card/80 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <Label>Faixa de Preço</Label>
+                    <div className="mt-2">
+                      <Slider
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        max={1000}
+                        step={10}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                        <span>€{priceRange[0]}</span>
+                        <span>€{priceRange[1]}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label>Raridade</Label>
+                    <div className="mt-2 space-y-2">
+                      {['Comum', 'Raro', 'Épico', 'Lendário'].map(rarity => (
+                        <div key={rarity} className="flex items-center space-x-2">
+                          <Checkbox id={rarity} />
+                          <Label htmlFor={rarity} className="text-sm">{rarity}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label>Vendedor</Label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="verified" />
+                        <Label htmlFor="verified" className="text-sm">Apenas Verificados</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="premium" />
+                        <Label htmlFor="premium" className="text-sm">Vendedores Premium</Label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label>Outras Opções</Label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="auction" />
+                        <Label htmlFor="auction" className="text-sm">Em Leilão</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="discount" />
+                        <Label htmlFor="discount" className="text-sm">Com Desconto</Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </Card>
+
+        {/* Wishlist & Compare Bar */}
+        {(wishlist.length > 0 || compareList.length > 0) && (
+          <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {wishlist.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-red-500" />
+                      <span className="text-sm">{wishlist.length} na lista de desejos</span>
+                      <Button variant="outline" size="sm">Ver Lista</Button>
+                    </div>
+                  )}
+                  {compareList.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm">{compareList.length} para comparar</span>
+                      <Button variant="outline" size="sm">Comparar</Button>
+                    </div>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setWishlist([]);
+                  setCompareList([]);
+                }}>
+                  Limpar Tudo
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Featured Items */}
         {selectedCategory === 'all' && (

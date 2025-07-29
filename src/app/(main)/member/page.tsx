@@ -155,6 +155,22 @@ export default function MemberPage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [playSuccessSound, setPlaySuccessSound] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [achievements, setAchievements] = useState([
+    { id: 1, name: 'Primeiro Pixel', icon: '🎯', unlocked: true, date: '2024-01-15' },
+    { id: 2, name: 'Colecionador', icon: '💎', unlocked: true, date: '2024-02-20' },
+    { id: 3, name: 'Artista', icon: '🎨', unlocked: false, progress: 75 }
+  ]);
+  const [socialStats, setSocialStats] = useState({
+    followers: 234,
+    following: 156,
+    posts: 89,
+    pixelsShared: 45
+  });
+  const [recentActivity, setRecentActivity] = useState([
+    { type: 'purchase', description: 'Comprou pixel em Lisboa', time: '2h', icon: '🛒' },
+    { type: 'like', description: 'Recebeu 15 likes no pixel do Porto', time: '4h', icon: '❤️' },
+    { type: 'achievement', description: 'Desbloqueou "Mestre das Cores"', time: '1d', icon: '🏆' }
+  ]);
 
   const xpPercentage = (xp / xpMax) * 100;
 
@@ -365,21 +381,29 @@ export default function MemberPage() {
               <BarChart3 className="h-4 w-4 mr-2" />
               Visão Geral
             </TabsTrigger>
+            <TabsTrigger value="social" className="font-headline">
+              <Users className="h-4 w-4 mr-2" />
+              Social
+            </TabsTrigger>
             <TabsTrigger value="pixels" className="font-headline">
               <MapPin className="h-4 w-4 mr-2" />
               Meus Pixels
+            </TabsTrigger>
+            <TabsTrigger value="portfolio" className="font-headline">
+              <Gem className="h-4 w-4 mr-2" />
+              Portfólio
             </TabsTrigger>
             <TabsTrigger value="achievements" className="font-headline">
               <Trophy className="h-4 w-4 mr-2" />
               Conquistas
             </TabsTrigger>
+            <TabsTrigger value="analytics" className="font-headline">
+              <LineChart className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
             <TabsTrigger value="activity" className="font-headline">
               <Activity className="h-4 w-4 mr-2" />
               Atividade
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="font-headline">
-              <PieChart className="h-4 w-4 mr-2" />
-              Estatísticas
             </TabsTrigger>
           </TabsList>
 
@@ -387,15 +411,15 @@ export default function MemberPage() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Quick Stats */}
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
                     <BarChart3 className="h-5 w-5 mr-2" />
-                    Resumo da Conta
+                    Dashboard Pessoal
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-primary/10 rounded-lg">
                       <MapPin className="h-8 w-8 text-primary mx-auto mb-2" />
                       <p className="text-2xl font-bold">{mockUserStats.totalPixels}</p>
@@ -406,11 +430,6 @@ export default function MemberPage() {
                       <p className="text-2xl font-bold">{mockUserStats.totalEarned}€</p>
                       <p className="text-sm text-muted-foreground">Total Ganho</p>
                     </div>
-                    <div className="text-center p-4 bg-red-500/10 rounded-lg">
-                      <Coins className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{mockUserStats.totalSpent}€</p>
-                      <p className="text-sm text-muted-foreground">Total Gasto</p>
-                    </div>
                     <div className="text-center p-4 bg-purple-500/10 rounded-lg">
                       <Award className="h-8 w-8 text-purple-500 mx-auto mb-2" />
                       <p className="text-2xl font-bold">{mockUserStats.achievements}</p>
@@ -418,56 +437,143 @@ export default function MemberPage() {
                     </div>
                   </div>
                   
-                  <Separator />
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Cor Favorita</span>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-6 h-6 rounded-full border-2 border-border"
-                          style={{ backgroundColor: mockUserStats.favoriteColor }}
-                        />
-                        <span className="font-code text-sm">{mockUserStats.favoriteColor}</span>
-                      </div>
+                  {/* Social Stats */}
+                  <div className="grid grid-cols-4 gap-4 pt-4 border-t">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-blue-500">{socialStats.followers}</p>
+                      <p className="text-xs text-muted-foreground">Seguidores</p>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Região Mais Ativa</span>
-                      <span className="font-medium">{mockUserStats.mostActiveRegion}</span>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-green-500">{socialStats.following}</p>
+                      <p className="text-xs text-muted-foreground">Seguindo</p>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Última Atividade</span>
-                      <span className="font-medium">{formatDate(mockUserStats.lastActive)}</span>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-purple-500">{socialStats.posts}</p>
+                      <p className="text-xs text-muted-foreground">Posts</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-orange-500">{socialStats.pixelsShared}</p>
+                      <p className="text-xs text-muted-foreground">Partilhados</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Achievements */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Trophy className="h-5 w-5 mr-2" />
-                    Conquistas Recentes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {mockAchievements.slice(0, 3).map((achievement) => (
-                      <div key={achievement.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
-                        <div className={cn("p-2 rounded-full", getRarityColor(achievement.rarity))}>
-                          {achievement.icon}
-                        </div>
+                  
+                  <Separator />
+                  
+                  {/* Recent Activity Preview */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Atividade Recente</h4>
+                    {recentActivity.slice(0, 3).map((activity, index) => (
+                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/20 rounded">
+                        <span className="text-lg">{activity.icon}</span>
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{achievement.name}</p>
-                          <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                          <p className="text-sm">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground">{activity.time}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full mt-4">
-                    Ver Todas
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <Zap className="h-5 w-5 mr-2" />
+                    Ações Rápidas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar Post
                   </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Partilhar Pixel
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Users className="h-4 w-4 mr-2" />
+                    Encontrar Amigos
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Ver Conquistas
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Analytics
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Social Tab */}
+          <TabsContent value="social" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <Users className="h-5 w-5 mr-2" />
+                    Rede Social
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="text-center p-4 bg-blue-500/10 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-500">{socialStats.followers}</p>
+                      <p className="text-sm text-muted-foreground">Seguidores</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-500/10 rounded-lg">
+                      <p className="text-2xl font-bold text-green-500">{socialStats.following}</p>
+                      <p className="text-sm text-muted-foreground">Seguindo</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Button className="w-full" variant="outline">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Encontrar Amigos
+                    </Button>
+                    <Button className="w-full" variant="outline">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Mensagens (3)
+                    </Button>
+                    <Button className="w-full" variant="outline">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Notificações Sociais
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <Heart className="h-5 w-5 mr-2" />
+                    Interações Recentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {[
+                      { user: 'ArtistaPro', action: 'curtiu seu pixel', time: '2h', avatar: '🎨' },
+                      { user: 'PixelMaster', action: 'comentou', time: '4h', avatar: '👑' },
+                      { user: 'ColorQueen', action: 'seguiu você', time: '6h', avatar: '🌈' }
+                    ].map((interaction, index) => (
+                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/20 rounded">
+                        <span className="text-lg">{interaction.avatar}</span>
+                        <div className="flex-1">
+                          <p className="text-sm">
+                            <span className="font-medium">{interaction.user}</span> {interaction.action}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{interaction.time}</p>
+                        </div>
+                        <Button size="sm" variant="ghost">Ver</Button>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>
