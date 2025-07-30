@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -300,7 +299,12 @@ export default function SettingsPage() {
                   <span className="font-medium text-accent">{specialCredits.toLocaleString('pt-PT')}</span>
                 </div>
                 
-                <Button variant="destructive" className="w-full">
+                <Button variant="destructive" className="w-full" onClick={() => {
+                  toast({
+                    title: "Sessão Terminada",
+                    description: "Você foi desconectado com sucesso.",
+                  });
+                }}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Terminar Sessão
                 </Button>

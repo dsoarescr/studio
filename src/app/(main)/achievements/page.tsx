@@ -210,15 +210,19 @@ export default function AchievementsPage() {
               <div>
                 <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center relative">
                   <Trophy className="h-8 w-8 mr-3 animate-glow" />
-                  Quadro de Conquistas
+                  Centro de Conquistas & Progressão
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  Desbloqueie conquistas épicas, ganhe XP e créditos para dominar o Pixel Universe!
+                  Sistema completo de progressão, conquistas épicas e recompensas exclusivas
                 </CardDescription>
               </div>
               
               {/* Enhanced Progress Overview */}
               <div className="flex flex-col sm:flex-row gap-4 animate-slide-in-right animation-delay-300">
+                <Card className="bg-background/50 p-4 text-center min-w-[120px]">
+                  <p className="text-2xl font-bold text-yellow-500">{userProgress.streakDays}</p>
+                  <p className="text-xs text-muted-foreground">Sequência</p>
+                </Card>
                 <Card className="bg-background/50 p-4 text-center min-w-[120px]">
                   <p className="text-2xl font-bold text-primary">{userProgress.unlockedAchievements}</p>
                   <p className="text-xs text-muted-foreground">Desbloqueadas</p>
@@ -228,8 +232,8 @@ export default function AchievementsPage() {
                   <p className="text-xs text-muted-foreground">Progresso</p>
                 </Card>
                 <Card className="bg-background/50 p-4 text-center min-w-[120px]">
-                  <p className="text-2xl font-bold text-green-500">{userProgress.streakDays}</p>
-                  <p className="text-xs text-muted-foreground">Sequência</p>
+                  <p className="text-2xl font-bold text-purple-500">#{userProgress.nextMilestone.current}</p>
+                  <p className="text-xs text-muted-foreground">Rank Global</p>
                 </Card>
               </div>
             </div>
@@ -238,14 +242,22 @@ export default function AchievementsPage() {
 
         {/* Enhanced Tabs */}
         <Tabs defaultValue="achievements" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-12 bg-card/60 backdrop-blur-sm shadow-md border border-primary/20">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-card/60 backdrop-blur-sm shadow-md border border-primary/20">
             <TabsTrigger value="achievements" className="font-headline">
               <Trophy className="h-4 w-4 mr-2"/>
               Conquistas
             </TabsTrigger>
+            <TabsTrigger value="daily" className="font-headline">
+              <Calendar className="h-4 w-4 mr-2"/>
+              Diárias
+            </TabsTrigger>
             <TabsTrigger value="progress" className="font-headline">
               <BarChart3 className="h-4 w-4 mr-2"/>
               Progresso
+            </TabsTrigger>
+            <TabsTrigger value="seasons" className="font-headline">
+              <Crown className="h-4 w-4 mr-2"/>
+              Temporadas
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="font-headline">
               <Medal className="h-4 w-4 mr-2"/>

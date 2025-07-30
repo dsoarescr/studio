@@ -299,7 +299,8 @@ export default function NotificationCenter({ children }: NotificationCenterProps
                       className={cn(
                         "transition-all duration-200 hover:shadow-md cursor-pointer",
                         !notification.isRead && "border-primary/50 bg-primary/5",
-                        notification.isImportant && "border-orange-500/50 bg-orange-500/5"
+                        notification.isImportant && "border-orange-500/50 bg-orange-500/5",
+                        "hover:scale-[1.02]"
                       )}
                       onClick={() => markAsRead(notification.id)}
                     >
@@ -353,10 +354,7 @@ export default function NotificationCenter({ children }: NotificationCenterProps
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteNotification(notification.id);
-                                }}
+                                onClick={() => deleteNotification(notification.id)}
                                 className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <X className="h-3 w-3" />

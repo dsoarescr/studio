@@ -1,428 +1,770 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, ShoppingCart, Users as UsersIcon, Plus, Coins, Palette, Bell, Search as SearchIcon, Users2, BarChart3 as AnalyticsIcon, Settings, Award } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import NotificationCenter from '@/components/layout/NotificationCenter';
-import { useUserStore } from '@/lib/store';
-import SearchSystem from '@/components/layout/SearchSystem';
-import EnhancedPixelPurchaseModal from '@/components/pixel-grid/EnhancedPixelPurchaseModal';
-import { useAuth } from '@/lib/auth-context';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { useTranslation } from 'react-i18next';
-import { StripeProvider } from '@/components/payment/StripePaymentProvider';
-import { motion } from 'framer-motion';
-import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
-import { useAppStore } from '@/lib/store';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { UserPlus, LogIn, Crown } from 'lucide-react';
-import '@/lib/i18n';
-import { HapticButton } from '@/components/mobile/HapticFeedback';
-import type { Achievement } from '@/data/achievements-data';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUserStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
+import { Confetti } from "@/components/ui/confetti";
+import { motion } from "framer-motion";
+import { User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2, Settings, Bell, Shield, Palette, Users, Globe, Link2, Save, Upload, Download, RefreshCw, Plus, Minus, X, Check, Info, BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock, Bookmark, Tag, Image as ImageIcon, Video, Music, FileText, Zap, Target, Flame, Sparkles, Rocket, CloudLightning as Lightning, Megaphone } from "lucide-react";
 
-const navLinks = [
-  { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
-  { href: "/marketplace", label: "Market", icon: ShoppingCart, color: "text-green-500", badge: 5, description: "Comprar píxeis" },
-  { href: "/pixels", label: "Galeria", icon: Palette, color: "text-purple-500", badge: 12, description: "Ver píxeis" },
-  { href: "/member", label: "Perfil", icon: UsersIcon, color: "text-orange-500", description: "Seu perfil" },
-  { href: "/ranking", label: "Ranking", icon: AnalyticsIcon, color: "text-amber-500", badge: 2, description: "Classificações" },
-  { href: "/community", label: "Comunidade", icon: Users2, color: "text-pink-500", badge: 3, description: "Interagir com a comunidade" },
-  { href: "/settings", label: "Ajustes", icon: Settings, color: "text-gray-500", description: "Configurações" },
-  { href: "/achievements", label: "Conquistas", icon: Award, color: "text-yellow-500", description: "Suas conquistas" },
+interface UserStats {
+  totalPixels: number;
+  totalSpent: number;
+  totalEarned: number;
+  favoriteColor: string;
+  mostActiveRegion: string;
+  joinDate: string;
+  lastActive: string;
+  achievements: number;
+  level: number;
+  xp: number;
+  xpMax: number;
+  streak: number;
+  rank: number;
+}
+
+interface PixelActivity {
+  id: string;
+  type: 'purchase' | 'sale' | 'edit' | 'like' | 'comment';
+  description: string;
+  timestamp: string;
+  value?: number;
+  coordinates?: { x: number; y: number };
+}
+
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  unlockedAt: string;
+  xpReward: number;
+  creditsReward: number;
+}
+
+const mockUserStats: UserStats = {
+  totalPixels: 42,
+  totalSpent: 1250,
+  totalEarned: 890,
+  favoriteColor: '#D4A757',
+  mostActiveRegion: 'Lisboa',
+  joinDate: '2024-01-15',
+  lastActive: '2024-03-15T14:30:00Z',
+  achievements: 8,
+  level: 12,
+  xp: 2450,
+  xpMax: 3000,
+  streak: 15,
+  rank: 156
+};
+
+const mockRecentActivity: PixelActivity[] = [
+  {
+    id: '1',
+    type: 'purchase',
+    description: 'Comprou pixel em Lisboa',
+    timestamp: '2024-03-15T10:30:00Z',
+    value: 150,
+    coordinates: { x: 245, y: 156 }
+  },
+  {
+    id: '2',
+    type: 'edit',
+    description: 'Editou cor do pixel no Porto',
+    timestamp: '2024-03-14T16:20:00Z',
+    coordinates: { x: 123, y: 89 }
+  },
+  {
+    id: '3',
+    type: 'sale',
+    description: 'Vendeu pixel em Coimbra',
+    timestamp: '2024-03-13T09:15:00Z',
+    value: 200,
+    coordinates: { x: 178, y: 234 }
+  }
 ];
 
-const BOTTOM_NAV_HEIGHT = '80px';
+const mockAchievements: Achievement[] = [
+  {
+    id: '1',
+    name: 'Primeiro Pixel',
+    description: 'Comprou seu primeiro pixel',
+    icon: <MapPin className="h-6 w-6" />,
+    rarity: 'common',
+    unlockedAt: '2024-01-15T12:00:00Z',
+    xpReward: 50,
+    creditsReward: 10
+  },
+  {
+    id: '2',
+    name: 'Mestre das Cores',
+    description: 'Usou 20 cores diferentes',
+    icon: <Palette className="h-6 w-6" />,
+    rarity: 'rare',
+    unlockedAt: '2024-02-20T15:30:00Z',
+    xpReward: 150,
+    creditsReward: 50
+  },
+  {
+    id: '3',
+    name: 'Colecionador',
+    description: 'Possui 25 pixels',
+    icon: <Trophy className="h-6 w-6" />,
+    rarity: 'epic',
+    unlockedAt: '2024-03-10T11:45:00Z',
+    xpReward: 300,
+    creditsReward: 100
+  }
+];
 
-export default function BottomNavBar() {
-  const pathname = usePathname();
-  const { t } = useTranslation();
-  const { notifications, credits, specialCredits, addCredits } = useUserStore();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [selectedPixelForPurchase, setSelectedPixelForPurchase] = useState<any>(null);
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [scaleX, setScaleX] = useState(0.8);
-  const [pulseIndex, setPulseIndex] = useState<number | null>(null);
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const [playHoverSound, setPlayHoverSound] = useState(false);
+export default function MemberPage() {
   const { user } = useAuth();
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { isOnline } = useAppStore();
+  const { credits, specialCredits, level, xp, xpMax, pixels, achievements, isPremium } = useUserStore();
+  const { toast } = useToast();
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    displayName: user?.displayName || 'PixelMaster',
+    bio: 'Artista digital apaixonado por pixel art e criação colaborativa.',
+    location: 'Lisboa, Portugal',
+    website: 'https://meusite.com',
+    favoriteColor: '#D4A757'
+  });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [playSuccessSound, setPlaySuccessSound] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [achievements, setAchievements] = useState([
+    { id: 1, name: 'Primeiro Pixel', icon: '🎯', unlocked: true, date: '2024-01-15' },
+    { id: 2, name: 'Colecionador', icon: '💎', unlocked: true, date: '2024-02-20' },
+    { id: 3, name: 'Artista', icon: '🎨', unlocked: false, progress: 75 }
+  ]);
+  const [socialStats, setSocialStats] = useState({
+    followers: 234,
+    following: 156,
+    posts: 89,
+    pixelsShared: 45
+  });
+  const [recentActivity, setRecentActivity] = useState([
+    { type: 'purchase', description: 'Comprou pixel em Lisboa', time: '2h', icon: '🛒' },
+    { type: 'like', description: 'Recebeu 15 likes no pixel do Porto', time: '4h', icon: '❤️' },
+    { type: 'achievement', description: 'Desbloqueou "Mestre das Cores"', time: '1d', icon: '🏆' }
+  ]);
 
-  useEffect(() => {
-    const currentIndex = navLinks.findIndex(link => link.href === pathname);
-    setActiveIndex(currentIndex >= 0 ? currentIndex : 0);
-  }, [pathname]);
+  const xpPercentage = (xp / xpMax) * 100;
 
-  useEffect(() => {
-    let animationFrameId: number;
-    const animate = () => {
-      setScaleX(0.8 + Math.sin(Date.now() / 1000) * 0.1);
-      animationFrameId = requestAnimationFrame(animate);
-    };
-    animate();
-    return () => cancelAnimationFrame(animationFrameId);
-  }, []);
-
-  // Pulse animation for nav items
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * navLinks.length);
-      setPulseIndex(randomIndex);
-      setTimeout(() => setPulseIndex(null), 2000);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-       
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  const handleSelectPixel = (pixelData: any) => {
-    setSelectedPixelForPurchase(pixelData);
-    setShowPurchaseModal(true);
-  };
-
-  const handlePurchase = async (pixelData: any, paymentMethod: string, customizations: any) => {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    return Math.random() > 0.1;
-  };
-
-  const handleNavHover = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
+  const handleSaveProfile = () => {
+    setIsEditing(false);
+    setShowConfetti(true);
+    setPlaySuccessSound(true);
     
-    hoverTimeoutRef.current = setTimeout(() => {
-      setPlayHoverSound(true);
-      setTimeout(() => setPlayHoverSound(false), 100);
-    }, 50);
+    toast({
+      title: "Perfil Atualizado",
+      description: "Suas informações foram salvas com sucesso!",
+    });
+  };
+
+  const handleShareProfile = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link Copiado",
+      description: "Link do seu perfil foi copiado para a área de transferência.",
+    });
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'purchase': return <Coins className="h-4 w-4 text-green-500" />;
+      case 'sale': return <TrendingUp className="h-4 w-4 text-blue-500" />;
+      case 'edit': return <Edit3 className="h-4 w-4 text-purple-500" />;
+      case 'like': return <Heart className="h-4 w-4 text-red-500" />;
+      case 'comment': return <MessageSquare className="h-4 w-4 text-orange-500" />;
+      default: return <Activity className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'text-gray-500 border-gray-500/50';
+      case 'rare': return 'text-blue-500 border-blue-500/50';
+      case 'epic': return 'text-purple-500 border-purple-500/50';
+      case 'legendary': return 'text-amber-500 border-amber-500/50';
+      default: return 'text-gray-500 border-gray-500/50';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-PT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
-    <StripeProvider>
-    <>
-      <SoundEffect src={SOUND_EFFECTS.HOVER} play={playHoverSound} onEnd={() => setPlayHoverSound(false)} volume={0.2} rate={1.5} />
-      <style jsx global>{`
-        :root {
-          --bottom-nav-height: ${BOTTOM_NAV_HEIGHT};
-        }
-      `}</style>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <nav
-        className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ease-out",
-          isVisible ? "translate-y-0" : "translate-y-full opacity-0",
-          "safe-bottom"
-        )}
-        style={{ height: BOTTOM_NAV_HEIGHT }}
-      >
-        {/* Glass Background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/90 to-background/80 backdrop-blur-2xl" />
-        <div className="absolute inset-0 border-t border-primary/20 shadow-2xl shadow-primary/10" />
-
-        {/* Enhanced Animated Indicator */}
-        <div 
-          className="absolute top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary transition-all duration-700 ease-out shadow-lg shadow-primary/50"
-          style={{
-            left: `${(activeIndex / navLinks.length) * 100}%`,
-            width: `${100 / navLinks.length}%`,
-            transform: `scaleX(${scaleX})`,
-          }}
-        />
-
-        {/* Enhanced Floating Particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/30 rounded-full animate-float"
-              style={{
-                left: `${10 + i * 8}%`,
-                top: '20%',
-                animationDelay: `${i * 0.4}s`,
-                animationDuration: `${3 + i * 0.3}s`,
-                opacity: 0.3 + Math.sin(i) * 0.2,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="container relative mx-auto flex h-full items-center justify-around max-w-screen-lg px-2">
-          {navLinks.map((link, index) => {
-            const isActive = pathname === link.href || pulseIndex === index;
-            return (
-              <Link 
-                key={link.label}
-                href={link.href}
-              >
-                <HapticButton
-                  hapticPattern={isActive ? 'medium' : 'light'}
-                  className={cn(
-                    "flex flex-col items-center justify-center text-xs font-medium rounded-2xl w-full h-16 transition-all duration-300 relative group overflow-hidden border-none bg-transparent",
-                    "hover:bg-primary/10 active:scale-95 transform-gpu",
-                    isActive
-                      ? "text-primary scale-110 bg-primary/15 shadow-lg shadow-primary/20" 
-                      : "text-muted-foreground hover:text-foreground hover:scale-105"
-                  )}
-                  onClick={() => {
-                    setActiveIndex(index);
-                    // Small reward for navigation
-                    if (Math.random() > 0.8) {
-                      addCredits(1);
-                    }
-                  }}
-                  onMouseEnter={handleNavHover}
-                >
-                  <EnhancedTooltip
-                    title={link.label}
-                    description={link.description}
-                    badges={link.badge ? [{ label: `${link.badge} novos`, variant: 'destructive' }] : []}
-                    side="top"
+      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl mb-16">
+        {/* Profile Header */}
+        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
+               style={{ backgroundSize: '200% 200%' }} />
+          <CardContent className="p-6 relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="relative">
+                  <Avatar className="h-24 w-24 border-4 border-primary shadow-lg">
+                    <AvatarImage 
+                      src={user?.photoURL || `https://placehold.co/96x96/D4A757/FFFFFF?text=${profileData.displayName.charAt(0)}`} 
+                      alt={profileData.displayName} 
+                    />
+                    <AvatarFallback className="text-2xl font-headline">
+                      {profileData.displayName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Button 
+                    size="icon" 
+                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
+                    onClick={() => setIsEditing(!isEditing)}
                   >
-                    <div className="w-full h-full flex flex-col items-center justify-center">
-                  {/* Active Background */}
-                  {isActive && (
+                    {isEditing ? <Check className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+                  </Button>
+                  {isPremium && (
+                    <Crown className="absolute -top-2 -left-2 h-6 w-6 text-amber-400" />
+                  )}
+                </div>
+                
+                <div className="text-center sm:text-left space-y-2">
+                  {isEditing ? (
+                    <Input
+                      value={profileData.displayName}
+                      onChange={(e) => setProfileData({...profileData, displayName: e.target.value})}
+                      className="text-2xl font-headline font-bold"
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-headline font-bold text-gradient-gold">
+                      {profileData.displayName}
+                    </h1>
+                  )}
+                  
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <Badge variant="secondary" className="font-code">
+                      Nível {level}
+                    </Badge>
+                    <Badge variant="outline" className="text-primary border-primary/50">
+                      Rank #{mockUserStats.rank}
+                    </Badge>
+                    {isPremium && (
+                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500">
+                        Premium
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      {isEditing ? (
+                        <Input
+                          value={profileData.location}
+                          onChange={(e) => setProfileData({...profileData, location: e.target.value})}
+                          className="h-6 text-sm"
+                        />
+                      ) : (
+                        profileData.location
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Desde {new Date(mockUserStats.joinDate).toLocaleDateString('pt-PT')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex-1 lg:text-right space-y-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary">{pixels}</p>
+                    <p className="text-xs text-muted-foreground">Pixels</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-accent">{achievements}</p>
+                    <p className="text-xs text-muted-foreground">Conquistas</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-500">{mockUserStats.streak}</p>
+                    <p className="text-xs text-muted-foreground">Sequência</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-500">{credits.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Créditos</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progresso XP</span>
+                    <span className="font-code">{xp}/{xpMax}</span>
+                  </div>
+                  <Progress value={xpPercentage} className="h-2" />
+                </div>
+                
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <Button onClick={handleSaveProfile} className="flex-1">
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar
+                    </Button>
+                  ) : (
                     <>
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-primary/20 to-transparent rounded-2xl animate-pulse" style={{ animationDuration: '3s' }} />
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/15 to-transparent rounded-2xl animate-shimmer" 
-                           style={{ backgroundSize: '200% 100%' }} />
+                      <Button variant="outline" onClick={() => setIsEditing(true)}>
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Button variant="outline" onClick={handleShareProfile}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Partilhar
+                      </Button>
                     </>
                   )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Bio Section */}
+            <div className="mt-6 pt-6 border-t border-primary/20">
+              {isEditing ? (
+                <Textarea
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                  placeholder="Conte-nos sobre você..."
+                  className="resize-none"
+                  rows={3}
+                />
+              ) : (
+                <p className="text-muted-foreground italic">"{profileData.bio}"</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-12 bg-card/50 backdrop-blur-sm shadow-md">
+            <TabsTrigger value="overview" className="font-headline">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="social" className="font-headline">
+              <Users className="h-4 w-4 mr-2" />
+              Social
+            </TabsTrigger>
+            <TabsTrigger value="pixels" className="font-headline">
+              <MapPin className="h-4 w-4 mr-2" />
+              Meus Pixels
+            </TabsTrigger>
+            <TabsTrigger value="portfolio" className="font-headline">
+              <Gem className="h-4 w-4 mr-2" />
+              Portfólio
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="font-headline">
+              <Trophy className="h-4 w-4 mr-2" />
+              Conquistas
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="font-headline">
+              <LineChart className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="font-headline">
+              <Activity className="h-4 w-4 mr-2" />
+              Atividade
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Quick Stats */}
+              <Card className="lg:col-span-2 card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Dashboard Pessoal
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-primary/10 rounded-lg">
+                      <MapPin className="h-8 w-8 text-primary mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.totalPixels}</p>
+                      <p className="text-sm text-muted-foreground">Total de Pixels</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-500/10 rounded-lg">
+                      <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.totalEarned}€</p>
+                      <p className="text-sm text-muted-foreground">Total Ganho</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-500/10 rounded-lg">
+                      <Award className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{mockUserStats.achievements}</p>
+                      <p className="text-sm text-muted-foreground">Conquistas</p>
+                    </div>
+                  </div>
                   
-                  {/* Icon Container */}
-                  <div className="relative mb-1 z-10">
-                    <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className={cn( 
-                      "p-2.5 rounded-2xl transition-all duration-500 relative overflow-hidden",
-                      isActive
-                        ? "bg-primary/25 shadow-lg shadow-primary/40 ring-2 ring-primary/40"
-                        : "group-hover:bg-muted/40 group-hover:scale-110 hover:rotate-3"
+                  {/* Social Stats */}
+                  <div className="grid grid-cols-4 gap-4 pt-4 border-t">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-blue-500">{socialStats.followers}</p>
+                      <p className="text-xs text-muted-foreground">Seguidores</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-green-500">{socialStats.following}</p>
+                      <p className="text-xs text-muted-foreground">Seguindo</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-purple-500">{socialStats.posts}</p>
+                      <p className="text-xs text-muted-foreground">Posts</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-orange-500">{socialStats.pixelsShared}</p>
+                      <p className="text-xs text-muted-foreground">Partilhados</p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Recent Activity Preview */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Atividade Recente</h4>
+                    {recentActivity.slice(0, 3).map((activity, index) => (
+                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/20 rounded">
+                        <span className="text-lg">{activity.icon}</span>
+                        <div className="flex-1">
+                          <p className="text-sm">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground">{activity.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <Zap className="h-5 w-5 mr-2" />
+                    Ações Rápidas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar Post
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Partilhar Pixel
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Users className="h-4 w-4 mr-2" />
+                    Encontrar Amigos
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Ver Conquistas
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Analytics
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Social Tab */}
+          <TabsContent value="social" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <Users className="h-5 w-5 mr-2" />
+                    Rede Social
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="text-center p-4 bg-blue-500/10 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-500">{socialStats.followers}</p>
+                      <p className="text-sm text-muted-foreground">Seguidores</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-500/10 rounded-lg">
+                      <p className="text-2xl font-bold text-green-500">{socialStats.following}</p>
+                      <p className="text-sm text-muted-foreground">Seguindo</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Button className="w-full" variant="outline">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Encontrar Amigos
+                    </Button>
+                    <Button className="w-full" variant="outline">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Mensagens (3)
+                    </Button>
+                    <Button className="w-full" variant="outline">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Notificações Sociais
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="card-hover-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <Heart className="h-5 w-5 mr-2" />
+                    Interações Recentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {[
+                      { user: 'ArtistaPro', action: 'curtiu seu pixel', time: '2h', avatar: '🎨' },
+                      { user: 'PixelMaster', action: 'comentou', time: '4h', avatar: '👑' },
+                      { user: 'ColorQueen', action: 'seguiu você', time: '6h', avatar: '🌈' }
+                    ].map((interaction, index) => (
+                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/20 rounded">
+                        <span className="text-lg">{interaction.avatar}</span>
+                        <div className="flex-1">
+                          <p className="text-sm">
+                            <span className="font-medium">{interaction.user}</span> {interaction.action}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{interaction.time}</p>
+                        </div>
+                        <Button size="sm" variant="ghost">Ver</Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Pixels Tab */}
+          <TabsContent value="pixels" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center text-primary">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    Meus Pixels ({mockUserStats.totalPixels})
+                  </span>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filtrar
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <MapPin className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Galeria de pixels em desenvolvimento
+                  </p>
+                  <Button className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Comprar Primeiro Pixel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Achievements Tab */}
+          <TabsContent value="achievements" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  <Trophy className="h-5 w-5 mr-2" />
+                  Minhas Conquistas ({mockAchievements.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mockAchievements.map((achievement) => (
+                    <Card key={achievement.id} className={cn(
+                      "border-2 transition-all hover:shadow-lg",
+                      getRarityColor(achievement.rarity)
                     )}>
-                      <link.icon className={cn(
-                        "h-6 w-6 transition-all duration-500 transform-gpu",
-                        isActive 
-                          ? `${link.color} drop-shadow-lg scale-110` 
-                          : "text-muted-foreground group-hover:text-foreground group-hover:scale-105"
-                      )} />
-                      
-                      {/* Glow Effect for Active */}
-                      {isActive && (
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 to-accent/30 blur-sm animate-pulse" />
-                      )} 
-                    </motion.div>
-                    
-                    {/* Pulse Ring for Active */}
-                    {isActive && (
-                      <div className="absolute inset-0 rounded-2xl border-2 border-primary/40 animate-ping" 
-                           style={{ animationDuration: '2s' }} />
-                    )}
-                    
-                    {/* Hover Glow */}
-                    <div className={cn(
-                      "absolute inset-0 rounded-2xl transition-all duration-300 -z-10 blur-lg",
-                      isActive
-                        ? "bg-primary/30 opacity-100" 
-                        : "bg-primary/20 opacity-0 group-hover:opacity-60 scale-125"
-                    )} />
-                  </div>
-                  
-                  {/* Label with Enhanced Typography */}
-                  <motion.span animate={isActive ? { y: [0, -2, 0] } : {}} transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }} className={cn( 
-                    "transition-all duration-500 font-medium text-xs leading-tight text-center px-1 z-10",
-                    isActive && "text-gradient-gold-animated font-bold drop-shadow-sm scale-105"
-                  )}>
-                    {link.label}
-                  </motion.span>
-                  
-                  {/* Notification Badge */}
-                  {link.badge && notifications > 0 && link.href === "/member" && ( 
-                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
-                      <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 flex items-center justify-center animate-heartbeat shadow-lg">
-                      <span className="animate-pulse">
-                        {notifications > 9 ? '9+' : notifications}
-                      </span>
-                      </Badge>
-                    </motion.div>
-                  )}
-
-                  {/* Interaction Ripple */}
-                  <div className="absolute inset-0 rounded-2xl overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/40 via-accent/40 to-primary/40 transform scale-0 group-active:scale-100 transition-transform duration-300 rounded-2xl blur-sm" />
-                  </div>
-                    </div>
-                  </EnhancedTooltip>
-                </HapticButton>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Enhanced Floating Action Button */}
-        <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: -8, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.3 }} className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <EnhancedTooltip
-                title="Menu Rápido"
-                description="Acesso rápido às principais funcionalidades"
-                badges={[
-                  { label: isOnline ? 'Online' : 'Offline', variant: isOnline ? 'default' : 'destructive' }
-                ]}
-                side="top"
-              >
-                <Button
-                  size="icon"
-                  className="h-16 w-16 rounded-full bg-gradient-to-r from-primary via-accent to-primary hover:from-primary/90 hover:via-accent/90 hover:to-primary/90 shadow-2xl shadow-primary/40 border-4 border-background transition-all duration-300 hover:scale-110 active:scale-95 relative overflow-hidden group"
-                  onMouseEnter={handleNavHover}
-                >
-                  {/* Rotating Background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary animate-spin rounded-full opacity-30" 
-                       style={{ animationDuration: '10s' }} />
-                  
-                  {/* Enhanced Pulse Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/50 to-accent/50 rounded-full animate-ping opacity-30" style={{ animationDuration: '3s' }} />
-                  
-                  <Plus className="h-8 w-8 text-primary-foreground relative z-10 transition-transform duration-300 group-hover:rotate-180 group-hover:scale-125 drop-shadow-lg" />
-                </Button>
-              </EnhancedTooltip>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" side="top" className="w-64 mb-4 bg-background/95 backdrop-blur-xl border border-primary/20 shadow-2xl rounded-xl">
-              <DropdownMenuLabel className="text-center font-headline text-primary">
-                <motion.span animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>🚀</motion.span> Ações Rápidas
-              </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-primary/20" />
-                
-                {!user && (
-                  <>
-                    <AuthModal defaultTab="login">
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer hover:bg-primary/10 transition-colors group">
-                        <div className="flex items-center w-full"> 
-                          <div className="p-2 rounded-lg bg-blue-500/20 mr-3 group-hover:scale-110 transition-transform">
-                            <LogIn className="h-4 w-4 text-blue-500" />
-                          </div>
-                          <div>
-                            <div className="font-medium">Iniciar Sessão</div>
-                            <div className="text-xs text-muted-foreground">Aceda à sua conta</div>
-                          </div>
+                      <CardContent className="p-4 text-center">
+                        <div className="mb-3">
+                          {achievement.icon}
                         </div>
-                      </DropdownMenuItem>
-                    </AuthModal>
-                    
-                    <AuthModal defaultTab="register">
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer hover:bg-primary/10 transition-colors group">
-                        <div className="flex items-center w-full"> 
-                          <div className="p-2 rounded-lg bg-green-500/20 mr-3 group-hover:scale-110 transition-transform">
-                            <UserPlus className="h-4 w-4 text-green-500" />
-                          </div>
-                          <div>
-                            <div className="font-medium">Criar Conta</div>
-                            <div className="text-xs text-muted-foreground">Registe-se para comprar pixels</div>
-                          </div>
+                        <h3 className="font-semibold mb-2">{achievement.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
+                        <div className="flex justify-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            +{achievement.xpReward} XP
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            +{achievement.creditsReward} Créditos
+                          </Badge>
                         </div>
-                      </DropdownMenuItem>
-                    </AuthModal>
-                    
-                    <DropdownMenuSeparator className="bg-primary/10" />
-                  </>
-                )}
-              
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer hover:bg-primary/10 transition-colors group">
-                  <div className="flex items-center w-full"> 
-                    <div className="p-2 rounded-lg bg-purple-500/20 mr-3 group-hover:scale-110 transition-transform">
-                      <Palette className="h-4 w-4 text-purple-500" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{t('pixel.editor')}</div>
-                      <div className="text-xs text-muted-foreground">{t('pixel.editor.desc')}</div>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              
-              <NotificationCenter>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer hover:bg-primary/10 transition-colors group">
-                  <div className="flex items-center w-full"> 
-                    <div className="p-2 rounded-lg bg-blue-500/20 mr-3 group-hover:scale-110 transition-transform">
-                      <Bell className="h-4 w-4 text-blue-500" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Centro de Notificações</div>
-                      <div className="text-xs text-muted-foreground">
-                        {notifications > 0 ? `${notifications} novas notificações` : 'Sem notificações'}
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {formatDate(achievement.unlockedAt)}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Activity Tab */}
+          <TabsContent value="activity" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  <Activity className="h-5 w-5 mr-2" />
+                  Atividade Recente
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockRecentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-center gap-4 p-4 bg-muted/20 rounded-lg">
+                      <div className="p-2 bg-background rounded-full">
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{activity.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{formatDate(activity.timestamp)}</span>
+                          {activity.coordinates && (
+                            <span className="font-code">
+                              ({activity.coordinates.x}, {activity.coordinates.y})
+                            </span>
+                          )}
+                          {activity.value && (
+                            <span className="text-primary font-medium">
+                              {activity.value}€
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Stats Tab */}
+          <TabsContent value="stats" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <PieChart className="h-5 w-5 mr-2" />
+                    Estatísticas Financeiras
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-green-500">
+                      +{(mockUserStats.totalEarned - mockUserStats.totalSpent).toFixed(0)}€
+                    </p>
+                    <p className="text-sm text-muted-foreground">Lucro Total</p>
                   </div>
-                </DropdownMenuItem>
-              </NotificationCenter>
-              
-              <SearchSystem>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer hover:bg-primary/10 transition-colors group">
-                  <div className="flex items-center w-full"> 
-                    <div className="p-2 rounded-lg bg-pink-500/20 mr-3 group-hover:scale-110 transition-transform">
-                      <SearchIcon className="h-4 w-4 text-pink-500" />
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Total Ganho</span>
+                      <span className="text-green-500 font-medium">+{mockUserStats.totalEarned}€</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Gasto</span>
+                      <span className="text-red-500 font-medium">-{mockUserStats.totalSpent}€</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>ROI</span>
+                      <span className="text-primary font-medium">
+                        {((mockUserStats.totalEarned / mockUserStats.totalSpent - 1) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Estatísticas de Atividade
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{mockUserStats.totalPixels}</p>
+                      <p className="text-sm text-muted-foreground">Pixels Possuídos</p>
                     </div>
                     <div>
-                      <div className="font-medium">Pesquisa Avançada</div>
-                      <div className="text-xs text-muted-foreground">Encontrar píxeis</div>
+                      <p className="text-2xl font-bold text-accent">{mockUserStats.streak}</p>
+                      <p className="text-sm text-muted-foreground">Dias Consecutivos</p>
                     </div>
                   </div>
-                </DropdownMenuItem>
-              </SearchSystem>
-              
-              {/* Online status indicator */}
-              <DropdownMenuSeparator className="bg-primary/10" />
-              <DropdownMenuItem className="cursor-default">
-                <div className="flex items-center w-full justify-center"> 
-                  <div className={`w-2 h-2 rounded-full mr-2 ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                  <span className="text-xs">{isOnline ? 'Conectado' : 'Offline'}</span>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </motion.div>
-
-        {/* Wave Animation */}
-        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary/50 via-accent/50 to-primary/50 opacity-30">
-          <div className="h-full bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
-        </div>
-      </nav>
-      
-      {selectedPixelForPurchase && (
-        <EnhancedPixelPurchaseModal
-          isOpen={showPurchaseModal}
-          onClose={() => setShowPurchaseModal(false)}
-          pixelData={selectedPixelForPurchase}
-          userCredits={credits}
-          userSpecialCredits={specialCredits}
-          onPurchase={handlePurchase}
-        />
-      )}
-    </>
-    </StripeProvider>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Rank Global</span>
+                      <span className="font-medium">#{mockUserStats.rank}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Região Favorita</span>
+                      <span className="font-medium">{mockUserStats.mostActiveRegion}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tempo no Pixel Universe</span>
+                      <span className="font-medium">
+                        {Math.floor((Date.now() - new Date(mockUserStats.joinDate).getTime()) / (1000 * 60 * 60 * 24))} dias
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 }
