@@ -1,122 +1,51 @@
 # Firebase Studio
 
-This is a NextJS starter in Firebase Studio.
+Este é um projeto Next.js inicializado no Firebase Studio, focado na criação de uma aplicação web interativa chamada "Pixel Universe".
 
-To get started, take a look at src/app/page.tsx.
+Para começar, explore o código na pasta `src/app`.
 
-## 🚀 Important: Firebase Setup
+## 🚀 Configuração Essencial do Firebase
 
-For user login and registration to work, you MUST enable the authentication methods in your Firebase project.
+Para que o login e registo de utilizadores funcionem, **É OBRIGATÓRIO** ativar os métodos de autenticação no seu projeto Firebase.
 
-### How to Enable Authentication:
+### Como Ativar a Autenticação:
 
-1.  **Go to the Firebase Console**: Open your project in the [Firebase Console](https://console.firebase.google.com/).
-2.  **Select Your Project**: Click on `pixel-universe-ub7uk`.
-3.  **Navigate to Authentication**: In the left-hand menu, under the "Build" section, click on **Authentication**.
-4.  **Get Started**: Click the **"Get started"** button.
-5.  **Enable Sign-in Methods**:
-    *   Go to the **"Sign-in method"** tab.
-    *   Click on **"Email/Password"** from the list of providers.
-    *   Enable the first toggle switch and click **"Save"**.
-    *   (Optional) You can also enable other providers like Google, Facebook, etc., by following the same process.
+1.  **Aceda à Consola Firebase**: Abra o seu projeto na [Firebase Console](https://console.firebase.google.com/).
+2.  **Selecione o seu Projeto**: Clique em `pixel-universe-ub7uk`.
+3.  **Navegue para a Autenticação**: No menu à esquerda, na secção "Build", clique em **Authentication**.
+4.  **Comece a Usar**: Clique no botão **"Get started"**.
+5.  **Ative os Métodos de Login**:
+    *   Vá para o separador **"Sign-in method"**.
+    *   Clique em **"Email/Password"** na lista de fornecedores.
+    *   Ative o primeiro interruptor e clique em **"Save"**.
+    *   (Opcional) Ative outros fornecedores como Google, Facebook, etc., seguindo o mesmo processo.
 
-**Without completing these steps, user registration and login will not work.**
+**Sem estes passos, o registo e login de utilizadores não irão funcionar.**
 
-## 🚀 Novas Funcionalidades Mobile
+---
 
-### Realidade Aumentada (AR)
-- **Pixel AR**: Descubra pixels próximos usando a câmara do smartphone
-- **Captura AR**: Tire fotos com overlay de pixels em tempo real
-- **Localização GPS**: Encontre pixels baseados na sua localização atual
+## 🔥 Funcionalidades Firebase para Explorar
 
-### Stories de Pixels
-- **Pixel Stories**: Crie e visualize histórias curtas sobre seus pixels
-- **Timelapse**: Mostre a evolução da criação do seu pixel art
-- **Música**: Adicione trilhas sonoras às suas histórias
-- **Interação**: Curta, comente e partilhe stories de outros utilizadores
+A sua aplicação já está configurada para usar Firebase. Aqui estão algumas funcionalidades da consola Firebase que pode integrar para potenciar o "Pixel Universe":
 
-### Live Streaming
-- **Transmissão ao Vivo**: Faça stream da criação dos seus pixels em tempo real
-- **Chat Interativo**: Interaja com espectadores através de chat ao vivo
-- **Presentes Virtuais**: Receba créditos dos espectadores durante a stream
-- **Multi-câmara**: Alterne entre diferentes ângulos durante a transmissão
+### 🤖 **Firebase Authentication**
+- **Gestão de Utilizadores**: Veja e gira todos os utilizadores registados.
+- **Provedores de Login**: Ative facilmente login com Google, Facebook, GitHub, etc., para facilitar o acesso dos seus utilizadores.
+- **Templates de Email**: Personalize os emails de verificação, recuperação de password, etc.
 
-### Gestos de Swipe
-- **Swipe para Curtir**: Deslize para a esquerda para curtir pixels
-- **Swipe para Salvar**: Deslize para a direita para guardar nos favoritos
-- **Swipe para Partilhar**: Deslize para cima para partilhar
-- **Swipe para Comprar**: Deslize para baixo para compra rápida
+### 💾 **Firestore Database (Base de Dados)**
+- **Dados em Tempo Real**: Substitua os dados "mock" (estáticos) da sua aplicação (como posts da comunidade, itens do marketplace, etc.) por dados reais e dinâmicos.
+- **Gestão de Dados**: Crie e gira as suas coleções de dados diretamente na consola. Por exemplo, pode criar uma coleção `pixels` para armazenar o dono, a cor e o preço de cada pixel do mapa.
 
-### Feedback Háptico
-- **Vibrações Contextuais**: Feedback tátil para diferentes ações
-- **Padrões Personalizados**: Diferentes vibrações para diferentes eventos
-- **Configurável**: Pode ser ativado/desativado nas definições
+### 🖼️ **Firebase Storage (Armazenamento)**
+- **Upload de Ficheiros**: Permita que os seus utilizadores façam upload de imagens de perfil, imagens personalizadas para os seus pixels ou timelapses das suas criações.
+- **Gestão de Conteúdo**: Armazene e gira todos os ficheiros dos seus utilizadores de forma segura.
 
-### Otimizações Mobile
-- **Deteção Automática**: Identifica dispositivos de baixo desempenho
-- **Modo Economia**: Ativa automaticamente com bateria baixa
-- **Economia de Dados**: Reduz qualidade quando em redes lentas
-- **Performance Adaptativa**: Ajusta automaticamente a qualidade visual
+### ⚙️ **Cloud Functions for Firebase**
+- **Lógica de Backend Automatizada**: Crie funções que são acionadas por eventos. Por exemplo, pode criar uma função que atribui uma conquista a um utilizador automaticamente quando ele compra 10 pixels.
+- **API Personalizada**: Crie os seus próprios endpoints de API para funcionalidades complexas sem ter de gerir um servidor.
 
-### Experiência Táctil Melhorada
-- **Targets de Toque**: Todos os elementos têm pelo menos 44px para fácil toque
-- **Gestos Naturais**: Navegação intuitiva com gestos familiares
-- **Feedback Visual**: Animações e transições otimizadas para mobile
-- **Modo Paisagem**: Suporte completo para orientação horizontal
+### 📈 **Google Analytics for Firebase**
+- **Análise de Comportamento**: Integre o Analytics para perceber como os utilizadores interagem com a sua aplicação, quais as páginas mais visitadas e que funcionalidades são mais populares.
 
-## 📱 Funcionalidades Específicas para Smartphones
-
-### Interface Adaptativa
-- Design responsivo otimizado para ecrãs pequenos
-- Navegação por gestos intuitiva
-- Controlos de toque ampliados
-- Modo escuro/claro automático
-
-### Monetização Mobile
-- Compras in-app simplificadas
-- Pagamentos móveis integrados
-- Subscrições premium mobile-first
-- Recompensas por engagement
-
-### Funcionalidades Avançadas Implementadas
-### Social Mobile
-#### 🤖 **Assistente IA Integrado**
-- **Paleta Inteligente**: IA sugere cores baseadas na localização
-- **Análise de Mercado**: Previsões de preço e tendências
-- **Consultor de Investimento**: Recomendações personalizadas
-- **Descrições Automáticas**: Gera descrições envolventes
-- **Preditor de Tendências**: Identifica pixels que vão valorizar
-- Partilha nativa do sistema
-#### 🎨 **Editor Colaborativo em Tempo Real**
-- **Edição Simultânea**: Múltiplos utilizadores editam o mesmo pixel
-- **Cursores em Tempo Real**: Veja onde outros estão a trabalhar
-- **Chat Integrado**: Comunicação durante a colaboração
-- **Gravação de Timelapse**: Documente o processo criativo
-- **Ferramentas Partilhadas**: Pincéis, cores e efeitos sincronizados
-- Integração com redes sociais
-#### 🏆 **Sistema de Leilões**
-- **Leilões ao Vivo**: Pixels raros em leilão com countdown
-- **Lances em Tempo Real**: Sistema de licitação competitivo
-- **Compra Imediata**: Opção "Buy Now" para pixels premium
-- **Histórico de Lances**: Transparência total no processo
-- **Notificações**: Alertas quando é ultrapassado
-- Stories efémeras
-#### 🎮 **Gamificação Avançada**
-- **Desafios Diários**: Missões que renovam a cada 24h
-- **Eventos Sazonais**: Conteúdo limitado por tempo
-- **Sistema VIP**: Níveis de membership com benefícios
-- **Classificações**: Leaderboards semanais e mensais
-- **Recompensas Progressivas**: Bónus por login consecutivo
-- Live streaming integrado
-#### 👥 **Hub Social Completo**
-- **Feed de Atividade**: Posts sobre pixels e criações
-- **Clubes Temáticos**: Comunidades por interesse/região
-- **Desafios Comunitários**: Competições entre utilizadores
-- **Eventos Exclusivos**: Concursos e maratonas
-- **Sistema de Seguimento**: Follow outros artistas
-
-### Performance Mobile
-- Carregamento progressivo
-- Cache inteligente
-- Modo offline básico
-- Otimização automática de recursos
+A exploração destas funcionalidades irá permitir-lhe construir uma aplicação muito mais rica, interativa e profissional.
