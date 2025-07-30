@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -518,7 +519,7 @@ export default function PixelsPage() {
                       <CardFooter className="p-4 pt-0 flex gap-2">
                         <Button variant="outline" size="sm" className="flex-1">
                           <Edit3 className="h-4 w-4 mr-2" />
-                          Editar
+                          <Link href="/pixels">Editar</Link>
                         </Button>
                         {!pixel.forSale ? (
                           <Button 

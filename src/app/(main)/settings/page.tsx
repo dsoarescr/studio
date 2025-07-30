@@ -226,14 +226,14 @@ export default function SettingsPage() {
                     className="w-full justify-start text-left px-3 py-2 h-auto"
                   >
                     <Paintbrush className="h-4 w-4 mr-3 text-blue-500" />
-                    Aparência
+                    <Link href="/settings/appearance">Aparência</Link>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="accessibility" 
                     className="w-full justify-start text-left px-3 py-2 h-auto"
                   >
                     <Eye className="h-4 w-4 mr-3 text-green-500" />
-                    Acessibilidade
+                    <Link href="/settings/accessibility">Acessibilidade</Link>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="notifications" 
@@ -254,7 +254,7 @@ export default function SettingsPage() {
                     className="w-full justify-start text-left px-3 py-2 h-auto"
                   >
                     <Shield className="h-4 w-4 mr-3 text-purple-500" />
-                    Segurança
+                    <Link href="/security">Segurança</Link>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="performance" 
@@ -275,7 +275,9 @@ export default function SettingsPage() {
                     className="w-full justify-start text-left px-3 py-2 h-auto"
                   >
                     <HelpCircle className="h-4 w-4 mr-3 text-orange-500" />
-                    Ajuda
+                    <HelpCenter>
+                      <span>Ajuda</span>
+                    </HelpCenter>
                   </TabsTrigger>
                 </TabsList>
               </Tabs>

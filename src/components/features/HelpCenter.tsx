@@ -462,7 +462,7 @@ export default function HelpCenter({ children }: HelpCenterProps) {
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-medium text-sm">{ticket.subject}</span>
                               <div className="flex items-center gap-2">
-                                <div className={cn("w-2 h-2 rounded-full", getStatusColor(ticket.status))} />
+                                <div className={`w-2 h-2 rounded-full ${getStatusColor(ticket.status)}`} />
                                 <span className="text-xs text-muted-foreground capitalize">
                                   {ticket.status.replace('_', ' ')}
                                 </span>

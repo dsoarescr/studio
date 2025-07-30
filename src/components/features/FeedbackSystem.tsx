@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -124,7 +123,6 @@ const mockFeedbackItems: FeedbackItem[] = [
           name: 'DevTeam',
           avatar: 'https://placehold.co/40x40.png',
           dataAiHint: 'staff avatar',
-          role: 'Desenvolvedor',
           isStaff: true
         }
       },
@@ -135,8 +133,7 @@ const mockFeedbackItems: FeedbackItem[] = [
         author: {
           name: 'PixelFan123',
           avatar: 'https://placehold.co/40x40.png',
-          dataAiHint: 'user avatar',
-          role: 'Utilizador'
+          dataAiHint: 'user avatar'
         }
       }
     ],
@@ -258,7 +255,7 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
   const [satisfaction, setSatisfaction] = useState<SatisfactionLevel | null>(null);
   const [surveyAnswers, setSurveyAnswers] = useState<Record<string, any>>({});
   const [showConfetti, setShowConfetti] = useState(false);
-  const [playSuccessSound, setPlaySuccessSound] = useState(false);
+  const [playRewardSound, setPlayRewardSound] = useState(false);
   const { toast } = useToast();
   const { addCredits, addXp } = useUserStore();
 
@@ -326,7 +323,7 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
     
     // Show success message
     setShowConfetti(true);
-    setPlaySuccessSound(true);
+    setPlayRewardSound(true);
     
     // Reward user
     addCredits(25);
@@ -362,8 +359,7 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
           author: {
             name: 'Você',
             avatar: 'https://placehold.co/40x40.png',
-            dataAiHint: 'user avatar',
-            role: 'Utilizador'
+            dataAiHint: 'user avatar'
           }
         }
       ],
@@ -414,7 +410,7 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
     
     // Show success message
     setShowConfetti(true);
-    setPlaySuccessSound(true);
+    setPlayRewardSound(true);
     
     // Reward user
     addCredits(50);
@@ -453,7 +449,7 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
             {children}
         </DialogTrigger>
         <DialogContent className="max-w-6xl max-h-[95vh] p-0 gap-0">
-        <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+        <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
         <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
         <DialogHeader className="p-6 border-b bg-gradient-to-br from-card via-card/95 to-primary/10 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 

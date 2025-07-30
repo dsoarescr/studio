@@ -15,10 +15,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
 import { Confetti } from "@/components/ui/confetti";
 import { motion } from "framer-motion";
-import { User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2, Settings, Bell, Shield, Palette, Users, Globe, Link2, Save, Upload, Download, RefreshCw, Plus, Minus, X, Check, Info, BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock, Bookmark, Tag, Image as ImageIcon, Video, Music, FileText, Zap, Target, Flame, Sparkles, Rocket, CloudLightning as Lightning, Megaphone } from "lucide-react";
+import { User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2, Settings, Bell, Shield, Palette, Users, Globe, Link2, Save, Upload, Download, RefreshCw, Plus, Minus, X, Check, Info, BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock, Bookmark, Tag, Image as ImageIcon, Video, Music, FileText, Zap, Target, Flame, Sparkles, Rocket, CloudLightning as Lightning, Megaphone, UserPlus, Mail, Phone, ExternalLink, Verified, Briefcase, GraduationCap, Building } from "lucide-react";
 
 interface UserStats {
   totalPixels: number;
@@ -478,23 +479,23 @@ export default function MemberPage() {
                 <CardContent className="space-y-3">
                   <Button className="w-full justify-start" variant="outline">
                     <Plus className="h-4 w-4 mr-2" />
-                    Criar Post
+                    <Link href="/community">Criar Post</Link>
                   </Button>
                   <Button className="w-full justify-start" variant="outline">
                     <Upload className="h-4 w-4 mr-2" />
-                    Partilhar Pixel
+                    <Link href="/pixels">Partilhar Pixel</Link>
                   </Button>
                   <Button className="w-full justify-start" variant="outline">
                     <Users className="h-4 w-4 mr-2" />
-                    Encontrar Amigos
+                    <Link href="/community">Encontrar Amigos</Link>
                   </Button>
                   <Button className="w-full justify-start" variant="outline">
                     <Trophy className="h-4 w-4 mr-2" />
-                    Ver Conquistas
+                    <Link href="/achievements">Ver Conquistas</Link>
                   </Button>
                   <Button className="w-full justify-start" variant="outline">
                     <BarChart3 className="h-4 w-4 mr-2" />
-                    Analytics
+                    <Link href="/ranking">Analytics</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -526,15 +527,15 @@ export default function MemberPage() {
                   <div className="space-y-3">
                     <Button className="w-full" variant="outline">
                       <UserPlus className="h-4 w-4 mr-2" />
-                      Encontrar Amigos
+                      <Link href="/community">Encontrar Amigos</Link>
                     </Button>
                     <Button className="w-full" variant="outline">
                       <MessageSquare className="h-4 w-4 mr-2" />
-                      Mensagens (3)
+                      <Link href="/community">Mensagens (3)</Link>
                     </Button>
                     <Button className="w-full" variant="outline">
                       <Bell className="h-4 w-4 mr-2" />
-                      Notificações Sociais
+                      <Link href="/settings">Notificações Sociais</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -600,7 +601,7 @@ export default function MemberPage() {
                   </p>
                   <Button className="mt-4">
                     <Plus className="h-4 w-4 mr-2" />
-                    Comprar Primeiro Pixel
+                    <Link href="/marketplace">Comprar Primeiro Pixel</Link>
                   </Button>
                 </div>
               </CardContent>
