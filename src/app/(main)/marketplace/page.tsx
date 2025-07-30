@@ -12,566 +12,768 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useUserStore } from "@/lib/store";
-import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
-import { motion } from "framer-motion";
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { Confetti } from '@/components/ui/confetti';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
-  ShoppingCart, Search, Filter, SortAsc, MapPin, Star, Heart, Eye,
-  TrendingUp, TrendingDown, Clock, User, Coins, Gift, Gem, Crown,
-  Palette, Image as ImageIcon, Video, Music, Sparkles, Flame, Zap,
-  Target, Award, Shield, Globe, Calendar, BarChart3, PieChart,
-  ArrowUpRight, ArrowDownLeft, Plus, Minus, X, Check, Info,
-  ExternalLink, Share2, Bookmark, Tag, Download, Upload, RefreshCw
+  ShoppingCart, Filter, Search, SortAsc, Grid3X3, List, Heart, Eye,
+  MapPin, Calendar, User, Share2, Download, Upload, Star, Crown,
+  Gem, Sparkles, Award, Trophy, Target, Zap, Activity, Clock,
+  BarChart3, PieChart, LineChart, TrendingUp, Globe, Settings,
+  Bell, MessageSquare, Users, Palette, Coins, Gift, Flame,
+  Rocket, Shield, Camera, Video, Music, Bookmark, Tag, Flag,
+  AlertTriangle, CheckCircle, Info, Plus, Minus, X, Check,
+  ArrowRight, ArrowLeft, ChevronUp, ChevronDown, ExternalLink,
+  RefreshCw, Loader2, Play, Pause, Volume2, VolumeX, Mic,
+  Phone, Mail, Globe as GlobeIcon, Link as LinkIcon, Copy,
+  Scissors, Edit, Trash2, Archive, FolderOpen, Save, Printer
 } from "lucide-react";
 
 interface MarketplaceItem {
   id: string;
-  type: 'pixel' | 'collection' | 'tool' | 'theme' | 'animation';
+  type: 'pixel' | 'collection' | 'nft' | 'tool' | 'theme';
   title: string;
   description: string;
   price: number;
   specialPrice?: number;
-  originalPrice?: number;
+  coordinates?: { x: number; y: number };
+  region?: string;
   seller: {
     name: string;
     avatar: string;
     verified: boolean;
     rating: number;
+    sales: number;
   };
-  coordinates?: { x: number; y: number };
-  region?: string;
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-  tags: string[];
+  rarity: 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário';
+  imageUrl: string;
   views: number;
   likes: number;
-  sales: number;
+  isLiked: boolean;
+  isWishlisted: boolean;
+  tags: string[];
   createdAt: string;
-  featured: boolean;
-  onSale: boolean;
+  lastSale?: number;
+  priceHistory: Array<{ date: string; price: number }>;
+  isAuction: boolean;
+  auctionEndTime?: string;
+  currentBid?: number;
+  bidCount?: number;
+  isHot: boolean;
+  isNew: boolean;
   discount?: number;
-  thumbnail: string;
-  category: string;
 }
 
 const mockMarketplaceItems: MarketplaceItem[] = [
   {
     id: '1',
     type: 'pixel',
-    title: 'Pixel Premium em Lisboa Centro',
-    description: 'Pixel localizado no coração de Lisboa, área histórica com alta visibilidade.',
+    title: 'Pixel Premium Lisboa Centro',
+    description: 'Localização privilegiada no coração de Lisboa com vista para o Tejo',
     price: 250,
     specialPrice: 50,
-    originalPrice: 300,
+    coordinates: { x: 245, y: 156 },
+    region: 'Lisboa',
     seller: {
       name: 'PixelMaster',
       avatar: 'https://placehold.co/40x40.png',
       verified: true,
-      rating: 4.9
+      rating: 4.9,
+      sales: 156
     },
-    coordinates: { x: 245, y: 156 },
-    region: 'Lisboa',
-    rarity: 'epic',
-    tags: ['centro', 'histórico', 'premium'],
+    rarity: 'Lendário',
+    imageUrl: 'https://placehold.co/300x300/D4A757/FFFFFF?text=Lisboa+Premium',
     views: 1234,
     likes: 89,
-    sales: 12,
-    createdAt: '2024-03-10T10:00:00Z',
-    featured: true,
-    onSale: true,
-    discount: 17,
-    thumbnail: 'https://placehold.co/300x200/D4A757/FFFFFF?text=Lisboa+Centro',
-    category: 'Pixels Premium'
+    isLiked: false,
+    isWishlisted: true,
+    tags: ['lisboa', 'centro', 'premium', 'vista-rio'],
+    createdAt: '2024-03-15',
+    lastSale: 200,
+    priceHistory: [
+      { date: '2024-01-01', price: 150 },
+      { date: '2024-02-01', price: 180 },
+      { date: '2024-03-01', price: 220 }
+    ],
+    isAuction: false,
+    isHot: true,
+    isNew: false,
+    discount: 15
   },
   {
     id: '2',
-    type: 'collection',
-    title: 'Coleção Paisagens de Portugal',
-    description: 'Uma coleção única de 25 pixels representando as mais belas paisagens portuguesas.',
-    price: 1500,
-    specialPrice: 300,
+    type: 'pixel',
+    title: 'Arte Digital Porto',
+    description: 'Pixel artístico na zona histórica do Porto',
+    price: 180,
+    coordinates: { x: 123, y: 89 },
+    region: 'Porto',
     seller: {
-      name: 'ArtistaNatural',
+      name: 'ArtistaPro',
       avatar: 'https://placehold.co/40x40.png',
       verified: false,
-      rating: 4.7
+      rating: 4.5,
+      sales: 89
     },
-    rarity: 'legendary',
-    tags: ['paisagem', 'portugal', 'natureza', 'coleção'],
-    views: 2156,
-    likes: 156,
-    sales: 3,
-    createdAt: '2024-03-08T14:30:00Z',
-    featured: true,
-    onSale: false,
-    thumbnail: 'https://placehold.co/300x200/7DF9FF/000000?text=Paisagens+PT',
-    category: 'Coleções'
+    rarity: 'Épico',
+    imageUrl: 'https://placehold.co/300x300/7DF9FF/000000?text=Porto+Art',
+    views: 567,
+    likes: 45,
+    isLiked: true,
+    isWishlisted: false,
+    tags: ['porto', 'arte', 'histórico'],
+    createdAt: '2024-03-10',
+    priceHistory: [
+      { date: '2024-02-01', price: 120 },
+      { date: '2024-03-01', price: 150 }
+    ],
+    isAuction: true,
+    auctionEndTime: '2024-03-20T18:00:00Z',
+    currentBid: 165,
+    bidCount: 12,
+    isHot: false,
+    isNew: true
   },
   {
     id: '3',
-    type: 'tool',
-    title: 'Pincel Mágico Pro',
-    description: 'Ferramenta avançada de edição com efeitos especiais e filtros únicos.',
-    price: 99,
-    specialPrice: 20,
+    type: 'collection',
+    title: 'Coleção Paisagens de Portugal',
+    description: 'Conjunto exclusivo de 25 pixels representando as mais belas paisagens portuguesas',
+    price: 1200,
+    specialPrice: 300,
     seller: {
-      name: 'DevTools',
+      name: 'CollectorPro',
       avatar: 'https://placehold.co/40x40.png',
       verified: true,
-      rating: 4.8
+      rating: 4.8,
+      sales: 234
     },
-    rarity: 'rare',
-    tags: ['ferramenta', 'edição', 'pro', 'efeitos'],
-    views: 876,
-    likes: 67,
-    sales: 45,
-    createdAt: '2024-03-12T09:15:00Z',
-    featured: false,
-    onSale: true,
-    discount: 20,
-    thumbnail: 'https://placehold.co/300x200/9C27B0/FFFFFF?text=Pincel+Pro',
-    category: 'Ferramentas'
-  },
-  {
-    id: '4',
-    type: 'theme',
-    title: 'Tema Neon Cyberpunk',
-    description: 'Tema futurista com cores neon e efeitos cyberpunk para sua interface.',
-    price: 49,
-    seller: {
-      name: 'ThemeDesigner',
-      avatar: 'https://placehold.co/40x40.png',
-      verified: false,
-      rating: 4.6
-    },
-    rarity: 'uncommon',
-    tags: ['tema', 'neon', 'cyberpunk', 'futurista'],
-    views: 543,
-    likes: 34,
-    sales: 23,
-    createdAt: '2024-03-11T16:45:00Z',
-    featured: false,
-    onSale: false,
-    thumbnail: 'https://placehold.co/300x200/FF0080/FFFFFF?text=Neon+Theme',
-    category: 'Temas'
-  },
-  {
-    id: '5',
-    type: 'animation',
-    title: 'Pack de Animações Épicas',
-    description: 'Conjunto de 10 animações profissionais para dar vida aos seus pixels.',
-    price: 199,
-    specialPrice: 40,
-    seller: {
-      name: 'AnimationStudio',
-      avatar: 'https://placehold.co/40x40.png',
-      verified: true,
-      rating: 4.9
-    },
-    rarity: 'epic',
-    tags: ['animação', 'pack', 'profissional', 'efeitos'],
-    views: 1876,
-    likes: 123,
-    sales: 18,
-    createdAt: '2024-03-09T11:20:00Z',
-    featured: true,
-    onSale: true,
-    discount: 25,
-    thumbnail: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Animações',
-    category: 'Animações'
+    rarity: 'Lendário',
+    imageUrl: 'https://placehold.co/300x300/4CAF50/FFFFFF?text=Paisagens+PT',
+    views: 2341,
+    likes: 234,
+    isLiked: false,
+    isWishlisted: true,
+    tags: ['coleção', 'paisagens', 'portugal', 'natureza'],
+    createdAt: '2024-02-20',
+    priceHistory: [
+      { date: '2024-02-20', price: 1000 },
+      { date: '2024-03-01', price: 1100 }
+    ],
+    isAuction: false,
+    isHot: true,
+    isNew: false,
+    discount: 20
   }
 ];
 
-const categories = [
-  { id: 'all', name: 'Todos', icon: <ShoppingCart className="h-4 w-4" /> },
-  { id: 'pixels', name: 'Pixels Premium', icon: <MapPin className="h-4 w-4" /> },
-  { id: 'collections', name: 'Coleções', icon: <Gem className="h-4 w-4" /> },
-  { id: 'tools', name: 'Ferramentas', icon: <Palette className="h-4 w-4" /> },
-  { id: 'themes', name: 'Temas', icon: <Sparkles className="h-4 w-4" /> },
-  { id: 'animations', name: 'Animações', icon: <Video className="h-4 w-4" /> }
-];
-
-const sortOptions = [
-  { id: 'featured', name: 'Em Destaque', icon: <Star className="h-4 w-4" /> },
-  { id: 'price_low', name: 'Menor Preço', icon: <TrendingDown className="h-4 w-4" /> },
-  { id: 'price_high', name: 'Maior Preço', icon: <TrendingUp className="h-4 w-4" /> },
-  { id: 'newest', name: 'Mais Recentes', icon: <Clock className="h-4 w-4" /> },
-  { id: 'popular', name: 'Mais Populares', icon: <Heart className="h-4 w-4" /> }
-];
-
 export default function MarketplacePage() {
+  const [items, setItems] = useState<MarketplaceItem[]>(mockMarketplaceItems);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('featured');
-  const [showFilters, setShowFilters] = useState(false);
-  const [likedItems, setLikedItems] = useState<string[]>([]);
-  const [cartItems, setCartItems] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'pixel' | 'collection' | 'nft' | 'tool' | 'theme'>('all');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
+  const [selectedRarity, setSelectedRarity] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'popular' | 'trending'>('newest');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [wishlist, setWishlist] = useState<string[]>([]);
-  const [compareList, setCompareList] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [wishlist, setWishlist] = useState<string[]>(['1', '3']);
+  const [cart, setCart] = useState<string[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [playPurchaseSound, setPlayPurchaseSound] = useState(false);
   
   const { toast } = useToast();
-  const { credits, specialCredits, addCredits, removeCredits } = useUserStore();
+  const { credits, specialCredits, addCredits, addXp } = useUserStore();
+  const router = useRouter();
 
-  const filteredItems = mockMarketplaceItems
-    .filter(item => {
-      const matchesSearch = !searchQuery || 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesCategory = selectedCategory === 'all' || 
-        (selectedCategory === 'pixels' && item.type === 'pixel') ||
-        (selectedCategory === 'collections' && item.type === 'collection') ||
-        (selectedCategory === 'tools' && item.type === 'tool') ||
-        (selectedCategory === 'themes' && item.type === 'theme') ||
-        (selectedCategory === 'animations' && item.type === 'animation');
-      
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price_low':
-          return a.price - b.price;
-        case 'price_high':
-          return b.price - a.price;
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'popular':
-          return b.likes - a.likes;
-        case 'featured':
-        default:
-          return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-      }
-    });
+  const categories = [
+    { id: 'all', label: 'Todos', count: items.length },
+    { id: 'pixel', label: 'Pixels', count: items.filter(i => i.type === 'pixel').length },
+    { id: 'collection', label: 'Coleções', count: items.filter(i => i.type === 'collection').length },
+    { id: 'nft', label: 'NFTs', count: items.filter(i => i.type === 'nft').length },
+    { id: 'tool', label: 'Ferramentas', count: items.filter(i => i.type === 'tool').length },
+    { id: 'theme', label: 'Temas', count: items.filter(i => i.type === 'theme').length }
+  ];
 
-  const handleLike = (itemId: string) => {
-    setLikedItems(prev => 
+  const filteredItems = items.filter(item => {
+    const matchesSearch = !searchQuery || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === 'all' || item.type === selectedCategory;
+    const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
+    const matchesRarity = selectedRarity === 'all' || item.rarity === selectedRarity;
+    
+    return matchesSearch && matchesCategory && matchesPrice && matchesRarity;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'oldest':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'popular':
+        return b.likes - a.likes;
+      case 'trending':
+        return b.views - a.views;
+      default:
+        return 0;
+    }
+  });
+
+  const handleToggleWishlist = (itemId: string) => {
+    setWishlist(prev => 
       prev.includes(itemId) 
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
+    
+    setItems(prev => prev.map(item => 
+      item.id === itemId 
+        ? { ...item, isWishlisted: !item.isWishlisted }
+        : item
+    ));
+  };
+
+  const handleToggleLike = (itemId: string) => {
+    setItems(prev => prev.map(item => 
+      item.id === itemId 
+        ? { 
+            ...item, 
+            isLiked: !item.isLiked,
+            likes: item.isLiked ? item.likes - 1 : item.likes + 1
+          }
+        : item
+    ));
   };
 
   const handleAddToCart = (itemId: string) => {
-    setCartItems(prev => [...prev, itemId]);
+    setCart(prev => [...prev, itemId]);
     toast({
       title: "Adicionado ao Carrinho",
-      description: "Item adicionado com sucesso ao seu carrinho.",
+      description: "Item adicionado com sucesso!",
     });
   };
 
   const handlePurchase = (item: MarketplaceItem) => {
-    const price = item.specialPrice || item.price;
+    const finalPrice = item.specialPrice || item.price;
     
-    if (credits < price) {
+    if (credits >= finalPrice || (item.specialPrice && specialCredits >= item.specialPrice)) {
+      setShowConfetti(true);
+      setPlayPurchaseSound(true);
+      
+      addXp(50);
+      
+      toast({
+        title: "Compra Realizada! 🎉",
+        description: `${item.title} adquirido com sucesso!`,
+      });
+      
+      // Redirect to pixel details or collection
+      if (item.type === 'pixel' && item.coordinates) {
+        router.push(`/?pixel=${item.coordinates.x},${item.coordinates.y}`);
+      } else {
+        router.push('/pixels');
+      }
+    } else {
       toast({
         title: "Créditos Insuficientes",
         description: "Você não tem créditos suficientes para esta compra.",
         variant: "destructive"
       });
-      return;
     }
-
-    removeCredits(price);
-    toast({
-      title: "Compra Realizada!",
-      description: `Você comprou "${item.title}" por ${price} créditos.`,
-    });
   };
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'common': return 'text-gray-500 border-gray-500/50';
-      case 'uncommon': return 'text-green-500 border-green-500/50';
-      case 'rare': return 'text-blue-500 border-blue-500/50';
-      case 'epic': return 'text-purple-500 border-purple-500/50';
-      case 'legendary': return 'text-amber-500 border-amber-500/50';
-      default: return 'text-gray-500 border-gray-500/50';
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'pixel': return <MapPin className="h-4 w-4" />;
-      case 'collection': return <Gem className="h-4 w-4" />;
-      case 'tool': return <Palette className="h-4 w-4" />;
-      case 'theme': return <Sparkles className="h-4 w-4" />;
-      case 'animation': return <Video className="h-4 w-4" />;
-      default: return <ShoppingCart className="h-4 w-4" />;
+      case 'Comum': return 'text-gray-500 border-gray-500/50 bg-gray-500/10';
+      case 'Incomum': return 'text-green-500 border-green-500/50 bg-green-500/10';
+      case 'Raro': return 'text-blue-500 border-blue-500/50 bg-blue-500/10';
+      case 'Épico': return 'text-purple-500 border-purple-500/50 bg-purple-500/10';
+      case 'Lendário': return 'text-amber-500 border-amber-500/50 bg-amber-500/10';
+      default: return 'text-gray-500 border-gray-500/50 bg-gray-500/10';
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <SoundEffect src={SOUND_EFFECTS.PURCHASE} play={playPurchaseSound} onEnd={() => setPlayPurchaseSound(false)} />
+      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
+      
       <div className="container mx-auto py-6 px-4 space-y-6 max-w-7xl mb-16">
-        {/* Header */}
+        {/* Enhanced Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
           <CardHeader className="relative">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
-                <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center">
+                <CardTitle className="font-headline text-3xl text-gradient-gold-animated flex items-center">
                   <ShoppingCart className="h-8 w-8 mr-3 animate-glow" />
-                  Marketplace
+                  Marketplace Premium
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  Descubra pixels únicos, ferramentas profissionais e coleções exclusivas
+                  Descubra, compre e venda pixels únicos no maior marketplace de arte digital de Portugal
                 </CardDescription>
               </div>
               
               <div className="flex items-center gap-4">
                 <div className="bg-background/50 p-3 rounded-lg text-center">
                   <p className="text-xs text-muted-foreground">Seus Créditos</p>
-                  <p className="text-xl font-bold text-primary">{credits.toLocaleString('pt-PT')}</p>
+                  <p className="text-xl font-bold text-primary">{credits.toLocaleString()}</p>
                 </div>
                 <div className="bg-background/50 p-3 rounded-lg text-center">
                   <p className="text-xs text-muted-foreground">Especiais</p>
-                  <p className="text-xl font-bold text-accent">{specialCredits.toLocaleString('pt-PT')}</p>
+                  <p className="text-xl font-bold text-accent">{specialCredits.toLocaleString()}</p>
                 </div>
+                <Link href="/premium">
+                  <Button className="bg-gradient-to-r from-primary to-accent">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Comprar Créditos
+                  </Button>
+                </Link>
               </div>
             </div>
           </CardHeader>
         </Card>
 
         {/* Search and Filters */}
-        <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
+        <Card className="shadow-lg">
           <CardContent className="p-4">
-            <div className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Pesquisar pixels, coleções, ferramentas..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                    className="flex items-center gap-2"
-                  >
-                    <Filter className="h-4 w-4" />
-                    Filtros Avançados
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                    className="flex items-center gap-2"
-                  >
-                    {viewMode === 'grid' ? <BarChart3 className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
-                    {viewMode === 'grid' ? 'Lista' : 'Grelha'}
-                  </Button>
-                  
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="px-3 py-2 border border-input bg-background rounded-md text-sm"
-                  >
-                    {sortOptions.map(option => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar pixels, coleções, NFTs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
               </div>
               
-              {/* Category Filters */}
-              <div className="flex flex-wrap gap-2">
-                {categories.map(category => (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filtros
+                  {showFilters && <ChevronUp className="h-4 w-4" />}
+                  {!showFilters && <ChevronDown className="h-4 w-4" />}
+                </Button>
+                
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+                >
+                  <option value="newest">Mais Recentes</option>
+                  <option value="oldest">Mais Antigos</option>
+                  <option value="price-low">Preço: Menor</option>
+                  <option value="price-high">Preço: Maior</option>
+                  <option value="popular">Mais Populares</option>
+                  <option value="trending">Em Tendência</option>
+                </select>
+                
+                <div className="flex border border-input rounded-md">
                   <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? 'default' : 'outline'}
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="flex items-center gap-2"
+                    onClick={() => setViewMode('grid')}
+                    className="rounded-r-none"
                   >
-                    {category.icon}
-                    {category.name}
+                    <Grid3X3 className="h-4 w-4" />
                   </Button>
-                ))}
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="rounded-l-none"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
+            
+            {/* Advanced Filters */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 pt-4 border-t"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Categoria</label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value as any)}
+                        className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                      >
+                        {categories.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.label} ({cat.count})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Raridade</label>
+                      <select
+                        value={selectedRarity}
+                        onChange={(e) => setSelectedRarity(e.target.value)}
+                        className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                      >
+                        <option value="all">Todas</option>
+                        <option value="Comum">Comum</option>
+                        <option value="Incomum">Incomum</option>
+                        <option value="Raro">Raro</option>
+                        <option value="Épico">Épico</option>
+                        <option value="Lendário">Lendário</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Preço: {priceRange[0]}€ - {priceRange[1]}€
+                      </label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={priceRange[0]}
+                          onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                          className="text-sm"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={priceRange[1]}
+                          onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Filtros Rápidos</label>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
+                          <Flame className="h-3 w-3 mr-1" />
+                          Hot
+                        </Badge>
+                        <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Novo
+                        </Badge>
+                        <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
+                          <Trophy className="h-3 w-3 mr-1" />
+                          Leilão
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </CardContent>
-          
-          {/* Advanced Filters Panel */}
-          {showAdvancedFilters && (
-            <Card className="bg-card/80 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <Label>Faixa de Preço</Label>
-                    <div className="mt-2">
-                      <Slider
-                        value={priceRange}
-                        onValueChange={setPriceRange}
-                        max={1000}
-                        step={10}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                        <span>€{priceRange[0]}</span>
-                        <span>€{priceRange[1]}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Raridade</Label>
-                    <div className="mt-2 space-y-2">
-                      {['Comum', 'Raro', 'Épico', 'Lendário'].map(rarity => (
-                        <div key={rarity} className="flex items-center space-x-2">
-                          <Checkbox id={rarity} />
-                          <Label htmlFor={rarity} className="text-sm">{rarity}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Vendedor</Label>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="verified" />
-                        <Label htmlFor="verified" className="text-sm">Apenas Verificados</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="premium" />
-                        <Label htmlFor="premium" className="text-sm">Vendedores Premium</Label>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Outras Opções</Label>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="auction" />
-                        <Label htmlFor="auction" className="text-sm">Em Leilão</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="discount" />
-                        <Label htmlFor="discount" className="text-sm">Com Desconto</Label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </Card>
 
-        {/* Wishlist & Compare Bar */}
-        {(wishlist.length > 0 || compareList.length > 0) && (
-          <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  {wishlist.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Heart className="h-4 w-4 text-red-500" />
-                      <span className="text-sm">{wishlist.length} na lista de desejos</span>
-                      <Button variant="outline" size="sm">Ver Lista</Button>
-                    </div>
-                  )}
-                  {compareList.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm">{compareList.length} para comparar</span>
-                      <Button variant="outline" size="sm">Comparar</Button>
-                    </div>
-                  )}
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => {
-                  setWishlist([]);
-                  setCompareList([]);
-                }}>
-                  Limpar Tudo
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Category Tabs */}
+        <div className="flex flex-wrap gap-2">
+          {categories.map(category => (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.id ? 'default' : 'outline'}
+              onClick={() => setSelectedCategory(category.id as any)}
+              className="flex items-center gap-2"
+            >
+              {category.label}
+              <Badge variant="secondary" className="text-xs">
+                {category.count}
+              </Badge>
+            </Button>
+          ))}
+        </div>
 
-        {/* Featured Items */}
-        {selectedCategory === 'all' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-primary">
-                <Star className="h-5 w-5 mr-2" />
-                Itens em Destaque
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredItems.filter(item => item.featured).slice(0, 3).map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="relative">
-                      <img 
-                        src={item.thumbnail} 
-                        alt={item.title}
-                        className="w-full h-48 object-cover"
-                      />
-                      {item.onSale && (
-                        <Badge className="absolute top-2 left-2 bg-red-500">
+        {/* Marketplace Items */}
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                  <div className="relative">
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title}
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    
+                    {/* Badges */}
+                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                      <Badge className={getRarityColor(item.rarity)}>
+                        {item.rarity}
+                      </Badge>
+                      {item.isHot && (
+                        <Badge className="bg-red-500 animate-pulse">
+                          <Flame className="h-3 w-3 mr-1" />
+                          Hot
+                        </Badge>
+                      )}
+                      {item.isNew && (
+                        <Badge className="bg-green-500">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Novo
+                        </Badge>
+                      )}
+                      {item.discount && (
+                        <Badge className="bg-orange-500">
                           -{item.discount}%
                         </Badge>
                       )}
-                      <Badge className={cn(
-                        "absolute top-2 right-2",
-                        getRarityColor(item.rarity)
-                      )}>
-                        {item.rarity}
-                      </Badge>
                     </div>
                     
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        {getTypeIcon(item.type)}
-                        <h3 className="font-semibold truncate">{item.title}</h3>
+                    {/* Action Buttons */}
+                    <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 bg-background/80 hover:bg-background"
+                        onClick={() => handleToggleWishlist(item.id)}
+                      >
+                        <Heart className={`h-4 w-4 ${item.isWishlisted ? 'text-red-500 fill-current' : ''}`} />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 bg-background/80 hover:bg-background"
+                        onClick={() => handleToggleLike(item.id)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 bg-background/80 hover:bg-background"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Auction Timer */}
+                    {item.isAuction && item.auctionEndTime && (
+                      <div className="absolute bottom-2 left-2 bg-black/80 text-white px-2 py-1 rounded text-xs">
+                        <Clock className="h-3 w-3 inline mr-1" />
+                        Termina em 2h 30m
+                      </div>
+                    )}
+                  </div>
+                  
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={item.seller.avatar} />
+                        <AvatarFallback>{item.seller.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-muted-foreground">{item.seller.name}</span>
+                      {item.seller.verified && (
+                        <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                      )}
+                    </div>
+                    
+                    <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {item.description}
+                    </p>
+                    
+                    {item.coordinates && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                        <MapPin className="h-3 w-3" />
+                        <span>({item.coordinates.x}, {item.coordinates.y}) - {item.region}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between text-sm mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-3 w-3" />
+                          {item.views}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-3 w-3" />
+                          {item.likes}
+                        </span>
                       </div>
                       
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {item.description}
-                      </p>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`h-3 w-3 ${i < Math.floor(item.seller.rating) ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`} 
+                          />
+                        ))}
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({item.seller.sales})
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        {item.specialPrice ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-primary">
+                              {item.specialPrice} <Gem className="h-4 w-4 inline" />
+                            </span>
+                            <span className="text-sm text-muted-foreground line-through">
+                              {item.price}€
+                            </span>
+                          </div>
+                        ) : item.isAuction ? (
+                          <div>
+                            <span className="text-lg font-bold text-primary">
+                              {item.currentBid}€
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              {item.bidCount} lances
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-lg font-bold text-primary">
+                            {item.price}€
+                          </span>
+                        )}
+                      </div>
                       
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={item.seller.avatar} />
-                            <AvatarFallback>{item.seller.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm">{item.seller.name}</span>
-                          {item.seller.verified && (
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                      {item.lastSale && (
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Última venda</p>
+                          <p className="text-sm font-medium">{item.lastSale}€</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Tags */}
+                    {item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {item.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                  
+                  <CardFooter className="p-4 pt-0 flex gap-2">
+                    {item.isAuction ? (
+                      <Button className="flex-1" onClick={() => handlePurchase(item)}>
+                        <Trophy className="h-4 w-4 mr-2" />
+                        Licitar
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => handleAddToCart(item.id)}
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Carrinho
+                        </Button>
+                        <Button 
+                          className="flex-1"
+                          onClick={() => handlePurchase(item)}
+                        >
+                          <Zap className="h-4 w-4 mr-2" />
+                          Comprar
+                        </Button>
+                      </>
+                    )}
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* List View */
+          <div className="space-y-4">
+            {filteredItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <Card className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.title}
+                        className="w-20 h-20 object-cover rounded"
+                      />
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{item.title}</h3>
+                          <Badge className={getRarityColor(item.rarity)}>
+                            {item.rarity}
+                          </Badge>
+                          {item.isHot && (
+                            <Badge className="bg-red-500">Hot</Badge>
                           )}
                         </div>
                         
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Eye className="h-3 w-3" />
-                          {item.views}
+                        <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {item.seller.name}
+                          </span>
+                          {item.coordinates && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              ({item.coordinates.x}, {item.coordinates.y})
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-primary">
-                              {item.specialPrice || item.price}
-                            </span>
-                            <Coins className="h-4 w-4 text-primary" />
-                          </div>
-                          {item.originalPrice && item.originalPrice > item.price && (
-                            <span className="text-sm text-muted-foreground line-through">
-                              {item.originalPrice}
-                            </span>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-primary mb-2">
+                          {item.specialPrice ? (
+                            <div className="flex items-center gap-2">
+                              <span>{item.specialPrice} <Gem className="h-4 w-4 inline" /></span>
+                              <span className="text-sm text-muted-foreground line-through">
+                                {item.price}€
+                              </span>
+                            </div>
+                          ) : (
+                            <span>{item.price}€</span>
                           )}
                         </div>
                         
@@ -579,161 +781,68 @@ export default function MarketplacePage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleLike(item.id)}
-                            className={cn(
-                              "h-8 w-8",
-                              likedItems.includes(item.id) && "text-red-500"
-                            )}
+                            onClick={() => handleToggleWishlist(item.id)}
                           >
-                            <Heart className={cn(
-                              "h-4 w-4",
-                              likedItems.includes(item.id) && "fill-current"
-                            )} />
+                            <Heart className={`h-4 w-4 ${item.isWishlisted ? 'text-red-500 fill-current' : ''}`} />
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddToCart(item.id)}
+                          >
+                            <ShoppingCart className="h-4 w-4" />
                           </Button>
                           
                           <Button
                             size="sm"
                             onClick={() => handlePurchase(item)}
-                            className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
                           >
                             Comprar
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         )}
 
-        {/* All Items Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
-              <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <div className="relative">
-                  <img 
-                    src={item.thumbnail} 
-                    alt={item.title}
-                    className="w-full h-40 object-cover"
-                  />
-                  
-                  {item.onSale && (
-                    <Badge className="absolute top-2 left-2 bg-red-500 animate-pulse">
-                      -{item.discount}% OFF
-                    </Badge>
-                  )}
-                  
-                  <Badge className={cn(
-                    "absolute top-2 right-2 border",
-                    getRarityColor(item.rarity)
-                  )}>
-                    {item.rarity}
-                  </Badge>
-                  
-                  <div className="absolute bottom-2 left-2 flex gap-1">
-                    {getTypeIcon(item.type)}
-                  </div>
-                </div>
-                
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 truncate">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {item.description}
-                  </p>
-                  
-                  {item.coordinates && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                      <MapPin className="h-3 w-3" />
-                      ({item.coordinates.x}, {item.coordinates.y}) - {item.region}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage src={item.seller.avatar} />
-                        <AvatarFallback className="text-xs">{item.seller.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs">{item.seller.name}</span>
-                      {item.seller.verified && (
-                        <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {item.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="h-3 w-3" />
-                        {item.likes}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-primary">
-                          {item.specialPrice || item.price}
-                        </span>
-                        <Coins className="h-4 w-4 text-primary" />
-                      </div>
-                      {item.originalPrice && item.originalPrice > item.price && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          {item.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleLike(item.id)}
-                        className={cn(
-                          "h-8 w-8",
-                          likedItems.includes(item.id) && "text-red-500"
-                        )}
-                      >
-                        <Heart className={cn(
-                          "h-4 w-4",
-                          likedItems.includes(item.id) && "fill-current"
-                        )} />
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        onClick={() => handlePurchase(item)}
-                        className="text-xs px-3"
-                      >
-                        Comprar
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
+        {/* Empty State */}
         {filteredItems.length === 0 && (
           <Card className="text-center p-12">
             <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Nenhum item encontrado</h3>
-            <p className="text-muted-foreground">
-              Tente ajustar seus filtros ou pesquisar por outros termos.
+            <p className="text-muted-foreground mb-4">
+              Tente ajustar os filtros ou pesquisar por outros termos.
             </p>
+            <Button onClick={() => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+              setSelectedRarity('all');
+            }}>
+              Limpar Filtros
+            </Button>
           </Card>
+        )}
+
+        {/* Floating Cart */}
+        {cart.length > 0 && (
+          <div className="fixed bottom-20 right-4 z-50">
+            <Card className="bg-card/90 backdrop-blur-sm shadow-2xl">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <ShoppingCart className="h-5 w-5 text-primary" />
+                  <span className="font-medium">{cart.length} itens no carrinho</span>
+                  <Button size="sm">
+                    Ver Carrinho
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
