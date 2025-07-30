@@ -1,770 +1,146 @@
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUserStore } from "@/lib/store";
-import { useAuth } from "@/lib/auth-context";
-import { useToast } from "@/hooks/use-toast";
-import { SoundEffect, SOUND_EFFECTS } from "@/components/ui/sound-effect";
-import { Confetti } from "@/components/ui/confetti";
-import { motion } from "framer-motion";
-import { User, Edit3, Camera, MapPin, Calendar, Award, Coins, Gift, Trophy, Star, Crown, Gem, Heart, Eye, MessageSquare, Share2, Settings, Bell, Shield, Palette, Users, Globe, Link2, Save, Upload, Download, RefreshCw, Plus, Minus, X, Check, Info, BarChart3, PieChart, LineChart, TrendingUp, Activity, Clock, Bookmark, Tag, Image as ImageIcon, Video, Music, FileText, Zap, Target, Flame, Sparkles, Rocket, CloudLightning as Lightning, Megaphone } from "lucide-react";
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useUserStore } from '@/lib/store';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Home,
+  ShoppingCart,
+  Palette,
+  User,
+  BarChart3,
+  Award,
+  Users,
+  Compass,
+  Star,
+  Plus,
+  Zap,
+  UserPlus,
+  Crown
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { AuthModal } from '../auth/AuthModal';
+import { useAuth } from '@/lib/auth-context';
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { UserMenu } from '../auth/UserMenu';
+import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 
-interface UserStats {
-  totalPixels: number;
-  totalSpent: number;
-  totalEarned: number;
-  favoriteColor: string;
-  mostActiveRegion: string;
-  joinDate: string;
-  lastActive: string;
-  achievements: number;
-  level: number;
-  xp: number;
-  xpMax: number;
-  streak: number;
-  rank: number;
-}
-
-interface PixelActivity {
-  id: string;
-  type: 'purchase' | 'sale' | 'edit' | 'like' | 'comment';
-  description: string;
-  timestamp: string;
-  value?: number;
-  coordinates?: { x: number; y: number };
-}
-
-interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  unlockedAt: string;
-  xpReward: number;
-  creditsReward: number;
-}
-
-const mockUserStats: UserStats = {
-  totalPixels: 42,
-  totalSpent: 1250,
-  totalEarned: 890,
-  favoriteColor: '#D4A757',
-  mostActiveRegion: 'Lisboa',
-  joinDate: '2024-01-15',
-  lastActive: '2024-03-15T14:30:00Z',
-  achievements: 8,
-  level: 12,
-  xp: 2450,
-  xpMax: 3000,
-  streak: 15,
-  rank: 156
-};
-
-const mockRecentActivity: PixelActivity[] = [
-  {
-    id: '1',
-    type: 'purchase',
-    description: 'Comprou pixel em Lisboa',
-    timestamp: '2024-03-15T10:30:00Z',
-    value: 150,
-    coordinates: { x: 245, y: 156 }
-  },
-  {
-    id: '2',
-    type: 'edit',
-    description: 'Editou cor do pixel no Porto',
-    timestamp: '2024-03-14T16:20:00Z',
-    coordinates: { x: 123, y: 89 }
-  },
-  {
-    id: '3',
-    type: 'sale',
-    description: 'Vendeu pixel em Coimbra',
-    timestamp: '2024-03-13T09:15:00Z',
-    value: 200,
-    coordinates: { x: 178, y: 234 }
-  }
+const navLinks = [
+  { href: "/", label: "Universo", icon: Home },
+  { href: "/marketplace", label: "Market", icon: ShoppingCart },
+  { href: "/pixels", label: "Galeria", icon: Palette },
+  { href: "/member", label: "Perfil", icon: User },
+  { href: "/ranking", label: "Ranking", icon: BarChart3 },
+  { href: "/community", label: "Comunidade", icon: Users },
 ];
 
-const mockAchievements: Achievement[] = [
-  {
-    id: '1',
-    name: 'Primeiro Pixel',
-    description: 'Comprou seu primeiro pixel',
-    icon: <MapPin className="h-6 w-6" />,
-    rarity: 'common',
-    unlockedAt: '2024-01-15T12:00:00Z',
-    xpReward: 50,
-    creditsReward: 10
-  },
-  {
-    id: '2',
-    name: 'Mestre das Cores',
-    description: 'Usou 20 cores diferentes',
-    icon: <Palette className="h-6 w-6" />,
-    rarity: 'rare',
-    unlockedAt: '2024-02-20T15:30:00Z',
-    xpReward: 150,
-    creditsReward: 50
-  },
-  {
-    id: '3',
-    name: 'Colecionador',
-    description: 'Possui 25 pixels',
-    icon: <Trophy className="h-6 w-6" />,
-    rarity: 'epic',
-    unlockedAt: '2024-03-10T11:45:00Z',
-    xpReward: 300,
-    creditsReward: 100
-  }
-];
-
-export default function MemberPage() {
+export default function BottomNavBar() {
+  const pathname = usePathname();
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const { credits, specialCredits, level, xp, xpMax, pixels, achievements, isPremium } = useUserStore();
-  const { toast } = useToast();
+  const { credits, specialCredits, level, xp, xpMax, achievements } = useUserStore();
   
-  const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    displayName: user?.displayName || 'PixelMaster',
-    bio: 'Artista digital apaixonado por pixel art e criação colaborativa.',
-    location: 'Lisboa, Portugal',
-    website: 'https://meusite.com',
-    favoriteColor: '#D4A757'
-  });
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [playSuccessSound, setPlaySuccessSound] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [achievements, setAchievements] = useState([
-    { id: 1, name: 'Primeiro Pixel', icon: '🎯', unlocked: true, date: '2024-01-15' },
-    { id: 2, name: 'Colecionador', icon: '💎', unlocked: true, date: '2024-02-20' },
-    { id: 3, name: 'Artista', icon: '🎨', unlocked: false, progress: 75 }
-  ]);
-  const [socialStats, setSocialStats] = useState({
-    followers: 234,
-    following: 156,
-    posts: 89,
-    pixelsShared: 45
-  });
-  const [recentActivity, setRecentActivity] = useState([
-    { type: 'purchase', description: 'Comprou pixel em Lisboa', time: '2h', icon: '🛒' },
-    { type: 'like', description: 'Recebeu 15 likes no pixel do Porto', time: '4h', icon: '❤️' },
-    { type: 'achievement', description: 'Desbloqueou "Mestre das Cores"', time: '1d', icon: '🏆' }
-  ]);
+  const [playClickSound, setPlayClickSound] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const xpPercentage = (xp / xpMax) * 100;
 
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-    setShowConfetti(true);
-    setPlaySuccessSound(true);
-    
-    toast({
-      title: "Perfil Atualizado",
-      description: "Suas informações foram salvas com sucesso!",
-    });
-  };
-
-  const handleShareProfile = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Link Copiado",
-      description: "Link do seu perfil foi copiado para a área de transferência.",
-    });
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'purchase': return <Coins className="h-4 w-4 text-green-500" />;
-      case 'sale': return <TrendingUp className="h-4 w-4 text-blue-500" />;
-      case 'edit': return <Edit3 className="h-4 w-4 text-purple-500" />;
-      case 'like': return <Heart className="h-4 w-4 text-red-500" />;
-      case 'comment': return <MessageSquare className="h-4 w-4 text-orange-500" />;
-      default: return <Activity className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'common': return 'text-gray-500 border-gray-500/50';
-      case 'rare': return 'text-blue-500 border-blue-500/50';
-      case 'epic': return 'text-purple-500 border-purple-500/50';
-      case 'legendary': return 'text-amber-500 border-amber-500/50';
-      default: return 'text-gray-500 border-gray-500/50';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-PT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
-      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
+    <>
+      <SoundEffect src={SOUND_EFFECTS.CLICK} play={playClickSound} onEnd={() => setPlayClickSound(false)} />
       
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl mb-16">
-        {/* Profile Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-               style={{ backgroundSize: '200% 200%' }} />
-          <CardContent className="p-6 relative z-10">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-              <div className="flex flex-col sm:flex-row items-center gap-6">
-                <div className="relative">
-                  <Avatar className="h-24 w-24 border-4 border-primary shadow-lg">
-                    <AvatarImage 
-                      src={user?.photoURL || `https://placehold.co/96x96/D4A757/FFFFFF?text=${profileData.displayName.charAt(0)}`} 
-                      alt={profileData.displayName} 
-                    />
-                    <AvatarFallback className="text-2xl font-headline">
-                      {profileData.displayName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button 
-                    size="icon" 
-                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    {isEditing ? <Check className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
-                  </Button>
-                  {isPremium && (
-                    <Crown className="absolute -top-2 -left-2 h-6 w-6 text-amber-400" />
-                  )}
-                </div>
-                
-                <div className="text-center sm:text-left space-y-2">
-                  {isEditing ? (
-                    <Input
-                      value={profileData.displayName}
-                      onChange={(e) => setProfileData({...profileData, displayName: e.target.value})}
-                      className="text-2xl font-headline font-bold"
-                    />
-                  ) : (
-                    <h1 className="text-2xl font-headline font-bold text-gradient-gold">
-                      {profileData.displayName}
-                    </h1>
-                  )}
-                  
-                  <div className="flex items-center justify-center sm:justify-start gap-2">
-                    <Badge variant="secondary" className="font-code">
-                      Nível {level}
-                    </Badge>
-                    <Badge variant="outline" className="text-primary border-primary/50">
-                      Rank #{mockUserStats.rank}
-                    </Badge>
-                    {isPremium && (
-                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500">
-                        Premium
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {isEditing ? (
-                        <Input
-                          value={profileData.location}
-                          onChange={(e) => setProfileData({...profileData, location: e.target.value})}
-                          className="h-6 text-sm"
-                        />
-                      ) : (
-                        profileData.location
-                      )}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Desde {new Date(mockUserStats.joinDate).toLocaleDateString('pt-PT')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex-1 lg:text-right space-y-4">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{pixels}</p>
-                    <p className="text-xs text-muted-foreground">Pixels</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-accent">{achievements}</p>
-                    <p className="text-xs text-muted-foreground">Conquistas</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-500">{mockUserStats.streak}</p>
-                    <p className="text-xs text-muted-foreground">Sequência</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-500">{credits.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Créditos</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progresso XP</span>
-                    <span className="font-code">{xp}/{xpMax}</span>
-                  </div>
-                  <Progress value={xpPercentage} className="h-2" />
-                </div>
-                
-                <div className="flex gap-2">
-                  {isEditing ? (
-                    <Button onClick={handleSaveProfile} className="flex-1">
-                      <Save className="h-4 w-4 mr-2" />
-                      Salvar
-                    </Button>
-                  ) : (
-                    <>
-                      <Button variant="outline" onClick={() => setIsEditing(true)}>
-                        <Edit3 className="h-4 w-4 mr-2" />
-                        Editar
-                      </Button>
-                      <Button variant="outline" onClick={handleShareProfile}>
-                        <Share2 className="h-4 w-4 mr-2" />
-                        Partilhar
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            {/* Bio Section */}
-            <div className="mt-6 pt-6 border-t border-primary/20">
-              {isEditing ? (
-                <Textarea
-                  value={profileData.bio}
-                  onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                  placeholder="Conte-nos sobre você..."
-                  className="resize-none"
-                  rows={3}
-                />
-              ) : (
-                <p className="text-muted-foreground italic">"{profileData.bio}"</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="fixed bottom-0 left-0 right-0 h-[var(--bottom-nav-height)] bg-transparent pointer-events-none z-40">
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="h-full w-full pointer-events-auto"
+        >
+          <Card className="professional-footer h-full w-full rounded-t-2xl overflow-hidden">
+            <CardContent className="h-full p-2 sm:p-3 flex items-center justify-around">
+              {navLinks.map((link) => {
+                const isActive = (pathname === '/' && link.href === '/') || (pathname !== '/' && link.href !== '/' && pathname.startsWith(link.href));
+                return (
+                  <Link href={link.href} key={link.href}>
+                    <motion.div
+                      onMouseEnter={() => setHoveredItem(link.href)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      onClick={() => setPlayClickSound(true)}
+                      className="relative flex flex-col items-center justify-center p-1 rounded-lg w-16 h-16 text-muted-foreground hover:text-primary transition-all duration-300"
+                    >
+                      <AnimatePresence>
+                        {hoveredItem === link.href && (
+                          <motion.div
+                            layoutId="hover-background"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-primary/10 rounded-lg"
+                          />
+                        )}
+                      </AnimatePresence>
 
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-12 bg-card/50 backdrop-blur-sm shadow-md">
-            <TabsTrigger value="overview" className="font-headline">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Visão Geral
-            </TabsTrigger>
-            <TabsTrigger value="social" className="font-headline">
-              <Users className="h-4 w-4 mr-2" />
-              Social
-            </TabsTrigger>
-            <TabsTrigger value="pixels" className="font-headline">
-              <MapPin className="h-4 w-4 mr-2" />
-              Meus Pixels
-            </TabsTrigger>
-            <TabsTrigger value="portfolio" className="font-headline">
-              <Gem className="h-4 w-4 mr-2" />
-              Portfólio
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="font-headline">
-              <Trophy className="h-4 w-4 mr-2" />
-              Conquistas
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="font-headline">
-              <LineChart className="h-4 w-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="font-headline">
-              <Activity className="h-4 w-4 mr-2" />
-              Atividade
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Quick Stats */}
-              <Card className="lg:col-span-2 card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <BarChart3 className="h-5 w-5 mr-2" />
-                    Dashboard Pessoal
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-primary/10 rounded-lg">
-                      <MapPin className="h-8 w-8 text-primary mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{mockUserStats.totalPixels}</p>
-                      <p className="text-sm text-muted-foreground">Total de Pixels</p>
-                    </div>
-                    <div className="text-center p-4 bg-green-500/10 rounded-lg">
-                      <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{mockUserStats.totalEarned}€</p>
-                      <p className="text-sm text-muted-foreground">Total Ganho</p>
-                    </div>
-                    <div className="text-center p-4 bg-purple-500/10 rounded-lg">
-                      <Award className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{mockUserStats.achievements}</p>
-                      <p className="text-sm text-muted-foreground">Conquistas</p>
-                    </div>
-                  </div>
-                  
-                  {/* Social Stats */}
-                  <div className="grid grid-cols-4 gap-4 pt-4 border-t">
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-blue-500">{socialStats.followers}</p>
-                      <p className="text-xs text-muted-foreground">Seguidores</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-green-500">{socialStats.following}</p>
-                      <p className="text-xs text-muted-foreground">Seguindo</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-purple-500">{socialStats.posts}</p>
-                      <p className="text-xs text-muted-foreground">Posts</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-orange-500">{socialStats.pixelsShared}</p>
-                      <p className="text-xs text-muted-foreground">Partilhados</p>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Recent Activity Preview */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Atividade Recente</h4>
-                    {recentActivity.slice(0, 3).map((activity, index) => (
-                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/20 rounded">
-                        <span className="text-lg">{activity.icon}</span>
-                        <div className="flex-1">
-                          <p className="text-sm">{activity.description}</p>
-                          <p className="text-xs text-muted-foreground">{activity.time}</p>
-                        </div>
+                      <div className="relative">
+                        <link.icon className={`h-6 w-6 transition-transform duration-300 ${isActive ? 'text-primary' : ''}`} />
+                        {isActive && (
+                          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+                          </span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Zap className="h-5 w-5 mr-2" />
-                    Ações Rápidas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Criar Post
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Partilhar Pixel
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Users className="h-4 w-4 mr-2" />
-                    Encontrar Amigos
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Trophy className="h-4 w-4 mr-2" />
-                    Ver Conquistas
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Analytics
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Social Tab */}
-          <TabsContent value="social" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Users className="h-5 w-5 mr-2" />
-                    Rede Social
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="text-center p-4 bg-blue-500/10 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-500">{socialStats.followers}</p>
-                      <p className="text-sm text-muted-foreground">Seguidores</p>
-                    </div>
-                    <div className="text-center p-4 bg-green-500/10 rounded-lg">
-                      <p className="text-2xl font-bold text-green-500">{socialStats.following}</p>
-                      <p className="text-sm text-muted-foreground">Seguindo</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Button className="w-full" variant="outline">
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Encontrar Amigos
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Mensagens (3)
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <Bell className="h-4 w-4 mr-2" />
-                      Notificações Sociais
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Heart className="h-5 w-5 mr-2" />
-                    Interações Recentes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {[
-                      { user: 'ArtistaPro', action: 'curtiu seu pixel', time: '2h', avatar: '🎨' },
-                      { user: 'PixelMaster', action: 'comentou', time: '4h', avatar: '👑' },
-                      { user: 'ColorQueen', action: 'seguiu você', time: '6h', avatar: '🌈' }
-                    ].map((interaction, index) => (
-                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/20 rounded">
-                        <span className="text-lg">{interaction.avatar}</span>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">{interaction.user}</span> {interaction.action}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{interaction.time}</p>
-                        </div>
-                        <Button size="sm" variant="ghost">Ver</Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Pixels Tab */}
-          <TabsContent value="pixels" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center text-primary">
-                    <MapPin className="h-5 w-5 mr-2" />
-                    Meus Pixels ({mockUserStats.totalPixels})
-                  </span>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filtrar
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Exportar
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <MapPin className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    Galeria de pixels em desenvolvimento
-                  </p>
-                  <Button className="mt-4">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Comprar Primeiro Pixel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Trophy className="h-5 w-5 mr-2" />
-                  Minhas Conquistas ({mockAchievements.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockAchievements.map((achievement) => (
-                    <Card key={achievement.id} className={cn(
-                      "border-2 transition-all hover:shadow-lg",
-                      getRarityColor(achievement.rarity)
-                    )}>
-                      <CardContent className="p-4 text-center">
-                        <div className="mb-3">
-                          {achievement.icon}
-                        </div>
-                        <h3 className="font-semibold mb-2">{achievement.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
-                        <div className="flex justify-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            +{achievement.xpReward} XP
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            +{achievement.creditsReward} Créditos
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {formatDate(achievement.unlockedAt)}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Activity className="h-5 w-5 mr-2" />
-                  Atividade Recente
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockRecentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-center gap-4 p-4 bg-muted/20 rounded-lg">
-                      <div className="p-2 bg-background rounded-full">
-                        {getActivityIcon(activity.type)}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{activity.description}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{formatDate(activity.timestamp)}</span>
-                          {activity.coordinates && (
-                            <span className="font-code">
-                              ({activity.coordinates.x}, {activity.coordinates.y})
-                            </span>
-                          )}
-                          {activity.value && (
-                            <span className="text-primary font-medium">
-                              {activity.value}€
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Stats Tab */}
-          <TabsContent value="stats" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <PieChart className="h-5 w-5 mr-2" />
-                    Estatísticas Financeiras
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-green-500">
-                      +{(mockUserStats.totalEarned - mockUserStats.totalSpent).toFixed(0)}€
-                    </p>
-                    <p className="text-sm text-muted-foreground">Lucro Total</p>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>Total Ganho</span>
-                      <span className="text-green-500 font-medium">+{mockUserStats.totalEarned}€</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total Gasto</span>
-                      <span className="text-red-500 font-medium">-{mockUserStats.totalSpent}€</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>ROI</span>
-                      <span className="text-primary font-medium">
-                        {((mockUserStats.totalEarned / mockUserStats.totalSpent - 1) * 100).toFixed(1)}%
+                      <span className={`text-xs mt-1 transition-colors duration-300 ${isActive ? 'text-primary font-semibold' : ''}`}>
+                        {link.label}
                       </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </motion.div>
+                  </Link>
+                );
+              })}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <BarChart3 className="h-5 w-5 mr-2" />
-                    Estatísticas de Atividade
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-primary">{mockUserStats.totalPixels}</p>
-                      <p className="text-sm text-muted-foreground">Pixels Possuídos</p>
+              {/* Botão Premium no Centro */}
+              <div className="hidden lg:block">
+                <EnhancedTooltip
+                  title="Pixel Universe Premium"
+                  description="Desbloqueie ferramentas avançadas, estatísticas detalhadas e recompensas exclusivas."
+                  actions={[
+                    { label: 'Saber Mais', onClick: () => {}, icon: <Zap className="h-4 w-4" /> }
+                  ]}
+                >
+                  <Link href="/premium">
+                    <Button
+                      size="lg"
+                      className="h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-accent text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-110 hover:shadow-primary/50"
+                    >
+                      <Crown className="h-7 w-7" />
+                    </Button>
+                  </Link>
+                </EnhancedTooltip>
+              </div>
+
+              {/* Login/User Menu */}
+              <div className="lg:hidden">
+                {user ? (
+                  <UserMenu />
+                ) : (
+                  <AuthModal>
+                    <div className="flex flex-col items-center justify-center p-1 rounded-lg w-16 h-16 text-muted-foreground hover:text-primary transition-all duration-300">
+                      <UserPlus className="h-6 w-6" />
+                      <span className="text-xs mt-1">Entrar</span>
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-accent">{mockUserStats.streak}</p>
-                      <p className="text-sm text-muted-foreground">Dias Consecutivos</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>Rank Global</span>
-                      <span className="font-medium">#{mockUserStats.rank}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Região Favorita</span>
-                      <span className="font-medium">{mockUserStats.mostActiveRegion}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tempo no Pixel Universe</span>
-                      <span className="font-medium">
-                        {Math.floor((Date.now() - new Date(mockUserStats.joinDate).getTime()) / (1000 * 60 * 60 * 24))} dias
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+                  </AuthModal>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
-    </div>
+    </>
   );
 }
