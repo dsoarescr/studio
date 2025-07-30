@@ -142,7 +142,7 @@ export function UserMenu() {
           <Link href="/member">
             <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors hover:scale-[1.02]">
               <User className="mr-2 h-4 w-4 text-primary" />
-              <span>Perfil Completo</span>
+              Meu Perfil
             </DropdownMenuItem>
           </Link>
           
@@ -157,7 +157,7 @@ export function UserMenu() {
           <Link href="/premium">
             <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
               <Crown className="mr-2 h-4 w-4 text-amber-500 animate-pulse" style={{ animationDuration: '3s' }} />
-              <span>Tornar-se Premium</span>
+              Upgrade Premium
               {isPremium && (
                 <Badge className="ml-auto bg-green-500 text-white text-xs">Ativo</Badge>
               )}
@@ -166,7 +166,7 @@ export function UserMenu() {
           
           <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
             <CreditCard className="mr-2 h-4 w-4 text-green-500" />
-            <span>Carteira Digital</span>
+            Meus Créditos
             <span className="ml-auto text-xs text-muted-foreground">{credits.toLocaleString('pt-PT')}</span>
           </DropdownMenuItem>
           
@@ -175,7 +175,7 @@ export function UserMenu() {
           <Link href="/settings">
             <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
               <Settings className="mr-2 h-4 w-4 text-gray-500" />
-              <span>Preferências</span>
+              Configurações
             </DropdownMenuItem>
           </Link>
           
@@ -183,7 +183,13 @@ export function UserMenu() {
           
           <DropdownMenuItem 
             className="cursor-pointer text-red-500 hover:bg-red-500/10 transition-colors"
-            onClick={handleLogout}
+            onClick={() => {
+              handleLogout();
+              toast({
+                title: "Sessão Terminada",
+                description: "Você foi desconectado com sucesso.",
+              });
+            }}
           >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Terminar Sessão</span>
