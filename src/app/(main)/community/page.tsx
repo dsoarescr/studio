@@ -44,7 +44,7 @@ import {
 import { useUserStore } from '@/lib/store';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Confetti } from '@/components/ui/confetti';
@@ -855,10 +855,12 @@ export default function CommunityPage() {
                     </div>
                   </div>
                   
-                  <Link href="/member" className="w-full">
-                    <Button className="w-full mt-4">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar Perfil
+                  <Link href="/member" passHref>
+                    <Button asChild className="w-full mt-4">
+                      <a>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar Perfil
+                      </a>
                     </Button>
                   </Link>
                 </div>

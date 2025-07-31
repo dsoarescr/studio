@@ -12,7 +12,7 @@ import { useAuth } from '@/lib/auth-context';
 import { 
   Settings, Paintbrush, Eye, Bell, User, Shield, Zap, Globe, HelpCircle, Coins, Gift, LogOut
 } from "lucide-react";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const sidebarNavItems = [
@@ -61,18 +61,18 @@ export default function SettingsLayout({
           <CardContent className="p-4">
             <nav className="flex flex-col space-y-1">
               {sidebarNavItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/settings' && pathname.startsWith(item.href));
+                const isActive = pathname.startsWith(item.href);
                 return (
-                  <Link href={item.href} key={item.href} passHref legacyBehavior>
-                    <a className={cn(
-                      "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                      isActive ? "bg-primary/10 text-primary font-semibold" : "hover:bg-accent hover:text-accent-foreground"
-                    )}>
+                  <Link href={item.href} key={item.href} passHref>
+                    <Button
+                      variant={isActive ? 'default' : 'ghost'}
+                      className="w-full justify-start gap-2"
+                    >
                       <item.icon className={cn("h-4 w-4 mr-1", isActive ? item.color : "text-muted-foreground")} />
                       <span>{item.label}</span>
-                    </a>
+                    </Button>
                   </Link>
-                )
+                );
               })}
             </nav>
             

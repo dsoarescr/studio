@@ -21,6 +21,8 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import UserProfileHeader from '@/components/layout/UserProfileHeader';
+import BottomNavBar from '@/components/layout/BottomNavBar';
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -107,7 +109,7 @@ export default function HomePage() {
       <Confetti active={showConfetti} duration={5000} onComplete={() => setShowConfetti(false)} />
       
       <SidebarProvider>
-        <div className="relative h-[calc(100vh-var(--header-height)-var(--bottom-nav-height))] w-full flex">
+        <div className="relative h-full w-full flex">
           <MapSidebar />
           <div className="flex-1 h-full relative">
             {/* Main Pixel Grid */}

@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -231,7 +234,6 @@ export default function StatisticsPage() {
   const [playRewardSound, setPlayRewardSound] = useState(false);
 
   useEffect(() => {
-    // Enhanced time update with smooth transitions
     const updateTime = () => {
       const now = new Date();
       setLastUpdated(now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }));
@@ -294,7 +296,7 @@ export default function StatisticsPage() {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
       
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
@@ -302,36 +304,28 @@ export default function StatisticsPage() {
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative z-10 animate-slide-in-down">
+          <CardHeader className="relative">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
                 <CardTitle className="font-headline text-3xl text-gradient-gold-animated flex items-center">
                   <BarChartHorizontalBig className="h-8 w-8 mr-3 animate-glow" />
-                  Centro de Rankings Global
+                  Estatísticas do Universo
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  Rankings em tempo real, competições e estatísticas globais
+                  Análise completa e em tempo real do ecossistema Pixel Universe
                 </CardDescription>
               </div>
               
-              <div className="flex items-center gap-3 animate-slide-in-right animation-delay-300">
+              <div className="flex items-center gap-3 animate-fade-in">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                   <span className="text-muted-foreground font-code">
                     Atualizado: {lastUpdated || '--:--'}
                   </span>
                 </div>
-                <Button variant="outline" size="sm" className="button-hover-lift">
-                  <Trophy className="h-4 w-4 mr-2 text-yellow-500" />
-                  Competições
-                </Button>
                 <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
                   <Download className="h-4 w-4 mr-2 text-green-500" />
                   Exportar
-                </Button>
-                <Button variant="outline" size="sm" className="button-hover-lift">
-                  <Users className="h-4 w-4 mr-2 text-blue-500" />
-                  Ligas
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
                   <Share2 className="h-4 w-4 mr-2 text-blue-500" />
@@ -344,7 +338,7 @@ export default function StatisticsPage() {
             </div>
             
             {/* Time Range Selector */}
-            <div className="flex flex-wrap gap-2 mt-4 animate-slide-in-up animation-delay-400">
+            <div className="flex flex-wrap gap-2 mt-4 animate-fade-in animation-delay-200">
               {timeRanges.map(range => (
                 <Button 
                   key={range.id} 
@@ -353,7 +347,7 @@ export default function StatisticsPage() {
                   onClick={() => setActiveTimeRange(range.id)}
                   className={cn(
                     "font-code text-xs sm:text-sm px-3 py-2 transition-all duration-200 hover:shadow-md",
-                    activeTimeRange === range.id ? "shadow-lg scale-105 animate-pulse" : "hover:scale-105"
+                    activeTimeRange === range.id ? "shadow-lg scale-105" : "hover:scale-105"
                   )}
                 >
                   {range.icon}
@@ -361,43 +355,19 @@ export default function StatisticsPage() {
                 </Button>
               ))}
             </div>
-            
-            {/* Live Competition Banner */}
-            <div className="mt-4 p-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-lg animate-pulse">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-red-500 rounded-full animate-ping" />
-                  <div>
-                    <h3 className="font-semibold text-red-500">🏆 Competição Ativa: "Mestre dos Pixels"</h3>
-                    <p className="text-sm text-muted-foreground">Termina em 2 dias • Prémio: 5000€ + Pixel Lendário</p>
-                  </div>
-                </div>
-                <Button size="sm" className="bg-red-500 hover:bg-red-600">
-                  Participar
-                </Button>
-              </div>
-            </div>
           </CardHeader>
         </Card>
 
         {/* Enhanced Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 h-12 bg-card/50 backdrop-blur-sm shadow-md">
-            <TabsTrigger value="overview" className="font-headline transition-all duration-300">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-12 bg-card/50 backdrop-blur-sm shadow-md">
+            <TabsTrigger value="overview" className="font-headline">
               <Globe className="h-4 w-4 mr-2"/>
               Visão Geral
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="font-headline">
               <Trophy className="h-4 w-4 mr-2"/>
               Classificação
-            </TabsTrigger>
-            <TabsTrigger value="competitions" className="font-headline">
-              <Award className="h-4 w-4 mr-2"/>
-              Competições
-            </TabsTrigger>
-            <TabsTrigger value="leagues" className="font-headline">
-              <Crown className="h-4 w-4 mr-2"/>
-              Ligas
             </TabsTrigger>
             <TabsTrigger value="regions" className="font-headline">
               <Map className="h-4 w-4 mr-2"/>
@@ -412,7 +382,7 @@ export default function StatisticsPage() {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Global Metrics Grid */}
-            <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-zoom-in" layout>
+            <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" layout>
               {globalStatsData.map(stat => <StatDisplayCard key={stat.title} {...stat} />)}
             </motion.div>
 
@@ -420,7 +390,7 @@ export default function StatisticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="card-hover-glow">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-primary animate-glow">
+                  <CardTitle className="flex items-center text-primary">
                     <TrendingUp className="h-5 w-5 mr-2" />
                     Tendências de Crescimento
                     <Badge variant="outline" className="ml-2 text-xs">Últimos 7 dias</Badge>
@@ -428,21 +398,21 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-colors duration-300">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
                       <div className="flex items-center gap-3">
                         <ArrowUp className="h-5 w-5 text-green-500" />
                         <span className="font-medium">Utilizadores Ativos</span>
                       </div>
-                      <span className="text-green-500 font-bold animate-pulse">+23.4%</span>
+                      <span className="text-green-500 font-bold">+23.4%</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 transition-colors duration-300">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
                       <div className="flex items-center gap-3">
                         <ArrowUp className="h-5 w-5 text-blue-500" />
                         <span className="font-medium">Volume de Transações</span>
                       </div>
-                      <span className="text-blue-500 font-bold animate-pulse">+18.9%</span>
+                      <span className="text-blue-500 font-bold">+18.9%</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 transition-colors duration-300">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10">
                       <div className="flex items-center gap-3">
                         <ArrowUp className="h-5 w-5 text-purple-500" />
                         <span className="font-medium">Novos Registos</span>
@@ -455,7 +425,7 @@ export default function StatisticsPage() {
 
               <Card className="card-hover-glow">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-primary animate-glow">
+                  <CardTitle className="flex items-center text-primary">
                     <Activity className="h-5 w-5 mr-2" />
                     Atividade em Tempo Real
                     <Badge variant="outline" className="ml-2 text-xs">Ao vivo</Badge>
@@ -465,19 +435,19 @@ export default function StatisticsPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm">
                       <span>Pixels comprados (última hora)</span>
-                      <span className="font-bold text-primary animate-pulse">47</span>
+                      <span className="font-bold text-primary">47</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span>Utilizadores online</span>
-                      <span className="font-bold text-green-500 animate-pulse">1,247</span>
+                      <span className="font-bold text-green-500">1,247</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span>Transações pendentes</span>
-                      <span className="font-bold text-orange-500 animate-pulse">23</span>
+                      <span className="font-bold text-orange-500">23</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span>Região mais ativa</span>
-                      <span className="font-bold text-accent animate-pulse">Lisboa</span>
+                      <span className="font-bold text-accent">Lisboa</span>
                     </div>
                   </div>
                 </CardContent>
@@ -489,7 +459,7 @@ export default function StatisticsPage() {
           <TabsContent value="leaderboard" className="space-y-6">
             {/* Filters */}
             <Card className="card-hover-glow">
-              <CardContent className="p-4 animate-fade-in">
+              <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -497,7 +467,7 @@ export default function StatisticsPage() {
                       placeholder="Pesquisar utilizadores..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 transition-all duration-300 focus:scale-105"
+                      className="pl-10"
                     />
                   </div>
                   
@@ -506,7 +476,7 @@ export default function StatisticsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setSortBy(sortBy === 'rank' ? 'pixels' : 'rank')}
-                      className="font-code hover:scale-105 transition-transform duration-200"
+                      className="font-code"
                     >
                       <SortAsc className="h-4 w-4 mr-2" />
                       {sortBy === 'rank' ? 'Rank' : 'Pixels'}
@@ -516,7 +486,7 @@ export default function StatisticsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setFilterRegion(filterRegion === 'all' ? 'Lisboa' : 'all')}
-                      className="font-code hover:scale-105 transition-transform duration-200"
+                      className="font-code"
                     >
                       <Filter className="h-4 w-4 mr-2" />
                       {filterRegion === 'all' ? 'Todas' : filterRegion}
@@ -529,7 +499,7 @@ export default function StatisticsPage() {
             {/* Leaderboard Table */}
             <Card className="card-hover-glow">
               <CardHeader>
-                <CardTitle className="flex items-center text-primary animate-glow">
+                <CardTitle className="flex items-center text-primary">
                   <Trophy className="h-5 w-5 mr-2" />
                   Classificação de Utilizadores
                 </CardTitle>
@@ -540,7 +510,7 @@ export default function StatisticsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[80px] font-code text-primary">Rank</TableHead>
+                        <TableHead className="w-[80px] font-code">Rank</TableHead>
                         <TableHead className="font-code">Utilizador</TableHead>
                         <TableHead className="text-right font-code">Pixels</TableHead>
                         <TableHead className="text-right font-code">Pontuação</TableHead>
@@ -551,11 +521,11 @@ export default function StatisticsPage() {
                     </TableHeader>
                     <TableBody>
                       {filteredRanking.map((entry) => (
-                        <TableRow key={entry.rank} className="hover:bg-muted/50 transition-all duration-300 hover:scale-[1.01]">
+                        <TableRow key={entry.rank} className="hover:bg-muted/50 transition-colors">
                           <TableCell className="font-semibold">
                             <div className="flex items-center gap-2">
-                              {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-heartbeat" />}
-                              {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400 animate-pulse" />}
+                              {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-pulse" />}
+                              {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
                               {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
                               #{entry.rank}
                             </div>
@@ -563,7 +533,7 @@ export default function StatisticsPage() {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="relative">
-                                <Avatar className="h-10 w-10 border-2 border-border hover:border-primary transition-colors duration-300">
+                                <Avatar className="h-10 w-10 border-2 border-border">
                                   <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
                                   <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
@@ -574,7 +544,7 @@ export default function StatisticsPage() {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-foreground">{entry.user}</span>
-                                  {entry.isVerified && ( 
+                                  {entry.isVerified && (
                                     <Badge variant="outline" className="text-xs px-1 py-0">
                                       <Star className="h-3 w-3" />
                                     </Badge>
@@ -585,15 +555,15 @@ export default function StatisticsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-code">
-                            <span className="animate-pulse"><FormattedNumber value={entry.pixels} /></span>
+                            <FormattedNumber value={entry.pixels} />
                           </TableCell>
                           <TableCell className="text-right font-code">
-                            <span className="animate-pulse"><FormattedNumber value={entry.score} /></span>
+                            <FormattedNumber value={entry.score} />
                           </TableCell>
                           <TableCell className="text-right">
-                            <Badge variant="secondary" className="font-code hover:scale-105 transition-transform duration-200">
+                            <Badge variant="secondary" className="font-code">
                               {entry.level}
-                            </Badge> 
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -603,17 +573,17 @@ export default function StatisticsPage() {
                           </TableCell>
                           <TableCell className="text-center">
                             {entry.change > 0 && (
-                              <div className="flex items-center justify-center text-green-500 animate-pulse">
+                              <div className="flex items-center justify-center text-green-500">
                                 <ChevronUp className="h-4 w-4" />
                                 <span className="text-xs">{entry.change}</span>
                               </div>
                             )}
                             {entry.change < 0 && (
-                              <div className="flex items-center justify-center text-red-500 animate-pulse">
+                              <div className="flex items-center justify-center text-red-500">
                                 <ChevronDown className="h-4 w-4" />
                                 <span className="text-xs">{Math.abs(entry.change)}</span>
                               </div>
-                            )} 
+                            )}
                             {entry.change === 0 && (
                               <span className="text-muted-foreground text-xs">-</span>
                             )}
@@ -632,7 +602,7 @@ export default function StatisticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Regional Distribution */}
               <Card className="card-hover-glow">
-                <CardHeader className="animate-fade-in">
+                <CardHeader>
                   <CardTitle className="flex items-center text-primary">
                     <PieChart className="h-5 w-5 mr-2" />
                     Distribuição Regional de Pixels
@@ -643,7 +613,7 @@ export default function StatisticsPage() {
                 <CardContent className="space-y-4">
                   {regionalDistributionData.map(region => (
                     <div key={region.name} className="space-y-2">
-                      <div className="flex justify-between items-center text-sm hover:scale-105 transition-transform duration-200">
+                      <div className="flex justify-between items-center text-sm">
                         <div className="flex items-center gap-2">
                           <span className="text-foreground font-medium">{region.name}</span>
                           {region.trend === 'up' && <ArrowUp className="h-3 w-3 text-green-500" />}
@@ -654,7 +624,7 @@ export default function StatisticsPage() {
                       <Progress 
                         value={region.percentage} 
                         className="h-3 [&>div]:transition-all [&>div]:duration-500" 
-                        style={{ '--progress-color': region.color } as React.CSSProperties}
+                        style={{ '--progress-color': region.color } as React.CSSProperties} 
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{region.pixels.toLocaleString('pt-PT')} pixels</span>
@@ -667,7 +637,7 @@ export default function StatisticsPage() {
 
               {/* Regional Performance */}
               <Card className="card-hover-glow">
-                <CardHeader className="animate-fade-in animation-delay-200">
+                <CardHeader>
                   <CardTitle className="flex items-center text-primary">
                     <BarChart3 className="h-5 w-5 mr-2" />
                     Performance Regional
@@ -679,7 +649,7 @@ export default function StatisticsPage() {
                   <ScrollArea className="h-80">
                     <div className="space-y-4">
                       {regionalDistributionData.map(region => (
-                        <Card key={region.name} className="p-4 bg-muted/30 hover:bg-muted/50 transition-all duration-300 hover:scale-105 interactive-glow">
+                        <Card key={region.name} className="p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
                           <div className="flex justify-between items-start mb-3">
                             <h4 className="font-semibold text-lg">{region.name}</h4>
                             <Badge 
@@ -696,19 +666,19 @@ export default function StatisticsPage() {
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                               <p className="text-muted-foreground">Pixels</p>
-                              <p className="font-bold text-primary animate-pulse">{region.pixels.toLocaleString('pt-PT')}</p>
+                              <p className="font-bold text-primary">{region.pixels.toLocaleString('pt-PT')}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Utilizadores</p>
-                              <p className="font-bold text-accent animate-pulse">{region.activeUsers}</p>
+                              <p className="font-bold text-accent">{region.activeUsers}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Preço Médio</p>
-                              <p className="font-bold text-green-500 animate-pulse">{region.avgPrice.toFixed(2)}€</p>
+                              <p className="font-bold text-green-500">{region.avgPrice.toFixed(2)}€</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Quota</p>
-                              <p className="font-bold text-purple-500 animate-pulse">{region.percentage}%</p>
+                              <p className="font-bold text-purple-500">{region.percentage}%</p>
                             </div>
                           </div>
                         </Card>
@@ -725,7 +695,7 @@ export default function StatisticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Market Trends */}
               <Card className="card-hover-glow">
-                <CardHeader className="animate-fade-in">
+                <CardHeader>
                   <CardTitle className="flex items-center text-primary">
                     <LineChart className="h-5 w-5 mr-2" />
                     Tendências de Mercado
@@ -734,7 +704,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="flex items-center justify-center h-64">
                   <div className="text-center">
-                    <LineChart className="h-16 w-16 text-muted-foreground mx-auto mb-4 animate-pulse" />
+                    <LineChart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">Gráficos de tendências em desenvolvimento</p>
                   </div>
                 </CardContent>
@@ -742,7 +712,7 @@ export default function StatisticsPage() {
 
               {/* User Engagement */}
               <Card className="card-hover-glow">
-                <CardHeader className="animate-fade-in animation-delay-200">
+                <CardHeader>
                   <CardTitle className="flex items-center text-primary">
                     <Activity className="h-5 w-5 mr-2" />
                     Engagement dos Utilizadores
@@ -751,22 +721,22 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center p-3 rounded-lg bg-blue-500/10">
-                    <span className="font-medium">Taxa de Retenção (7 dias)</span> 
+                    <span className="font-medium">Taxa de Retenção (7 dias)</span>
                     <span className="text-blue-500 font-bold">78.4%</span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-lg bg-green-500/10">
                     <span className="font-medium">Sessões por Utilizador</span>
-                    <span className="text-green-500 font-bold animate-pulse">4.2</span>
+                    <span className="text-green-500 font-bold">4.2</span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-lg bg-purple-500/10">
                     <span className="font-medium">Tempo Médio de Sessão</span>
-                    <span className="text-purple-500 font-bold animate-pulse">12m 34s</span>
+                    <span className="text-purple-500 font-bold">12m 34s</span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-lg bg-orange-500/10">
                     <span className="font-medium">Taxa de Conversão</span>
-                    <span className="text-orange-500 font-bold animate-pulse">23.7%</span>
+                    <span className="text-orange-500 font-bold">23.7%</span>
                   </div>
-                </CardContent> 
+                </CardContent>
               </Card>
             </div>
 
@@ -774,7 +744,7 @@ export default function StatisticsPage() {
             <Card className="card-hover-glow">
               <CardHeader>
                 <CardTitle className="flex items-center text-primary">
-                  <BarChart3 className="h-5 w-5 mr-2 animate-pulse" />
+                  <BarChart3 className="h-5 w-5 mr-2" />
                   Análise Detalhada
                   <Badge variant="outline" className="ml-2 text-xs">Insights Avançados</Badge>
                 </CardTitle>
@@ -785,7 +755,7 @@ export default function StatisticsPage() {
               <CardContent className="flex items-center justify-center h-64">
                 <div className="text-center">
                   <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-4 animate-fade-in">
+                  <p className="text-muted-foreground mb-4">
                     Dashboard de análise avançada em desenvolvimento.
                   </p>
                   <Button variant="outline" disabled>
@@ -800,7 +770,7 @@ export default function StatisticsPage() {
         
         {/* New Section: Data Insights */}
         <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20 shadow-lg">
-          <CardHeader className="animate-fade-in">
+          <CardHeader>
             <CardTitle className="flex items-center text-primary">
               <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
               Insights e Recomendações
@@ -811,7 +781,7 @@ export default function StatisticsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner hover:shadow-lg transition-shadow duration-300 interactive-glow">
+              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
                 <h3 className="font-semibold flex items-center mb-2">
                   <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
                   Oportunidades de Investimento
@@ -820,7 +790,7 @@ export default function StatisticsPage() {
                   A região do Algarve está mostrando um crescimento de 23% no valor dos pixels nas últimas semanas. Considere investir nesta área.
                 </p>
               </div>
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner hover:shadow-lg transition-shadow duration-300 interactive-glow">
+              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
                 <h3 className="font-semibold flex items-center mb-2">
                   <Users className="h-4 w-4 mr-2 text-blue-500" />
                   Tendências de Comunidade
@@ -829,7 +799,7 @@ export default function StatisticsPage() {
                   Projetos colaborativos estão ganhando popularidade, com um aumento de 45% na participação. Considere iniciar ou juntar-se a um.
                 </p>
               </div>
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner hover:shadow-lg transition-shadow duration-300 interactive-glow">
+              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
                 <h3 className="font-semibold flex items-center mb-2">
                   <Calendar className="h-4 w-4 mr-2 text-purple-500" />
                   Eventos Próximos
@@ -841,7 +811,7 @@ export default function StatisticsPage() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-center border-t border-primary/10 pt-4">
-            <Button variant="outline" className="w-full sm:w-auto hover:scale-105 transition-transform duration-200" onClick={handleExportData}>
+            <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportData}>
               <Download className="h-4 w-4 mr-2" />
               Exportar Relatório Completo
             </Button>
