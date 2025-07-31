@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -81,9 +82,9 @@ export default function SettingsLayout({
             <CardContent className="p-4">
               <nav className="flex flex-col space-y-1">
                 {sidebarNavItems.map((item) => (
-                  <Link href={item.href} key={item.href} passHref legacyBehavior>
-                    <a className={cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  <Link href={item.href} key={item.href} passHref>
+                    <div className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
                       "hover:bg-muted",
                       pathname.startsWith(item.href) 
                         ? "bg-primary/10 text-primary" 
@@ -91,7 +92,7 @@ export default function SettingsLayout({
                     )}>
                       <item.icon className={cn("h-4 w-4", pathname.startsWith(item.href) ? item.color : "")} />
                       <span>{item.label}</span>
-                    </a>
+                    </div>
                   </Link>
                 ))}
               </nav>
