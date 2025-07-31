@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useUserStore } from "@/lib/store";
+import { useAuth } from '@/lib/auth-context';
 import { 
   Settings, Paintbrush, Eye, Bell, User, Shield, Zap, Globe, HelpCircle, Coins, Gift, LogOut
 } from "lucide-react";
@@ -31,14 +32,24 @@ export default function SettingsLayout({
 }) {
   const pathname = usePathname();
   const { toast } = useToast();
+  const { logOut } = useAuth();
   const { credits, specialCredits } = useUserStore();
 
-  const handleLogout = () => {
-    toast({
-      title: "Sessão Terminada",
-      description: "Você foi desconectado com sucesso.",
-    });
-    // Add actual logout logic here
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      toast({
+        title: "Sessão Terminada",
+        description: "Você foi desconectado com sucesso.",
+      });
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast({
+        title: "Erro ao Sair",
+        description: "Ocorreu um problema ao terminar a sessão.",
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -70,17 +81,18 @@ export default function SettingsLayout({
             <CardContent className="p-4">
               <nav className="flex flex-col space-y-1">
                 {sidebarNavItems.map((item) => (
-                  <Button
-                    key={item.href}
-                    variant={pathname === item.href ? 'default' : 'ghost'}
-                    className="w-full justify-start text-left"
-                    asChild
-                  >
-                    <Link href={item.href}>
-                      <item.icon className={cn("h-4 w-4 mr-3", pathname.startsWith(item.href) ? item.color : "")} />
-                      {item.label}
-                    </Link>
-                  </Button>
+                  <Link href={item.href} key={item.href} passHref legacyBehavior>
+                    <a className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                      "hover:bg-muted",
+                      pathname.startsWith(item.href) 
+                        ? "bg-primary/10 text-primary" 
+                        : "text-muted-foreground hover:text-foreground"
+                    )}>
+                      <item.icon className={cn("h-4 w-4", pathname.startsWith(item.href) ? item.color : "")} />
+                      <span>{item.label}</span>
+                    </a>
+                  </Link>
                 ))}
               </nav>
               
