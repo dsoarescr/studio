@@ -1484,7 +1484,7 @@ export default function MarketplacePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link href="/tutorials">
+              <Link href="/tutorials" asChild>
                 <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <Info className="h-6 w-6 text-primary" />
                     <span>Guia do Marketplace</span>
@@ -1492,7 +1492,7 @@ export default function MarketplacePage() {
                 </Button>
               </Link>
               
-              <Link href="/support">
+              <Link href="/support" asChild>
                 <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <MessageSquare className="h-6 w-6 text-blue-500" />
                     <span>Suporte ao Cliente</span>
@@ -1500,7 +1500,7 @@ export default function MarketplacePage() {
                 </Button>
               </Link>
               
-              <Link href="/report">
+              <Link href="/report" asChild>
                 <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <AlertTriangle className="h-6 w-6 text-yellow-500" />
                     <span>Reportar Problema</span>
