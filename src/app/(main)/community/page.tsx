@@ -1,36 +1,33 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
-  Users, MessageSquare, Heart, Share2, Send, Camera, Video, Mic,
-  Image as ImageIcon, MapPin, Calendar, Clock, Star, Crown, Gem,
-  Sparkles, Award, Trophy, Target, Zap, Activity, Bell, Settings,
-  Search, Filter, Plus, MoreHorizontal, ThumbsUp, ThumbsDown,
-  Bookmark, Flag, Eye, Play, Pause, Volume2, VolumeX, Phone,
-  UserPlus, UserMinus, Edit, Trash2, Copy, ExternalLink, Globe,
-  Palette, Brush, Music, Gift, Coins, Flame, TrendingUp, Hash,
-  AtSign, Smile, Paperclip, Download, Upload, RefreshCw, X,
-  Check, ArrowRight, ChevronDown, ChevronUp, MoreVertical,
-  MessageCircle, Repeat, Quote, AlertTriangle, Info, CheckCircle
+  Users, Heart, MessageSquare, Share2, Send, Camera, Video, Smile,
+  MapPin, Calendar, Clock, Star, Crown, Gem, Eye, ThumbsUp, Bookmark,
+  Plus, Search, Filter, TrendingUp, Globe, Hash, UserPlus, Settings,
+  MoreHorizontal, Play, Pause, Volume2, VolumeX, Zap, Award, Gift,
+  Image as ImageIcon, Music, Palette, Target, Flame, Sparkles, Bell,
+  Edit, Trash2, Flag, Copy, ExternalLink, Download, Upload, Link2
 } from "lucide-react";
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-interface SocialPost {
+interface Post {
   id: string;
   author: {
     id: string;
@@ -40,1221 +37,802 @@ interface SocialPost {
     verified: boolean;
     level: number;
     followers: number;
-    isFollowing: boolean;
   };
-  content: string;
-  media?: {
-    type: 'image' | 'video' | 'pixel' | 'collection';
-    url: string;
-    thumbnail?: string;
-    metadata?: any;
-  }[];
-  pixel?: {
-    x: number;
-    y: number;
-    region: string;
-    imageUrl: string;
-    price?: number;
+  content: {
+    text?: string;
+    images?: string[];
+    video?: string;
+    pixel?: {
+      x: number;
+      y: number;
+      region: string;
+      imageUrl: string;
+    };
+    poll?: {
+      question: string;
+      options: Array<{ text: string; votes: number }>;
+      totalVotes: number;
+    };
   };
-  likes: number;
-  comments: number;
-  shares: number;
-  views: number;
+  engagement: {
+    likes: number;
+    comments: number;
+    shares: number;
+    views: number;
+  };
   timestamp: string;
-  isLiked: boolean;
-  isBookmarked: boolean;
-  isShared: boolean;
-  tags: string[];
-  mentions: string[];
   location?: string;
   mood?: string;
-  privacy: 'public' | 'followers' | 'private';
-  isPinned: boolean;
-  isPromoted: boolean;
-  engagement: {
-    rate: number;
-    reach: number;
-  };
+  hashtags: string[];
+  isLiked: boolean;
+  isBookmarked: boolean;
+  isFollowing: boolean;
 }
 
-interface ChatRoom {
+interface Story {
   id: string;
-  name: string;
-  description: string;
-  type: 'public' | 'private' | 'regional';
-  members: number;
-  avatar: string;
-  isJoined: boolean;
-  lastMessage: {
-    user: string;
-    content: string;
-    timestamp: string;
-  };
-  unreadCount: number;
-  isActive: boolean;
-}
-
-interface LiveStream {
-  id: string;
-  streamer: {
+  author: {
     name: string;
     avatar: string;
-    verified: boolean;
-    followers: number;
   };
-  title: string;
-  viewers: number;
   thumbnail: string;
-  category: string;
-  isLive: boolean;
-  duration: string;
+  isViewed: boolean;
+  isLive?: boolean;
 }
 
-interface CommunityEvent {
-  id: string;
-  title: string;
-  description: string;
-  type: 'contest' | 'workshop' | 'meetup' | 'auction';
-  startDate: string;
-  endDate: string;
-  participants: number;
-  maxParticipants?: number;
-  prize?: string;
-  location?: string;
-  isOnline: boolean;
-  organizer: {
-    name: string;
-    avatar: string;
-    verified: boolean;
-  };
-  isJoined: boolean;
-  status: 'upcoming' | 'live' | 'ended';
-}
-
-const mockPosts: SocialPost[] = [
+const mockPosts: Post[] = [
   {
     id: '1',
     author: {
       id: 'user1',
       name: 'PixelArtist',
-      username: '@pixelartist',
+      username: 'pixelartist_pt',
       avatar: 'https://placehold.co/40x40.png',
       verified: true,
       level: 15,
-      followers: 1234,
-      isFollowing: false
+      followers: 1234
     },
-    content: 'Acabei de criar esta obra-prima em Lisboa! 🎨✨ Levei 3 horas mas valeu cada minuto. O que acham da combinação de cores? #PixelArt #Lisboa #Arte',
-    media: [{
-      type: 'pixel',
-      url: 'https://placehold.co/400x400/D4A757/FFFFFF?text=Lisboa+Art',
-      metadata: { x: 245, y: 156, region: 'Lisboa' }
-    }],
-    pixel: {
-      x: 245,
-      y: 156,
-      region: 'Lisboa',
-      imageUrl: 'https://placehold.co/200x200/D4A757/FFFFFF?text=Lisboa',
-      price: 150
+    content: {
+      text: 'Acabei de criar esta obra-prima em Lisboa! O que acham? 🎨✨ #pixelart #lisboa #arte',
+      images: ['https://placehold.co/500x500/D4A757/FFFFFF?text=Arte+Lisboa'],
+      pixel: {
+        x: 245,
+        y: 156,
+        region: 'Lisboa',
+        imageUrl: 'https://placehold.co/100x100/D4A757/FFFFFF?text=LX'
+      }
     },
-    likes: 89,
-    comments: 23,
-    shares: 12,
-    views: 456,
+    engagement: {
+      likes: 89,
+      comments: 23,
+      shares: 12,
+      views: 456
+    },
     timestamp: '2h',
-    isLiked: false,
-    isBookmarked: true,
-    isShared: false,
-    tags: ['PixelArt', 'Lisboa', 'Arte'],
-    mentions: [],
     location: 'Lisboa, Portugal',
     mood: '🎨',
-    privacy: 'public',
-    isPinned: false,
-    isPromoted: false,
-    engagement: {
-      rate: 18.5,
-      reach: 2340
-    }
+    hashtags: ['pixelart', 'lisboa', 'arte'],
+    isLiked: false,
+    isBookmarked: false,
+    isFollowing: true
   },
   {
     id: '2',
     author: {
       id: 'user2',
       name: 'ColorMaster',
-      username: '@colormaster',
+      username: 'colormaster_pro',
       avatar: 'https://placehold.co/40x40.png',
       verified: false,
       level: 12,
-      followers: 567,
-      isFollowing: true
+      followers: 567
     },
-    content: 'Novo recorde pessoal! 🚀 Consegui 50 pixels numa semana! Obrigado a todos que compraram e apoiaram. Próxima meta: 100 pixels! 💪 #Milestone #PixelUniverse',
-    likes: 156,
-    comments: 45,
-    shares: 28,
-    views: 890,
-    timestamp: '4h',
-    isLiked: true,
-    isBookmarked: false,
-    isShared: true,
-    tags: ['Milestone', 'PixelUniverse'],
-    mentions: [],
-    mood: '🚀',
-    privacy: 'public',
-    isPinned: true,
-    isPromoted: false,
+    content: {
+      text: 'Novo recorde pessoal! 50 pixels numa semana! 🚀 Quem consegue bater?',
+      poll: {
+        question: 'Qual é o teu recorde semanal?',
+        options: [
+          { text: '1-10 pixels', votes: 45 },
+          { text: '11-25 pixels', votes: 32 },
+          { text: '26-50 pixels', votes: 18 },
+          { text: '50+ pixels', votes: 12 }
+        ],
+        totalVotes: 107
+      }
+    },
     engagement: {
-      rate: 22.1,
-      reach: 1890
-    }
+      likes: 156,
+      comments: 45,
+      shares: 28,
+      views: 789
+    },
+    timestamp: '4h',
+    mood: '🚀',
+    hashtags: ['recorde', 'desafio', 'pixels'],
+    isLiked: true,
+    isBookmarked: true,
+    isFollowing: false
   }
 ];
 
-const mockChatRooms: ChatRoom[] = [
-  {
-    id: '1',
-    name: 'Geral',
-    description: 'Conversa geral da comunidade',
-    type: 'public',
-    members: 1247,
-    avatar: 'https://placehold.co/40x40/D4A757/FFFFFF?text=G',
-    isJoined: true,
-    lastMessage: {
-      user: 'PixelMaster',
-      content: 'Alguém sabe quando sai a próxima atualização?',
-      timestamp: '2m'
-    },
-    unreadCount: 3,
-    isActive: true
-  },
-  {
-    id: '2',
-    name: 'Trading & Investimento',
-    description: 'Discussões sobre compra e venda',
-    type: 'public',
-    members: 456,
-    avatar: 'https://placehold.co/40x40/7DF9FF/000000?text=T',
-    isJoined: true,
-    lastMessage: {
-      user: 'InvestorPro',
-      content: 'Pixels de Lisboa estão em alta! 📈',
-      timestamp: '5m'
-    },
-    unreadCount: 0,
-    isActive: true
-  },
-  {
-    id: '3',
-    name: 'Arte & Criatividade',
-    description: 'Partilha de técnicas e inspiração',
-    type: 'public',
-    members: 789,
-    avatar: 'https://placehold.co/40x40/9C27B0/FFFFFF?text=A',
-    isJoined: false,
-    lastMessage: {
-      user: 'ArtGuru',
-      content: 'Tutorial de sombreamento disponível!',
-      timestamp: '1h'
-    },
-    unreadCount: 0,
-    isActive: false
-  }
+const mockStories: Story[] = [
+  { id: '1', author: { name: 'Você', avatar: 'https://placehold.co/60x60.png' }, thumbnail: 'https://placehold.co/60x60/D4A757/FFFFFF?text=+', isViewed: false },
+  { id: '2', author: { name: 'PixelPro', avatar: 'https://placehold.co/60x60.png' }, thumbnail: 'https://placehold.co/60x60/7DF9FF/000000?text=PP', isViewed: false, isLive: true },
+  { id: '3', author: { name: 'ArtMaster', avatar: 'https://placehold.co/60x60.png' }, thumbnail: 'https://placehold.co/60x60/9C27B0/FFFFFF?text=AM', isViewed: true }
 ];
 
-const mockLiveStreams: LiveStream[] = [
-  {
-    id: '1',
-    streamer: {
-      name: 'PixelMaster',
-      avatar: 'https://placehold.co/40x40.png',
-      verified: true,
-      followers: 2341
-    },
-    title: 'Criando Arte Pixel em Tempo Real - Lisboa',
-    viewers: 156,
-    thumbnail: 'https://placehold.co/300x200/D4A757/FFFFFF?text=Live+Stream',
-    category: 'Arte',
-    isLive: true,
-    duration: '1:23:45'
-  }
-];
-
-const mockEvents: CommunityEvent[] = [
-  {
-    id: '1',
-    title: 'Concurso de Arte Natalícia',
-    description: 'Crie o melhor pixel com tema natalício e ganhe prémios incríveis!',
-    type: 'contest',
-    startDate: '2024-12-20',
-    endDate: '2024-12-31',
-    participants: 234,
-    maxParticipants: 500,
-    prize: '2000€ + Pixel Lendário',
-    isOnline: true,
-    organizer: {
-      name: 'Pixel Universe',
-      avatar: 'https://placehold.co/40x40.png',
-      verified: true
-    },
-    isJoined: false,
-    status: 'upcoming'
-  }
+const trendingHashtags = [
+  { tag: '#pixelart', posts: 2340 },
+  { tag: '#lisboa', posts: 1890 },
+  { tag: '#nft', posts: 1567 },
+  { tag: '#tutorial', posts: 1234 },
+  { tag: '#concurso', posts: 987 }
 ];
 
 export default function CommunityPage() {
-  const [posts, setPosts] = useState<SocialPost[]>(mockPosts);
-  const [chatRooms] = useState<ChatRoom[]>(mockChatRooms);
-  const [liveStreams] = useState<LiveStream[]>(mockLiveStreams);
-  const [events] = useState<CommunityEvent[]>(mockEvents);
+  const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [newPost, setNewPost] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [activeTab, setActiveTab] = useState('feed');
-  const [selectedChatRoom, setSelectedChatRoom] = useState<string | null>(null);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState(1247);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { addCredits, addXp } = useUserStore();
-  const router = useRouter();
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  const moods = ['😊', '🎨', '🚀', '💪', '🔥', '✨', '🎉', '💡', '🌟', '❤️'];
-  const locations = ['Lisboa', 'Porto', 'Coimbra', 'Braga', 'Faro', 'Aveiro', 'Viseu'];
-
-  useEffect(() => {
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setOnlineUsers(prev => prev + Math.floor(Math.random() * 10) - 5);
-      
-      // Add random activity
-      if (Math.random() > 0.8) {
-        const activities = [
-          'PixelMaster comprou um pixel em Lisboa',
-          'ArtistaPro criou uma nova obra',
-          'ColorQueen ganhou uma conquista',
-          'InvestorPro vendeu um pixel raro'
-        ];
-        
-        // Could add to activity feed here
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { addXp, addCredits } = useUserStore();
 
   const handleCreatePost = () => {
-    if (!newPost.trim()) return;
-    
-    const post: SocialPost = {
+    if (!user) {
+      toast({
+        title: "Login Necessário",
+        description: "Faça login para criar posts na comunidade.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!newPost.trim()) {
+      toast({
+        title: "Post Vazio",
+        description: "Escreva algo antes de publicar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const post: Post = {
       id: Date.now().toString(),
       author: {
-        id: 'current-user',
-        name: 'Você',
-        username: '@voce',
-        avatar: 'https://placehold.co/40x40.png',
+        id: 'current_user',
+        name: user.displayName || 'Você',
+        username: 'voce_user',
+        avatar: user.photoURL || 'https://placehold.co/40x40.png',
         verified: true,
         level: 15,
-        followers: 234,
-        isFollowing: false
+        followers: 0
       },
-      content: newPost,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      views: 0,
+      content: {
+        text: newPost,
+        images: selectedImages.length > 0 ? ['https://placehold.co/500x500/D4A757/FFFFFF?text=Novo+Post'] : undefined
+      },
+      engagement: {
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        views: 1
+      },
       timestamp: 'agora',
-      isLiked: false,
-      isBookmarked: false,
-      isShared: false,
-      tags: newPost.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
-      mentions: newPost.match(/@\w+/g)?.map(mention => mention.substring(1)) || [],
       location: selectedLocation,
       mood: selectedMood,
-      privacy: 'public',
-      isPinned: false,
-      isPromoted: false,
-      engagement: {
-        rate: 0,
-        reach: 0
-      }
+      hashtags: newPost.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
+      isLiked: false,
+      isBookmarked: false,
+      isFollowing: false
     };
-    
+
     setPosts(prev => [post, ...prev]);
     setNewPost('');
     setSelectedMood('');
     setSelectedLocation('');
-    
-    addXp(10);
-    addCredits(5);
-    
+    setSelectedImages([]);
+    setShowCreatePost(false);
+
+    // Recompensar utilizador
+    addXp(25);
+    addCredits(10);
+
     toast({
-      title: "Post Criado! 📝",
-      description: "Sua publicação foi partilhada com a comunidade. +10 XP, +5 créditos",
+      title: "Post Criado! 🎉",
+      description: "Seu post foi publicado na comunidade. +25 XP, +10 créditos!",
     });
   };
 
   const handleLike = (postId: string) => {
+    if (!user) {
+      toast({
+        title: "Login Necessário",
+        description: "Faça login para curtir posts.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setPosts(prev => prev.map(post => 
       post.id === postId 
         ? { 
             ...post, 
             isLiked: !post.isLiked,
-            likes: post.isLiked ? post.likes - 1 : post.likes + 1
-          }
-        : post
-    ));
-  };
-
-  const handleFollow = (userId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.author.id === userId 
-        ? { 
-            ...post, 
-            author: {
-              ...post.author,
-              isFollowing: !post.author.isFollowing,
-              followers: post.author.isFollowing ? post.author.followers - 1 : post.author.followers + 1
+            engagement: {
+              ...post.engagement,
+              likes: post.isLiked ? post.engagement.likes - 1 : post.engagement.likes + 1
             }
           }
         : post
     ));
-    
+
+    if (!posts.find(p => p.id === postId)?.isLiked) {
+      addXp(5);
+    }
+  };
+
+  const handleFollow = (userId: string) => {
+    if (!user) {
+      toast({
+        title: "Login Necessário",
+        description: "Faça login para seguir utilizadores.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setPosts(prev => prev.map(post => 
+      post.author.id === userId 
+        ? { ...post, isFollowing: !post.isFollowing }
+        : post
+    ));
+
     toast({
       title: "Seguindo!",
       description: "Agora você segue este utilizador.",
     });
   };
 
-  const handleJoinChatRoom = (roomId: string) => {
-    setSelectedChatRoom(roomId);
-    // Load chat messages for this room
-    setChatMessages([
-      {
-        id: '1',
-        user: 'PixelMaster',
-        avatar: 'https://placehold.co/30x30.png',
-        content: 'Olá pessoal! Como estão?',
-        timestamp: '14:23',
-        isOwn: false
-      },
-      {
-        id: '2',
-        user: 'ArtistaPro',
-        avatar: 'https://placehold.co/30x30.png',
-        content: 'Tudo bem! Acabei de terminar um pixel incrível',
-        timestamp: '14:25',
-        isOwn: false
-      }
-    ]);
+  const handleShare = (postId: string) => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Pixel Universe',
+        text: 'Confira este post incrível!',
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link Copiado",
+        description: "Link do post copiado para a área de transferência.",
+      });
+    }
   };
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedChatRoom) return;
-    
-    const message = {
-      id: Date.now().toString(),
-      user: 'Você',
-      avatar: 'https://placehold.co/30x30.png',
-      content: newMessage,
-      timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
-      isOwn: true
-    };
-    
-    setChatMessages(prev => [...prev, message]);
-    setNewMessage('');
-    
-    // Auto-scroll to bottom
-    setTimeout(() => {
-      if (chatScrollRef.current) {
-        chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-      }
-    }, 100);
-  };
-
-  const handleJoinEvent = (eventId: string) => {
-    toast({
-      title: "Evento Registado! 🎉",
-      description: "Você foi registado no evento com sucesso.",
-    });
-  };
-
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
-  };
+  const moods = ['😊', '🎨', '🚀', '💎', '🔥', '✨', '🎯', '💪', '🌟', '🎉'];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-7xl mb-16">
-        {/* Enhanced Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
+      <div className="container mx-auto py-6 px-4 max-w-6xl mb-16">
+        {/* Header */}
+        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden mb-6">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
           <CardHeader className="relative">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <CardTitle className="font-headline text-3xl text-gradient-gold-animated flex items-center">
-                  <Users className="h-8 w-8 mr-3 animate-glow" />
-                  Comunidade Pixel Universe
-                </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2">
-                  Conecte-se, partilhe e colabore com artistas de todo Portugal
-                </CardDescription>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="bg-background/50 p-3 rounded-lg text-center">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-sm font-medium">{onlineUsers.toLocaleString()}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Online agora</p>
-                </div>
-                <Button className="bg-gradient-to-r from-primary to-accent">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar Post
-                </Button>
-              </div>
-            </div>
+            <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center">
+              <Users className="h-8 w-8 mr-3 animate-glow" />
+              Comunidade Pixel Universe
+            </CardTitle>
+            <CardDescription className="text-muted-foreground mt-2">
+              Conecte-se, partilhe e descubra arte pixel incrível com a nossa comunidade global
+            </CardDescription>
           </CardHeader>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-12 bg-card/50 backdrop-blur-sm shadow-md">
-            <TabsTrigger value="feed" className="font-headline">
-              <MessageSquare className="h-4 w-4 mr-2"/>
-              Feed Social
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="font-headline">
-              <MessageCircle className="h-4 w-4 mr-2"/>
-              Chat Rooms
-            </TabsTrigger>
-            <TabsTrigger value="live" className="font-headline">
-              <Video className="h-4 w-4 mr-2"/>
-              Lives
-            </TabsTrigger>
-            <TabsTrigger value="events" className="font-headline">
-              <Calendar className="h-4 w-4 mr-2"/>
-              Eventos
-            </TabsTrigger>
-            <TabsTrigger value="discover" className="font-headline">
-              <Search className="h-4 w-4 mr-2"/>
-              Descobrir
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Esquerda */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* Stories */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Stories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {mockStories.map(story => (
+                    <div key={story.id} className="flex-shrink-0 text-center cursor-pointer">
+                      <div className={cn(
+                        "relative w-16 h-16 rounded-full p-1",
+                        story.isViewed ? "bg-gray-300" : "bg-gradient-to-tr from-primary to-accent",
+                        story.isLive && "animate-pulse"
+                      )}>
+                        <img 
+                          src={story.thumbnail} 
+                          alt={story.author.name}
+                          className="w-full h-full rounded-full object-cover bg-background"
+                        />
+                        {story.isLive && (
+                          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+                            <Badge className="bg-red-500 text-xs px-1">AO VIVO</Badge>
+                          </div>
+                        )}
+                        {story.id === '1' && (
+                          <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
+                            <Plus className="h-3 w-3 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs mt-1 truncate w-16">{story.author.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Social Feed */}
-          <TabsContent value="feed" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Main Feed */}
-              <div className="lg:col-span-3 space-y-6">
-                {/* Create Post */}
-                <Card>
-                  <CardContent className="p-4">
+            {/* Trending Hashtags */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2 text-orange-500" />
+                  Trending
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {trendingHashtags.map((item, index) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <span className="text-primary font-medium cursor-pointer hover:underline">
+                      {item.tag}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {item.posts.toLocaleString()} posts
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Sugestões de Seguir */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Sugestões para Seguir</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  { name: 'PixelMaster', username: '@pixelmaster', avatar: 'https://placehold.co/40x40.png', verified: true },
+                  { name: 'ArtisticSoul', username: '@artisticsoul', avatar: 'https://placehold.co/40x40.png', verified: false },
+                  { name: 'ColorWizard', username: '@colorwizard', avatar: 'https://placehold.co/40x40.png', verified: true }
+                ].map((user, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.avatar} />
+                        <AvatarFallback>{user.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium text-sm">{user.name}</p>
+                          {user.verified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{user.username}</p>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline">Seguir</Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Feed Principal */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Criar Post */}
+            <Card>
+              <CardContent className="p-4">
+                {!user ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      Faça login para participar da comunidade
+                    </p>
+                    <AuthModal>
+                      <Button>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Fazer Login
+                      </Button>
+                    </AuthModal>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
                     <div className="flex gap-3">
                       <Avatar>
-                        <AvatarImage src="https://placehold.co/40x40.png" />
-                        <AvatarFallback>V</AvatarFallback>
+                        <AvatarImage src={user.photoURL || 'https://placehold.co/40x40.png'} />
+                        <AvatarFallback>{user.displayName?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 space-y-3">
+                      <div className="flex-1">
                         <Textarea
-                          placeholder="O que está a acontecer no seu mundo de pixels?"
+                          placeholder="O que está a acontecer no seu mundo pixel?"
                           value={newPost}
                           onChange={(e) => setNewPost(e.target.value)}
-                          className="resize-none"
-                          rows={3}
+                          className="min-h-[80px] resize-none border-none bg-muted/20 focus:bg-muted/30"
                         />
-                        
-                        {/* Post Options */}
+                      </div>
+                    </div>
+
+                    {/* Opções de Post */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm">
+                          <ImageIcon className="h-4 w-4 mr-2" />
+                          Foto
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Video className="h-4 w-4 mr-2" />
+                          Vídeo
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Palette className="h-4 w-4 mr-2" />
+                          Pixel
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Local
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {/* Mood Selector */}
+                        <div className="flex gap-1">
+                          {moods.slice(0, 5).map(mood => (
+                            <Button
+                              key={mood}
+                              variant="ghost"
+                              size="sm"
+                              className={cn(
+                                "text-lg p-1 h-8 w-8",
+                                selectedMood === mood && "bg-primary/20"
+                              )}
+                              onClick={() => setSelectedMood(selectedMood === mood ? '' : mood)}
+                            >
+                              {mood}
+                            </Button>
+                          ))}
+                        </div>
+
+                        <Button 
+                          onClick={handleCreatePost}
+                          disabled={!newPost.trim()}
+                          className="bg-gradient-to-r from-primary to-accent"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          Publicar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Posts Feed */}
+            <div className="space-y-6">
+              <AnimatePresence>
+                {posts.map((post, index) => (
+                  <motion.div
+                    key={post.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {/* Post Header */}
+                      <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              <Camera className="h-4 w-4 mr-2" />
-                              Foto
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <MapPin className="h-4 w-4 mr-2" />
-                              Localização
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Palette className="h-4 w-4 mr-2" />
-                              Pixel
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={post.author.avatar} />
+                              <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold">{post.author.name}</h3>
+                                {post.author.verified && (
+                                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                                )}
+                                <Badge variant="secondary" className="text-xs">
+                                  Nível {post.author.level}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span>@{post.author.username}</span>
+                                <span>•</span>
+                                <span>{post.timestamp}</span>
+                                {post.location && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {post.location}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {post.mood && <span className="text-lg">{post.mood}</span>}
+                            {!post.isFollowing && post.author.id !== 'current_user' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleFollow(post.author.id)}
+                              >
+                                Seguir
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </div>
-                          
-                          <Button onClick={handleCreatePost} disabled={!newPost.trim()}>
-                            <Send className="h-4 w-4 mr-2" />
-                            Publicar
+                        </div>
+                      </CardHeader>
+
+                      {/* Post Content */}
+                      <CardContent className="space-y-4">
+                        {post.content.text && (
+                          <p className="text-foreground leading-relaxed">
+                            {post.content.text.split(' ').map((word, i) => 
+                              word.startsWith('#') ? (
+                                <span key={i} className="text-primary hover:underline cursor-pointer">
+                                  {word}{' '}
+                                </span>
+                              ) : (
+                                <span key={i}>{word} </span>
+                              )
+                            )}
+                          </p>
+                        )}
+
+                        {post.content.images && (
+                          <div className="grid grid-cols-1 gap-2">
+                            {post.content.images.map((image, i) => (
+                              <img 
+                                key={i}
+                                src={image} 
+                                alt="Post content"
+                                className="w-full rounded-lg object-cover max-h-96"
+                              />
+                            ))}
+                          </div>
+                        )}
+
+                        {post.content.pixel && (
+                          <Card className="bg-muted/20">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-3">
+                                <img 
+                                  src={post.content.pixel.imageUrl} 
+                                  alt="Pixel"
+                                  className="w-16 h-16 rounded border"
+                                />
+                                <div>
+                                  <h4 className="font-medium">
+                                    Pixel ({post.content.pixel.x}, {post.content.pixel.y})
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {post.content.pixel.region}
+                                  </p>
+                                  <Button size="sm" variant="outline" className="mt-2">
+                                    Ver Pixel
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {post.content.poll && (
+                          <Card className="bg-muted/20">
+                            <CardContent className="p-4">
+                              <h4 className="font-medium mb-3">{post.content.poll.question}</h4>
+                              <div className="space-y-2">
+                                {post.content.poll.options.map((option, i) => {
+                                  const percentage = (option.votes / post.content.poll!.totalVotes) * 100;
+                                  return (
+                                    <div key={i} className="relative">
+                                      <Button 
+                                        variant="outline" 
+                                        className="w-full justify-between h-auto p-3"
+                                      >
+                                        <span>{option.text}</span>
+                                        <span className="font-bold">{percentage.toFixed(0)}%</span>
+                                      </Button>
+                                      <div 
+                                        className="absolute inset-0 bg-primary/20 rounded-md transition-all"
+                                        style={{ width: `${percentage}%` }}
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {post.content.poll.totalVotes} votos
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Hashtags */}
+                        {post.hashtags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {post.hashtags.map(tag => (
+                              <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-primary/10">
+                                #{tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+
+                      {/* Post Actions */}
+                      <CardFooter className="pt-0">
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-6">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleLike(post.id)}
+                              className={cn(
+                                "gap-2",
+                                post.isLiked && "text-red-500"
+                              )}
+                            >
+                              <Heart className={cn("h-4 w-4", post.isLiked && "fill-current")} />
+                              {post.engagement.likes}
+                            </Button>
+
+                            <Button variant="ghost" size="sm" className="gap-2">
+                              <MessageSquare className="h-4 w-4" />
+                              {post.engagement.comments}
+                            </Button>
+
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="gap-2"
+                              onClick={() => handleShare(post.id)}
+                            >
+                              <Share2 className="h-4 w-4" />
+                              {post.engagement.shares}
+                            </Button>
+
+                            <span className="text-sm text-muted-foreground flex items-center gap-1">
+                              <Eye className="h-4 w-4" />
+                              {post.engagement.views}
+                            </span>
+                          </div>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setPosts(prev => prev.map(p => 
+                                p.id === post.id ? { ...p, isBookmarked: !p.isBookmarked } : p
+                              ));
+                            }}
+                          >
+                            <Bookmark className={cn(
+                              "h-4 w-4",
+                              post.isBookmarked && "fill-current text-yellow-500"
+                            )} />
                           </Button>
                         </div>
-                        
-                        {/* Mood and Location */}
-                        <div className="flex gap-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Humor:</span>
-                            <div className="flex gap-1">
-                              {moods.slice(0, 5).map(mood => (
-                                <button
-                                  key={mood}
-                                  onClick={() => setSelectedMood(mood)}
-                                  className={`text-lg hover:scale-125 transition-transform ${
-                                    selectedMood === mood ? 'scale-125' : ''
-                                  }`}
-                                >
-                                  {mood}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Local:</span>
-                            <select
-                              value={selectedLocation}
-                              onChange={(e) => setSelectedLocation(e.target.value)}
-                              className="text-sm border border-input bg-background rounded px-2 py-1"
-                            >
-                              <option value="">Selecionar...</option>
-                              {locations.map(location => (
-                                <option key={location} value={location}>{location}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Posts Feed */}
-                <div className="space-y-6">
-                  <AnimatePresence>
-                    {posts.map(post => (
-                      <motion.div
-                        key={post.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                      >
-                        <Card className="hover:shadow-lg transition-shadow">
-                          <CardContent className="p-6">
-                            {/* Post Header */}
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-3">
-                                <Link href={`/member/${post.author.id}`}>
-                                  <Avatar className="cursor-pointer hover:scale-110 transition-transform">
-                                    <AvatarImage src={post.author.avatar} />
-                                    <AvatarFallback>{post.author.name[0]}</AvatarFallback>
-                                  </Avatar>
-                                </Link>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <Link href={`/member/${post.author.id}`}>
-                                      <span className="font-semibold hover:text-primary cursor-pointer">
-                                        {post.author.name}
-                                      </span>
-                                    </Link>
-                                    {post.author.verified && (
-                                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                                    )}
-                                    <Badge variant="secondary" className="text-xs">
-                                      Nível {post.author.level}
-                                    </Badge>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <span>{post.author.username}</span>
-                                    <span>•</span>
-                                    <span>{post.timestamp}</span>
-                                    {post.location && (
-                                      <>
-                                        <span>•</span>
-                                        <MapPin className="h-3 w-3" />
-                                        <span>{post.location}</span>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                {post.mood && <span className="text-lg">{post.mood}</span>}
-                                {!post.author.isFollowing && post.author.id !== 'current-user' && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleFollow(post.author.id)}
-                                  >
-                                    <UserPlus className="h-4 w-4 mr-2" />
-                                    Seguir
-                                  </Button>
-                                )}
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            {/* Post Content */}
-                            <div className="mb-4">
-                              <p className="text-foreground leading-relaxed mb-3">
-                                {post.content}
-                              </p>
-                              
-                              {/* Tags */}
-                              {post.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-3">
-                                  {post.tags.map(tag => (
-                                    <Badge key={tag} variant="outline" className="text-xs cursor-pointer hover:bg-primary/10">
-                                      #{tag}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                              
-                              {/* Media */}
-                              {post.media && post.media.length > 0 && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                                  {post.media.map((media, index) => (
-                                    <div key={index} className="relative rounded-lg overflow-hidden">
-                                      <img 
-                                        src={media.url} 
-                                        alt="Post media"
-                                        className="w-full h-64 object-cover hover:scale-105 transition-transform cursor-pointer"
-                                      />
-                                      {media.type === 'video' && (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                          <Play className="h-12 w-12 text-white bg-black/50 rounded-full p-3" />
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              
-                              {/* Pixel Showcase */}
-                              {post.pixel && (
-                                <Card className="bg-muted/20 mb-3">
-                                  <CardContent className="p-4">
-                                    <div className="flex items-center gap-4">
-                                      <img 
-                                        src={post.pixel.imageUrl} 
-                                        alt="Pixel"
-                                        className="w-20 h-20 rounded border"
-                                      />
-                                      <div className="flex-1">
-                                        <h4 className="font-semibold">
-                                          Pixel ({post.pixel.x}, {post.pixel.y})
-                                        </h4>
-                                        <p className="text-sm text-muted-foreground">
-                                          {post.pixel.region}
-                                        </p>
-                                        {post.pixel.price && (
-                                          <p className="text-sm font-medium text-primary">
-                                            €{post.pixel.price}
-                                          </p>
-                                        )}
-                                      </div>
-                                      <Button size="sm">
-                                        Ver Pixel
-                                      </Button>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              )}
-                            </div>
-                            
-                            {/* Engagement Stats */}
-                            <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                              <div className="flex items-center gap-4">
-                                <span>{formatNumber(post.likes)} curtidas</span>
-                                <span>{formatNumber(post.comments)} comentários</span>
-                                <span>{formatNumber(post.shares)} partilhas</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Eye className="h-4 w-4" />
-                                <span>{formatNumber(post.views)} visualizações</span>
-                              </div>
-                            </div>
-                            
-                            {/* Action Buttons */}
-                            <div className="flex items-center justify-between border-t pt-4">
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleLike(post.id)}
-                                  className={post.isLiked ? 'text-red-500' : ''}
-                                >
-                                  <Heart className={`h-4 w-4 mr-2 ${post.isLiked ? 'fill-current' : ''}`} />
-                                  Curtir
-                                </Button>
-                                
-                                <Button variant="ghost" size="sm">
-                                  <MessageSquare className="h-4 w-4 mr-2" />
-                                  Comentar
-                                </Button>
-                                
-                                <Button variant="ghost" size="sm">
-                                  <Share2 className="h-4 w-4 mr-2" />
-                                  Partilhar
-                                </Button>
-                              </div>
-                              
-                              <Button variant="ghost" size="sm">
-                                <Bookmark className={`h-4 w-4 ${post.isBookmarked ? 'fill-current' : ''}`} />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </div>
-              
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Trending Topics */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-sm">
-                      <TrendingUp className="h-4 w-4 mr-2 text-orange-500" />
-                      Trending
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { tag: '#LisboaArt', posts: '234 posts' },
-                      { tag: '#PixelInvestment', posts: '156 posts' },
-                      { tag: '#PortugalPixels', posts: '89 posts' },
-                      { tag: '#NFTArt', posts: '67 posts' },
-                      { tag: '#CommunityEvent', posts: '45 posts' }
-                    ].map((trend, index) => (
-                      <div key={index} className="flex justify-between hover:bg-muted/20 p-2 rounded cursor-pointer">
-                        <span className="font-medium text-primary">{trend.tag}</span>
-                        <span className="text-sm text-muted-foreground">{trend.posts}</span>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Suggested Users */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-sm">
-                      <UserPlus className="h-4 w-4 mr-2 text-blue-500" />
-                      Sugestões para Seguir
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { name: 'PixelGuru', username: '@pixelguru', avatar: 'https://placehold.co/40x40.png', verified: true },
-                      { name: 'ArtCollector', username: '@artcollector', avatar: 'https://placehold.co/40x40.png', verified: false },
-                      { name: 'DigitalArtist', username: '@digitalartist', avatar: 'https://placehold.co/40x40.png', verified: true }
-                    ].map((user, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.avatar} />
-                            <AvatarFallback>{user.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium text-sm">{user.name}</span>
-                              {user.verified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
-                            </div>
-                            <span className="text-xs text-muted-foreground">{user.username}</span>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          Seguir
-                        </Button>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Live Activity */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-sm">
-                      <Activity className="h-4 w-4 mr-2 text-green-500" />
-                      Atividade ao Vivo
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {[
-                      { user: 'PixelMaster', action: 'comprou um pixel em Lisboa', time: '2m' },
-                      { user: 'ArtistaPro', action: 'criou uma nova obra', time: '5m' },
-                      { user: 'ColorQueen', action: 'ganhou uma conquista', time: '8m' }
-                    ].map((activity, index) => (
-                      <div key={index} className="text-sm">
-                        <span className="font-medium text-primary">{activity.user}</span>
-                        <span className="text-muted-foreground"> {activity.action}</span>
-                        <span className="text-xs text-muted-foreground block">{activity.time} atrás</span>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Chat Rooms */}
-          <TabsContent value="chat" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Chat Rooms List */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Salas de Chat</h3>
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Sala
-                  </Button>
-                </div>
-                
-                {chatRooms.map(room => (
-                  <Card 
-                    key={room.id} 
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      selectedChatRoom === room.id ? 'border-primary bg-primary/5' : ''
-                    }`}
-                    onClick={() => handleJoinChatRoom(room.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <img src={room.avatar} alt={room.name} className="w-12 h-12 rounded-full" />
-                          {room.isActive && (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">{room.name}</h4>
-                            {room.unreadCount > 0 && (
-                              <Badge className="bg-red-500 text-white">
-                                {room.unreadCount}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">{room.members} membros</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {room.lastMessage.user}: {room.lastMessage.content}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardFooter>
+                    </Card>
+                  </motion.div>
                 ))}
-              </div>
-              
-              {/* Chat Interface */}
-              <div className="lg:col-span-2">
-                {selectedChatRoom ? (
-                  <Card className="h-96 flex flex-col">
-                    <CardHeader className="border-b">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={chatRooms.find(r => r.id === selectedChatRoom)?.avatar} 
-                            alt="Room" 
-                            className="w-8 h-8 rounded-full" 
-                          />
-                          <div>
-                            <h4 className="font-medium">
-                              {chatRooms.find(r => r.id === selectedChatRoom)?.name}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {chatRooms.find(r => r.id === selectedChatRoom)?.members} membros online
-                            </p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="icon">
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    
-                    <ScrollArea className="flex-1 p-4" ref={chatScrollRef}>
-                      <div className="space-y-4">
-                        {chatMessages.map(message => (
-                          <div 
-                            key={message.id} 
-                            className={`flex gap-3 ${message.isOwn ? 'flex-row-reverse' : ''}`}
-                          >
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={message.avatar} />
-                              <AvatarFallback>{message.user[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className={`max-w-xs ${message.isOwn ? 'text-right' : ''}`}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-sm">{message.user}</span>
-                                <span className="text-xs text-muted-foreground">{message.timestamp}</span>
-                              </div>
-                              <div className={`p-3 rounded-lg ${
-                                message.isOwn 
-                                  ? 'bg-primary text-primary-foreground' 
-                                  : 'bg-muted'
-                              }`}>
-                                {message.content}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {isTyping && (
-                          <div className="flex gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback>?</AvatarFallback>
-                            </Avatar>
-                            <div className="bg-muted p-3 rounded-lg">
-                              <div className="flex gap-1">
-                                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
-                                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </ScrollArea>
-                    
-                    <div className="p-4 border-t">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Escrever mensagem..."
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                          className="flex-1"
-                        />
-                        <Button onClick={handleSendMessage}>
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ) : (
-                  <Card className="h-96 flex items-center justify-center">
-                    <div className="text-center">
-                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="font-semibold mb-2">Selecione uma sala de chat</h3>
-                      <p className="text-muted-foreground">
-                        Escolha uma sala para começar a conversar com a comunidade
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </div>
+              </AnimatePresence>
             </div>
-          </TabsContent>
+          </div>
 
-          {/* Live Streams */}
-          <TabsContent value="live" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {liveStreams.map(stream => (
-                <Card key={stream.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="relative">
-                    <img 
-                      src={stream.thumbnail} 
-                      alt={stream.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <Badge className="absolute top-2 left-2 bg-red-500 animate-pulse">
-                      <div className="w-2 h-2 bg-white rounded-full mr-1" />
-                      AO VIVO
-                    </Badge>
-                    <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
-                      {stream.viewers} espectadores
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={stream.streamer.avatar} />
-                        <AvatarFallback>{stream.streamer.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium text-sm">{stream.streamer.name}</span>
-                          {stream.streamer.verified && (
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {stream.streamer.followers.toLocaleString()} seguidores
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <h3 className="font-semibold mb-2">{stream.title}</h3>
-                    <div className="flex items-center justify-between text-sm">
-                      <Badge variant="outline">{stream.category}</Badge>
-                      <span className="text-muted-foreground">{stream.duration}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {/* Start Your Own Stream */}
-              <Card className="border-dashed border-2 border-primary/30 hover:border-primary/50 transition-colors cursor-pointer">
-                <CardContent className="p-8 text-center">
-                  <Video className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">Iniciar Live Stream</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Partilhe sua criação em tempo real
-                  </p>
-                  <Button>
-                    <Play className="h-4 w-4 mr-2" />
-                    Começar Stream
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Events */}
-          <TabsContent value="events" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map(event => (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <Avatar>
-                        <AvatarImage src={event.organizer.avatar} />
-                        <AvatarFallback>{event.organizer.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium text-sm">{event.organizer.name}</span>
-                          {event.organizer.verified && (
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                          )}
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {event.type}
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <h3 className="font-semibold mb-2">{event.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{event.description}</p>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{new Date(event.startDate).toLocaleDateString('pt-PT')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>{event.participants} participantes</span>
-                        {event.maxParticipants && (
-                          <span className="text-muted-foreground">/ {event.maxParticipants}</span>
-                        )}
-                      </div>
-                      {event.prize && (
-                        <div className="flex items-center gap-2">
-                          <Trophy className="h-4 w-4 text-yellow-500" />
-                          <span className="text-yellow-500 font-medium">{event.prize}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <Button 
-                      className="w-full mt-4"
-                      onClick={() => handleJoinEvent(event.id)}
-                      disabled={event.isJoined}
-                    >
-                      {event.isJoined ? 'Registado' : 'Participar'}
+          {/* Sidebar Direita */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* Eventos Ao Vivo */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center">
+                  <Zap className="h-5 w-5 mr-2 text-red-500" />
+                  Eventos Ao Vivo
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  { name: 'Concurso de Arte', participants: 234, prize: '1000€' },
+                  { name: 'Workshop Pixel Art', participants: 89, prize: 'Certificado' },
+                  { name: 'Leilão Premium', participants: 156, prize: 'Pixel Raro' }
+                ].map((event, index) => (
+                  <div key={index} className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                    <h4 className="font-medium text-sm">{event.name}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {event.participants} participantes • Prémio: {event.prize}
+                    </p>
+                    <Button size="sm" className="w-full mt-2 bg-red-500 hover:bg-red-600">
+                      Participar
                     </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Discover */}
-          <TabsContent value="discover" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Popular Hashtags */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Hash className="h-5 w-5 mr-2 text-primary" />
-                    Hashtags Populares
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { tag: 'PixelArt', count: 1234, trend: 'up' },
-                      { tag: 'Lisboa', count: 567, trend: 'up' },
-                      { tag: 'Investment', count: 234, trend: 'down' },
-                      { tag: 'NFT', count: 189, trend: 'up' },
-                      { tag: 'Community', count: 156, trend: 'neutral' },
-                      { tag: 'Tutorial', count: 89, trend: 'up' }
-                    ].map((hashtag, index) => (
-                      <div key={index} className="p-3 bg-muted/20 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-primary">#{hashtag.tag}</span>
-                          {hashtag.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{hashtag.count} posts</p>
-                      </div>
-                    ))}
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </CardContent>
+            </Card>
 
-              {/* Featured Artists */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                    Artistas em Destaque
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { name: 'PixelMaster', followers: 2341, pixels: 156, avatar: 'https://placehold.co/40x40.png', verified: true },
-                      { name: 'ArtistaPro', followers: 1890, pixels: 89, avatar: 'https://placehold.co/40x40.png', verified: false },
-                      { name: 'ColorQueen', followers: 1567, pixels: 234, avatar: 'https://placehold.co/40x40.png', verified: true }
-                    ].map((artist, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={artist.avatar} />
-                            <AvatarFallback>{artist.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">{artist.name}</span>
-                              {artist.verified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {artist.followers.toLocaleString()} seguidores • {artist.pixels} pixels
-                            </p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          Ver Perfil
-                        </Button>
-                      </div>
-                    ))}
+            {/* Conquistas da Comunidade */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center">
+                  <Award className="h-5 w-5 mr-2 text-yellow-500" />
+                  Conquistas Recentes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  { user: 'PixelMaster', achievement: 'Mestre das Cores', time: '2h' },
+                  { user: 'ArtisticSoul', achievement: 'Colecionador', time: '4h' },
+                  { user: 'ColorWizard', achievement: 'Primeiro Pixel', time: '6h' }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                    <div className="flex-1">
+                      <p className="text-sm">
+                        <span className="font-medium">{item.user}</span> desbloqueou{' '}
+                        <span className="text-primary">{item.achievement}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">{item.time}</p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Links Úteis */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Links Úteis</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Link href="/tutorials">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Play className="h-4 w-4 mr-2" />
+                    Tutoriais
+                  </Button>
+                </Link>
+                <Link href="/marketplace">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Gem className="h-4 w-4 mr-2" />
+                    Marketplace
+                  </Button>
+                </Link>
+                <Link href="/achievements">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Award className="h-4 w-4 mr-2" />
+                    Conquistas
+                  </Button>
+                </Link>
+                <Link href="/ranking">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Target className="h-4 w-4 mr-2" />
+                    Rankings
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
