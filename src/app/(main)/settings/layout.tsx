@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useUserStore } from "@/lib/store";
@@ -54,81 +54,56 @@ export default function SettingsLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-6xl">
-        {/* Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-               style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative z-10">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center">
-                  <Settings className="h-8 w-8 mr-3 animate-glow" />
-                  Definições
-                </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2">
-                  Personalize a sua experiência no Pixel Universe
-                </CardDescription>
+    <div className="container mx-auto py-6 px-4 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar */}
+        <Card className="lg:col-span-1 h-fit">
+          <CardContent className="p-4">
+            <nav className="flex flex-col space-y-1">
+              {sidebarNavItems.map((item) => (
+                <Link key={item.href} href={item.href} passHref>
+                  <Button
+                    variant={pathname.startsWith(item.href) ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <item.icon className={cn("h-4 w-4 mr-3", item.color)} />
+                    <span>{item.label}</span>
+                  </Button>
+                </Link>
+              ))}
+            </nav>
+            
+            <Separator className="my-4" />
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Coins className="h-4 w-4 mr-2 text-primary" />
+                  <span className="text-sm">Créditos</span>
+                </div>
+                <span className="font-medium text-primary">{credits.toLocaleString('pt-PT')}</span>
               </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Gift className="h-4 w-4 mr-2 text-accent" />
+                  <span className="text-sm">Especiais</span>
+                </div>
+                <span className="font-medium text-accent">{specialCredits.toLocaleString('pt-PT')}</span>
+              </div>
+              
+              <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Terminar Sessão
+              </Button>
             </div>
-          </CardHeader>
+          </CardContent>
         </Card>
 
-        {/* Settings Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <Card className="lg:col-span-1 h-fit">
-            <CardContent className="p-4">
-              <nav className="flex flex-col space-y-1">
-                {sidebarNavItems.map((item) => (
-                  <Link href={item.href} key={item.href} passHref>
-                    <div className={cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
-                      "hover:bg-muted",
-                      pathname.startsWith(item.href) 
-                        ? "bg-primary/10 text-primary" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}>
-                      <item.icon className={cn("h-4 w-4", pathname.startsWith(item.href) ? item.color : "")} />
-                      <span>{item.label}</span>
-                    </div>
-                  </Link>
-                ))}
-              </nav>
-              
-              <Separator className="my-4" />
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Coins className="h-4 w-4 mr-2 text-primary" />
-                    <span className="text-sm">Créditos</span>
-                  </div>
-                  <span className="font-medium text-primary">{credits.toLocaleString('pt-PT')}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Gift className="h-4 w-4 mr-2 text-accent" />
-                    <span className="text-sm">Especiais</span>
-                  </div>
-                  <span className="font-medium text-accent">{specialCredits.toLocaleString('pt-PT')}</span>
-                </div>
-                
-                <Button variant="destructive" className="w-full" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Terminar Sessão
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Main Content */}
-          <main className="lg:col-span-3">
-            {children}
-          </main>
-        </div>
+        {/* Main Content */}
+        <main className="lg:col-span-3">
+          {children}
+        </main>
       </div>
     </div>
   );

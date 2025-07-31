@@ -51,6 +51,7 @@
     --sidebar-ring: 39 70% 55%;
 
     /* Variable for bottom navigation height if needed elsewhere in CSS, though primarily set in JS/TSX */
+    --header-height: 56px; /* Corresponds to h-14 */
     --bottom-nav-height: 80px; 
   }
 
@@ -110,8 +111,9 @@
   }
 
   body {
-    @apply text-foreground;
-    background-color: transparent;
+    @apply text-foreground bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300;
+    padding-top: var(--header-height);
+    padding-bottom: var(--bottom-nav-height);
   }
   
   html, body {
