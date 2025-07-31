@@ -259,7 +259,7 @@ export default function UserProfileHeader() {
                   </Link>
                   <Button variant="destructive" className="w-full justify-start mt-4" size="sm">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Terminar Sessão
+                    <Link href="/credits">Comprar Mais</Link>
                   </Button>
                 </div>
               </div>

@@ -365,8 +365,20 @@ export default function MarketplacePage() {
                   <Filter className="h-4 w-4" />
                   Filtros
                   {showFilters && <ChevronUp className="h-4 w-4" />}
-                  {!showFilters && <ChevronDown className="h-4 w-4" />}
+                  <Link href="/tutorials">Guia do Marketplace</Link>
                 </Button>
+                <HelpCenter>
+                  <Button variant="outline" className="flex-1">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Suporte ao Cliente
+                  </Button>
+                </HelpCenter>
+                <FeedbackSystem>
+                  <Button variant="outline" className="flex-1">
+                    <Flag className="h-4 w-4 mr-2" />
+                    Reportar Problema
+                  </Button>
+                </FeedbackSystem>
                 
                 <select
                   value={sortBy}

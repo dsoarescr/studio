@@ -340,6 +340,12 @@ export default function MemberPage() {
                         <Edit3 className="h-4 w-4 mr-2" />
                         Editar
                       </Button>
+                      <Link href="/settings">
+                        <Button variant="outline">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Configurações
+                        </Button>
+                      </Link>
                       <Button variant="outline" onClick={handleShareProfile}>
                         <Share2 className="h-4 w-4 mr-2" />
                         Partilhar
@@ -479,23 +485,47 @@ export default function MemberPage() {
                 <CardContent className="space-y-3">
                   <Button className="w-full justify-start" variant="outline">
                     <Plus className="h-4 w-4 mr-2" />
-                    <Link href="/community">Criar Post</Link>
+                    Criar Post
                   </Button>
+                  <Link href="/community">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Users className="h-4 w-4 mr-2" />
+                      Ir para Comunidade
+                    </Button>
+                  </Link>
                   <Button className="w-full justify-start" variant="outline">
                     <Upload className="h-4 w-4 mr-2" />
-                    <Link href="/pixels">Partilhar Pixel</Link>
+                    Partilhar Pixel
                   </Button>
+                  <Link href="/pixels">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Palette className="h-4 w-4 mr-2" />
+                      Minha Galeria
+                    </Button>
+                  </Link>
                   <Button className="w-full justify-start" variant="outline">
-                    <Users className="h-4 w-4 mr-2" />
-                    <Link href="/community">Encontrar Amigos</Link>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Encontrar Amigos
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Trophy className="h-4 w-4 mr-2" />
-                    <Link href="/achievements">Ver Conquistas</Link>
-                  </Button>
+                  <Link href="/achievements">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Ver Conquistas
+                    </Button>
+                  </Link>
                   <Button className="w-full justify-start" variant="outline">
                     <BarChart3 className="h-4 w-4 mr-2" />
-                    <Link href="/ranking">Analytics</Link>
+                    Analytics
+                  </Button>
+                  <Link href="/ranking">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Target className="h-4 w-4 mr-2" />
+                      Rankings
+                    </Button>
+                  </Link>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade Premium
                   </Button>
                 </CardContent>
               </Card>
@@ -527,15 +557,27 @@ export default function MemberPage() {
                   <div className="space-y-3">
                     <Button className="w-full" variant="outline">
                       <UserPlus className="h-4 w-4 mr-2" />
-                      <Link href="/community">Encontrar Amigos</Link>
+                      Encontrar Amigos
                     </Button>
+                    <Link href="/community">
+                      <Button className="w-full" variant="outline">
+                        <Users className="h-4 w-4 mr-2" />
+                        Ir para Comunidade
+                      </Button>
+                    </Link>
                     <Button className="w-full" variant="outline">
                       <MessageSquare className="h-4 w-4 mr-2" />
-                      <Link href="/community">Mensagens (3)</Link>
+                      Mensagens (3)
                     </Button>
+                    <Link href="/settings">
+                      <Button className="w-full" variant="outline">
+                        <Bell className="h-4 w-4 mr-2" />
+                        Notificações Sociais
+                      </Button>
+                    </Link>
                     <Button className="w-full" variant="outline">
-                      <Bell className="h-4 w-4 mr-2" />
-                      <Link href="/settings">Notificações Sociais</Link>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Partilhar Perfil
                     </Button>
                   </div>
                 </CardContent>
@@ -601,8 +643,14 @@ export default function MemberPage() {
                   </p>
                   <Button className="mt-4">
                     <Plus className="h-4 w-4 mr-2" />
-                    <Link href="/marketplace">Comprar Primeiro Pixel</Link>
+                    Comprar Primeiro Pixel
                   </Button>
+                  <Link href="/marketplace" className="block mt-2">
+                    <Button variant="outline" className="w-full">
+                      <Gem className="h-4 w-4 mr-2" />
+                      Ir para Marketplace
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
