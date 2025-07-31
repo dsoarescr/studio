@@ -70,19 +70,17 @@ export default function SettingsLayout({
             <CardContent className="p-4">
               <nav className="flex flex-col space-y-1">
                 {sidebarNavItems.map((item) => (
-                  <Link href={item.href} key={item.href} passHref legacyBehavior>
-                    <a
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted',
-                        pathname.startsWith(item.href)
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:text-foreground'
-                      )}
-                    >
-                      <item.icon className={cn("h-4 w-4", pathname.startsWith(item.href) && item.color)} />
+                  <Button
+                    key={item.href}
+                    variant={pathname === item.href ? 'default' : 'ghost'}
+                    className="w-full justify-start text-left"
+                    asChild
+                  >
+                    <Link href={item.href}>
+                      <item.icon className={cn("h-4 w-4 mr-3", pathname.startsWith(item.href) ? item.color : "")} />
                       {item.label}
-                    </a>
-                  </Link>
+                    </Link>
+                  </Button>
                 ))}
               </nav>
               

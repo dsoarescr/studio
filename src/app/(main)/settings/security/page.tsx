@@ -4,7 +4,7 @@ import React from 'react';
 import SecurityDashboard from '@/components/security/SecurityDashboard';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 
-export default function SecurityPage() {
+export default function SecuritySettingsPage() {
   return (
     <RequireAuth>
       <SecurityDashboard />
