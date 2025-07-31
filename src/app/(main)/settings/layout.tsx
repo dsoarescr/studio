@@ -12,7 +12,7 @@ import { useAuth } from '@/lib/auth-context';
 import { 
   Settings, Paintbrush, Eye, Bell, User, Shield, Zap, Globe, HelpCircle, Coins, Gift, LogOut
 } from "lucide-react";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const sidebarNavItems = [
@@ -60,17 +60,20 @@ export default function SettingsLayout({
         <Card className="lg:col-span-1 h-fit">
           <CardContent className="p-4">
             <nav className="flex flex-col space-y-1">
-              {sidebarNavItems.map((item) => (
-                <Link key={item.href} href={item.href} passHref>
-                  <Button
-                    variant={pathname.startsWith(item.href) ? "default" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <item.icon className={cn("h-4 w-4 mr-3", item.color)} />
-                    <span>{item.label}</span>
-                  </Button>
-                </Link>
-              ))}
+              {sidebarNavItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link href={item.href} key={item.href} passHref>
+                      <Button
+                        variant={isActive ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <item.icon className={cn("h-4 w-4 mr-3", item.color)} />
+                        <span>{item.label}</span>
+                      </Button>
+                  </Link>
+                )
+              })}
             </nav>
             
             <Separator className="my-4" />
