@@ -1484,33 +1484,27 @@ export default function MarketplacePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link href="/tutorials" passHref>
-                <Button asChild variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
-                  <a>
+              <Link href="/tutorials">
+                <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <Info className="h-6 w-6 text-primary" />
                     <span>Guia do Marketplace</span>
                     <p className="text-xs text-muted-foreground">Aprenda a comprar e vender</p>
-                  </a>
                 </Button>
               </Link>
               
-              <Link href="/support" passHref>
-                <Button asChild variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
-                  <a>
+              <Link href="/support">
+                <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <MessageSquare className="h-6 w-6 text-blue-500" />
                     <span>Suporte ao Cliente</span>
                     <p className="text-xs text-muted-foreground">Tire suas dúvidas</p>
-                  </a>
                 </Button>
               </Link>
               
-              <Link href="/report" passHref>
-                <Button asChild variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
-                  <a>
+              <Link href="/report">
+                <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <AlertTriangle className="h-6 w-6 text-yellow-500" />
                     <span>Reportar Problema</span>
                     <p className="text-xs text-muted-foreground">Ajude-nos a melhorar</p>
-                  </a>
                 </Button>
               </Link>
             </div>
@@ -1529,4 +1523,3 @@ export default function MarketplacePage() {
     </div>
   );
 }
-
