@@ -8,12 +8,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="flex flex-col h-full">
       <UserProfileHeader />
-      <main>
+      <main className="flex-1 overflow-y-auto">
         {children}
       </main>
       <BottomNavBar />
-    </>
+    </div>
   );
 }

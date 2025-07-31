@@ -108,18 +108,14 @@
 
   html {
     background-color: hsl(var(--background));
+    @apply h-full;
   }
 
   body {
     @apply text-foreground bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300;
-    padding-top: var(--header-height);
-    padding-bottom: var(--bottom-nav-height);
-  }
-  
-  html, body {
     @apply h-full;
   }
-
+  
   /* Mobile-specific optimizations */
   @media (max-width: 640px) {
     .container {
