@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1483,23 +1484,35 @@ export default function MarketplacePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2">
-                <Info className="h-6 w-6 text-primary" />
-                <span>Guia do Marketplace</span>
-                <p className="text-xs text-muted-foreground">Aprenda a comprar e vender</p>
-              </Button>
+              <Link href="/tutorials" passHref legacyBehavior>
+                <a className="block">
+                  <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
+                    <Info className="h-6 w-6 text-primary" />
+                    <span>Guia do Marketplace</span>
+                    <p className="text-xs text-muted-foreground">Aprenda a comprar e vender</p>
+                  </Button>
+                </a>
+              </Link>
               
-              <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2">
-                <MessageSquare className="h-6 w-6 text-blue-500" />
-                <span>Suporte ao Cliente</span>
-                <p className="text-xs text-muted-foreground">Tire suas dúvidas</p>
-              </Button>
+              <Link href="/support" passHref legacyBehavior>
+                <a className="block">
+                  <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
+                    <MessageSquare className="h-6 w-6 text-blue-500" />
+                    <span>Suporte ao Cliente</span>
+                    <p className="text-xs text-muted-foreground">Tire suas dúvidas</p>
+                  </Button>
+                </a>
+              </Link>
               
-              <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2">
-                <AlertTriangle className="h-6 w-6 text-yellow-500" />
-                <span>Reportar Problema</span>
-                <p className="text-xs text-muted-foreground">Ajude-nos a melhorar</p>
-              </Button>
+              <Link href="/report" passHref legacyBehavior>
+                <a className="block">
+                  <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
+                    <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                    <span>Reportar Problema</span>
+                    <p className="text-xs text-muted-foreground">Ajude-nos a melhorar</p>
+                  </Button>
+                </a>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -1516,3 +1529,4 @@ export default function MarketplacePage() {
     </div>
   );
 }
+
