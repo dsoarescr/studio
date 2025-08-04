@@ -462,13 +462,6 @@ export default function PixelsPage() {
     return num.toString();
   };
   
-  // Mock user data for profile sheet
-  const mockUserData = {
-    id: "user123", name: "Pixel Master", username: "@pixelmaster", avatarUrl: "https://placehold.co/100x100.png",
-    dataAiHint: "user avatar", level: 25, xp: 2450, xpMax: 3000, credits: 12500, specialCredits: 120,
-    bio: "Colecionador apaixonado de pixels raros e criador de arte digital no Pixel Universe.",
-    pixelsOwned: 156, achievementsUnlocked: 23, unlockedAchievementIds: ["pixel_initiate", "color_master", "community_star"],
-    rank: 12, location: "Lisboa, Portugal", socials: [], albums: [] };
   const handleLoadMore = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -490,6 +483,14 @@ export default function PixelsPage() {
       });
     }, 1000);
   };
+  // Mock user data for profile sheet
+  const mockUserData = {
+    id: "user123", name: "Pixel Master", username: "@pixelmaster", avatarUrl: "https://placehold.co/100x100.png",
+    dataAiHint: "user avatar", level: 25, xp: 2450, xpMax: 3000, credits: 12500, specialCredits: 120,
+    bio: "Colecionador apaixonado de pixels raros e criador de arte digital no Pixel Universe.",
+    pixelsOwned: 156, achievementsUnlocked: 23, unlockedAchievementIds: ["pixel_initiate", "color_master", "community_star"],
+    rank: 12, location: "Lisboa, Portugal", socials: [], albums: [] };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <SoundEffect 
@@ -647,18 +648,23 @@ export default function PixelsPage() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Empty State */}
+        {!isLoading && filteredPixels.length === 0 && (
+          <Card className="p-12 text-center"> 
+            <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold mb-2">Nenhum pixel encontrado</h3>
+            <p className="text-muted-foreground mb-4">
+              Tente ajustar os seus filtros ou pesquisar por outros termos
+            </p>
+            <Button onClick={clearFilters}>
+              Limpar Filtros
+            </Button>
+          </Card>
+        )}
 
         {/* Pixels Grid/List */}
-        {isLoading ? (
-          <Card className="p-12 text-center">
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-              <h3 className="text-lg font-semibold mb-2">Carregando Pixels</h3>
-              <p className="text-muted-foreground">Aguarde enquanto carregamos os pixels mais incríveis...</p>
-            </div>
-          </Card>
-        ) : (
-          <div className={cn(
+        <div className={cn(
           "gap-6",
           viewMode === 'grid' 
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
@@ -958,14 +964,27 @@ export default function PixelsPage() {
               </Card>
             </motion.div>
           ))}
-
-          {filteredPixels.length > 0 && (
-            <Button variant="outline" className="w-full mt-4" onClick={handleLoadMore}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Carregar Mais Pixels
-            </Button>
-          )}
         </div>
+        
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="flex justify-center items-center p-4">
+            <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+            <span className="ml-2">Carregando...</span>
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {filteredPixels.length > 0 && (
+          <Button 
+            variant="outline" 
+            className="w-full mt-4" 
+            onClick={handleLoadMore}
+            disabled={isLoading}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Carregar Mais Pixels
+          </Button>
         )}
 
         {/* Promotion Modal */}
@@ -1015,24 +1034,6 @@ export default function PixelsPage() {
             </div>
           </DialogContent>
         </Dialog>
-
-        {/* Empty State */}
-        {filteredPixels.length === 0 && !isLoading && (
-          <Card className="p-12 text-center"> 
-            <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum pixel encontrado</h3>
-            <p className="text-muted-foreground mb-4">
-              Tente ajustar os seus filtros ou pesquisar por outros termos
-            </p>
-            <Button onClick={() => {
-              setSearchQuery('');
-              setFilterCategory('all'); 
-              setSortBy('trending');
-            }}>
-              Limpar Filtros
-            </Button>
-          </Card>
-        )}
         
         {/* Pixel Details Dialog */} 
         <Dialog open={showPixelDetails} onOpenChange={setShowPixelDetails}>
