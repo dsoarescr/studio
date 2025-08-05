@@ -1064,6 +1064,7 @@ export default function MemberPage() {
                     <Card 
                       key={album.id} 
                       className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-primary/30"
+                      onClick={() => handleViewAlbum(album)}
                     >
                       <div className="p-3">
                         <div className="aspect-square rounded-md overflow-hidden mb-3">
@@ -1099,14 +1100,6 @@ export default function MemberPage() {
                           <div className="flex gap-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7">
                               <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-[0.7rem] h-6 px-2"
-                              onClick={() => handleViewAlbum(album)}
-                            >
-                              Ver
                             </Button>
                             <Button 
                               variant="ghost" 
