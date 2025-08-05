@@ -646,77 +646,61 @@ export default function MemberPage() {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card className="bg-card/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            <Grid3X3 className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Pixels</p>
-                            <p className="text-2xl font-bold">{pixelCount}</p>
-                          </div>
+                    <CardContent className="p-4 grid grid-cols-[auto_1fr] items-center gap-4">
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                        <Grid3X3 className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Pixels</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-2xl font-bold">{pixelCount}</p>
+                          <Badge variant="outline" className="text-green-500 border-green-500/50">+3</Badge>
                         </div>
-                        <Badge variant="outline" className="text-green-500 border-green-500/50">
-                          +3 esta semana
-                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
                   
                   <Card className="bg-card/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                            <Award className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Conquistas</p>
-                            <p className="text-2xl font-bold">{achievementCount}</p>
-                          </div>
+                    <CardContent className="p-4 grid grid-cols-[auto_1fr] items-center gap-4">
+                      <div className="p-2 rounded-lg bg-accent/10 text-accent">
+                        <Award className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Conquistas</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-2xl font-bold">{achievementCount}</p>
+                          <Badge variant="outline" className="text-green-500 border-green-500/50">+1</Badge>
                         </div>
-                        <Badge variant="outline" className="text-green-500 border-green-500/50">
-                          +1 esta semana
-                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
                   
                   <Card className="bg-card/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
-                            <Coins className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Créditos</p>
-                            <p className="text-2xl font-bold">{credits.toLocaleString('pt-PT')}</p>
-                          </div>
+                    <CardContent className="p-4 grid grid-cols-[auto_1fr] items-center gap-4">
+                      <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+                        <Coins className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Créditos</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-2xl font-bold">{credits.toLocaleString('pt-PT')}</p>
+                          <Badge variant="outline" className="text-green-500 border-green-500/50">+250</Badge>
                         </div>
-                        <Badge variant="outline" className="text-green-500 border-green-500/50">
-                          +250 esta semana
-                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
                   
                   <Card className="bg-card/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-                            <Gift className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Especiais</p>
-                            <p className="text-2xl font-bold">{specialCredits}</p>
-                          </div>
+                    <CardContent className="p-4 grid grid-cols-[auto_1fr] items-center gap-4">
+                      <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                        <Gift className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Especiais</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-2xl font-bold">{specialCredits}</p>
+                          <Badge variant="outline" className="text-green-500 border-green-500/50">+15</Badge>
                         </div>
-                        <Badge variant="outline" className="text-green-500 border-green-500/50">
-                          +15 esta semana
-                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
