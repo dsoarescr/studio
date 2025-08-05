@@ -421,6 +421,8 @@ export default function MemberPage() {
   const [showPixelDetail, setShowPixelDetail] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showCreateAlbum, setShowCreateAlbum] = useState(false);
+  const [showAlbumDetail, setShowAlbumDetail] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [newAlbumName, setNewAlbumName] = useState('');
   const [newAlbumDescription, setNewAlbumDescription] = useState('');
   const [newAlbumIsPublic, setNewAlbumIsPublic] = useState(true);
@@ -542,6 +544,11 @@ export default function MemberPage() {
       title: "Álbum Removido",
       description: "O álbum foi removido com sucesso.",
     });
+  };
+
+  const handleViewAlbum = (album: Album) => {
+    setSelectedAlbum(album);
+    setShowAlbumDetail(true);
   };
 
   // Prepare user data for UserProfileDisplay component
@@ -1057,6 +1064,7 @@ export default function MemberPage() {
                     <Card 
                       key={album.id} 
                       className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-primary/30"
+                      onClick={() => handleViewAlbum(album)}
                     >
                       <div className="p-3">
                         <div className="aspect-square rounded-md overflow-hidden mb-3">
@@ -1728,6 +1736,45 @@ export default function MemberPage() {
             >
               <Plus className="h-4 w-4 mr-2" />
               Criar Álbum
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Album Detail Modal */}
+      <Dialog open={showAlbumDetail} onOpenChange={setShowAlbumDetail}>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-6 border-b">
+            <DialogTitle className="text-xl font-headline">{selectedAlbum?.name}</DialogTitle>
+            <CardDescription>{selectedAlbum?.description}</CardDescription>
+          </DialogHeader>
+          
+          {selectedAlbum && (
+            <ScrollArea className="flex-1">
+              <div className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {pixels.slice(0, selectedAlbum.pixelCount).map(pixel => (
+                    <Card key={pixel.id} className="cursor-pointer hover:shadow-lg transition-all duration-300">
+                      <div className="aspect-square rounded-md overflow-hidden">
+                        {pixel.imageUrl ? (
+                          <img src={pixel.imageUrl} alt={pixel.title || `Pixel em ${pixel.region}`} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full" style={{ backgroundColor: pixel.color }} />
+                        )}
+                      </div>
+                      <div className="p-2 text-center">
+                        <p className="text-xs font-medium truncate">{pixel.title || `Pixel (${pixel.coordinates.x}, ${pixel.coordinates.y})`}</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+          
+          <DialogFooter className="p-4 border-t">
+            <Button variant="outline" onClick={() => setShowAlbumDetail(false)}>
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
