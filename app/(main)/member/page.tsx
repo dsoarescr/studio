@@ -1757,7 +1757,7 @@ export default function MemberPage() {
                     <Card key={pixel.id} className="cursor-pointer hover:shadow-lg transition-all duration-300">
                       <div className="aspect-square rounded-md overflow-hidden">
                         {pixel.imageUrl ? (
-                          <img src={pixel.imageUrl} alt={pixel.title || `Pixel em ${pixel.region}`} className="w-full h-full object-cover" />
+                          <img src={pixel.imageUrl} alt={pixel.title || `Pixel em ${pixel.region}`} className="w-full h-full object-cover" data-ai-hint={pixel.dataAiHint} />
                         ) : (
                           <div className="w-full h-full" style={{ backgroundColor: pixel.color }} />
                         )}
@@ -1782,4 +1782,3 @@ export default function MemberPage() {
     </div>
   );
 }
-
