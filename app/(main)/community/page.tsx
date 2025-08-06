@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -855,10 +856,14 @@ export default function CommunityPage() {
                     </div>
                   </div>
                   
-                  <Button className="w-full mt-4">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar Perfil
-                  </Button>
+                  <Link href="/member" passHref>
+                    <Button asChild className="w-full mt-4">
+                      <a>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar Perfil
+                      </a>
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
