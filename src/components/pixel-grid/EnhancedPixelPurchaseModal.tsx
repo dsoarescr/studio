@@ -247,6 +247,19 @@ export default function EnhancedPixelPurchaseModal({
     
   }, [isOpen, pixelData]);
 
+  // Update preview canvas when tab is switched
+  useEffect(() => {
+    if (activeTab === 'preview' && canvasRef.current && previewCanvasRef.current) {
+      const previewCtx = previewCanvasRef.current.getContext('2d');
+      if (previewCtx) {
+        previewCanvasRef.current.width = canvasRef.current.width;
+        previewCanvasRef.current.height = canvasRef.current.height;
+        previewCtx.drawImage(canvasRef.current, 0, 0);
+      }
+    }
+  }, [activeTab, isOpen]);
+
+
   // Advanced drawing functions
   const saveToHistory = useCallback(() => {
     const canvas = canvasRef.current;
