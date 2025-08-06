@@ -2,13 +2,13 @@
 // src/components/pixel-grid/PixelGrid.tsx
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   ZoomIn, ZoomOut, Expand, Search, Sparkles, Info, User, CalendarDays,
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users, Layers, Grid, Filter, Target, Zap, Eye, MousePointer
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -61,6 +61,12 @@ const SVG_VIEWBOX_HEIGHT = 26674;
 const LOGICAL_GRID_COLS_CONFIG = 1273;
 const RENDERED_PIXEL_SIZE_CONFIG = 1;
 
+// Enhanced visual constants
+const PIXEL_HOVER_SCALE = 1.2;
+const PIXEL_ANIMATION_DURATION = 200;
+const GRID_LINE_OPACITY = 0.1;
+const HIGHLIGHT_GLOW_SIZE = 3;
+
 // Pixel pricing constants
 const PIXEL_BASE_PRICE = 1; // Base price in euros
 const PIXEL_RARITY_MULTIPLIERS = {
@@ -94,6 +100,17 @@ const USER_BOUGHT_PIXEL_COLOR = 'hsl(var(--primary))';
 
 const MOCK_CURRENT_USER_ID = 'currentUserPixelMaster';
 
+// Enhanced pixel states
+type PixelState = 'available' | 'owned' | 'highlighted' | 'selected' | 'hovered' | 'animated';
+
+interface PixelVisualEffect {
+  x: number;
+  y: number;
+  type: 'purchase' | 'edit' | 'hover' | 'select';
+  timestamp: number;
+  duration: number;
+}
+
 interface SoldPixel {
   x: number;
   y: number;
@@ -101,6 +118,8 @@ interface SoldPixel {
   ownerId?: string;
   title?: string;
   pixelImageUrl?: string;
+  lastModified?: number;
+  purchaseAnimation?: boolean;
 }
 
 interface SelectedPixelDetails {
@@ -141,6 +160,11 @@ const ZOOM_SENSITIVITY_FACTOR = 1.1;
 const HEADER_HEIGHT_PX = 64;
 const BOTTOM_NAV_HEIGHT_PX = 64;
 
+// Enhanced interaction constants
+const DOUBLE_CLICK_THRESHOLD = 300;
+const LONG_PRESS_THRESHOLD = 800;
+const HOVER_DELAY = 500;
+
 const mockRarities: SelectedPixelDetails['rarity'][] = ['Comum', 'Raro', 'Épico', 'Lendário', 'Marco Histórico'];
 const mockLoreSnippets: string[] = [
   "Dizem que este pixel brilha sob a lua cheia.",
@@ -148,6 +172,13 @@ const mockLoreSnippets: string[] = [
   "Sente-se uma energia estranha emanando deste local.",
 ];
 
+// Enhanced visual effects
+const PIXEL_EFFECTS = {
+  PURCHASE: 'animate-scale-in',
+  EDIT: 'animate-pulse',
+  HOVER: 'animate-glow',
+  SELECT: 'animate-bounce-slow'
+};
 
 export default function PixelGrid() {
   const [isClient, setIsClient] = useState(false);
@@ -161,6 +192,13 @@ export default function PixelGrid() {
   const dragThreshold = 5;
 
   const [highlightedPixel, setHighlightedPixel] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
+  const [animatingPixels, setAnimatingPixels] = useState<Set<string>>(new Set());
+  const [visualEffects, setVisualEffects] = useState<PixelVisualEffect[]>([]);
+  const [showGrid, setShowGrid] = useState(false);
+  const [pixelFilter, setPixelFilter] = useState<'all' | 'owned' | 'available' | 'recent'>('all');
+  const [lastClickTime, setLastClickTime] = useState(0);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [selectedPixelDetails, setSelectedPixelDetails] = useState<SelectedPixelDetails | null>(null);
   
   const [showPixelModal, setShowPixelModal] = useState(false);
@@ -169,6 +207,8 @@ export default function PixelGrid() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pixelCanvasRef = useRef<HTMLCanvasElement>(null);
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null);
+  const effectsCanvasRef = useRef<HTMLCanvasElement>(null);
+  const gridCanvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
   const [mapData, setMapData] = useState<MapData | null>(null);
@@ -190,6 +230,44 @@ export default function PixelGrid() {
   const containerSizeRef = useRef({ width: 0, height: 0 });
   const { vibrate } = useHapticFeedback();
 
+  // Enhanced pixel management
+  const pixelStates = useMemo(() => {
+    const states = new Map<string, PixelState>();
+    
+    soldPixels.forEach(pixel => {
+      const key = `${pixel.x},${pixel.y}`;
+      states.set(key, 'owned');
+    });
+    
+    if (highlightedPixel) {
+      const key = `${highlightedPixel.x},${highlightedPixel.y}`;
+      states.set(key, 'highlighted');
+    }
+    
+    if (hoveredPixel) {
+      const key = `${hoveredPixel.x},${hoveredPixel.y}`;
+      if (!states.has(key)) {
+        states.set(key, 'hovered');
+      }
+    }
+    
+    return states;
+  }, [soldPixels, highlightedPixel, hoveredPixel]);
+
+  // Filter pixels based on current filter
+  const filteredPixels = useMemo(() => {
+    switch (pixelFilter) {
+      case 'owned':
+        return soldPixels;
+      case 'available':
+        return []; // Would be calculated from pixelBitmap
+      case 'recent':
+        return soldPixels.filter(p => p.lastModified && Date.now() - p.lastModified < 24 * 60 * 60 * 1000);
+      default:
+        return soldPixels;
+    }
+  }, [soldPixels, pixelFilter]);
+
   const clearAutoResetTimeout = useCallback(() => {
     if (autoResetTimeoutRef.current) {
       clearTimeout(autoResetTimeoutRef.current);
@@ -199,6 +277,39 @@ export default function PixelGrid() {
   
   // Enhanced loading state with better UX
   const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  // Add visual effect
+  const addVisualEffect = useCallback((x: number, y: number, type: PixelVisualEffect['type']) => {
+    const effect: PixelVisualEffect = {
+      x,
+      y,
+      type,
+      timestamp: Date.now(),
+      duration: type === 'purchase' ? 2000 : type === 'edit' ? 1000 : 500
+    };
+    
+    setVisualEffects(prev => [...prev, effect]);
+    
+    // Auto-remove effect after duration
+    setTimeout(() => {
+      setVisualEffects(prev => prev.filter(e => e.timestamp !== effect.timestamp));
+    }, effect.duration);
+  }, []);
+  
+  // Enhanced animation for pixel purchase
+  const animatePixelPurchase = useCallback((x: number, y: number) => {
+    const key = `${x},${y}`;
+    setAnimatingPixels(prev => new Set(prev).add(key));
+    addVisualEffect(x, y, 'purchase');
+    
+    setTimeout(() => {
+      setAnimatingPixels(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(key);
+        return newSet;
+      });
+    }, 2000);
+  }, [addVisualEffect]);
   
   useEffect(() => {
     setIsClient(true);
@@ -311,55 +422,211 @@ export default function PixelGrid() {
     }
   }, [soldPixels, loadedPixelImages]);
 
-
+  // Enhanced pixel rendering with visual effects
   useEffect(() => {
-    if (!pixelBitmap || !unsoldColor || !pixelCanvasRef.current) return;
+    if (!pixelBitmap || !unsoldColor || !pixelCanvasRef.current || !effectsCanvasRef.current) return;
+    
     const canvas = pixelCanvasRef.current;
+    const effectsCanvas = effectsCanvasRef.current;
+    
     if (canvas.width !== canvasDrawWidth || canvas.height !== canvasDrawHeight) {
         canvas.width = canvasDrawWidth;
         canvas.height = canvasDrawHeight;
     }
+    if (effectsCanvas.width !== canvasDrawWidth || effectsCanvas.height !== canvasDrawHeight) {
+        effectsCanvas.width = canvasDrawWidth;
+        effectsCanvas.height = canvasDrawHeight;
+    }
+    
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const effectsCtx = effectsCanvas.getContext('2d');
+    if (!ctx || !effectsCtx) return;
     
     ctx.imageSmoothingEnabled = false;
+    effectsCtx.imageSmoothingEnabled = false;
 
     // 1. Clear and draw the base map (unsold pixels)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    effectsCtx.clearRect(0, 0, effectsCanvas.width, effectsCanvas.height);
+    
+    // Draw base unsold pixels with enhanced visuals
     ctx.fillStyle = unsoldColor;
     for (let row = 0; row < logicalGridRows; row++) {
         for (let col = 0; col < LOGICAL_GRID_COLS_CONFIG; col++) {
             if (pixelBitmap[row * LOGICAL_GRID_COLS_CONFIG + col] === 1) {
-                ctx.fillRect(
-                    col * RENDERED_PIXEL_SIZE_CONFIG,
-                    row * RENDERED_PIXEL_SIZE_CONFIG,
-                    RENDERED_PIXEL_SIZE_CONFIG,
-                    RENDERED_PIXEL_SIZE_CONFIG
-                );
+                const pixelKey = `${col},${row}`;
+                const state = pixelStates.get(pixelKey);
+                
+                // Enhanced rendering based on state
+                if (state === 'hovered') {
+                  ctx.save();
+                  ctx.shadowColor = unsoldColor;
+                  ctx.shadowBlur = 5;
+                  ctx.fillStyle = unsoldColor;
+                  ctx.fillRect(
+                      col * RENDERED_PIXEL_SIZE_CONFIG - 1,
+                      row * RENDERED_PIXEL_SIZE_CONFIG - 1,
+                      RENDERED_PIXEL_SIZE_CONFIG + 2,
+                      RENDERED_PIXEL_SIZE_CONFIG + 2
+                  );
+                  ctx.restore();
+                } else {
+                  ctx.fillRect(
+                      col * RENDERED_PIXEL_SIZE_CONFIG,
+                      row * RENDERED_PIXEL_SIZE_CONFIG,
+                      RENDERED_PIXEL_SIZE_CONFIG,
+                      RENDERED_PIXEL_SIZE_CONFIG
+                  );
+                }
             }
         }
     }
 
-    // 2. Draw sold pixels over the base map
+    // 2. Draw sold pixels with enhanced effects
     soldPixels.forEach(pixel => {
       const renderX = pixel.x * RENDERED_PIXEL_SIZE_CONFIG;
       const renderY = pixel.y * RENDERED_PIXEL_SIZE_CONFIG;
+      const pixelKey = `${pixel.x},${pixel.y}`;
+      const isAnimating = animatingPixels.has(pixelKey);
+      const state = pixelStates.get(pixelKey);
       
-      if (pixel.pixelImageUrl) {
-        const img = loadedPixelImages.get(pixel.pixelImageUrl);
-        if (img && img.complete) {
-            ctx.drawImage(img, renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+      ctx.save();
+      
+      // Add glow effect for owned pixels
+      if (pixel.ownerId === MOCK_CURRENT_USER_ID) {
+        ctx.shadowColor = pixel.color;
+        ctx.shadowBlur = 3;
+      }
+      
+      // Scale effect for animations
+      if (isAnimating || state === 'hovered') {
+        const scale = isAnimating ? 1.3 : 1.1;
+        const offset = (scale - 1) * RENDERED_PIXEL_SIZE_CONFIG / 2;
+        ctx.translate(renderX + RENDERED_PIXEL_SIZE_CONFIG / 2, renderY + RENDERED_PIXEL_SIZE_CONFIG / 2);
+        ctx.scale(scale, scale);
+        ctx.translate(-RENDERED_PIXEL_SIZE_CONFIG / 2, -RENDERED_PIXEL_SIZE_CONFIG / 2);
+        
+        if (pixel.pixelImageUrl) {
+          const img = loadedPixelImages.get(pixel.pixelImageUrl);
+          if (img && img.complete) {
+              ctx.drawImage(img, 0, 0, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          } else {
+              ctx.fillStyle = pixel.color;
+              ctx.fillRect(0, 0, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          }
         } else {
-            ctx.fillStyle = pixel.color;
-            ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          ctx.fillStyle = pixel.color;
+          ctx.fillRect(0, 0, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
         }
       } else {
-        ctx.fillStyle = pixel.color;
-        ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+        if (pixel.pixelImageUrl) {
+          const img = loadedPixelImages.get(pixel.pixelImageUrl);
+          if (img && img.complete) {
+              ctx.drawImage(img, renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          } else {
+              ctx.fillStyle = pixel.color;
+              ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          }
+        } else {
+          ctx.fillStyle = pixel.color;
+          ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+        }
       }
+      
+      ctx.restore();
+    });
+    
+    // 3. Draw visual effects
+    visualEffects.forEach(effect => {
+      const age = Date.now() - effect.timestamp;
+      const progress = Math.min(age / effect.duration, 1);
+      const alpha = 1 - progress;
+      
+      effectsCtx.save();
+      effectsCtx.globalAlpha = alpha;
+      
+      const renderX = effect.x * RENDERED_PIXEL_SIZE_CONFIG;
+      const renderY = effect.y * RENDERED_PIXEL_SIZE_CONFIG;
+      
+      switch (effect.type) {
+        case 'purchase':
+          // Expanding circle effect
+          const radius = progress * 20;
+          effectsCtx.strokeStyle = '#FFD700';
+          effectsCtx.lineWidth = 2;
+          effectsCtx.beginPath();
+          effectsCtx.arc(
+            renderX + RENDERED_PIXEL_SIZE_CONFIG / 2,
+            renderY + RENDERED_PIXEL_SIZE_CONFIG / 2,
+            radius,
+            0,
+            2 * Math.PI
+          );
+          effectsCtx.stroke();
+          break;
+          
+        case 'edit':
+          // Pulsing border effect
+          const pulseSize = Math.sin(progress * Math.PI * 4) * 2;
+          effectsCtx.strokeStyle = '#7DF9FF';
+          effectsCtx.lineWidth = 1;
+          effectsCtx.strokeRect(
+            renderX - pulseSize,
+            renderY - pulseSize,
+            RENDERED_PIXEL_SIZE_CONFIG + pulseSize * 2,
+            RENDERED_PIXEL_SIZE_CONFIG + pulseSize * 2
+          );
+          break;
+          
+        case 'hover':
+          // Subtle glow effect
+          effectsCtx.fillStyle = `rgba(212, 167, 87, ${alpha * 0.3})`;
+          effectsCtx.fillRect(
+            renderX - 1,
+            renderY - 1,
+            RENDERED_PIXEL_SIZE_CONFIG + 2,
+            RENDERED_PIXEL_SIZE_CONFIG + 2
+          );
+          break;
+      }
+      
+      effectsCtx.restore();
     });
 
-  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages]);
+  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages, pixelStates, animatingPixels, visualEffects]);
+  
+  // Enhanced grid rendering
+  useEffect(() => {
+    if (!showGrid || !gridCanvasRef.current || !pixelBitmap) return;
+    
+    const canvas = gridCanvasRef.current;
+    if (canvas.width !== canvasDrawWidth || canvas.height !== canvasDrawHeight) {
+        canvas.width = canvasDrawWidth;
+        canvas.height = canvasDrawHeight;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = `rgba(125, 249, 255, ${GRID_LINE_OPACITY})`;
+    ctx.lineWidth = 0.5;
+    
+    // Draw grid lines only where pixels exist
+    for (let row = 0; row <= logicalGridRows; row++) {
+      ctx.beginPath();
+      ctx.moveTo(0, row * RENDERED_PIXEL_SIZE_CONFIG);
+      ctx.lineTo(canvasDrawWidth, row * RENDERED_PIXEL_SIZE_CONFIG);
+      ctx.stroke();
+    }
+    
+    for (let col = 0; col <= LOGICAL_GRID_COLS_CONFIG; col++) {
+      ctx.beginPath();
+      ctx.moveTo(col * RENDERED_PIXEL_SIZE_CONFIG, 0);
+      ctx.lineTo(col * RENDERED_PIXEL_SIZE_CONFIG, canvasDrawHeight);
+      ctx.stroke();
+    }
+  }, [showGrid, pixelBitmap, logicalGridRows]);
   
   useEffect(() => {
     const container = containerRef.current;
@@ -371,11 +638,14 @@ export default function PixelGrid() {
           width: entry.contentRect.width,
           height: entry.contentRect.height,
         };
-        const outlineCanvas = outlineCanvasRef.current;
-        if (outlineCanvas) {
-          outlineCanvas.width = entry.contentRect.width;
-          outlineCanvas.height = entry.contentRect.height;
-        }
+        
+        // Update all overlay canvases
+        [outlineCanvasRef.current, effectsCanvasRef.current, gridCanvasRef.current].forEach(canvas => {
+          if (canvas) {
+            canvas.width = entry.contentRect.width;
+            canvas.height = entry.contentRect.height;
+          }
+        });
       }
     });
   
@@ -383,6 +653,7 @@ export default function PixelGrid() {
     return () => resizeObserver.disconnect();
   }, []);
 
+  // Enhanced outline rendering with better visual feedback
   useEffect(() => {
     if (!mapData || !strokeColor || !outlineCanvasRef.current || containerSizeRef.current.width === 0) return;
     const canvas = outlineCanvasRef.current;
@@ -398,7 +669,7 @@ export default function PixelGrid() {
     ctx.translate(position.x, position.y);
     ctx.scale(zoom * logicalToSvgScale, zoom * logicalToSvgScale);
     ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = 0.5 / (zoom * logicalToSvgScale);
+    ctx.lineWidth = Math.max(0.3, 0.5 / (zoom * logicalToSvgScale));
     ctx.imageSmoothingEnabled = true;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -412,23 +683,54 @@ export default function PixelGrid() {
     });
     ctx.restore();
   
-    // Draw highlighted pixel border
+    // Enhanced highlighted pixel border with glow
     ctx.save();
     ctx.translate(position.x, position.y);
     ctx.scale(zoom, zoom);
+    
     if (highlightedPixel) {
-        ctx.strokeStyle = 'hsl(var(--foreground))';
-        ctx.lineWidth = (0.5 / zoom) * RENDERED_PIXEL_SIZE_CONFIG;
+        // Main highlight border
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = Math.max(1, (2 / zoom) * RENDERED_PIXEL_SIZE_CONFIG);
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = HIGHLIGHT_GLOW_SIZE;
         ctx.strokeRect(
-            highlightedPixel.x * RENDERED_PIXEL_SIZE_CONFIG,
-            highlightedPixel.y * RENDERED_PIXEL_SIZE_CONFIG,
+            highlightedPixel.x * RENDERED_PIXEL_SIZE_CONFIG - 1,
+            highlightedPixel.y * RENDERED_PIXEL_SIZE_CONFIG - 1,
+            RENDERED_PIXEL_SIZE_CONFIG + 2,
+            RENDERED_PIXEL_SIZE_CONFIG + 2
+        );
+        
+        // Animated outer glow
+        const time = Date.now() * 0.003;
+        const glowAlpha = (Math.sin(time) + 1) * 0.3;
+        ctx.strokeStyle = `rgba(255, 215, 0, ${glowAlpha})`;
+        ctx.lineWidth = Math.max(2, (4 / zoom) * RENDERED_PIXEL_SIZE_CONFIG);
+        ctx.strokeRect(
+            highlightedPixel.x * RENDERED_PIXEL_SIZE_CONFIG - 2,
+            highlightedPixel.y * RENDERED_PIXEL_SIZE_CONFIG - 2,
+            RENDERED_PIXEL_SIZE_CONFIG + 4,
+            RENDERED_PIXEL_SIZE_CONFIG + 4
+        );
+    }
+    
+    // Draw hovered pixel with subtle effect
+    if (hoveredPixel && (!highlightedPixel || hoveredPixel.x !== highlightedPixel.x || hoveredPixel.y !== highlightedPixel.y)) {
+        ctx.strokeStyle = 'rgba(125, 249, 255, 0.8)';
+        ctx.lineWidth = Math.max(1, (1.5 / zoom) * RENDERED_PIXEL_SIZE_CONFIG);
+        ctx.setLineDash([2, 2]);
+        ctx.strokeRect(
+            hoveredPixel.x * RENDERED_PIXEL_SIZE_CONFIG,
+            hoveredPixel.y * RENDERED_PIXEL_SIZE_CONFIG,
             RENDERED_PIXEL_SIZE_CONFIG,
             RENDERED_PIXEL_SIZE_CONFIG
         );
+        ctx.setLineDash([]);
     }
+    
     ctx.restore();
 
-  }, [mapData, zoom, position, strokeColor, highlightedPixel]);
+  }, [mapData, zoom, position, strokeColor, highlightedPixel, hoveredPixel, pixelStates]);
   
 
   useEffect(() => { 
@@ -488,21 +790,40 @@ export default function PixelGrid() {
   const handleZoomIn = () => { clearAutoResetTimeout(); setZoom((prevZoom) => Math.min(prevZoom * 1.2, MAX_ZOOM)); };
   const handleZoomOut = () => { clearAutoResetTimeout(); setZoom((prevZoom) => Math.max(prevZoom / 1.2, MIN_ZOOM)); };
 
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    clearAutoResetTimeout();
-    const targetElement = e.target as HTMLElement;
-     if (targetElement.closest('button, [data-dialog-content], [data-tooltip-content], [data-popover-content], label, a, [role="menuitem"], [role="tab"], input, textarea')) {
-        return;
-    }
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    didDragRef.current = false;
-  };
-
-
+  // Enhanced mouse interaction with hover detection
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
+    if (!isDragging || !containerRef.current) {
+      // Handle hover detection when not dragging
+      if (!isDragging && pixelBitmap && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const mouseXInContainer = e.clientX - rect.left;
+        const mouseYInContainer = e.clientY - rect.top;
+
+        const xOnContent = (mouseXInContainer - position.x) / zoom;
+        const yOnContent = (mouseYInContainer - position.y) / zoom;
+
+        const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+        const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+
+        if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
+          const bitmapIdx = logicalRow * LOGICAL_GRID_COLS_CONFIG + logicalCol;
+          if (pixelBitmap[bitmapIdx] === 1) {
+            const newHovered = { x: logicalCol, y: logicalRow };
+            if (!hoveredPixel || hoveredPixel.x !== newHovered.x || hoveredPixel.y !== newHovered.y) {
+              setHoveredPixel(newHovered);
+              addVisualEffect(logicalCol, logicalRow, 'hover');
+            }
+          } else {
+            setHoveredPixel(null);
+          }
+        } else {
+          setHoveredPixel(null);
+        }
+      }
+      return;
+    }
+    
+    // Original dragging logic
     const currentX = e.clientX - dragStart.x;
     const currentY = e.clientY - dragStart.y;
 
@@ -515,8 +836,82 @@ export default function PixelGrid() {
     }
     setPosition({ x: currentX, y: currentY });
   };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    clearAutoResetTimeout();
+    const targetElement = e.target as HTMLElement;
+     if (targetElement.closest('button, [data-dialog-content], [data-tooltip-content], [data-popover-content], label, a, [role="menuitem"], [role="tab"], input, textarea')) {
+        return;
+    }
+    
+    // Enhanced interaction detection
+    const currentTime = Date.now();
+    const isDoubleClick = currentTime - lastClickTime < DOUBLE_CLICK_THRESHOLD;
+    setLastClickTime(currentTime);
+    
+    if (isDoubleClick) {
+      // Handle double click for quick actions
+      handleQuickAction(e);
+      return;
+    }
+    
+    // Start long press detection
+    const timer = setTimeout(() => {
+      handleLongPress(e);
+    }, LONG_PRESS_THRESHOLD);
+    setLongPressTimer(timer);
+    
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    didDragRef.current = false;
+  };
+
+  // Enhanced quick action handler
+  const handleQuickAction = (e: React.MouseEvent) => {
+    if (!pixelBitmap || !containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const clickXInContainer = e.clientX - rect.left;
+    const clickYInContainer = e.clientY - rect.top;
+
+    const xOnContent = (clickXInContainer - position.x) / zoom;
+    const yOnContent = (clickYInContainer - position.y) / zoom;
+
+    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+
+    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
+      const bitmapIdx = logicalRow * LOGICAL_GRID_COLS_CONFIG + logicalCol;
+      if (pixelBitmap[bitmapIdx] === 1) {
+        // Quick purchase for available pixels
+        const existingSoldPixel = soldPixels.find(p => p.x === logicalCol && p.y === logicalRow);
+        if (!existingSoldPixel) {
+          toast({
+            title: "Compra Rápida",
+            description: `Duplo clique para comprar pixel (${logicalCol}, ${logicalRow}) rapidamente!`,
+          });
+        }
+      }
+    }
+  };
   
+  // Long press handler for advanced options
+  const handleLongPress = (e: React.MouseEvent) => {
+    vibrate('medium');
+    toast({
+      title: "Menu Avançado",
+      description: "Pressão longa detectada - abrindo opções avançadas...",
+    });
+  };
+  
+  // Enhanced canvas click with better feedback
   const handleCanvasClick = (event: React.MouseEvent) => {
+    // Clear long press timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
     clearAutoResetTimeout();
 
     // Feedback háptico ao clicar
@@ -524,6 +919,7 @@ export default function PixelGrid() {
 
     if (!isOnline) {
       toast({ title: "Sem Conexão", description: "Você está offline.", variant: "destructive" });
+      return;
     }
 
     if (isLoadingMap || !pixelBitmap || !containerRef.current) {
@@ -547,6 +943,7 @@ export default function PixelGrid() {
       
       if (pixelBitmap[bitmapIdx] === 1) {
         setHighlightedPixel({ x: logicalCol, y: logicalRow });
+        addVisualEffect(logicalCol, logicalRow, 'select');
 
         let mockDetails: SelectedPixelDetails;
         const randomRarity = mockRarities[Math.floor(Math.random() * mockRarities.length)];
@@ -586,23 +983,37 @@ export default function PixelGrid() {
         setShowPixelModal(true);
       } else { 
         setHighlightedPixel(null);
+        setHoveredPixel(null);
         setSelectedPixelDetails(null);
       }
     } else { 
       setHighlightedPixel(null);
+      setHoveredPixel(null);
       setSelectedPixelDetails(null);
     }
   };
 
   const handleMouseUpOrLeave = (event: React.MouseEvent) => {
+    // Clear long press timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
     if (isDragging) {
       if (!didDragRef.current) {
         handleCanvasClick(event);
       }
       setIsDragging(false);
     }
+    
+    // Clear hover when mouse leaves
+    if (event.type === 'mouseleave') {
+      setHoveredPixel(null);
+    }
   };
   
+  // Enhanced purchase handler with animations
   const handlePurchase = async (pixelData: SelectedPixelDetails, paymentMethod: string, customizations: any): Promise<boolean> => {
     if (!user) {
         toast({
@@ -627,9 +1038,12 @@ export default function PixelGrid() {
       ownerId: MOCK_CURRENT_USER_ID,
       title: customizations.title || `Meu Pixel (${pixelData.x},${pixelData.y})`,
       pixelImageUrl: customizations.image, 
+      lastModified: Date.now(),
+      purchaseAnimation: true
     };
     
     addSoldPixel(newSoldPixel);
+    animatePixelPurchase(pixelData.x, pixelData.y);
 
     setSelectedPixelDetails({
       ...pixelData,
@@ -733,6 +1147,7 @@ export default function PixelGrid() {
     }
 
     setHighlightedPixel(myLocationPixel);
+    addVisualEffect(myLocationPixel.x, myLocationPixel.y, 'select');
 
     const targetZoom = 15;
     const containerWidth = containerRef.current.offsetWidth;
@@ -755,6 +1170,24 @@ export default function PixelGrid() {
       toast({ title: "Coordenadas não disponíveis", description: "Não foi possível determinar a localização GPS para este pixel." });
     }
   };
+  
+  // Enhanced filter handler
+  const handleFilterChange = (newFilter: typeof pixelFilter) => {
+    setPixelFilter(newFilter);
+    toast({
+      title: "Filtro Aplicado",
+      description: `Mostrando pixels: ${newFilter === 'all' ? 'todos' : newFilter === 'owned' ? 'possuídos' : newFilter === 'available' ? 'disponíveis' : 'recentes'}`,
+    });
+  };
+  
+  // Enhanced grid toggle
+  const toggleGrid = () => {
+    setShowGrid(!showGrid);
+    toast({
+      title: showGrid ? "Grelha Oculta" : "Grelha Visível",
+      description: showGrid ? "Linhas da grelha foram ocultadas" : "Linhas da grelha estão agora visíveis",
+    });
+  };
 
   return (
 
@@ -769,20 +1202,73 @@ export default function PixelGrid() {
           <div />
         </LoadingOverlay>
         
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
+        {/* Enhanced control panels */}
+        <div className="absolute top-4 right-4 z-20 flex flex-col gap-3 pointer-events-auto animate-slide-in-up animation-delay-200">
+          {/* Pixel Filter Controls */}
+          <Card className="bg-card/90 backdrop-blur-sm border-primary/20 shadow-lg">
+            <CardContent className="p-3">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Filtros</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  {[
+                    { key: 'all', label: 'Todos', icon: <Eye className="h-3 w-3" /> },
+                    { key: 'owned', label: 'Meus', icon: <Crown className="h-3 w-3" /> },
+                    { key: 'available', label: 'Livres', icon: <Target className="h-3 w-3" /> },
+                    { key: 'recent', label: 'Novos', icon: <Zap className="h-3 w-3" /> }
+                  ].map(filter => (
+                    <Button
+                      key={filter.key}
+                      variant={pixelFilter === filter.key ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleFilterChange(filter.key as typeof pixelFilter)}
+                      className="text-xs h-8 px-2"
+                    >
+                      {filter.icon}
+                      <span className="ml-1">{filter.label}</span>
+                    </Button>
+                  ))}
+                </div>
+                
+                {/* Grid toggle */}
+                <Button
+                  variant={showGrid ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={toggleGrid}
+                  className="text-xs h-8"
+                >
+                  <Grid className="h-3 w-3 mr-1" />
+                  Grelha
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Enhanced zoom controls */}
           <EnhancedTooltip
             title="Controles do Mapa"
             description="Use estes controles para navegar pelo mapa"
             stats={[
               { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
+              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> },
+              { label: 'Possuídos', value: soldPixels.length.toString(), icon: <Crown className="h-4 w-4" /> }
             ]}
           >
-            <div className="space-y-2">
+            <Card className="bg-card/90 backdrop-blur-sm border-primary/20 shadow-lg">
+              <CardContent className="p-3 space-y-2">
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
+                    <Button 
+                      style={{ pointerEvents: 'auto' }} 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handleZoomIn} 
+                      aria-label="Zoom In"
+                      className="hover:bg-primary/10 hover:border-primary/50 transition-all duration-200"
+                    >
                       <ZoomIn className="h-5 w-5" />
                     </Button>
                   </TooltipTrigger>
@@ -790,7 +1276,14 @@ export default function PixelGrid() {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
+                    <Button 
+                      style={{ pointerEvents: 'auto' }} 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handleZoomOut} 
+                      aria-label="Zoom Out"
+                      className="hover:bg-primary/10 hover:border-primary/50 transition-all duration-200"
+                    >
                       <ZoomOut className="h-5 w-5" />
                     </Button>
                   </TooltipTrigger>
@@ -798,16 +1291,45 @@ export default function PixelGrid() {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
+                    <Button 
+                      style={{ pointerEvents: 'auto' }} 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handleResetView} 
+                      aria-label="Reset View"
+                      className="hover:bg-primary/10 hover:border-primary/50 transition-all duration-200"
+                    >
                       <Expand className="h-5 w-5" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent><p>Resetar Vista</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
+              </CardContent>
+            </Card>
           </EnhancedTooltip>
         </div>
+        
+        {/* Enhanced pixel info overlay */}
+        {hoveredPixel && zoom > 5 && (
+          <div className="absolute top-4 left-4 z-20 pointer-events-none animate-fade-in">
+            <Card className="bg-card/95 backdrop-blur-sm border-primary/30 shadow-lg">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <MousePointer className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    Pixel ({hoveredPixel.x}, {hoveredPixel.y})
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {soldPixels.find(p => p.x === hoveredPixel.x && p.y === hoveredPixel.y) 
+                    ? 'Pixel possuído' 
+                    : 'Disponível para compra'}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         
         <EnhancedPixelPurchaseModal
           isOpen={showPixelModal}
@@ -845,14 +1367,16 @@ export default function PixelGrid() {
           }}
           className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center"
         >
+          {/* Enhanced container with better visual feedback */}
           <div
               ref={containerRef}
-              className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
+              className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20 bg-gradient-to-br from-background/50 to-primary/5"
               onMouseDown={handleMouseDown} 
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
           >
+              {/* Enhanced canvas layers */}
               <div
               style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
@@ -862,105 +1386,112 @@ export default function PixelGrid() {
                   position: 'relative', 
               }}
               >
+              {/* Base pixel canvas */}
               <canvas
                   ref={pixelCanvasRef}
-                  className="absolute top-0 left-0 w-full h-full z-10" 
+                  className="absolute top-0 left-0 w-full h-full z-10 transition-opacity duration-300" 
                   style={{ imageRendering: 'pixelated' }} 
               />
+              
+              {/* Grid overlay canvas */}
+              <canvas
+                  ref={gridCanvasRef}
+                  className={`absolute top-0 left-0 w-full h-full z-15 pointer-events-none transition-opacity duration-300 ${showGrid ? 'opacity-100' : 'opacity-0'}`}
+                  style={{ imageRendering: 'pixelated' }}
+              />
+              
+              {/* Effects overlay canvas */}
+              <canvas
+                  ref={effectsCanvasRef}
+                  className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
+                  style={{ imageRendering: 'pixelated' }}
+              />
+              
               {(!mapData && isClient) && <PortugalMapSvg onMapDataLoaded={handleMapDataLoaded} className="invisible absolute" />}
               </div>
+              
+              {/* Enhanced outline canvas */}
               <canvas
                   ref={outlineCanvasRef}
-                  className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
+                  className="absolute top-0 left-0 w-full h-full z-25 pointer-events-none"
                   style={{ imageRendering: 'auto' }}
               />
+              
+              {/* Interactive overlay for better UX */}
+              <div className="absolute inset-0 z-30 pointer-events-none">
+                {/* Zoom level indicator */}
+                <div className="absolute bottom-4 left-4 bg-card/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/20">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Target className="h-4 w-4 text-primary" />
+                    <span className="font-code">{zoom.toFixed(1)}x</span>
+                  </div>
+                </div>
+                
+                {/* Pixel count indicator */}
+                <div className="absolute bottom-4 right-4 bg-card/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/20">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Layers className="h-4 w-4 text-accent" />
+                    <span className="font-code">{soldPixels.length}/{activePixelsInMap}</span>
+                  </div>
+                </div>
+              </div>
           </div>
         </SwipeGestures>
         
-        {/* Zoom Controls */}
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                  <ZoomIn className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Aproximar</p></TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                  <ZoomOut className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Afastar</p></TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                  <Expand className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Resetar Vista</p></TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 hover:scale-110 transition-all duration-200">
               <Brain className="h-6 w-6" />
             </Button>
           </PixelAI>
           
           {/* Social Features */}
           <PixelSocialFeatures>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 hover:scale-110 transition-all duration-200">
               <Users className="h-6 w-6" />
             </Button>
           </PixelSocialFeatures>
           
           {/* Gamification */}
           <PixelGameification>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 hover:scale-110 transition-all duration-200">
               <Trophy className="h-6 w-6" />
             </Button>
           </PixelGameification>
           
           {/* Auction */}
           <PixelAuction>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 hover:scale-110 transition-all duration-200">
               <Gavel className="h-6 w-6" />
             </Button>
           </PixelAuction>
           
           {/* Collaborative Editor */}
           <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 hover:scale-110 transition-all duration-200">
               <Users className="h-6 w-6" />
             </Button>
           </PixelCollaborativeEditor>
           
           {/* AR Button */}
           <PixelAR>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-110 transition-all duration-200">
               <Camera className="h-6 w-6" />
             </Button>
           </PixelAR>
           
           {/* Stories Button */}
           <PixelStories>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 hover:scale-110 transition-all duration-200">
               <Play className="h-6 w-6" />
             </Button>
           </PixelStories>
           
           {/* Live Stream Button */}
           <PixelLiveStream>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 hover:scale-110 transition-all duration-200">
               <Radio className="h-6 w-6" />
             </Button>
           </PixelLiveStream>
@@ -985,7 +1516,11 @@ export default function PixelGrid() {
           >
             <Dialog>
               <DialogTrigger asChild>
-                 <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
+                 <Button 
+                   style={{ pointerEvents: 'auto' }} 
+                   size="icon" 
+                   className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95 hover:scale-110 transition-all duration-300"
+                 >
                     <Star className="h-7 w-7" />
                 </Button>
               </DialogTrigger>
@@ -998,7 +1533,15 @@ export default function PixelGrid() {
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
+                  <Button 
+                    style={{ pointerEvents: 'auto' }} 
+                    variant="outline" 
+                    className="button-3d-effect-outline"
+                    onClick={toggleGrid}
+                  >
+                    <Grid className="mr-2 h-4 w-4" />
+                    {showGrid ? 'Ocultar' : 'Mostrar'} Grelha
+                  </Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
