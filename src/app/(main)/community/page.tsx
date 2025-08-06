@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -25,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Tooltip,
@@ -44,7 +46,7 @@ import {
 import { useUserStore } from '@/lib/store';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { cn } from "@/lib/utils";
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Confetti } from '@/components/ui/confetti';
@@ -483,6 +485,8 @@ export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState('feed');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showPostDetail, setShowPostDetail] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [showGroupDetail, setShowGroupDetail] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [playHoverSound, setPlayHoverSound] = useState(false);
@@ -658,7 +662,13 @@ export default function CommunityPage() {
     });
   };
 
-  const handleJoinGroup = (groupId: string) => {
+  const handleViewGroup = (group: Group) => {
+    setSelectedGroup(group);
+    setShowGroupDetail(true);
+  };
+  
+  const handleJoinGroup = (groupId: string, event?: React.MouseEvent) => {
+    event?.stopPropagation();
     setGroups(prev => prev.map(group => {
       if (group.id === groupId) {
         const newIsJoined = !group.isJoined;
@@ -878,7 +888,7 @@ export default function CommunityPage() {
               <CardContent className="pt-0">
                 <div className="space-y-3">
                   {groups.filter(group => group.isJoined).slice(0, 3).map(group => (
-                    <div key={group.id} className="flex items-center gap-3 p-2 hover:bg-muted/30 rounded-lg transition-colors">
+                    <div key={group.id} className="flex items-center gap-3 p-2 hover:bg-muted/30 rounded-lg transition-colors cursor-pointer" onClick={() => handleViewGroup(group)}>
                       {group.imageUrl ? (
                         <img 
                           src={group.imageUrl} 
@@ -908,7 +918,7 @@ export default function CommunityPage() {
                     </div>
                   ))}
                   
-                  <Button variant="outline" className="w-full mt-2">
+                  <Button variant="outline" className="w-full mt-2" onClick={() => setActiveTab('groups')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Ver Todos os Grupos
                   </Button>
@@ -953,7 +963,7 @@ export default function CommunityPage() {
                     </div>
                   ))}
                   
-                  <Button variant="outline" className="w-full mt-2">
+                  <Button variant="outline" className="w-full mt-2" onClick={() => setActiveTab('events')}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Ver Todos os Eventos
                   </Button>
@@ -1392,84 +1402,87 @@ export default function CommunityPage() {
                 {/* Groups Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {groups.map(group => (
-                    <Card 
-                      key={group.id} 
-                      className="bg-card/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:border-primary/30"
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex gap-4">
-                          {group.imageUrl ? (
-                            <img 
-                              src={group.imageUrl} 
-                              alt={group.name} 
-                              className="w-16 h-16 rounded-lg object-cover"
-                              data-ai-hint={group.dataAiHint}
-                            />
-                          ) : (
-                            <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
-                              <Users className="h-8 w-8 text-primary" />
-                            </div>
-                          )}
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-semibold truncate">{group.name}</h3>
-                              <Badge variant="outline" className={cn(
-                                "text-xs",
-                                group.privacy === 'public' ? "text-green-500" :
-                                group.privacy === 'private' ? "text-blue-500" :
-                                "text-amber-500"
-                              )}>
-                                {group.privacy === 'public' ? "Público" :
-                                 group.privacy === 'private' ? "Privado" :
-                                 "Convite"}
-                              </Badge>
-                            </div>
+                    <div key={group.id} className="cursor-pointer" onClick={() => handleViewGroup(group)}>
+                      <Card 
+                        className="bg-card/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:border-primary/30 h-full"
+                      >
+                        <CardContent className="p-4 h-full flex flex-col">
+                          <div className="flex gap-4">
+                            {group.imageUrl ? (
+                              <img 
+                                src={group.imageUrl} 
+                                alt={group.name} 
+                                className="w-16 h-16 rounded-lg object-cover"
+                                data-ai-hint={group.dataAiHint}
+                              />
+                            ) : (
+                              <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Users className="h-8 w-8 text-primary" />
+                              </div>
+                            )}
                             
-                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                              {group.description}
-                            </p>
-                            
-                            <div className="flex items-center justify-between mt-3">
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Users className="h-3 w-3" />
-                                <span>{group.memberCount} membros</span>
-                                <span>•</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold truncate">{group.name}</h3>
                                 <Badge variant="outline" className={cn(
                                   "text-xs",
-                                  group.activity === 'high' ? "text-green-500" : 
-                                  group.activity === 'medium' ? "text-amber-500" : 
-                                  "text-blue-500"
+                                  group.privacy === 'public' ? "text-green-500" :
+                                  group.privacy === 'private' ? "text-blue-500" :
+                                  "text-amber-500"
                                 )}>
-                                  {group.activity === 'high' ? "Muito ativo" : 
-                                   group.activity === 'medium' ? "Ativo" : 
-                                   "Pouco ativo"}
+                                  {group.privacy === 'public' ? "Público" :
+                                   group.privacy === 'private' ? "Privado" :
+                                   "Convite"}
                                 </Badge>
                               </div>
                               
-                              <Button 
-                                variant={group.isJoined ? "outline" : "default"} 
-                                size="sm" 
-                                className="text-xs h-8"
-                                onClick={() => handleJoinGroup(group.id)}
-                              >
-                                {group.isJoined ? (
-                                  <>
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Membro
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserPlus className="h-3 w-3 mr-1" />
-                                    Juntar-se
-                                  </>
-                                )}
-                              </Button>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                {group.description}
+                              </p>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+
+                          <div className="flex-1 flex flex-col justify-end mt-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Users className="h-3 w-3" />
+                                  <span>{group.memberCount} membros</span>
+                                  <span>•</span>
+                                  <Badge variant="outline" className={cn(
+                                    "text-xs",
+                                    group.activity === 'high' ? "text-green-500" : 
+                                    group.activity === 'medium' ? "text-amber-500" : 
+                                    "text-blue-500"
+                                  )}>
+                                    {group.activity === 'high' ? "Muito ativo" : 
+                                     group.activity === 'medium' ? "Ativo" : 
+                                     "Pouco ativo"}
+                                  </Badge>
+                                </div>
+                                
+                                <Button 
+                                  variant={group.isJoined ? "outline" : "default"} 
+                                  size="sm" 
+                                  className="text-xs h-8"
+                                  onClick={(e) => handleJoinGroup(group.id, e)}
+                                >
+                                  {group.isJoined ? (
+                                    <>
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      Membro
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserPlus className="h-3 w-3 mr-1" />
+                                      Juntar-se
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                        </CardContent>
+                      </Card>
+                    </div>
                   ))}
                 </div>
                 
@@ -2040,6 +2053,65 @@ export default function CommunityPage() {
                       </Button>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Group Detail Modal */}
+      <Dialog open={showGroupDetail} onOpenChange={setShowGroupDetail}>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-0">
+            <div className="relative h-40 bg-muted/50">
+              {selectedGroup?.imageUrl && (
+                <img src={selectedGroup.imageUrl} alt={selectedGroup.name} className="w-full h-full object-cover" data-ai-hint={selectedGroup.dataAiHint} />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+              <div className="absolute bottom-4 left-6">
+                <DialogTitle className="text-2xl font-headline text-white">{selectedGroup?.name}</DialogTitle>
+                <DialogDescription className="text-muted-foreground">{selectedGroup?.description}</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          {selectedGroup && (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="p-6 border-b flex items-center justify-between">
+                <div className="flex gap-4">
+                  <div className="text-center">
+                    <p className="font-bold text-lg">{selectedGroup.memberCount}</p>
+                    <p className="text-xs text-muted-foreground">Membros</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-lg">{formatRelativeTime(selectedGroup.createdAt)}</p>
+                    <p className="text-xs text-muted-foreground">Criado</p>
+                  </div>
+                </div>
+                <Button variant={selectedGroup.isJoined ? "outline" : "default"} onClick={(e) => handleJoinGroup(selectedGroup.id, e)}>
+                  {selectedGroup.isJoined ? 'Membro' : 'Juntar-se'}
+                </Button>
+              </div>
+
+              <div className="flex-1 flex overflow-hidden">
+                <ScrollArea className="flex-1 p-6">
+                  <h3 className="font-semibold mb-4">Publicações Recentes</h3>
+                  <div className="space-y-4">
+                    {/* Placeholder for group posts */}
+                    <Card><CardContent className="p-4">Publicação do grupo 1...</CardContent></Card>
+                    <Card><CardContent className="p-4">Publicação do grupo 2...</CardContent></Card>
+                  </div>
+                </ScrollArea>
+                <div className="w-80 border-l p-6">
+                   <h3 className="font-semibold mb-4">Sobre o Grupo</h3>
+                   <div className="space-y-2 text-sm">
+                      <p><strong>Privacidade:</strong> {selectedGroup.privacy}</p>
+                      <p><strong>Tags:</strong></p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedGroup.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                      </div>
+                   </div>
                 </div>
               </div>
             </div>
