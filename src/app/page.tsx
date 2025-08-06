@@ -18,6 +18,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 import { Confetti } from '@/components/ui/confetti';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { useToast } from '@/hooks/use-toast';
+import { UserProfileHeader } from '@/components/layout/UserProfileHeader';
+import { BottomNavBar } from '@/components/layout/BottomNavBar';
+
+export default function HomePage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleActionSelect = (action: any) => {
+    if (action) {
+      toast({
         title: "Ação Executada",
         description: `${action.label} selecionado`,
       });
