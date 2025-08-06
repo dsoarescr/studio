@@ -31,7 +31,6 @@ import { useAuth } from '@/lib/auth-context';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { UserMenu } from '../auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
-import Link from 'next/link';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home },
