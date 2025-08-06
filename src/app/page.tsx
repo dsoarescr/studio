@@ -108,7 +108,7 @@ export default function HomePage() {
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playWelcomeSound} onEnd={() => setPlayWelcomeSound(false)} />
       <Confetti active={showConfetti} duration={5000} onComplete={() => setShowConfetti(false)} />
       
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className="relative h-full w-full flex">
           <MapSidebar />
           <div className="flex-1 h-full relative">
@@ -310,5 +310,3 @@ export default function HomePage() {
     </>
   );
 }
-
-    
