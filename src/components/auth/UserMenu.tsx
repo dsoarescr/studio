@@ -163,11 +163,13 @@ export function UserMenu() {
             </DropdownMenuItem>
           </Link>
           
-          <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
-            <CreditCard className="mr-2 h-4 w-4 text-green-500" />
-            Meus Créditos
-            <span className="ml-auto text-xs text-muted-foreground">{credits.toLocaleString('pt-PT')}</span>
-          </DropdownMenuItem>
+          <Link href="/credits">
+            <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
+              <CreditCard className="mr-2 h-4 w-4 text-green-500" />
+              Meus Créditos
+              <span className="ml-auto text-xs text-muted-foreground">{credits.toLocaleString('pt-PT')}</span>
+            </DropdownMenuItem>
+          </Link>
           
           <DropdownMenuSeparator className="my-2" />
           
@@ -175,6 +177,13 @@ export function UserMenu() {
             <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
               <Settings className="mr-2 h-4 w-4 text-gray-500" />
               Configurações
+            </DropdownMenuItem>
+          </Link>
+          
+          <Link href="/support">
+            <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 transition-colors">
+              <MessageSquare className="mr-2 h-4 w-4 text-blue-500" />
+              Suporte
             </DropdownMenuItem>
           </Link>
           

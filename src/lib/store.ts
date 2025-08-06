@@ -57,6 +57,7 @@ export const useUserStore = create<UserState>()(
       removeCredits: (amount) => set((state) => ({ credits: Math.max(0, state.credits - amount) })),
       addSpecialCredits: (amount) => set((state) => ({ specialCredits: state.specialCredits + amount })),
       removeSpecialCredits: (amount) => set((state) => ({ specialCredits: Math.max(0, state.specialCredits - amount) })),
+      removeSpecialCredits: (amount) => set((state) => ({ specialCredits: Math.max(0, state.specialCredits - amount) })),
       addXp: (amount) => {
         set((state) => {
           let newXp = state.xp + amount;

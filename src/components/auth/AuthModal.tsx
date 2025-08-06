@@ -123,6 +123,12 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
       setPlaySuccessSound(true);
       setIsOpen(false);
       resetForm();
+      
+      // Welcome bonus for new users
+      toast({
+        title: "Bem-vindo ao Pixel Universe! 🎉",
+        description: "Recebeu 500 créditos + 50 especiais de bónus!",
+      });
     } catch (error: any) {
       if (error.code === 'auth/configuration-not-found') {
          toast({

@@ -31,14 +31,15 @@ import { useAuth } from '@/lib/auth-context';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { UserMenu } from '../auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
+import Link from 'next/link';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home },
-  { href: "/marketplace", label: "Market", icon: ShoppingCart },
-  { href: "/pixels", label: "Galeria", icon: Palette },
-  { href: "/member", label: "Perfil", icon: User },
+  { href: "/marketplace", label: "Market", icon: ShoppingCart, requiresAuth: false },
+  { href: "/pixels", label: "Galeria", icon: Palette, requiresAuth: true },
+  { href: "/member", label: "Perfil", icon: User, requiresAuth: true },
   { href: "/ranking", label: "Ranking", icon: BarChart3 },
-  { href: "/community", label: "Comunidade", icon: Users },
+  { href: "/community", label: "Comunidade", icon: Users, requiresAuth: false },
 ];
 
 export default function BottomNavBar() {
@@ -67,6 +68,60 @@ export default function BottomNavBar() {
             <CardContent className="h-full p-2 sm:p-3 flex items-center justify-around">
               {navLinks.map((link) => {
                 const isActive = (pathname === '/' && link.href === '/') || (pathname !== '/' && link.href !== '/' && pathname.startsWith(link.href));
+                
+                // Show auth modal for protected routes when user is not logged in
+                if (link.requiresAuth && !user) {
+                  return (
+                    <AuthModal key={link.href} defaultTab="login">
+                      <motion.div
+                        onMouseEnter={() => setHoveredItem(link.href)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        onClick={() => setPlayClickSound(true)}
+                        className="relative flex flex-col items-center justify-center p-1 rounded-lg w-16 h-16 text-muted-foreground hover:text-primary transition-all duration-300 cursor-pointer"
+                      >
+                        <AnimatePresence>
+                          {hoveredItem === link.href && (
+                            <motion.div
+                              layoutId="hover-background"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 bg-primary/10 rounded-lg"
+                            />
+                          )}
+                        </AnimatePresence>
+
+                        <div className="relative">
+                          <link.icon className="h-6 w-6 transition-transform duration-300" />
+                        </div>
+                        <span className="text-xs mt-1 transition-colors duration-300">
+                          {link.label}
+                        </span>
+                      </motion.div>
+                    </AuthModal>
+                  );
+                }
+                
+                
+                // Show auth modal for protected routes when user is not logged in
+                if (link.requiresAuth && !user) {
+                  return (
+                    <AuthModal key={link.href} defaultTab="login">
+                      <motion.div
+                        onMouseEnter={() => setHoveredItem(link.href)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        onClick={() => setPlayClickSound(true)}
+                        className="relative flex flex-col items-center justify-center p-1 rounded-lg w-16 h-16 text-muted-foreground hover:text-primary transition-all duration-300 cursor-pointer"
+                      >
+                        <link.icon className="h-6 w-6 transition-transform duration-300" />
+                        <span className="text-xs mt-1 transition-colors duration-300">
+                          {link.label}
+                        </span>
+                      </motion.div>
+                    </AuthModal>
+                  );
+                }
+                
                 return (
                   <Link href={link.href} key={link.href}>
                     <motion.div

@@ -51,6 +51,7 @@
 
     /* Variable for bottom navigation height if needed elsewhere in CSS, though primarily set in JS/TSX */
     --header-height: 56px;
+    --header-height: 56px;
     --bottom-nav-height: 80px; 
   }
 

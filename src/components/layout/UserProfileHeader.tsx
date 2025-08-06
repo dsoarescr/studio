@@ -46,12 +46,12 @@ import { useAppStore } from '@/lib/store';
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
   { href: "/marketplace", label: "Market", icon: ShoppingCart, color: "text-green-500", description: "Comprar píxeis" },
-  { href: "/pixels", label: "Galeria", icon: Palette, color: "text-purple-500", badge: 12, description: "Ver píxeis" },
-  { href: "/member", label: "Perfil", icon: UsersIcon, color: "text-orange-500", description: "Seu perfil" },
+  { href: "/pixels", label: "Galeria", icon: Palette, color: "text-purple-500", description: "Ver píxeis", requiresAuth: true },
+  { href: "/member", label: "Perfil", icon: UsersIcon, color: "text-orange-500", description: "Seu perfil", requiresAuth: true },
   { href: "/ranking", label: "Ranking", icon: AnalyticsIcon, color: "text-amber-500", badge: 2, description: "Classificações" },
   { href: "/community", label: "Comunidade", icon: Users2, color: "text-pink-500", description: "Interagir com a comunidade" },
-  { href: "/settings", label: "Ajustes", icon: Settings, color: "text-gray-500", description: "Configurações" },
-  { href: "/achievements", label: "Conquistas", icon: Award, color: "text-yellow-500", description: "Suas conquistas" },
+  { href: "/settings", label: "Ajustes", icon: Settings, color: "text-gray-500", description: "Configurações", requiresAuth: true },
+  { href: "/achievements", label: "Conquistas", icon: Award, color: "text-yellow-500", description: "Suas conquistas", requiresAuth: true },
 ];
 
 export default function UserProfileHeader() {
@@ -215,20 +215,39 @@ export default function UserProfileHeader() {
                 {/* Enhanced Navigation Links */}
                 <div className="space-y-1">
                   {navLinks.map((link) => (
-                    <Link href={link.href} key={link.href}>
-                      <Button 
-                        variant={pathname === link.href ? "default" : "ghost"} 
-                        className="w-full justify-start text-sm h-10 transition-all duration-300"
-                      >
-                        {React.cloneElement(link.icon as React.ReactElement, {
-                          className: cn("h-4 w-4 mr-3", pathname === link.href ? link.color : "text-muted-foreground") 
-                        })}
-                        {link.label}
-                        {link.badge && (
-                          <Badge className="ml-auto bg-red-500 text-white">{link.badge}</Badge>
-                        )}
-                      </Button>
-                    </Link>
+                    <React.Fragment key={link.href}>
+                      {link.requiresAuth && !user ? (
+                        <AuthModal defaultTab="login">
+                          <Button 
+                            variant="ghost" 
+                            className="w-full justify-start text-sm h-10 transition-all duration-300"
+                          >
+                            {React.cloneElement(link.icon as React.ReactElement, {
+                              className: "h-4 w-4 mr-3 text-muted-foreground"
+                            })}
+                            {link.label}
+                            {link.badge && (
+                              <Badge className="ml-auto bg-red-500 text-white">{link.badge}</Badge>
+                            )}
+                          </Button>
+                        </AuthModal>
+                      ) : (
+                        <Link href={link.href}>
+                          <Button 
+                            variant={pathname === link.href ? "default" : "ghost"} 
+                            className="w-full justify-start text-sm h-10 transition-all duration-300"
+                          >
+                            {React.cloneElement(link.icon as React.ReactElement, {
+                              className: cn("h-4 w-4 mr-3", pathname === link.href ? link.color : "text-muted-foreground") 
+                            })}
+                            {link.label}
+                            {link.badge && (
+                              <Badge className="ml-auto bg-red-500 text-white">{link.badge}</Badge>
+                            )}
+                          </Button>
+                        </Link>
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
 
@@ -257,10 +276,12 @@ export default function UserProfileHeader() {
                       Tornar-se Premium
                     </Button>
                   </Link>
-                  <Button variant="destructive" className="w-full justify-start mt-4" size="sm">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    <Link href="/credits">Comprar Mais</Link>
-                  </Button>
+                  <Link href="/credits">
+                    <Button variant="outline" className="w-full justify-start mt-4" size="sm">
+                      <Coins className="h-4 w-4 mr-2" />
+                      Comprar Créditos
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </SheetContent>

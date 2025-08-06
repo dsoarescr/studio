@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Info, Star, Heart, Eye, MapPin, Calendar, User, Coins, 
-  Trophy, Crown, Gem, Sparkles, Zap, Target, Award, Shield
+  Trophy, Crown, Gem, Sparkles, Zap, Target, Award, Shield, UserPlus
 } from 'lucide-react';
 
 interface EnhancedTooltipProps {
@@ -225,7 +225,7 @@ export function UserTooltip({
       ]}
       actions={[
         { label: 'Ver Perfil', onClick: () => {}, icon: <User className="h-4 w-4" /> },
-        { label: 'Seguir', onClick: () => {}, variant: 'default', icon: <UserPlus className="h-4 w-4" /> }
+        { label: 'Seguir', onClick: () => {}, variant: 'default' as const, icon: <UserPlus className="h-4 w-4" /> }
       ]}
       interactive={true}
     >
