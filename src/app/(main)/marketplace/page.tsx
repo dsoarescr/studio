@@ -840,7 +840,7 @@ export default function MarketplacePage() {
               {/* Sort and View Options */}
               <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <div className="flex gap-2 w-full sm:w-auto">
-                  <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
                     <SelectTrigger className="w-full sm:w-48">
                       <SortAsc className="h-4 w-4 mr-2" />
                       <SelectValue />
@@ -898,7 +898,7 @@ export default function MarketplacePage() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                       <label className="text-sm font-medium mb-2 block">Tipo de Venda</label>
-                      <Select value={selectedType} onValueChange={(value: ListingType | 'all') => setSelectedType(value)}>
+                      <Select value={selectedType} onValueChange={(value) => setSelectedType(value as ListingType | 'all')}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -913,7 +913,7 @@ export default function MarketplacePage() {
 
                     <div>
                       <label className="text-sm font-medium mb-2 block">Raridade</label>
-                      <Select value={selectedRarity} onValueChange={(value: PixelRarity | 'all') => setSelectedRarity(value)}>
+                      <Select value={selectedRarity} onValueChange={(value) => setSelectedRarity(value as PixelRarity | 'all')}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -1484,34 +1484,34 @@ export default function MarketplacePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link href="/tutorials" passHref>
-                <Button asChild variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
-                  <a>
+              <Link href="/tutorials" passHref legacyBehavior>
+                <a className="block">
+                  <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <Info className="h-6 w-6 text-primary" />
                     <span>Guia do Marketplace</span>
                     <p className="text-xs text-muted-foreground">Aprenda a comprar e vender</p>
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               </Link>
               
-              <Link href="/support" passHref>
-                <Button asChild variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
-                  <a>
+              <Link href="/support" passHref legacyBehavior>
+                <a className="block">
+                  <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <MessageSquare className="h-6 w-6 text-blue-500" />
                     <span>Suporte ao Cliente</span>
                     <p className="text-xs text-muted-foreground">Tire suas dúvidas</p>
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               </Link>
               
-              <Link href="/report" passHref>
-                <Button asChild variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
-                  <a>
+              <Link href="/report" passHref legacyBehavior>
+                <a className="block">
+                  <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 w-full">
                     <AlertTriangle className="h-6 w-6 text-yellow-500" />
                     <span>Reportar Problema</span>
                     <p className="text-xs text-muted-foreground">Ajude-nos a melhorar</p>
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               </Link>
             </div>
           </CardContent>
@@ -1529,3 +1529,4 @@ export default function MarketplacePage() {
     </div>
   );
 }
+
