@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 export default function HomePage() {
   const { t } = useTranslation();
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="relative h-full w-full flex">
         <MapSidebar />
         <div className="flex-1 h-full">
