@@ -741,7 +741,7 @@ export default function EnhancedPixelPurchaseModal({
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 max-h-[60vh]">
+          <ScrollArea className="flex-1 max-h-[calc(95vh-200px)]">
             <div className="p-6">
               {/* Overview Tab */}
               <TabsContent value="overview" className="mt-0 space-y-6">
@@ -2028,4 +2028,3 @@ export default function EnhancedPixelPurchaseModal({
     </Dialog>
   );
 }
-
