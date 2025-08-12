@@ -12,19 +12,24 @@ const nextConfig = {
   },
   serverExternalPackages: ['@genkit-ai/ai', 'genkit'],
   webpack: (config, { isServer }) => {
-    // Adicionado para evitar erro com favicon.ico
+    // Exclude .ico files from the default image loader
+    const imageRule = config.module.rules.find(
+      (rule) =>
+        typeof rule === 'object' &&
+        rule.test instanceof RegExp &&
+        rule.test.test('.svg')
+    );
+    if (imageRule && typeof imageRule === 'object') {
+      imageRule.exclude = /\.ico$/;
+    }
+
+    // Add a new rule for .ico files using asset/resource
     config.module.rules.push({
       test: /\.ico$/,
-      use: [
-        {
-          loader: 'file-loader',
-          options: {
-            name: '[name].[ext]',
-            outputPath: 'static/media/', // ou o diretório que preferir
-            publicPath: '/_next/static/media/',
-          },
-        },
-      ],
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name][ext]',
+      },
     });
 
     return config;

@@ -27,7 +27,6 @@ export const metadata: Metadata = {
     description: 'Explore, compre e personalize píxeis no mapa interativo de Portugal.',
     creator: '@pixeluniverse',
   },
-  icons: null,
 };
 
 export default function RootLayout({
