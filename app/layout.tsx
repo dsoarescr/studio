@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     description: 'Explore, compre e personalize píxeis no mapa interativo de Portugal.',
     creator: '@pixeluniverse',
   },
+  icons: null,
 };
 
 export default function RootLayout({
@@ -41,7 +42,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <meta name="theme-color" content="#D4A757" />
       </head>

@@ -769,7 +769,7 @@ export default function PixelGrid() {
           <div />
         </LoadingOverlay>
         
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
           <EnhancedTooltip
             title="Controles do Mapa"
             description="Use estes controles para navegar pelo mapa"
@@ -783,23 +783,23 @@ export default function PixelGrid() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                      <ZoomIn className="h-5 w-5" />
+                      <ZoomIn className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Aproximar</p></TooltipContent>
+                  <TooltipContent><p>Ampliar</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                      <ZoomOut className="h-5 w-5" />
+                      <ZoomOut className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Afastar</p></TooltipContent>
+                  <TooltipContent><p>Reduzir</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                      <Expand className="h-5 w-5" />
+                      <Expand className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent><p>Resetar Vista</p></TooltipContent>
@@ -807,6 +807,39 @@ export default function PixelGrid() {
               </TooltipProvider>
             </div>
           </EnhancedTooltip>
+          
+          {/* Enhanced info panel */}
+          <div className="mt-2 p-3 bg-background/90 rounded-md text-xs font-code border border-primary/20 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Zoom:</span>
+              <span className="text-primary font-bold">{zoom.toFixed(2)}x</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Posição:</span>
+              <span className="text-accent">({Math.round(position.x)}, {Math.round(position.y)})</span>
+            </div>
+            {highlightedPixel && (
+              <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+                <span className="text-muted-foreground">Pixel:</span>
+                <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+              <span className="text-muted-foreground">Pixels Ativos:</span>
+              <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
+            </div>
+            
+            {/* Online status indicator */}
+            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+              <span className="text-muted-foreground">Status:</span>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                <span className={`text-xs ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <EnhancedPixelPurchaseModal
