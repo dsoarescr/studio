@@ -8,10 +8,10 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-full">
-      <UserProfileHeader />
-      <main className="h-[calc(100%-var(--header-height)-var(--bottom-nav-height))]">
-        {children}
+    <div className="flex flex-col h-full">
+      <UserProfileHeader /> 
+      <main className="flex-1 overflow-y-auto pt-14 pb-[var(--bottom-nav-height)]">
+          {children}
       </main>
       <BottomNavBar />
     </div>
