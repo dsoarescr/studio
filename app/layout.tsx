@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Pixel Universe Team' }],
   creator: 'Pixel Universe',
   publisher: 'Pixel Universe',
+  icons: false, // Disable automatic favicon generation
   openGraph: {
     type: 'website',
     locale: 'pt_PT',
