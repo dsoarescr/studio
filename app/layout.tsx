@@ -1,10 +1,7 @@
 
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { OfflineIndicator } from '@/components/ui/offline-indicator';
-import { AuthProvider } from '@/lib/auth-context';
-import { StripeProvider } from '@/components/payment/StripePaymentProvider';
+import Providers from '@/components/layout/Providers';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
@@ -27,6 +24,7 @@ export const metadata: Metadata = {
     description: 'Explore, compre e personalize píxeis no mapa interativo de Portugal.',
     creator: '@pixeluniverse',
   },
+  icons: false,
 };
 
 export default function RootLayout({
@@ -41,20 +39,17 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <meta name="theme-color" content="#D4A757" />
       </head>
       {/* h-full on body, overflow-hidden removed to allow MainLayout's overflow-y-auto to work */}
       <body className="font-body antialiased h-full">
-        <AuthProvider>
-          <StripeProvider>
-            {children}
-            <OfflineIndicator />
-            <Toaster />
-          </StripeProvider>
-        </AuthProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
 }
+
