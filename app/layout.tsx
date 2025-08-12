@@ -1,31 +1,13 @@
+// app/layout.tsx
+'use client';
 
 import type {Metadata} from 'next';
 import './globals.css';
+import { Toaster } from "@/components/ui/toaster";
+import { OfflineIndicator } from '@/components/ui/offline-indicator';
+import { AuthProvider } from '@/lib/auth-context';
+import { StripeProvider } from '@/components/payment/StripePaymentProvider';
 import Providers from '@/components/layout/Providers';
-
-export const metadata: Metadata = {
-  title: 'Pixel Universe - Mapa Interativo de Portugal',
-  description: 'A collaborative pixel art map of Portugal.',
-  keywords: 'pixel art, Portugal, interactive map, digital art, NFT, community',
-  authors: [{ name: 'Pixel Universe Team' }],
-  creator: 'Pixel Universe',
-  publisher: 'Pixel Universe',
-  openGraph: {
-    type: 'website',
-    locale: 'pt_PT',
-    url: 'https://pixeluniverse.pt',
-    title: 'Pixel Universe - Mapa Interativo de Portugal',
-    description: 'Explore, compre e personalize píxeis no mapa interativo de Portugal.',
-    siteName: 'Pixel Universe',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Pixel Universe - Mapa Interativo de Portugal',
-    description: 'Explore, compre e personalize píxeis no mapa interativo de Portugal.',
-    creator: '@pixeluniverse',
-  },
-  icons: false,
-};
 
 export default function RootLayout({
   children,
@@ -52,4 +34,3 @@ export default function RootLayout({
     </html>
   );
 }
-
