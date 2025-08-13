@@ -37,6 +37,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Progress } from '../ui/progress';
+import { LanguageSwitcher } from '../ui/language-switcher';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
@@ -73,11 +74,9 @@ export default function UserProfileHeader() {
   const [formattedSpecialCredits, setFormattedSpecialCredits] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-<<<<<<< HEAD
   const isMobile = useIsMobile();
   const [showQuickStats, setShowQuickStats] = useState(false);
-=======
->>>>>>> 124bb7e80e605bb9b45ce062910b94e2afdf6152
+
 
   // Combine store data with mock data for a complete user object
   const userData = {
@@ -350,12 +349,8 @@ export default function UserProfileHeader() {
               description="Sua moeda principal para comprar pixels"
               stats={[
                 { label: 'Saldo Atual', value: formattedCredits || '...', icon: <Coins className="h-4 w-4" /> },
-<<<<<<< HEAD
-                  { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> },
-                  { label: 'Pixels Owned', value: pixels, icon: <MapPinIcon className="h-4 w-4" /> }
-=======
-                { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> }
->>>>>>> 124bb7e80e605bb9b45ce062910b94e2afdf6152
+                { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> },
+                { label: 'Pixels Possuídos', value: pixels, icon: <MapPinIcon className="h-4 w-4" /> }
               ]}
               actions={[
                 { label: 'Comprar Mais', onClick: () => {}, icon: <Plus className="h-4 w-4" /> }
@@ -417,11 +412,6 @@ export default function UserProfileHeader() {
           </div>
         </div>
       </div>
-<<<<<<< HEAD
       </div>
-    </>
-=======
-    </div>
->>>>>>> 124bb7e80e605bb9b45ce062910b94e2afdf6152
   );
 }

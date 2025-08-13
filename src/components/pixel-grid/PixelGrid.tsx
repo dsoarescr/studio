@@ -915,7 +915,7 @@ export default function PixelGrid() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
+                <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
                   <ZoomIn className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -923,7 +923,7 @@ export default function PixelGrid() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
+                <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
                   <ZoomOut className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -931,7 +931,7 @@ export default function PixelGrid() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
+                <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
                   <Expand className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -1025,9 +1025,9 @@ export default function PixelGrid() {
               <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
                 <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
                   <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
+                  <DialogDescription className="text-muted-foreground animate-fade-in animation-delay-200">
                     Explore, filtre e interaja com o mapa de pixels.
-                  </DialogDescriptionElement>
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
@@ -1059,28 +1059,3 @@ export default function PixelGrid() {
     </MobileOptimizations>
   );
 }
-<<<<<<< HEAD
-=======
-
-// Enhanced cursor styles for different tools
-const getCursorStyle = (tool: string) => {
-  switch (tool) {
-    case 'brush':
-      return 'cursor-crosshair';
-    case 'eraser':
-      return 'cursor-not-allowed';
-    case 'bucket':
-      return 'cursor-pointer';
-    case 'eyedropper':
-      return 'cursor-copy';
-    case 'move':
-      return 'cursor-move';
-    case 'zoom':
-      return 'cursor-zoom-in';
-    default:
-      return 'cursor-default';
-  }
-};
-
-    
->>>>>>> 124bb7e80e605bb9b45ce062910b94e2afdf6152
