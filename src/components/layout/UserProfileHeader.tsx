@@ -1,4 +1,3 @@
-
 // src/components/layout/UserProfileHeader.tsx
 'use client';
 
@@ -34,8 +33,7 @@ import { useAuth } from '@/lib/auth-context';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { UserMenu } from '../auth/UserMenu';
-import { AuthModal } from '@/components/auth/AuthModal';
+import { UserMenu } from '@/components/auth/UserMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Progress } from '../ui/progress';
 
@@ -372,5 +370,3 @@ export default function UserProfileHeader() {
     </>
   );
 }
-
-    

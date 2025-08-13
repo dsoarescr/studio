@@ -33,7 +33,7 @@ import {
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
-export default function UserMenu() {
+export function UserMenu() {
   const { user, logOut } = useAuth();
   const { 
     credits, 
