@@ -12,7 +12,7 @@ import {
   Award, Gift, Bell, Settings, Menu,
   Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIconLucide
+  BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIconLucide, Sparkles
 } from "lucide-react"; 
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
@@ -35,7 +35,7 @@ import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UserMenu } from '../auth/UserMenu';
-import { AuthModal } from '../auth/AuthModal';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Progress } from '../ui/progress';
 
@@ -372,3 +372,5 @@ export default function UserProfileHeader() {
     </>
   );
 }
+
+    

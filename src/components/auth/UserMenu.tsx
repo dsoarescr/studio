@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from '@/lib/auth-context';
-import { AuthModal } from './AuthModal';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { useUserStore } from '@/lib/store';
 import { motion } from 'framer-motion';
 import {
@@ -33,7 +33,7 @@ import {
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
-export function UserMenu() {
+export default function UserMenu() {
   const { user, logOut } = useAuth();
   const { 
     credits, 
