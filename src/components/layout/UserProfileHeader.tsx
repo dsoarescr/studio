@@ -1,5 +1,7 @@
+
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +13,11 @@ import {
   Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
   User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield
+  BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIconLucide
 } from "lucide-react"; 
-import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ import { useAuth } from '@/lib/auth-context';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
@@ -79,12 +81,8 @@ export default function UserProfileHeader() {
   const [formattedSpecialCredits, setFormattedSpecialCredits] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
   const [showQuickStats, setShowQuickStats] = useState(false);
-
-  useEffect(() => {
-    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-  }, []);
 
   // Combine store data with mock data for a complete user object
   const userData = {
@@ -160,7 +158,7 @@ export default function UserProfileHeader() {
                   <div className="relative">
                     <Avatar className="h-16 w-16 border-2 border-primary shadow-lg">
                       <AvatarImage src={userData.avatarUrl} alt={userData.name} data-ai-hint={userData.dataAiHint} />
-                      <AvatarFallback className="font-headline text-3xl">{userData.name.substring(0, 1).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback className="font-headline text-3xl">{userData.name ? userData.name.substring(0, 1).toUpperCase() : ''}</AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
                       <Badge className="h-6 w-6 p-0 flex items-center justify-center bg-primary text-primary-foreground">
@@ -350,7 +348,7 @@ export default function UserProfileHeader() {
               stats={[
                 { label: 'Saldo Atual', value: formattedCredits || '...', icon: <Coins className="h-4 w-4" /> },
                   { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> },
-                  { label: 'Pixels Owned', value: pixels, icon: <MapPin className="h-4 w-4" /> }
+                  { label: 'Pixels Owned', value: pixels, icon: <MapPinIconLucide className="h-4 w-4" /> }
               ]}
               actions={[
                   { label: 'Comprar Mais', onClick: () => {}, icon: <ShoppingCart className="h-4 w-4" /> }
@@ -378,40 +376,94 @@ export default function UserProfileHeader() {
           <UserMenu />
         </div>
       </div>
-
-        {/* Quick Stats Dropdown */}
-        <AnimatePresence>
-          {showQuickStats && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="fixed top-16 right-4 z-40"
-            >
-              <Card className="bg-card/95 backdrop-blur-xl border-primary/30 shadow-2xl">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Créditos</span>
-                    <span className="font-bold text-primary">{formattedCredits}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Especiais</span>
-                    <span className="font-bold text-accent">{formattedSpecialCredits}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Pixels</span>
-                    <span className="font-bold text-green-500">{pixels}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Nível</span>
-                    <Badge>{level}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </>
-    </div>
+      </div>
+      {/* Quick Stats Dropdown */}
+      <AnimatePresence>
+        {showQuickStats && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-16 right-4 z-40"
+          >
+            <Card className="bg-card/95 backdrop-blur-xl border-primary/30 shadow-2xl">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Créditos</span>
+                  <span className="font-bold text-primary">{formattedCredits}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Especiais</span>
+                  <span className="font-bold text-accent">{formattedSpecialCredits}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Pixels</span>
+                  <span className="font-bold text-green-500">{pixels}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Nível</span>
+                  <Badge>{level}</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
+
+// Separate UserMenu component for clarity and reuse
+function UserMenu() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <AuthModal>
+        <Button variant="default" size="sm" className="gap-2">
+          <User className="h-4 w-4" />
+          <span>Entrar</span>
+        </Button>
+      </AuthModal>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className="relative h-10 w-10 rounded-full p-0"
+        >
+          <Avatar className="h-10 w-10 border-2 border-primary/50">
+            <AvatarImage src={user.photoURL || `https://placehold.co/40x40.png?text=${user.displayName?.charAt(0) || 'U'}`} />
+            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 mt-2">
+        <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <Link href="/member" passHref>
+          <DropdownMenuItem>
+            <User className="mr-2 h-4 w-4" />
+            <span>Perfil</span>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/settings" passHref>
+          <DropdownMenuItem>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Configurações</span>
+          </DropdownMenuItem>
+        </Link>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Terminar Sessão</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+    
