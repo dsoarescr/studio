@@ -47,6 +47,7 @@ const PixelGrid: React.FC<PixelGridProps> = ({ className = '' }) => {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [hoveredPixel, setHoveredPixel] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('map');
+  const [mapData, setMapData] = useState<any>(null);
 
   // Generate mock pixels for demonstration
   const [mockPixels, setMockPixels] = useState<Pixel[]>(() => {
@@ -83,6 +84,10 @@ const PixelGrid: React.FC<PixelGridProps> = ({ className = '' }) => {
 
   const handlePixelHover = useCallback((pixelId: string | null) => {
     setHoveredPixel(pixelId);
+  }, []);
+
+  const handleMapDataLoaded = useCallback((data: any) => {
+    setMapData(data);
   }, []);
 
   const handlePurchaseComplete = useCallback((pixel: Pixel) => {
@@ -214,11 +219,8 @@ const PixelGrid: React.FC<PixelGridProps> = ({ className = '' }) => {
           {viewMode === 'map' ? (
             <div className="bg-white rounded-lg border shadow-sm p-6">
               <PortugalMapSvg 
-                pixels={mockPixels}
-                onPixelClick={handlePixelClick}
-                onPixelHover={handlePixelHover}
-                hoveredPixel={hoveredPixel}
-                selectedPixel={selectedPixel}
+                onMapDataLoaded={handleMapDataLoaded}
+                className="w-full h-96"
               />
             </div>
           ) : (

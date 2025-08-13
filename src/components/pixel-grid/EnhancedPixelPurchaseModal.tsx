@@ -50,7 +50,7 @@ interface EnhancedPixelPurchaseModalProps {
   onPurchase: (pixelData: any, paymentMethod: string, customizations: PixelCustomization) => Promise<boolean>;
 }
 
-export default function EnhancedPixelPurchaseModal({
+export function EnhancedPixelPurchaseModal({
   isOpen,
   onClose,
   pixelData,
