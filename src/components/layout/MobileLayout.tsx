@@ -5,24 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import UserProfileHeader from './UserProfileHeader';
 import BottomNavBar from './BottomNavBar';
-import { MobileNavigation } from '@/components/ui/mobile-navigation';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Home, ShoppingCart, Palette, User, BarChart3, 
-  Trophy, Settings, Crown, Users, Award
+  Trophy, Settings, Crown, Users, Award, Zap
 } from 'lucide-react';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
 }
-
-const mobileNavItems = [
-  { href: "/", label: "Início", icon: <Home />, color: "text-blue-500" },
-  { href: "/marketplace", label: "Market", icon: <ShoppingCart />, color: "text-green-500" },
-  { href: "/pixels", label: "Galeria", icon: <Palette />, badge: 3, color: "text-purple-500" },
-  { href: "/member", label: "Perfil", icon: <User />, color: "text-orange-500" },
-  { href: "/achievements", label: "Conquistas", icon: <Trophy />, badge: 2, color: "text-yellow-500" }
-];
 
 export default function MobileLayout({ children }: MobileLayoutProps) {
   const pathname = usePathname();
@@ -63,45 +54,32 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
     };
   }, [isMobile]);
 
-  // Show orientation change notification
+  // Show orientation change notification for map page
   useEffect(() => {
-    if (isMobile) {
+    if (isMobile && pathname === '/') {
       toast({
-        title: orientation === 'landscape' ? "Modo Paisagem" : "Modo Retrato",
+        title: orientation === 'landscape' ? "🔄 Modo Paisagem" : "📱 Modo Retrato",
         description: orientation === 'landscape' 
-          ? "Melhor experiência para visualizar o mapa" 
-          : "Melhor experiência para navegação",
+          ? "Perfeito para explorar o mapa de pixels!" 
+          : "Ideal para navegar e interagir",
         duration: 2000
       });
     }
-  }, [orientation, isMobile, toast]);
-
-  if (!isMobile) {
-    // Desktop layout
-    return (
-      <div className="flex flex-col h-full">
-        <UserProfileHeader />
-        <main className="flex-1 overflow-y-auto pt-14 pb-[var(--bottom-nav-height)]">
-          {children}
-        </main>
-        <BottomNavBar />
-      </div>
-    );
-  }
+  }, [orientation, isMobile, toast, pathname]);
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden bg-gradient-to-br from-background via-background/98 to-primary/5">
       {/* Mobile Header */}
       <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex-shrink-0"
+        className="flex-shrink-0 z-50"
       >
         <UserProfileHeader />
       </motion.div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden relative">
+      <main className="flex-1 overflow-hidden relative pt-14 pb-20">
         <motion.div
           key={pathname}
           initial={{ opacity: 0, x: 20 }}
@@ -113,15 +91,31 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
           {children}
         </motion.div>
 
-        {/* Orientation Helper */}
+        {/* Orientation Helper for Map */}
         {orientation === 'landscape' && pathname === '/' && (
-          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-40">
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-primary/90 text-primary-foreground rounded-full px-3 py-1 text-xs font-medium"
+              className="bg-primary/90 text-primary-foreground rounded-full px-4 py-2 text-sm font-medium shadow-lg"
             >
-              Modo paisagem ativo - Melhor para explorar o mapa
+              🗺️ Modo paisagem ativo - Perfeito para explorar pixels!
+            </motion.div>
+          </div>
+        )}
+
+        {/* Tutorial Hints */}
+        {pathname === '/' && (
+          <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-30">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="bg-black/70 backdrop-blur-sm text-white rounded-xl px-4 py-3 text-center max-w-xs"
+            >
+              <Zap className="h-5 w-5 mx-auto mb-2 text-primary" />
+              <p className="text-sm font-medium">Toque para comprar pixels únicos!</p>
+              <p className="text-xs text-white/80 mt-1">Deslize para ações rápidas</p>
             </motion.div>
           </div>
         )}
@@ -134,13 +128,9 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="flex-shrink-0"
+            className="flex-shrink-0 z-50"
           >
-            <MobileNavigation
-              items={mobileNavItems}
-              showLabels={orientation === 'portrait'}
-              showPremiumButton={true}
-            />
+            <BottomNavBar />
           </motion.div>
         )}
       </AnimatePresence>

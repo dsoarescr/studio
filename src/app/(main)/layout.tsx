@@ -1,4 +1,3 @@
-
 import MobileLayout from '@/components/layout/MobileLayout';
 
 export default function MainLayout({
