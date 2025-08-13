@@ -61,7 +61,7 @@ export function UserMenu() {
   
   if (!user) {
     return (
-      <AuthModal>
+      <AuthModal defaultTab="login">
         <Button variant="default" size="sm" className="gap-2">
           <User className="h-4 w-4" />
           <span>Entrar</span>
@@ -76,16 +76,16 @@ export function UserMenu() {
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
-            className="relative h-8 w-8 rounded-full p-0 hover:bg-primary/10 transition-colors"
+            className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 transition-colors"
           >
             <div className="relative">
-              <Avatar className="h-8 w-8 border-2 border-primary/50 hover:border-primary transition-colors">
+              <Avatar className="h-10 w-10 border-2 border-primary/50 hover:border-primary transition-colors">
                 <AvatarImage 
                   src={user.photoURL || `https://placehold.co/40x40.png?text=${user.displayName?.charAt(0) || 'U'}`} 
                   alt={user.displayName || 'User'} 
                   className="hover:scale-110 transition-transform duration-300" 
                 />
-                <AvatarFallback className="text-xs font-headline">
+                <AvatarFallback className="text-sm font-headline">
                   {user.displayName?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>

@@ -1,31 +1,22 @@
 
+// src/components/layout/UserProfileHeader.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import NotificationCenter from './NotificationCenter';
 import { useUserStore } from '@/lib/store';
 import SearchSystem from './SearchSystem';
 import { 
-  Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
-  User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
+  Award, Gift, Bell, Settings, Menu,
+  Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
   BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIconLucide
 } from "lucide-react"; 
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -35,16 +26,18 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from 'react-i18next';
 import HelpCenter from '@/components/features/HelpCenter';
 import TwoFactorAuth from '@/components/security/TwoFactorAuth';
 import FeedbackSystem from '@/components/features/FeedbackSystem';
 import { useAuth } from '@/lib/auth-context';
-import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { UserMenu } from '../auth/UserMenu';
+import { AuthModal } from '../auth/AuthModal';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Progress } from '../ui/progress';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
@@ -100,7 +93,6 @@ export default function UserProfileHeader() {
     isPremium,
     isVerified,
   };
-
 
   useEffect(() => {
     setFormattedCredits(credits.toLocaleString('pt-PT'));
@@ -377,93 +369,6 @@ export default function UserProfileHeader() {
         </div>
       </div>
       </div>
-      {/* Quick Stats Dropdown */}
-      <AnimatePresence>
-        {showQuickStats && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-16 right-4 z-40"
-          >
-            <Card className="bg-card/95 backdrop-blur-xl border-primary/30 shadow-2xl">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Créditos</span>
-                  <span className="font-bold text-primary">{formattedCredits}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Especiais</span>
-                  <span className="font-bold text-accent">{formattedSpecialCredits}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Pixels</span>
-                  <span className="font-bold text-green-500">{pixels}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Nível</span>
-                  <Badge>{level}</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }
-
-// Separate UserMenu component for clarity and reuse
-function UserMenu() {
-  const { user } = useAuth();
-
-  if (!user) {
-    return (
-      <AuthModal>
-        <Button variant="default" size="sm" className="gap-2">
-          <User className="h-4 w-4" />
-          <span>Entrar</span>
-        </Button>
-      </AuthModal>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="relative h-10 w-10 rounded-full p-0"
-        >
-          <Avatar className="h-10 w-10 border-2 border-primary/50">
-            <AvatarImage src={user.photoURL || `https://placehold.co/40x40.png?text=${user.displayName?.charAt(0) || 'U'}`} />
-            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 mt-2">
-        <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <Link href="/member" passHref>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
-          </DropdownMenuItem>
-        </Link>
-        <Link href="/settings" passHref>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Configurações</span>
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Terminar Sessão</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-    
