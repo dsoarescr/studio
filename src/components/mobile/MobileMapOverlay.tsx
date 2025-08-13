@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Users, TrendingUp, Activity, Zap, Eye, 
   Wifi, WifiOff, Battery, Signal, Clock, Globe,
-  Compass, Target, Navigation, Crosshair
+  Compass, Target, Navigation, Crosshair, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

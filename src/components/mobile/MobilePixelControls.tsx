@@ -74,7 +74,7 @@ export default function MobilePixelControls({
   };
 
   return (
-    <div className={cn("fixed bottom-20 left-4 z-30", className)}>
+    <div className={cn("fixed bottom-24 left-4 z-30", className)}>
       {/* Zoom Level Indicator */}
       <AnimatePresence>
         {showZoomLevel && (

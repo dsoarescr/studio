@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, PanInfo, useMotionValue, useTransform } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, Share2, ShoppingCart, Bookmark, Star, Zap } from 'lucide-react';

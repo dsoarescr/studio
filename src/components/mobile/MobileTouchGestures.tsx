@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 import { Heart, Bookmark, Share2, ShoppingCart, Zap } from 'lucide-react';
 
 interface TouchGesture {
