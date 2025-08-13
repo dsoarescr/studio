@@ -156,6 +156,9 @@ export default function PixelGrid() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [defaultView, setDefaultView] = useState<{ zoom: number; position: { x: number; y: number } } | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchStartTime, setTouchStartTime] = useState(0);
+  const [lastTap, setLastTap] = useState(0);
 
   const didDragRef = useRef(false);
   const dragThreshold = 5;
@@ -202,6 +205,7 @@ export default function PixelGrid() {
   
   useEffect(() => {
     setIsClient(true);
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
      if (typeof window !== 'undefined') {
       const computedStyle = getComputedStyle(document.documentElement);
       const primaryColor = `hsl(${computedStyle.getPropertyValue('--primary').trim()})`;
@@ -498,6 +502,84 @@ export default function PixelGrid() {
     setIsDragging(true);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
     didDragRef.current = false;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    clearAutoResetTimeout();
+    const touch = e.touches[0];
+    const now = Date.now();
+    setTouchStartTime(now);
+    
+    // Double tap detection
+    if (now - lastTap < 300) {
+      handleDoubleTap(touch);
+      return;
+    }
+    setLastTap(now);
+    
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y });
+    didDragRef.current = false;
+    
+    // Haptic feedback
+    vibrate('light');
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    e.preventDefault(); // Prevent scrolling
+    
+    const touch = e.touches[0];
+    const currentX = touch.clientX - dragStart.x;
+    const currentY = touch.clientY - dragStart.y;
+
+    if (!didDragRef.current) {
+      const dx = Math.abs(currentX - position.x);
+      const dy = Math.abs(currentY - position.y);
+      if (dx > dragThreshold || dy > dragThreshold) {
+        didDragRef.current = true;
+      }
+    }
+    setPosition({ x: currentX, y: currentY });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isDragging) {
+      if (!didDragRef.current && Date.now() - touchStartTime < 300) {
+        // Short tap without drag - treat as click
+        const touch = e.changedTouches[0];
+        const syntheticEvent = {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          preventDefault: () => {},
+          stopPropagation: () => {}
+        } as React.MouseEvent;
+        handleCanvasClick(syntheticEvent);
+      }
+      setIsDragging(false);
+    }
+  };
+
+  const handleDoubleTap = (touch: Touch) => {
+    // Double tap to zoom in
+    const newZoom = Math.min(zoom * 2, MAX_ZOOM);
+    if (newZoom !== zoom) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const centerX = touch.clientX - rect.left;
+        const centerY = touch.clientY - rect.top;
+        
+        const currentCanvasX = (centerX - position.x) / zoom;
+        const currentCanvasY = (centerY - position.y) / zoom;
+        
+        const newPosX = centerX - currentCanvasX * newZoom;
+        const newPosY = centerY - currentCanvasY * newZoom;
+        
+        setZoom(newZoom);
+        setPosition({ x: newPosX, y: newPosY });
+        vibrate('medium');
+      }
+    }
   };
 
 
@@ -843,15 +925,18 @@ export default function PixelGrid() {
               setShowPixelModal(true);
             }
           }}
-          className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center"
+          className="flex-grow w-full h-full p-2 sm:p-4 md:p-8 flex items-center justify-center"
         >
           <div
               ref={containerRef}
-              className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
+              className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-lg sm:rounded-xl shadow-2xl border border-primary/20 touch-none"
               onMouseDown={handleMouseDown} 
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
           >
               <div
               style={{
@@ -878,28 +963,49 @@ export default function PixelGrid() {
         </SwipeGestures>
         
         {/* Zoom Controls */}
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 flex flex-col gap-1 sm:gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                  <ZoomIn className="h-5 w-5" />
+                <Button 
+                  style={{ pointerEvents: 'auto' }} 
+                  variant="outline" 
+                  size={isMobile ? "sm" : "icon"} 
+                  onClick={handleZoomIn} 
+                  aria-label="Zoom In"
+                  className="h-10 w-10 sm:h-10 sm:w-10 touch-target"
+                >
+                  <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent><p>Aproximar</p></TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                  <ZoomOut className="h-5 w-5" />
+                <Button 
+                  style={{ pointerEvents: 'auto' }} 
+                  variant="outline" 
+                  size={isMobile ? "sm" : "icon"} 
+                  onClick={handleZoomOut} 
+                  aria-label="Zoom Out"
+                  className="h-10 w-10 sm:h-10 sm:w-10 touch-target"
+                >
+                  <ZoomOut className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent><p>Afastar</p></TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                  <Expand className="h-5 w-5" />
+                <Button 
+                  style={{ pointerEvents: 'auto' }} 
+                  variant="outline" 
+                  size={isMobile ? "sm" : "icon"} 
+                  onClick={handleResetView} 
+                  aria-label="Reset View"
+                  className="h-10 w-10 sm:h-10 sm:w-10 touch-target"
+                >
+                  <Expand className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent><p>Resetar Vista</p></TooltipContent>
@@ -908,18 +1014,24 @@ export default function PixelGrid() {
         </div>
 
         {/* Enhanced Mobile Action Menu */}
-        <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
+        <div className="absolute bottom-4 right-2 sm:bottom-6 sm:right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-2 sm:gap-3" style={{ pointerEvents: 'auto' }}>
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-              <Brain className="h-6 w-6" />
+            <Button 
+              size={isMobile ? "sm" : "icon"} 
+              className="rounded-full w-10 h-10 sm:w-12 sm:h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 touch-target"
+            >
+              <Brain className="h-4 w-4 sm:h-6 sm:w-6" />
             </Button>
           </PixelAI>
           
           {/* Social Features */}
           <PixelSocialFeatures>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
-              <Users className="h-6 w-6" />
+            <Button 
+              size={isMobile ? "sm" : "icon"} 
+              className="rounded-full w-10 h-10 sm:w-12 sm:h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 touch-target"
+            >
+              <Users className="h-4 w-4 sm:h-6 sm:w-6" />
             </Button>
           </PixelSocialFeatures>
           
@@ -985,8 +1097,12 @@ export default function PixelGrid() {
           >
             <Dialog>
               <DialogTrigger asChild>
-                 <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
-                    <Star className="h-7 w-7" />
+                 <Button 
+                   style={{ pointerEvents: 'auto' }} 
+                   size={isMobile ? "sm" : "icon"} 
+                   className="rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95 touch-target"
+                 >
+                    <Star className="h-5 w-5 sm:h-7 sm:w-7" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
@@ -996,7 +1112,7 @@ export default function PixelGrid() {
                     Explore, filtre e interaja com o mapa de pixels.
                   </DialogDescriptionElement>
                 </DialogHeader>
-                <div className="grid gap-3 py-4">
+                <div className="grid gap-2 sm:gap-3 py-4">
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>

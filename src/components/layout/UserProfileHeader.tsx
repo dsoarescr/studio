@@ -78,6 +78,11 @@ export default function UserProfileHeader() {
   const [formattedSpecialCredits, setFormattedSpecialCredits] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  }, []);
 
   // Combine store data with mock data for a complete user object
   const userData = {
@@ -132,18 +137,18 @@ export default function UserProfileHeader() {
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 animate-shimmer" 
            style={{ backgroundSize: '300% 100%' }} />
       
-      <div className="container relative flex h-14 max-w-screen-2xl items-center justify-between px-3 sm:px-4">
+      <div className="container relative flex h-12 sm:h-14 max-w-screen-2xl items-center justify-between px-2 sm:px-3 safe-left safe-right">
         {/* Left: Logo + Menu (Mobile) */}
-        <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center space-x-1 sm:space-x-2">
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
               <Button 
                 variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 sm:hidden hover:bg-primary/10 transition-colors"
+                size="sm" 
+                className="h-8 w-8 sm:hidden hover:bg-primary/10 transition-colors touch-target"
               >
-                <Menu className="h-5 w-5" />
+                <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 p-0">
@@ -273,19 +278,19 @@ export default function UserProfileHeader() {
               <Image 
                 src="/logo.png" 
                 alt="Pixel Universe" 
-                width={32} 
-                height={32} 
+                width={isMobile ? 24 : 32} 
+                height={isMobile ? 24 : 32} 
                 className="relative z-10 transition-transform duration-300 group-hover:scale-110" 
               />
             </div>
-            <span className="hidden sm:block font-headline text-lg font-bold text-gradient-gold-animated transition-all duration-300 group-hover:scale-105">
+            <span className="hidden sm:block font-headline text-base sm:text-lg font-bold text-gradient-gold-animated transition-all duration-300 group-hover:scale-105">
               Pixel Universe
             </span>
           </Link>
         </div>
 
         {/* Enhanced Center: Search (Desktop) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-4 relative">
+        <div className="hidden lg:flex flex-1 max-w-md mx-4 relative">
           <SearchSystem>
             <div className="relative w-full cursor-pointer group">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -300,43 +305,47 @@ export default function UserProfileHeader() {
         </div>
 
         {/* Right: User Info + Actions */}
-        <div className="flex items-center space-x-1 sm:space-x-2">
+        <div className="flex items-center space-x-1">
           {/* Mobile Search */}
           <SearchSystem>
             <Button
               variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 md:hidden hover:bg-primary/10 transition-colors"
+              size="sm" 
+              className="h-8 w-8 lg:hidden hover:bg-primary/10 transition-colors touch-target"
             >
               <Search className="h-4 w-4" />
             </Button>
           </SearchSystem>
 
           {/* Language Switcher */}
-          <LanguageSwitcher variant="ghost" size="icon" showText={false} />
+          <div className="hidden sm:block">
+            <LanguageSwitcher variant="ghost" size="icon" showText={false} />
+          </div>
 
           {/* Quick Add */}
-          <Button
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 hidden sm:flex hover:bg-primary/10 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          <div className="hidden md:block">
+            <Button
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 hover:bg-primary/10 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
 
           {/* Notifications */}
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}><NotificationCenter>
             <Button 
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => clearNotifications()} 
-              className="h-8 w-8 relative hover:bg-primary/10 transition-colors"
+              className="h-8 w-8 relative hover:bg-primary/10 transition-colors touch-target"
             >
               <Bell className="h-4 w-4" />
               {notifications > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 flex h-3 w-3 sm:h-4 sm:w-4 items-center justify-center">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-heartbeat"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 text-[10px] text-white font-bold items-center justify-center">
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-red-500 text-[8px] sm:text-[10px] text-white font-bold items-center justify-center">
                   {notifications > 9 ? '9+' : notifications}
                 </span>
               </span>
@@ -345,7 +354,7 @@ export default function UserProfileHeader() {
           </NotificationCenter></motion.div>
 
           {/* Credits (Mobile Compact) */}
-          <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="flex items-center space-x-1">
             <EnhancedTooltip
               title="Créditos"
               description="Sua moeda principal para comprar pixels"
@@ -358,13 +367,13 @@ export default function UserProfileHeader() {
               ]}
             >
               <div className={cn(
-                "flex items-center text-foreground transition-all duration-300 hover:scale-105 cursor-pointer bg-primary/10 rounded-full px-2 py-1 group",
+                "flex items-center text-foreground transition-all duration-300 hover:scale-105 cursor-pointer bg-primary/10 rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 group touch-target",
                 isAnimating && "animate-bounce-slow"
               )}>
-                <Coins className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary group-hover:text-primary/80 transition-colors animate-pulse" style={{ animationDuration: '3s' }} />
+                <Coins className="h-3 w-3 mr-0.5 sm:mr-1 text-primary group-hover:text-primary/80 transition-colors animate-pulse" style={{ animationDuration: '3s' }} />
                 {formattedCredits !== null ? (
-                  <span className="font-code text-xs sm:text-sm text-primary font-bold group-hover:text-primary/80 transition-colors">
-                    {typeof window !== 'undefined' && window.innerWidth < 640 ? `${Math.floor(credits / 1000)}K` : formattedCredits}
+                  <span className="font-code text-xs text-primary font-bold group-hover:text-primary/80 transition-colors">
+                    {isMobile ? `${Math.floor(credits / 1000)}K` : formattedCredits}
                   </span>
                 ) : (
                   <span className="font-code text-xs loading-dots">...</span>
@@ -372,35 +381,37 @@ export default function UserProfileHeader() {
               </div>
             </EnhancedTooltip>
             
-            <EnhancedTooltip
-              title="Créditos Especiais"
-              description="Moeda premium para itens exclusivos"
-              stats={[
-                { label: 'Saldo Especial', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> }
-              ]}
-              badges={[
-                { label: 'Premium', variant: 'default' }
-              ]}
-            >
-              <div className={cn(
-                "hidden sm:flex items-center text-foreground transition-all duration-300 hover:scale-105 cursor-pointer bg-accent/10 rounded-full px-2 py-1 group",
-                isAnimating && "animate-bounce-slow animation-delay-100"
-              )}>
-                <Gift className="h-4 w-4 mr-1 text-accent group-hover:text-accent/80 transition-colors animate-pulse" style={{ animationDuration: '4s' }} /> 
-                {formattedSpecialCredits !== null ? (
-                  <span className="font-code text-sm text-accent font-bold group-hover:text-accent/80 transition-colors">{formattedSpecialCredits}</span>
-                ) : (
-                  <span className="font-code text-xs loading-dots">...</span>
-                )}
-              </div>
-            </EnhancedTooltip>
+            <div className="hidden md:block">
+              <EnhancedTooltip
+                title="Créditos Especiais"
+                description="Moeda premium para itens exclusivos"
+                stats={[
+                  { label: 'Saldo Especial', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> }
+                ]}
+                badges={[
+                  { label: 'Premium', variant: 'default' }
+                ]}
+              >
+                <div className={cn(
+                  "flex items-center text-foreground transition-all duration-300 hover:scale-105 cursor-pointer bg-accent/10 rounded-full px-2 py-1 group",
+                  isAnimating && "animate-bounce-slow animation-delay-100"
+                )}>
+                  <Gift className="h-4 w-4 mr-1 text-accent group-hover:text-accent/80 transition-colors animate-pulse" style={{ animationDuration: '4s' }} /> 
+                  {formattedSpecialCredits !== null ? (
+                    <span className="font-code text-sm text-accent font-bold group-hover:text-accent/80 transition-colors">{formattedSpecialCredits}</span>
+                  ) : (
+                    <span className="font-code text-xs loading-dots">...</span>
+                  )}
+                </div>
+              </EnhancedTooltip>
+            </div>
           </div>
 
           {/* User Menu */}
           <UserMenu />
           
           {/* Connection status indicator */}
-          <div className="flex items-center">
+          <div className="hidden sm:flex items-center">
             <EnhancedTooltip
               title={isOnline ? "Conectado" : "Offline"}
               description={isOnline ? "Todas as funcionalidades disponíveis" : "Modo offline ativo"}

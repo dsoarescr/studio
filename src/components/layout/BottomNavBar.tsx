@@ -49,6 +49,11 @@ export default function BottomNavBar() {
   
   const [playClickSound, setPlayClickSound] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  }, []);
 
   const xpPercentage = (xp / xpMax) * 100;
 
@@ -63,8 +68,8 @@ export default function BottomNavBar() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="h-full w-full pointer-events-auto"
         >
-          <Card className="professional-footer h-full w-full rounded-t-2xl overflow-hidden">
-            <CardContent className="h-full p-2 sm:p-3 flex items-center justify-around">
+          <Card className="professional-footer h-full w-full rounded-t-xl sm:rounded-t-2xl overflow-hidden">
+            <CardContent className="h-full p-1 sm:p-2 flex items-center justify-around safe-bottom">
               {navLinks.map((link) => {
                 const isActive = (pathname === '/' && link.href === '/') || (pathname !== '/' && link.href !== '/' && pathname.startsWith(link.href));
                 return (
@@ -73,7 +78,7 @@ export default function BottomNavBar() {
                       onMouseEnter={() => setHoveredItem(link.href)}
                       onMouseLeave={() => setHoveredItem(null)}
                       onClick={() => setPlayClickSound(true)}
-                      className="relative flex flex-col items-center justify-center p-1 rounded-lg w-16 h-16 text-muted-foreground hover:text-primary transition-all duration-300"
+                      className="relative flex flex-col items-center justify-center p-1 rounded-lg w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground hover:text-primary transition-all duration-300 touch-target"
                     >
                       <AnimatePresence>
                         {hoveredItem === link.href && (
@@ -88,15 +93,15 @@ export default function BottomNavBar() {
                       </AnimatePresence>
 
                       <div className="relative">
-                        <link.icon className={`h-6 w-6 transition-transform duration-300 ${isActive ? 'text-primary' : ''}`} />
+                        <link.icon className={`h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 ${isActive ? 'text-primary' : ''}`} />
                         {isActive && (
-                          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                          <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 flex h-2 w-2 sm:h-2.5 sm:w-2.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-primary"></span>
                           </span>
                         )}
                       </div>
-                      <span className={`text-xs mt-1 transition-colors duration-300 ${isActive ? 'text-primary font-semibold' : ''}`}>
+                      <span className={`text-xs mt-0.5 sm:mt-1 transition-colors duration-300 ${isActive ? 'text-primary font-semibold' : ''} ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
                         {link.label}
                       </span>
                     </motion.div>
@@ -105,7 +110,7 @@ export default function BottomNavBar() {
               })}
 
               {/* Botão Premium no Centro */}
-              <div className="hidden lg:block">
+              <div className="hidden sm:block">
                 <EnhancedTooltip
                   title="Pixel Universe Premium"
                   description="Desbloqueie ferramentas avançadas, estatísticas detalhadas e recompensas exclusivas."
@@ -116,23 +121,23 @@ export default function BottomNavBar() {
                   <Link href="/premium">
                     <Button
                       size="lg"
-                      className="h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-accent text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-110 hover:shadow-primary/50"
+                      className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-tr from-primary to-accent text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-110 hover:shadow-primary/50 touch-target"
                     >
-                      <Crown className="h-7 w-7" />
+                      <Crown className="h-5 w-5 sm:h-7 sm:w-7" />
                     </Button>
                   </Link>
                 </EnhancedTooltip>
               </div>
 
               {/* Login/User Menu */}
-              <div className="lg:hidden">
+              <div className="sm:hidden">
                 {user ? (
                   <UserMenu />
                 ) : (
                   <AuthModal>
-                    <div className="flex flex-col items-center justify-center p-1 rounded-lg w-16 h-16 text-muted-foreground hover:text-primary transition-all duration-300">
-                      <UserPlus className="h-6 w-6" />
-                      <span className="text-xs mt-1">Entrar</span>
+                    <div className="flex flex-col items-center justify-center p-1 rounded-lg w-12 h-12 text-muted-foreground hover:text-primary transition-all duration-300 touch-target">
+                      <UserPlus className="h-5 w-5" />
+                      <span className="text-[10px] mt-0.5">Entrar</span>
                     </div>
                   </AuthModal>
                 )}
