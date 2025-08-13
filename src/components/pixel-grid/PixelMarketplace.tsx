@@ -10,11 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion } from 'framer-motion';
-import { 
-  ShoppingCart, TrendingUp, Star, Crown, Gem, MapPin, 
-  Eye, Heart, Filter, Search, SortAsc, Coins, Gift,
-  Zap, Target, Award, Sparkles, Flame, Lightning
-} from 'lucide-react';
+import { ShoppingCart, TrendingUp, Star, Crown, Gem, MapPin, Eye, Heart, Filter, Search, SortAsc, Coins, Gift, Zap, Target, Award, Sparkles, Flame, CloudLightning as Lightning } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MarketPixel {

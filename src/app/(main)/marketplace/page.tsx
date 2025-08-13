@@ -10,12 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { 
-  ShoppingCart, TrendingUp, Star, Crown, Gem, MapPin, Eye, Heart, 
-  Filter, Search, Coins, Gift, Zap, Target, Award, Sparkles, 
-  Flame, Lightning, DollarSign, Users, Calendar, Clock, Share2,
-  Bookmark, MoreHorizontal, Play, Pause, Volume2, Settings
-} from "lucide-react";
+import { ShoppingCart, TrendingUp, Star, Crown, Gem, MapPin, Eye, Heart, Filter, Search, Coins, Gift, Zap, Target, Award, Sparkles, Flame, CloudLightning as Lightning, DollarSign, Users, Calendar, Clock, Share2, Bookmark, MoreHorizontal, Play, Pause, Volume2, Settings } from "lucide-react";
 import { useUserStore } from '@/lib/store';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
