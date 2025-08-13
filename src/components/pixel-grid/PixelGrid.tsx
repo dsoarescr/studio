@@ -53,6 +53,10 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
+import PixelMarketplace from './PixelMarketplace';
+import PixelIdentityEditor from './PixelIdentityEditor';
+import PixelShowcase from './PixelShowcase';
+import { PixelPurchaseFlow } from './PixelPurchaseFlow';
 
 
 // Configuration constants
@@ -192,6 +196,9 @@ export default function PixelGrid() {
 
   const containerSizeRef = useRef({ width: 0, height: 0 });
   const { vibrate } = useHapticFeedback();
+  const [showPurchaseFlow, setShowPurchaseFlow] = useState(false);
+  const [showIdentityEditor, setShowIdentityEditor] = useState(false);
+  const [showMarketplace, setShowMarketplace] = useState(false);
 
   const clearAutoResetTimeout = useCallback(() => {
     if (autoResetTimeoutRef.current) {
@@ -666,6 +673,13 @@ export default function PixelGrid() {
         }
         setSelectedPixelDetails(mockDetails);
         setShowPixelModal(true);
+        
+        // Vibração mais forte para pixels disponíveis para compra
+        if (!existingSoldPixel) {
+          vibrate('medium');
+        } else {
+          vibrate('light');
+        }
       } else { 
         setHighlightedPixel(null);
         setSelectedPixelDetails(null);
@@ -922,7 +936,11 @@ export default function PixelGrid() {
           onSwipeDown={() => {
             vibrate('medium');
             if (selectedPixelDetails) {
-              setShowPixelModal(true);
+              if (selectedPixelDetails.isForSaleBySystem) {
+                setShowPurchaseFlow(true);
+              } else {
+                setShowPixelModal(true);
+              }
             }
           }}
           className="flex-grow w-full h-full p-2 sm:p-4 md:p-8 flex items-center justify-center"
@@ -963,7 +981,7 @@ export default function PixelGrid() {
         </SwipeGestures>
         
         {/* Zoom Controls */}
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 flex flex-col gap-1 sm:gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
+        <div className="absolute top-16 right-2 sm:top-20 sm:right-4 z-20 flex flex-col gap-1 sm:gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1014,130 +1032,73 @@ export default function PixelGrid() {
         </div>
 
         {/* Enhanced Mobile Action Menu */}
-        <div className="absolute bottom-4 right-2 sm:bottom-6 sm:right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-2 sm:gap-3" style={{ pointerEvents: 'auto' }}>
+        <div className="absolute bottom-20 right-2 sm:bottom-24 sm:right-4 z-20 animate-scale-in animation-delay-500 flex flex-col gap-2" style={{ pointerEvents: 'auto' }}>
+          {/* Marketplace Button */}
+          <PixelMarketplace>
+            <Button 
+              size="icon" 
+              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 touch-target"
+            >
+              <ShoppingCart className="h-6 w-6" />
+            </Button>
+          </PixelMarketplace>
+          
+          {/* Identity Editor */}
+          <PixelIdentityEditor pixelData={selectedPixelDetails}>
+            <Button 
+              size="icon" 
+              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 touch-target"
+            >
+              <Edit3 className="h-6 w-6" />
+            </Button>
+          </PixelIdentityEditor>
+          
+          {/* Showcase */}
+          <PixelShowcase>
+            <Button 
+              size="icon" 
+              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 touch-target"
+            >
+              <Star className="h-6 w-6" />
+            </Button>
+          </PixelShowcase>
+          
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
             <Button 
-              size={isMobile ? "sm" : "icon"} 
-              className="rounded-full w-10 h-10 sm:w-12 sm:h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 touch-target"
+              size="icon" 
+              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 touch-target"
             >
-              <Brain className="h-4 w-4 sm:h-6 sm:w-6" />
+              <Brain className="h-6 w-6" />
             </Button>
           </PixelAI>
-          
-          {/* Social Features */}
-          <PixelSocialFeatures>
-            <Button 
-              size={isMobile ? "sm" : "icon"} 
-              className="rounded-full w-10 h-10 sm:w-12 sm:h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 touch-target"
-            >
-              <Users className="h-4 w-4 sm:h-6 sm:w-6" />
-            </Button>
-          </PixelSocialFeatures>
-          
-          {/* Gamification */}
-          <PixelGameification>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
-              <Trophy className="h-6 w-6" />
-            </Button>
-          </PixelGameification>
-          
-          {/* Auction */}
-          <PixelAuction>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Gavel className="h-6 w-6" />
-            </Button>
-          </PixelAuction>
-          
-          {/* Collaborative Editor */}
-          <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
-              <Users className="h-6 w-6" />
-            </Button>
-          </PixelCollaborativeEditor>
-          
-          {/* AR Button */}
-          <PixelAR>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-              <Camera className="h-6 w-6" />
-            </Button>
-          </PixelAR>
-          
-          {/* Stories Button */}
-          <PixelStories>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Play className="h-6 w-6" />
-            </Button>
-          </PixelStories>
-          
-          {/* Live Stream Button */}
-          <PixelLiveStream>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
-              <Radio className="h-6 w-6" />
-            </Button>
-          </PixelLiveStream>
-          
-          {/* Main Action Button */}
-          <EnhancedTooltip
-            title="Ações Rápidas"
-            description="Acesso rápido às funcionalidades principais"
-            actions={[
-              { 
-                label: 'Explorar', 
-                onClick: () => {}, 
-                icon: <Search className="h-4 w-4" /> 
-              },
-              { 
-                label: 'Filtros', 
-                onClick: () => {}, 
-                icon: <PaletteIconLucide className="h-4 w-4" /> 
-              }
-            ]}
-            interactive={true}
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                 <Button 
-                   style={{ pointerEvents: 'auto' }} 
-                   size={isMobile ? "sm" : "icon"} 
-                   className="rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95 touch-target"
-                 >
-                    <Star className="h-5 w-5 sm:h-7 sm:w-7" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
-                <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
-                  <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
-                    Explore, filtre e interaja com o mapa de pixels.
-                  </DialogDescriptionElement>
-                </DialogHeader>
-                <div className="grid gap-2 sm:gap-3 py-4">
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
-                    <Brain className="mr-2 h-4 w-4" />
-                    Assistente IA
-                  </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
-                    <Crosshair className="mr-2 h-4 w-4" />
-                    Modo Precisão
-                  </Button>
-                  <Separator />
-                  <Link href="/premium" className="w-full">
-                    <Button style={{ pointerEvents: 'auto' }} variant="default" className="w-full button-gradient-gold button-3d-effect">
-                      <Crown className="mr-2 h-4 w-4" />Tornar-se Premium
-                    </Button>
-                  </Link>
-                </div>
-                <DialogFooter className="dialog-footer-gold-accent rounded-b-lg">
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </EnhancedTooltip>
         </div>
+        
+        {/* Purchase Flow Modal */}
+        <PixelPurchaseFlow
+          isOpen={showPurchaseFlow}
+          onClose={() => setShowPurchaseFlow(false)}
+          pixelData={selectedPixelDetails}
+          onPurchaseComplete={(pixelData) => {
+            setShowPurchaseFlow(false);
+            setShowIdentityEditor(true);
+            vibrate('success');
+          }}
+        />
+        
+        {/* Identity Editor Modal */}
+        <PixelIdentityEditor
+          isOpen={showIdentityEditor}
+          onClose={() => setShowIdentityEditor(false)}
+          pixelData={selectedPixelDetails}
+          onSave={(identity) => {
+            setShowIdentityEditor(false);
+            toast({
+              title: "Identidade Digital Criada! 🎨",
+              description: "Seu pixel agora tem uma identidade única!",
+            });
+          }}
+        />
       </div>
     </MobileOptimizations>
   );
