@@ -125,126 +125,8 @@
     
     /* Ensure touch targets are at least 44px */
     button, a, [role="button"] {
-      min-height: 48px;
-      min-width: 48px;
-    }
-    
-    /* Enhanced mobile touch targets */
-    .touch-target {
-      min-height: 48px;
-      min-width: 48px;
-      @apply flex items-center justify-center;
-    }
-    
-    /* Mobile pixel grid optimizations */
-    .mobile-pixel-grid {
-      @apply touch-none select-none;
-    }
-    
-    /* Mobile gesture feedback */
-    .mobile-gesture-feedback {
-      @apply active:scale-95 transition-transform duration-150;
-    }
-    
-    /* Mobile card optimizations */
-    .mobile-card-hover:active {
-      @apply scale-98 transition-transform duration-150;
-    }
-    
-    /* Enhanced mobile buttons */
-    .mobile-button-enhanced {
-      @apply h-12 px-6 text-base font-medium rounded-xl touch-target;
-    }
-    
-    /* Mobile navigation enhancements */
-    .mobile-nav-enhanced {
-      @apply h-20 bg-card/95 backdrop-blur-xl border-t-2 border-primary/30;
-    }
-    
-    /* Mobile dialog optimizations */
-    .mobile-dialog-optimized {
-      @apply max-h-[90vh] rounded-t-2xl;
-    }
-    
-    /* Mobile input optimizations */
-    .mobile-input-enhanced {
-      @apply h-12 text-base px-4 rounded-xl;
-    }
-    
-    /* Mobile spacing optimizations */
-    .mobile-spacing-optimized {
-      @apply space-y-4 p-4;
-    }
-    
-    /* Mobile text optimizations */
-    .mobile-text-optimized {
-      @apply text-base leading-relaxed;
-    }
-    
-    /* Mobile shadow optimizations */
-    .mobile-shadow-enhanced {
-      @apply shadow-2xl;
-    }
-    
-    /* Mobile-optimized cards */
-    .mobile-card {
-      @apply p-4 rounded-xl shadow-lg border-2;
-    }
-    
-    /* Mobile-friendly buttons */
-    .mobile-button {
-      @apply h-12 px-6 text-base font-medium rounded-xl;
-    }
-    
-    /* Mobile navigation optimization */
-    .mobile-nav {
-      @apply h-16 bg-card/95 backdrop-blur-xl border-t-2 border-primary/20;
-    }
-    
-    /* Mobile pixel grid optimizations */
-    .mobile-pixel-grid {
-      @apply touch-none select-none;
-    }
-    
-    /* Mobile gesture indicators */
-    .gesture-indicator {
-      @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none;
-      @apply bg-black/80 backdrop-blur-sm rounded-full p-4 text-white;
-    }
-    
-    /* Improved touch targets */
-    .touch-target {
       min-height: 44px;
       min-width: 44px;
-      @apply flex items-center justify-center;
-    }
-    
-    /* Mobile-specific button sizes */
-    .mobile-button {
-      @apply h-12 px-4 text-base;
-    }
-    
-    /* Mobile-friendly spacing */
-    .mobile-spacing {
-      @apply space-y-3;
-    }
-    
-    /* Mobile card padding */
-    .mobile-card {
-      @apply p-3 rounded-lg;
-    }
-    
-    /* Mobile text sizes */
-    .mobile-text-lg {
-      @apply text-lg;
-    }
-    
-    .mobile-text-base {
-      @apply text-base;
-    }
-    
-    .mobile-text-sm {
-      @apply text-sm;
     }
     
     /* Optimize text sizes for mobile */
@@ -271,21 +153,6 @@
     /* Improved mobile dialogs */
     .mobile-dialog {
       @apply p-3 rounded-lg max-h-[90vh];
-    }
-    
-    /* Mobile-specific animations */
-    .mobile-scale-on-tap {
-      @apply active:scale-95 transition-transform duration-150;
-    }
-    
-    /* Mobile-optimized shadows */
-    .mobile-shadow {
-      @apply shadow-lg;
-    }
-    
-    /* Mobile-friendly borders */
-    .mobile-border {
-      @apply border-2;
     }
   }
 
@@ -581,17 +448,6 @@
     animation: pixel-float 3s ease-in-out infinite;
   }
   
-  /* Mobile-specific pixel effects */
-  .pixel-mobile-highlight {
-    animation: pixel-mobile-pulse 1.5s ease-in-out infinite;
-    filter: drop-shadow(0 0 8px currentColor);
-  }
-  
-  @keyframes pixel-mobile-pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.15); opacity: 0.9; }
-  }
-  
   @keyframes pixel-rotate {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -692,29 +548,6 @@
     
     .button-hover-lift:hover {
       transform: scale(1.02);
-    }
-    
-    /* Enhanced touch feedback */
-    .touch-feedback:active {
-      transform: scale(0.95);
-      transition: transform 0.1s ease-out;
-    }
-    
-    /* Mobile-specific hover states */
-    .mobile-hover:active {
-      @apply bg-primary/10 scale-95;
-    }
-    
-    /* Disable hover effects on touch devices */
-    .no-touch-hover:hover {
-      transform: none;
-      box-shadow: none;
-    }
-    
-    /* Enhanced touch feedback */
-    .touch-feedback:active {
-      transform: scale(0.95);
-      transition: transform 0.1s ease-out;
     }
   }
   
@@ -1053,34 +886,6 @@
   .touch-target {
     min-height: 44px;
     min-width: 44px;
-    @apply flex items-center justify-center;
-  }
-  
-  /* Enhanced touch target with feedback */
-  .touch-target-enhanced {
-    min-height: 48px;
-    min-width: 48px;
-    @apply flex items-center justify-center touch-feedback;
-  }
-  
-  /* Mobile-optimized button */
-  .mobile-button-optimized {
-    @apply h-12 px-4 text-base font-medium rounded-lg touch-target mobile-scale-on-tap;
-  }
-  
-  /* Mobile-friendly input */
-  .mobile-input {
-    @apply h-12 text-base px-4 rounded-lg;
-  }
-  
-  /* Mobile card optimization */
-  .mobile-card-optimized {
-    @apply p-4 rounded-xl shadow-lg border-2;
-  }
-  
-  /* Mobile navigation optimization */
-  .mobile-nav-optimized {
-    @apply h-16 px-2 bg-card/95 backdrop-blur-xl border-t-2 border-primary/20;
   }
   
   /* Professional footer style */
@@ -1132,65 +937,6 @@
   @keyframes purchase-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(212, 167, 87, 0.7); }
     50% { box-shadow: 0 0 20px 5px rgba(212, 167, 87, 0.5); }
-  }
-  
-  /* Mobile-specific animations */
-  .mobile-bounce {
-    animation: mobile-bounce 0.3s ease-in-out;
-  }
-  
-  @keyframes mobile-bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-  
-  /* Swipe gesture animations */
-  .swipe-left {
-    animation: swipe-left 0.3s ease-out;
-  }
-  
-  .swipe-right {
-    animation: swipe-right 0.3s ease-out;
-  }
-  
-  @keyframes swipe-left {
-    0% { transform: translateX(0); }
-    50% { transform: translateX(-20px); }
-    100% { transform: translateX(0); }
-  }
-  
-  @keyframes swipe-right {
-    0% { transform: translateX(0); }
-    50% { transform: translateX(20px); }
-    100% { transform: translateX(0); }
-  }
-  
-  /* Mobile pixel effects */
-  .pixel-mobile-glow {
-    box-shadow: 0 0 15px 3px currentColor;
-    animation: pixel-mobile-pulse 2s ease-in-out infinite;
-  }
-  
-  @keyframes pixel-mobile-pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.1); }
-  }
-  
-  /* Enhanced mobile scrolling */
-  .mobile-scroll {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-  
-  /* Mobile-optimized shadows */
-  .mobile-shadow {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* Mobile card hover effects */
-  .mobile-card-hover:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease-out;
   }
 }
 
