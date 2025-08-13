@@ -2,14 +2,13 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthContext } from '@/lib/auth-context';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EnhancedPixelPurchaseModal } from './EnhancedPixelPurchaseModal';
-import { PortugalMapSvg } from './PortugalMapSvg';
+import PortugalMapSvg from './PortugalMapSvg';
 import { 
   MapPin, 
   Crown, 
@@ -43,15 +42,14 @@ interface PixelGridProps {
 }
 
 const PixelGrid: React.FC<PixelGridProps> = ({ className = '' }) => {
-  const { user } = useAuthContext();
-  const { pixels, userStats, addPixel, updatePixel } = useStore();
+  const { user } = useAuth();
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [hoveredPixel, setHoveredPixel] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('map');
 
   // Generate mock pixels for demonstration
-  const mockPixels = useMemo(() => {
+  const [mockPixels, setMockPixels] = useState<Pixel[]>(() => {
     const pixelArray: Pixel[] = [];
     for (let x = 0; x < 100; x++) {
       for (let y = 0; y < 60; y++) {
@@ -74,7 +72,7 @@ const PixelGrid: React.FC<PixelGridProps> = ({ className = '' }) => {
       }
     }
     return pixelArray;
-  }, []);
+  });
 
   const handlePixelClick = useCallback((pixel: Pixel) => {
     setSelectedPixel(pixel);
@@ -88,10 +86,16 @@ const PixelGrid: React.FC<PixelGridProps> = ({ className = '' }) => {
   }, []);
 
   const handlePurchaseComplete = useCallback((pixel: Pixel) => {
-    updatePixel(pixel.id, { ...pixel, owner: user?.uid || null });
+    setMockPixels(prevPixels => 
+      prevPixels.map(p => 
+        p.id === pixel.id 
+          ? { ...p, owner: user?.uid || null }
+          : p
+      )
+    );
     setShowPurchaseModal(false);
     setSelectedPixel(null);
-  }, [user, updatePixel]);
+  }, [user]);
 
   const getPixelStatus = (pixel: Pixel) => {
     if (pixel.isPremium) return 'premium';
