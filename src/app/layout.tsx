@@ -5,6 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { AuthProvider } from '@/lib/auth-context';
 import { StripeProvider } from '@/components/payment/StripePaymentProvider';
+import { PWAInstallPrompt } from '@/components/ui/pwa-install-prompt';
+import { AnalyticsTracker } from '@/components/ui/analytics-tracker';
+import { PerformanceOptimizer } from '@/components/ui/performance-optimizer';
+import { PushNotifications } from '@/components/ui/push-notifications';
+import { registerServiceWorker } from '@/lib/service-worker';
+import { useEffect } from 'react';
+import '@/lib/i18n';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
@@ -49,11 +56,28 @@ export default function RootLayout({
       <body className="font-body antialiased h-full">
         <AuthProvider>
           <StripeProvider>
+            <AnalyticsTracker />
+            <PerformanceOptimizer />
+            <PushNotifications />
             {children}
             <OfflineIndicator />
+            <PWAInstallPrompt />
             <Toaster />
           </StripeProvider>
         </AuthProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+                });
+              }
+            `
+          }}
+        />
       </body>
     </html>
   );

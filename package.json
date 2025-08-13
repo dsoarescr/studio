@@ -9,7 +9,11 @@
     "build": "./node_modules/.bin/next build",
     "start": "./node_modules/.bin/next dev -p 9002",
     "lint": "./node_modules/.bin/next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",
@@ -77,6 +81,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "babel-jest": "^30.0.5",
     "genkit-cli": "^1.8.0",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
