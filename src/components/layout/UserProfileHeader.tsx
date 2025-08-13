@@ -1,3 +1,4 @@
+
 // src/components/layout/UserProfileHeader.tsx
 'use client';
 
@@ -11,7 +12,7 @@ import {
   Award, Gift, Bell, Settings, Menu,
   Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIconLucide, Sparkles
+  BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIcon, Sparkles
 } from "lucide-react"; 
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
@@ -338,7 +339,7 @@ export default function UserProfileHeader() {
               stats={[
                 { label: 'Saldo Atual', value: formattedCredits || '...', icon: <Coins className="h-4 w-4" /> },
                   { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> },
-                  { label: 'Pixels Owned', value: pixels, icon: <MapPinIconLucide className="h-4 w-4" /> }
+                  { label: 'Pixels Owned', value: pixels, icon: <MapPinIcon className="h-4 w-4" /> }
               ]}
               actions={[
                   { label: 'Comprar Mais', onClick: () => {}, icon: <ShoppingCart className="h-4 w-4" /> }

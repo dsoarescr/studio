@@ -24,7 +24,7 @@ import { useAppStore, usePixelStore, useUserStore } from '@/lib/store';
 import {
   Dialog,
   DialogContent,
-  DialogDescription as DialogDescriptionElement,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
