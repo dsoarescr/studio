@@ -1,0 +1,14 @@
+@@ .. @@
+ @tailwind base;
+ @tailwind components;
+ @tailwind utilities;
+
++/* CSS Variables */
++:root {
++  --header-height: 56px;
++  --bottom-nav-height: 80px;
++}
++
+ @layer base {
+   :root {
+     --background: 220 15% 5%; /* Slightly richer black for better depth */
