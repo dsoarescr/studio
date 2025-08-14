@@ -449,7 +449,7 @@ export default function SettingsPage() {
                           </div>
                           <Slider
                             value={[fontSize]}
-                            onValueChange={([value]) => setFontSize(value[0])}
+                            onValueChange={(value) => setFontSize(value[0])}
                             min={75}
                             max={150}
                             step={5}
@@ -481,7 +481,7 @@ export default function SettingsPage() {
                           </div>
                           <Slider
                             value={[contrast]}
-                            onValueChange={([value]) => setContrast(value[0])}
+                            onValueChange={(value) => setContrast(value[0])}
                             min={50}
                             max={150}
                             step={5}
@@ -495,7 +495,7 @@ export default function SettingsPage() {
                           </div>
                           <Slider
                             value={[brightness]}
-                            onValueChange={([value]) => setBrightness(value[0])}
+                            onValueChange={(value) => setBrightness(value[0])}
                             min={50}
                             max={150}
                             step={5}
