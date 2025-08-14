@@ -14,8 +14,8 @@ import {
   Award, Gem, MapPin as MapPinIcon, Coins, Gift, Trophy, BookImage, FolderPlus, Link as LinkIcon, 
   Twitter, Instagram, Github, UserCircle
 } from "lucide-react";
-import type { Achievement } from '@/data/achievements-data'; // Corrected import
-import { achievementsData } from '@/data/achievements-data'; // Corrected import
+import type { Achievement } from '@/data/achievements-data';
+import { achievementsData } from '@/data/achievements-data';
 
 interface SocialLink {
   platform: string;
@@ -57,7 +57,6 @@ export interface UserProfileData {
 
 interface UserProfileDisplayProps {
   userData: UserProfileData;
-  // achievementsData is imported globally now
 }
 
 export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {

@@ -14,12 +14,21 @@ import {
   Shield, Key, Smartphone, Lock, Copy, RefreshCw, CheckCircle, AlertTriangle, Loader2
 } from 'lucide-react';
 import QRCode from 'qrcode.react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogDescription,
+  } from '@/components/ui/dialog';
 
 interface TwoFactorAuthProps {
   children: React.ReactNode;
+  onSuccess: () => void;
 }
 
-export default function TwoFactorAuth({ children }: TwoFactorAuthProps) {
+export default function TwoFactorAuth({ children, onSuccess }: TwoFactorAuthProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'intro' | 'setup' | 'verify' | 'success'>('intro');
   const [secret, setSecret] = useState<string | null>(null);
@@ -111,6 +120,7 @@ export default function TwoFactorAuth({ children }: TwoFactorAuthProps) {
         setStep('success');
         setShowConfetti(true);
         setPlaySuccessSound(true);
+        onSuccess();
       } else {
         throw new Error('Código inválido');
       }

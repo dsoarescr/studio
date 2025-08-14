@@ -10,7 +10,7 @@ import {
   Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
   User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield
+  BarChart3 as AnalyticsIcon, Shield, MapPin as MapPinIcon
 } from "lucide-react"; 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -42,6 +42,7 @@ import { useAuth } from '@/lib/auth-context';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
@@ -78,6 +79,9 @@ export default function UserProfileHeader() {
   const [formattedSpecialCredits, setFormattedSpecialCredits] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const isMobile = useIsMobile();
+  const [showQuickStats, setShowQuickStats] = useState(false);
+
 
   // Combine store data with mock data for a complete user object
   const userData = {
@@ -351,7 +355,8 @@ export default function UserProfileHeader() {
               description="Sua moeda principal para comprar pixels"
               stats={[
                 { label: 'Saldo Atual', value: formattedCredits || '...', icon: <Coins className="h-4 w-4" /> },
-                { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> }
+                { label: 'Especiais', value: formattedSpecialCredits || '...', icon: <Gift className="h-4 w-4" /> },
+                 { label: 'Pixels Possuídos', value: pixels, icon: <MapPinIcon className="h-4 w-4" /> }
               ]}
               actions={[
                 { label: 'Comprar Mais', onClick: () => {}, icon: <Plus className="h-4 w-4" /> }

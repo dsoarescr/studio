@@ -12,16 +12,14 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { UserProfileDisplay, type UserProfileData } from './UserProfileDisplay';
-import type { Achievement } from '@/data/achievements-data'; // Corrected import
 import { ScrollArea } from '../ui/scroll-area';
 
 interface UserProfileSheetProps {
   children: React.ReactNode;
   userData: UserProfileData;
-  achievementsData: Achievement[]; // Keep this prop as it's passed down
 }
 
-export function UserProfileSheet({ children, userData, achievementsData }: UserProfileSheetProps) {
+export function UserProfileSheet({ children, userData }: UserProfileSheetProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -33,7 +31,6 @@ export function UserProfileSheet({ children, userData, achievementsData }: UserP
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="h-full">
-          {/* Passing achievementsData to UserProfileDisplay, though it's globally imported there */}
           <UserProfileDisplay userData={userData} />
         </ScrollArea>
       </SheetContent>

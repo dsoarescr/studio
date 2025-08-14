@@ -15,7 +15,6 @@ import {
   Share2, Edit, Settings, Calendar, TrendingUp, Award, Gem,
   Palette, Users, Globe, Camera, Video, Music, Link as LinkIcon,
   Instagram, Twitter, Youtube, Github, Linkedin, Facebook, Plus, ShoppingCart
-  ShoppingCart
 } from "lucide-react";
 
 interface UserProfile {
