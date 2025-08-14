@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -403,19 +404,6 @@ export default function UserProfileHeader() {
 
           {/* User Menu */}
           <UserMenu />
-          
-          {/* Connection status indicator */}
-          <div className="flex items-center">
-            <EnhancedTooltip
-              title={isOnline ? "Conectado" : "Offline"}
-              description={isOnline ? "Todas as funcionalidades disponíveis" : "Modo offline ativo"}
-              stats={lastSync ? [
-                { label: 'Última Sincronização', value: new Date(lastSync).toLocaleTimeString('pt-PT'), icon: <RefreshCw className="h-4 w-4" /> }
-              ] : []}
-            >
-              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-            </EnhancedTooltip>
-          </div>
         </div>
       </div>
     </div>

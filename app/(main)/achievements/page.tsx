@@ -3,15 +3,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { Progress } from "../../components/ui/progress";
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { ScrollArea } from '../../components/ui/scroll-area';
-import { Separator } from '../../components/ui/separator';
-import { useUserStore, useSettingsStore } from '../../lib/store';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { useUserStore, useSettingsStore } from '@/lib/store';
 import { 
   CheckCircle2, Lock, Award, Edit3, Users, Eye, Map, Compass, Puzzle, Activity, 
   CheckCheck, ShieldCheck, Share2, Trophy, Search, Filter, SortAsc, Star, 
@@ -20,12 +20,12 @@ import {
   BookImage, Palette, MapPin, Globe, Rocket, Settings, Bell, Download, Coins,
   Lightbulb, Megaphone
 } from "lucide-react";
-import { achievementsData, type Achievement, type AchievementCategory, type AchievementRarity } from '../../data/achievements-data';
-import { useToast } from '../../hooks/use-toast';
-import { cn } from '../../lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
-import { SoundEffect, SOUND_EFFECTS } from '../../components/ui/sound-effect';
-import { Confetti } from '../../components/ui/confetti';
+import { achievementsData, type Achievement, type AchievementCategory, type AchievementRarity } from '@/data/achievements-data';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
 
 type FilterValue = AchievementCategory | 'all' | 'completed' | 'locked';

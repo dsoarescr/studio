@@ -1,16 +1,17 @@
+
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Progress } from '../../components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { useUserStore, useSettingsStore } from '../../lib/store';
-import { Input } from "../../components/ui/input";
-import { ScrollArea } from "../../components/ui/scroll-area";
-import { SoundEffect, SOUND_EFFECTS } from '../../components/ui/sound-effect';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUserStore, useSettingsStore } from '@/lib/store';
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { 
   BarChartHorizontalBig, RefreshCw, Globe, MapPin, Target, Users, Eye, Heart, 
   TrendingUp, ArrowUp, ArrowDown, Map, Clock, Trophy, Medal, Info, Crown,
@@ -19,10 +20,11 @@ import {
   ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, MapPinIcon,
   Lightbulb
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
-import { cn } from '../../lib/utils';
-import { useToast } from '../../hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 
 interface StatCardData {
   title: string;

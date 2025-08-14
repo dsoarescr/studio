@@ -1,11 +1,12 @@
+
 'use client';
 
  import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Switch } from "../../../components/ui/switch";
-import { Label } from "../../../components/ui/label";
-import { useSettingsStore } from "../../../lib/store";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useSettingsStore } from "@/lib/store";
 import { Volume2, Zap, Eye, Download, Upload } from 'lucide-react';
 
 export default function PerformanceSettingsPage() {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -31,6 +32,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { VirtualizedList } from '@/components/ui/virtualized-list';
 import { useTranslation } from 'react-i18next';
+import 'i18next'
 
 // Types and data from ActivityFeedPanel
 type ActivityItem = {

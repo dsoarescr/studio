@@ -1,20 +1,21 @@
+
 'use client';
 
  import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { useToast } from "../../hooks/use-toast";
-import { useUserStore } from "../../lib/store";
-import { SoundEffect, SOUND_EFFECTS } from '../../components/ui/sound-effect';
-import { Confetti } from '../../components/ui/confetti';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useUserStore } from "@/lib/store";
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { Confetti } from '@/components/ui/confetti';
 import { 
    Coins, Gift, Crown, Star, Zap, Target, Award, 
    CreditCard, Smartphone, Wallet, Percent, Clock,
-   TrendingUp, Shield, CheckCircle, Sparkles
+   TrendingUp, Shield, CheckCircle, Sparkles, Gem as GemIcon, ShoppingCart
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils';
 
 const creditPacks = [
   {
@@ -53,7 +54,7 @@ const creditPacks = [
     price: 49.99,
     bonus: 2500,
     badge: 'Para Profissionais',
-    icon: <Gem className="h-6 w-6" />,
+    icon: <GemIcon className="h-6 w-6" />,
     color: 'border-purple-500/60 hover:border-purple-500',
     bgColor: 'bg-purple-500/10'
   },
