@@ -1,101 +1,8 @@
 # Firebase Studio
 
-# 🎨 Pixel Universe - Mapa Interativo de Portugal
+Este é um projeto Next.js inicializado no Firebase Studio, focado na criação de uma aplicação web interativa chamada "Pixel Universe".
 
-Uma plataforma inovadora que transforma Portugal num universo de pixels interativos, onde cada pixel representa uma identidade digital única.
-
-## 🌟 Conceito da Aplicação
-
-O **Pixel Universe** é uma plataforma revolucionária que combina:
-- **Mapa Interativo de Portugal** dividido em pixels comprável
-- **Identidades Digitais Únicas** para cada pixel
-- **Gamificação Completa** com conquistas, níveis e recompensas
-- **Comunidade Social** com partilha, comentários e colaboração
-- **Marketplace** para compra/venda de pixels
-- **Sistema Premium** com funcionalidades avançadas
-- **IA Integrada** para descrições e assistência
-- **Realidade Aumentada** para experiências imersivas
-
-## 🚀 Funcionalidades Principais
-
-### 🗺️ **Mapa Interativo**
-- Navegação fluida com zoom e pan
-- Pixels comprável em todo o território português
-- Visualização em tempo real de atividade
-- Filtros avançados e pesquisa
-
-### 🎮 **Gamificação**
-- Sistema de níveis e XP
-- 50+ conquistas únicas
-- Desafios diários e semanais
-- Classificações globais e regionais
-- Eventos sazonais
-
-### 👥 **Comunidade**
-- Feed social estilo Instagram
-- Stories de pixels
-- Live streaming de criação
-- Colaboração em tempo real
-- Clubes e grupos temáticos
-
-### 🤖 **IA Avançada**
-- Geração automática de descrições
-- Sugestões de cores inteligentes
-- Análise de tendências de mercado
-- Assistente personalizado
-
-### 📱 **Mobile-First**
-- Otimizado para dispositivos móveis
-- Gestos touch intuitivos
-- Feedback háptico
-- Performance adaptativa
-- PWA ready
-
-## 🛠️ Stack Tecnológica
-
-- **Frontend:** Next.js 15, React 18, TypeScript
-- **UI:** Tailwind CSS, shadcn/ui, Framer Motion
-- **Backend:** Firebase (Auth, Firestore, Storage)
-- **Pagamentos:** Stripe
-- **IA:** Google Genkit + Gemini 2.0
-- **Estado:** Zustand com persistência
-- **Testes:** Jest, React Testing Library
-
-## 📁 Estrutura do Projeto
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── (main)/            # Rotas principais
-│   ├── api/               # API routes
-│   └── globals.css        # Estilos globais
-├── components/            # Componentes React
-│   ├── auth/              # Autenticação
-│   ├── core/              # Componentes principais
-│   ├── features/          # Funcionalidades avançadas
-│   ├── layout/            # Layout e navegação
-│   ├── mobile/            # Otimizações mobile
-│   ├── payment/           # Sistema de pagamentos
-│   ├── pixel-grid/        # Mapa e pixels
-│   ├── security/          # Segurança
-│   ├── ui/                # Componentes UI base
-│   └── user/              # Perfis de utilizador
-├── lib/                   # Utilitários e configurações
-├── hooks/                 # React hooks customizados
-├── data/                  # Dados e tipos
-└── ai/                    # Integração IA
-```
-
-## 🎯 Páginas Principais
-
-- **`/`** - Mapa interativo principal
-- **`/marketplace`** - Compra/venda de pixels
-- **`/community`** - Feed social e interações
-- **`/achievements`** - Sistema de conquistas
-- **`/ranking`** - Classificações e estatísticas
-- **`/member`** - Perfil do utilizador
-- **`/premium`** - Subscrições premium
-- **`/settings`** - Configurações da conta
+Para começar, explore o código na pasta `src/app`.
 
 ## 🚀 Configuração Essencial do Firebase
 
@@ -103,7 +10,7 @@ Para que o login e registo de utilizadores funcionem, **É OBRIGATÓRIO** ativar
 
 ### Como Ativar a Autenticação:
 
-1. **Aceda à Consola Firebase**: Abra o seu projeto na [Firebase Console](https://console.firebase.google.com/).
+1.  **Aceda à Consola Firebase**: Abra o seu projeto na [Firebase Console](https://console.firebase.google.com/).
 2.  **Selecione o seu Projeto**: Clique em `pixel-universe-ub7uk`.
 3.  **Navegue para a Autenticação**: No menu à esquerda, na secção "Build", clique em **Authentication**.
 4.  **Comece a Usar**: Clique no botão **"Get started"**.
@@ -115,20 +22,6 @@ Para que o login e registo de utilizadores funcionem, **É OBRIGATÓRIO** ativar
 
 **Sem estes passos, o registo e login de utilizadores não irão funcionar.**
 
-## 🏃‍♂️ Como Executar
-
-```bash
-# Instalar dependências
-npm install
-
-# Executar em modo de desenvolvimento
-npm run dev
-
-# Construir para produção
-npm run build
-```
-
-A aplicação estará disponível em `http://localhost:9002`
 ---
 
 ## 🔥 Funcionalidades Firebase para Explorar
@@ -156,35 +49,3 @@ A sua aplicação já está configurada para usar Firebase. Aqui estão algumas 
 - **Análise de Comportamento**: Integre o Analytics para perceber como os utilizadores interagem com a sua aplicação, quais as páginas mais visitadas e que funcionalidades são mais populares.
 
 A exploração destas funcionalidades irá permitir-lhe construir uma aplicação muito mais rica, interativa e profissional.
-
-## 🎨 Design System
-
-### Cores Principais
-- **Primary:** `#D4A757` (Dourado Português)
-- **Accent:** `#7DF9FF` (Azul Atlântico)
-- **Background:** Dark theme otimizado
-
-### Tipografia
-- **Headlines:** Space Grotesk (moderno e tech)
-- **Body:** Space Grotesk (legibilidade)
-- **Code:** Source Code Pro (coordenadas e dados)
-
-## 🔮 Roadmap Futuro
-
-- **NFT Integration** - Pixels como NFTs únicos
-- **Geolocalização Real** - GPS para pixels
-- **Eventos Sazonais** - Natal, Verão, etc.
-- **Sistema de Clãs** - Grupos colaborativos
-- **API Pública** - Para desenvolvedores
-- **Metaverso 3D** - Experiência imersiva
-
-## 🤝 Contribuição
-
-Este projeto está em desenvolvimento ativo. Contribuições são bem-vindas!
-
-## 📄 Licença
-
-© 2025 Pixel Universe. Todos os direitos reservados.
-
----
-**Transforme Portugal num universo de possibilidades digitais! 🇵🇹✨**

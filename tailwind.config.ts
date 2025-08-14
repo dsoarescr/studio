@@ -1,12 +1,11 @@
 import type {Config} from 'tailwindcss';
-import tailwindcssAnimate from 'tailwindcss-animate';
 
-const config: Config = {
+export default {
   darkMode: ['class'], // Keep 'class' if you might add a theme switcher later
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
@@ -114,7 +113,5 @@ const config: Config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
-};
-
-export default config;
+  plugins: [require('tailwindcss-animate')],
+} satisfies Config;
