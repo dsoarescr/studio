@@ -613,20 +613,20 @@ export default function CommunityPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900/95 to-red-500/20">
       <SoundEffect src={SOUND_EFFECTS.CLICK} play={playInteractionSound} onEnd={() => setPlayInteractionSound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
       <div className="container mx-auto py-6 px-4 max-w-6xl space-y-6">
         {/* Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30">
+        <Card className="shadow-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-red-500/20 border-pink-500/50">
           <CardHeader>
-            <CardTitle className="text-3xl font-headline text-gradient-gold flex items-center">
+            <CardTitle className="text-4xl font-headline text-white flex items-center animate-pulse">
               <Users className="h-8 w-8 mr-3" />
-              Comunidade Pixel Universe
+              🚀 NOVA REDE SOCIAL PIXEL UNIVERSE 🚀
             </CardTitle>
             <CardDescription>
-              Conecte-se, partilhe e colabore com artistas de pixels de todo o mundo
+              ✨ DESIGN ATUALIZADO - Conecte-se, partilhe e colabore com artistas de pixels de todo o mundo ✨
             </CardDescription>
           </CardHeader>
         </Card>
