@@ -8,11 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Heart, MessageSquare, Share2, Gift, Crown, Star, Users, 
-  Send, Smile, Camera, Mic, Video, MapPin, Trophy, Zap,
-  ThumbsUp, ThumbsDown, Laugh, Angry, Sad, Wow, Love
-} from 'lucide-react';
+import { Heart, MessageSquare, Share2, Gift, Crown, Star, Users, Send, Smile, Camera, Mic, Video, MapPin, Trophy, Zap, ThumbsUp, ThumbsDown, Laugh, Angry, Salad as Sad, Workflow as Wow, Move as Love } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Reaction {

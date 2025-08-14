@@ -17,17 +17,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { SocialInteractions } from '@/components/ui/social-interactions';
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Users, Heart, MessageSquare, Share2, Plus, Camera, Video, Mic,
-  MapPin, Palette, Star, Crown, Gift, Zap, Eye, Send, Smile,
-  Image as ImageIcon, Music, Bookmark, MoreHorizontal, Filter,
-  TrendingUp, Clock, Globe, UserPlus, Search, Hash, Award,
-  Sparkles, Target, Flame, Calendar, Bell, Settings, Edit3,
-  Play, Pause, Volume2, VolumeX, Maximize, X, ChevronLeft,
-  ChevronRight, Download, Upload, Copy, Link as LinkIcon,
-  Flag, Shield, ThumbsUp, ThumbsDown, Laugh, Angry, Sad,
-  Wow, Love, Coffee, Pizza, Rocket, Rainbow, Sun, Moon
-} from "lucide-react";
+import { Users, Heart, MessageSquare, Share2, Plus, Camera, Video, Mic, MapPin, Palette, Star, Crown, Gift, Zap, Eye, Send, Smile, Image as ImageIcon, Music, Bookmark, MoreHorizontal, Filter, TrendingUp, Clock, Globe, UserPlus, Search, Hash, Award, Sparkles, Target, Flame, Calendar, Bell, Settings, Edit3, Play, Pause, Volume2, VolumeX, Maximize, X, ChevronLeft, ChevronRight, Download, Upload, Copy, Link as LinkIcon, Flag, Shield, ThumbsUp, ThumbsDown, Laugh, Angry, Salad as Sad, Workflow as Wow, Move as Love, Coffee, Pizza, Rocket, Rainbow, Sun, Moon } from "lucide-react";
 import { cn } from '@/lib/utils';
 
 interface CommunityPost {
