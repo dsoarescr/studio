@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { useToast } from "../../hooks/use-toast";
 import { motion } from "framer-motion";
 import { 
   Palette, Grid, List, Search, Filter, Plus, Star, Crown, 
@@ -16,7 +16,7 @@ import {
   Gem, Sparkles, Award, Target, Zap, Users, Globe, Camera,
   Video, Music, Image as ImageIcon, Bookmark, MoreHorizontal
 } from "lucide-react";
-import { useUserStore } from '@/lib/store';
+import { useUserStore } from '../../lib/store';
 
 interface UserPixel {
   id: string;

@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store";
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { useToast } from "../../hooks/use-toast";
+import { useUserStore } from "../../lib/store";
+import { SoundEffect, SOUND_EFFECTS } from '../../components/ui/sound-effect';
+import { Confetti } from '../../components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Heart, MessageSquare, Share2, Send, Plus, Camera, 

@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { useToast } from "../../hooks/use-toast";
 import { motion } from "framer-motion";
 import { 
   ShoppingCart, TrendingUp, Star, Crown, Gem, MapPin, Eye, Heart, 
@@ -17,9 +17,9 @@ import {
   MoreHorizontal, Play, Pause, Volume2, Settings, User, Edit3,
   Camera, Video, Music, Image as ImageIcon, Globe, MessageSquare
 } from "lucide-react";
-import { useUserStore } from '@/lib/store';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
+import { useUserStore } from '../../lib/store';
+import { SoundEffect, SOUND_EFFECTS } from '../../components/ui/sound-effect';
+import { Confetti } from '../../components/ui/confetti';
 
 interface MarketplacePixel {
   id: string;

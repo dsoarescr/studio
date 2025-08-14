@@ -2,17 +2,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Switch } from "../../components/ui/switch";
+import { Label } from "../../components/ui/label";
+import { Slider } from "../../components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Separator } from "../../components/ui/separator";
+import { Input } from "../../components/ui/input";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { Badge } from "../../components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import Image from 'next/image';
 import { 
   Settings, Moon, Sun, Monitor, Volume2, VolumeX, Bell, Eye, 
@@ -22,11 +22,11 @@ import {
   Mail, BellRing, CreditCard, HelpCircle, FileText, MessageSquare,
   Gift, Coins, ShoppingCart, Trophy, Crown
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useSettingsStore, useUserStore } from "@/lib/store";
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
-import { cn } from '@/lib/utils';
+import { useToast } from "../../hooks/use-toast";
+import { useSettingsStore, useUserStore } from "../../lib/store";
+import { SoundEffect, SOUND_EFFECTS } from '../../components/ui/sound-effect';
+import { Confetti } from '../../components/ui/confetti';
+import { cn } from '../../lib/utils';
 
 export default function SettingsPage() {
   const { toast } = useToast();

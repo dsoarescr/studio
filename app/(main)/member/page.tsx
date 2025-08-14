@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from '@/lib/auth-context';
-import { useUserStore } from '@/lib/store';
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Progress } from "../../components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useAuth } from '../../lib/auth-context';
+import { useUserStore } from '../../lib/store';
 import { motion } from "framer-motion";
 import { 
   User, MapPin, Trophy, Coins, Gift, Star, Crown, Eye, Heart, 
   Share2, Edit, Settings, Calendar, TrendingUp, Award, Gem,
   Palette, Users, Globe, Camera, Video, Music, Link as LinkIcon,
-  Instagram, Twitter, Youtube, Github, Linkedin, Facebook, Plus,
+  Instagram, Twitter, Youtube, Github, Linkedin, Facebook, Plus, ShoppingCart
   ShoppingCart
 } from "lucide-react";
 

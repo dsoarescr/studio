@@ -1,7 +1,6 @@
 
 import BottomNavBar from '../../components/layout/BottomNavBar';
 import UserProfileHeader from '../../components/layout/UserProfileHeader';
-import { useSettingsStore } from '../../lib/store';
 
 export default function MainLayout({
   children,

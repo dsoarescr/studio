@@ -7,7 +7,6 @@ import PixelGrid from '../components/pixel-grid/PixelGrid';
 import MapSidebar from '../components/layout/MapSidebar';
 import { PerformanceMonitor } from '../components/ui/performance-monitor';
 import { SidebarProvider } from '../components/ui/sidebar';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/auth-context';
 import { AuthModal } from '../components/auth/AuthModal';
 import { Button } from '../components/ui/button';
@@ -16,7 +15,6 @@ import UserProfileHeader from '../components/layout/UserProfileHeader';
 import BottomNavBar from '../components/layout/BottomNavBar';
 
 export default function HomePage() {
-  const { t } = useTranslation();
   const { user } = useAuth();
   
   // Show welcome message for new visitors
