@@ -1,14 +1,15 @@
 "use client"
 
+// Inspired by react-hot-toast library
 import * as React from "react"
 
 import type {
   ToastActionElement,
   ToastProps,
-} from "../components/ui/toast"
+} from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 5000
+const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -59,8 +60,7 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
-    clearTimeout(toastTimeouts.get(toastId))
-    toastTimeouts.delete(toastId)
+    return
   }
 
   const timeout = setTimeout(() => {
@@ -77,8 +77,6 @@ const addToRemoveQueue = (toastId: string) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
-      // Set automatic dismissal timeout
-      addToRemoveQueue(action.toast.id)
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
@@ -95,19 +93,12 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
       if (toastId) {
-        // Clear existing timeout before dismissing
-        if (toastTimeouts.has(toastId)) {
-          clearTimeout(toastTimeouts.get(toastId))
-          toastTimeouts.delete(toastId)
-        }
         addToRemoveQueue(toastId)
       } else {
         state.toasts.forEach((toast) => {
-          if (toastTimeouts.has(toast.id)) {
-            clearTimeout(toastTimeouts.get(toast.id))
-            toastTimeouts.delete(toast.id)
-          }
           addToRemoveQueue(toast.id)
         })
       }
@@ -126,18 +117,10 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "REMOVE_TOAST":
       if (action.toastId === undefined) {
-        // Clear all timeouts
-        toastTimeouts.forEach((timeout) => clearTimeout(timeout))
-        toastTimeouts.clear()
         return {
           ...state,
           toasts: [],
         }
-      }
-      // Clear specific timeout
-      if (toastTimeouts.has(action.toastId)) {
-        clearTimeout(toastTimeouts.get(action.toastId))
-        toastTimeouts.delete(action.toastId)
       }
       return {
         ...state,

@@ -1,31 +1,30 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+// src/lib/firebase-admin.ts
+import * as admin from 'firebase-admin';
 
-// Mock Firebase Admin for development
-export const adminAuth = {
-  verifyIdToken: async (token: string) => ({ uid: 'mock-user' }),
-  getUser: async (uid: string) => ({ 
-    uid, 
-    email: 'user@example.com', 
-    displayName: 'Mock User' 
-  })
-};
+// This is for server-side Genkit, which uses the GenAI key.
+// The key is hardcoded here for simplicity in this environment.
+// In a production app, use environment variables.
+process.env.GOOGLE_API_KEY = "AIzaSyDPbqjR3o8mSQ1itdaoUQzyOmPEaUtaTI8";
 
-export const adminDb = {
-  collection: (path: string) => ({
-    doc: (id: string) => ({
-      get: async () => ({ exists: false, data: () => null }),
-      set: async (data: any, options?: any) => {},
-      update: async (data: any) => {},
-      collection: (subPath: string) => ({
-        add: async (data: any) => ({ id: 'mock-doc-id' })
-      })
-    }),
-    where: (field: string, op: string, value: any) => ({
-      limit: (n: number) => ({
-        get: async () => ({ empty: true, docs: [] })
-      })
-    })
-  })
+if (typeof window === 'undefined') {
+  if (admin.apps.length === 0) {
+    try {
+      // Use application default credentials provided by the environment
+      admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+      });
+    } catch (error: any) {
+      console.error("Firebase admin initialization error:", error.stack);
+    }
+  }
+}
+
+export const adminAuth = admin.apps.length > 0 ? admin.auth() : ({} as admin.auth.Auth);
+export const adminDb = admin.apps.length > 0 ? admin.firestore() : ({} as admin.firestore.Firestore);
+
+export const initializeAdminApp = () => {
+  if (admin.apps.length > 0) {
+    return admin.app();
+  }
+  return admin.initializeApp();
 };
