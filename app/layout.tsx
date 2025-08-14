@@ -1,10 +1,10 @@
 
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { OfflineIndicator } from '@/components/ui/offline-indicator';
-import { AuthProvider } from '@/lib/auth-context';
-import { StripeProvider } from '@/components/payment/StripePaymentProvider';
+import { Toaster } from "../components/ui/toaster";
+import { OfflineIndicator } from '../components/ui/offline-indicator';
+import { AuthProvider } from '../lib/auth-context';
+import { StripeProvider } from '../components/payment/StripePaymentProvider';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',

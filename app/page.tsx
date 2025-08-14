@@ -3,17 +3,17 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import PixelGrid from '@/components/pixel-grid/PixelGrid';
-import MapSidebar from '@/components/layout/MapSidebar';
-import { PerformanceMonitor } from '@/components/ui/performance-monitor';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import PixelGrid from '../components/pixel-grid/PixelGrid';
+import MapSidebar from '../components/layout/MapSidebar';
+import { PerformanceMonitor } from '../components/ui/performance-monitor';
+import { SidebarProvider } from '../components/ui/sidebar';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/lib/auth-context';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '../lib/auth-context';
+import { AuthModal } from '../components/auth/AuthModal';
+import { Button } from '../components/ui/button';
 import { LogIn, UserPlus } from 'lucide-react';
-import UserProfileHeader from '@/components/layout/UserProfileHeader';
-import BottomNavBar from '@/components/layout/BottomNavBar';
+import UserProfileHeader from '../components/layout/UserProfileHeader';
+import BottomNavBar from '../components/layout/BottomNavBar';
 
 export default function HomePage() {
   const { t } = useTranslation();

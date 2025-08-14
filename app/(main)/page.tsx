@@ -3,10 +3,10 @@
 'use client';
 
 import React from 'react';
-import PixelGrid from '@/components/pixel-grid/PixelGrid';
-import MapSidebar from '@/components/layout/MapSidebar';
-import { PerformanceMonitor } from '@/components/ui/performance-monitor';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import PixelGrid from '../../components/pixel-grid/PixelGrid';
+import MapSidebar from '../../components/layout/MapSidebar';
+import { PerformanceMonitor } from '../../components/ui/performance-monitor';
+import { SidebarProvider } from '../../components/ui/sidebar';
 import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
