@@ -122,8 +122,8 @@ export default function UserProfileHeader() {
   const xpPercentage = (xp / xpMax) * 100;
 
   return (
-    <div className={cn( 
-      "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500",
+    <header className={cn( 
+      "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500 h-14",
       isScrolled 
           ? "border-primary/20 bg-background/95 backdrop-blur-xl shadow-lg shadow-primary/10" 
           : "border-transparent bg-background/70 backdrop-blur-md"
