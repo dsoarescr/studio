@@ -38,7 +38,6 @@ const navLinks = [
   { href: "/pixels", label: "Galeria", icon: Palette },
   { href: "/member", label: "Perfil", icon: User },
   { href: "/ranking", label: "Ranking", icon: BarChart3 },
-  { href: "/community", label: "Comunidade", icon: Users },
 ];
 
 export default function BottomNavBar() {

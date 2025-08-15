@@ -1,3 +1,5 @@
+'use client';
+
 import BottomNavBar from '@/components/layout/BottomNavBar';
 import UserProfileHeader from '@/components/layout/UserProfileHeader';
 
