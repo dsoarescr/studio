@@ -9,7 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const GeneratePixelDescriptionInputSchema = z.object({
   x: z.number().describe('The x coordinate of the pixel.'),
