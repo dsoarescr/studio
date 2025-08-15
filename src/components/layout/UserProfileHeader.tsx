@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,7 +11,7 @@ import {
   Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
   User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield
+  BarChart3 as AnalyticsIcon, Shield, Map as MapIconLucide
 } from "lucide-react"; 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -414,6 +415,6 @@ export default function UserProfileHeader() {
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
