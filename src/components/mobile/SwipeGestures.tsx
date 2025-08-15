@@ -92,15 +92,34 @@ export default function SwipeGestures({
       threshold: 80,
       action: () => {
         if (navigator.share) {
-          navigator.share({
-            title: 'Pixel Universe',
-            text: 'Confira este pixel incrível!',
-            url: window.location.href
-          });
+          try {
+            navigator.share({
+              title: 'Pixel Universe',
+              text: 'Confira este pixel incrível!',
+              url: window.location.href
+            });
+          } catch (error) {
+            // Fallback to clipboard copy if share fails
+            navigator.clipboard.writeText(window.location.href).then(() => {
+              toast({
+                title: "📤 Partilhado!",
+                description: "Link copiado para a área de transferência.",
+              });
+            }).catch(() => {
+              toast({
+                title: "❌ Erro",
+                description: "Não foi possível partilhar o conteúdo.",
+              });
+            });
+          }
         } else {
           toast({
             title: "📤 Partilhado!",
             description: "Link copiado para a área de transferência.",
+          });
+          // Fallback for browsers without share API
+          navigator.clipboard.writeText(window.location.href).catch(() => {
+            // Silent fail if clipboard is also not available
           });
         }
       }
