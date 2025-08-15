@@ -51,15 +51,6 @@ export default function RootLayout({
       <body className="font-body antialiased h-full">
         <AuthProvider>
           <StripeProvider>
-            <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300">
-              <UserProfileHeader /> 
-              <main className="flex-1 pt-14 pb-20 overflow-y-auto">
-                <div className="min-h-full">
-                  {children}
-                </div>
-              </main>
-              <BottomNavBar />
-            </div>
             {children}
             <OfflineIndicator />
             <Toaster />
