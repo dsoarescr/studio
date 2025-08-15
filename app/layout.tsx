@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { AuthProvider } from '@/lib/auth-context';
 import { StripeProvider } from '@/components/payment/StripePaymentProvider';
-import BottomNavBar from '@/components/layout/BottomNavBar';
-import UserProfileHeader from '@/components/layout/UserProfileHeader';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
