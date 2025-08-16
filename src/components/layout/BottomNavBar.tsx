@@ -38,6 +38,7 @@ const navLinks = [
   { href: "/pixels", label: "Galeria", icon: Palette },
   { href: "/member", label: "Perfil", icon: User },
   { href: "/ranking", label: "Ranking", icon: BarChart3 },
+  { href: "/community", label: "Comunidade", icon: Users },
 ];
 
 export default function BottomNavBar() {
@@ -55,14 +56,14 @@ export default function BottomNavBar() {
     <>
       <SoundEffect src={SOUND_EFFECTS.CLICK} play={playClickSound} onEnd={() => setPlayClickSound(false)} />
       
-      <nav className="fixed bottom-0 left-0 right-0 h-20 bg-transparent pointer-events-none z-40">
+      <div className="fixed bottom-0 left-0 right-0 h-[var(--bottom-nav-height)] bg-transparent pointer-events-none z-40">
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="h-full w-full pointer-events-auto"
         >
-          <Card className="professional-footer h-full w-full rounded-t-2xl overflow-hidden border-t border-primary/20 bg-background/95 backdrop-blur-xl shadow-lg shadow-primary/5">
+          <Card className="professional-footer h-full w-full rounded-t-2xl overflow-hidden">
             <CardContent className="h-full p-2 sm:p-3 flex items-center justify-around">
               {navLinks.map((link) => {
                 const isActive = (pathname === '/' && link.href === '/') || (pathname !== '/' && link.href !== '/' && pathname.startsWith(link.href));
@@ -139,7 +140,7 @@ export default function BottomNavBar() {
             </CardContent>
           </Card>
         </motion.div>
-      </nav>
+      </div>
     </>
   );
 }

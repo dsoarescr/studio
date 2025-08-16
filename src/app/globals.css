@@ -107,12 +107,12 @@
 
   html {
     background-color: hsl(var(--background));
-    @apply h-full;
+    @apply h-full w-full overflow-hidden;
   }
 
   body {
     @apply text-foreground bg-gradient-to-br from-background via-background/98 to-primary/5;
-    @apply h-full;
+    @apply h-full w-full overflow-hidden;
   }
   
   /* Mobile-specific optimizations */

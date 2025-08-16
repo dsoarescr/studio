@@ -1,11 +1,10 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { AuthProvider } from '@/lib/auth-context';
 import { StripeProvider } from '@/components/payment/StripePaymentProvider';
-import BottomNavBar from '@/components/layout/BottomNavBar';
-import UserProfileHeader from '@/components/layout/UserProfileHeader';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
@@ -36,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark h-full">
+    <html lang="en" className="dark h-full">{/* Keep 'dark' for now, h-full is important */}
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -46,6 +45,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <meta name="theme-color" content="#D4A757" />
       </head>
+      {/* h-full on body, overflow-hidden removed to allow MainLayout's overflow-y-auto to work */}
       <body className="font-body antialiased h-full">
         <AuthProvider>
           <StripeProvider>

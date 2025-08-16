@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +10,7 @@ import {
   Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
   User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield, Map as MapIconLucide
+  BarChart3 as AnalyticsIcon, Shield
 } from "lucide-react"; 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -43,7 +42,6 @@ import { useAuth } from '@/lib/auth-context';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
-import { RefreshCw } from 'lucide-react';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
@@ -124,8 +122,8 @@ export default function UserProfileHeader() {
   const xpPercentage = (xp / xpMax) * 100;
 
   return (
-    <header className={cn( 
-      "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500 h-14",
+    <div className={cn( 
+      "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500",
       isScrolled 
           ? "border-primary/20 bg-background/95 backdrop-blur-xl shadow-lg shadow-primary/10" 
           : "border-transparent bg-background/70 backdrop-blur-md"
@@ -415,6 +413,6 @@ export default function UserProfileHeader() {
           </div>
         </div>
       </div>
-    </header>
+    </div>
   );
 }
