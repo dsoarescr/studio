@@ -25,14 +25,14 @@ import { useAppStore, usePixelStore } from '@/lib/store';
 import {
   Dialog,
   DialogContent,
-  DialogDescription as DialogDescriptionElement,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardHeader, CardTitle as CardTitleElement, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -40,20 +40,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '../ui/separator';
-import { mapPixelToApproxGps, cn } from '@/lib/utils';
-import EnhancedPixelPurchaseModal from './EnhancedPixelPurchaseModal';
-import PixelAR from './PixelAR';
-import PixelStories from './PixelStories';
-import PixelLiveStream from './PixelLiveStream';
-import PixelCollaborativeEditor from './PixelCollaborativeEditor';
-import PixelAuction from './PixelAuction';
-import PixelGameification from './PixelGameification';
-import PixelAI from './PixelAI';
-import PixelSocialFeatures from './PixelSocialFeatures';
+import { cn } from '@/lib/utils';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
 
+
+// Helper function to map pixel coordinates to approximate GPS
+const mapPixelToApproxGps = (x: number, y: number, totalCols: number, totalRows: number) => {
+  // Portugal approximate bounds
+  const minLat = 36.838;
+  const maxLat = 42.154;
+  const minLon = -9.526;
+  const maxLon = -6.189;
+  
+  const lat = maxLat - (y / totalRows) * (maxLat - minLat);
+  const lon = minLon + (x / totalCols) * (maxLon - minLon);
+  
+  return { lat: Number(lat.toFixed(6)), lon: Number(lon.toFixed(6)) };
+};
 
 // Configuration constants
 const SVG_VIEWBOX_WIDTH = 12969;
@@ -842,14 +847,52 @@ export default function PixelGrid() {
           </div>
         </div>
         
-        <EnhancedPixelPurchaseModal
-          isOpen={showPixelModal}
-          onClose={() => setShowPixelModal(false)}
-          pixelData={selectedPixelDetails}
-          userCredits={12500} // Mocked value, ideally from user store
-          userSpecialCredits={120} // Mocked value
-          onPurchase={handlePurchase}
-        />
+        {/* Pixel Modal - Simplified for now */}
+        <Dialog open={showPixelModal} onOpenChange={setShowPixelModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Detalhes do Pixel</DialogTitle>
+              <DialogDescription>
+                {selectedPixelDetails && `Pixel (${selectedPixelDetails.x}, ${selectedPixelDetails.y})`}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedPixelDetails && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Coordenadas:</span>
+                    <p className="font-code">({selectedPixelDetails.x}, {selectedPixelDetails.y})</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Região:</span>
+                    <p>{selectedPixelDetails.region}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Preço:</span>
+                    <p className="font-bold text-primary">€{selectedPixelDetails.price}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Raridade:</span>
+                    <p>{selectedPixelDetails.rarity}</p>
+                  </div>
+                </div>
+                
+                {selectedPixelDetails.isForSaleBySystem && (
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      handlePurchase(selectedPixelDetails, 'credits', { color: '#D4A757' });
+                      setShowPixelModal(false);
+                    }}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Comprar Pixel
+                  </Button>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <SwipeGestures
           onSwipeLeft={() => {
@@ -943,60 +986,44 @@ export default function PixelGrid() {
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
           {/* IA Assistant */}
-          <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-              <Brain className="h-6 w-6" />
-            </Button>
-          </PixelAI>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+            <Brain className="h-6 w-6" />
+          </Button>
           
           {/* Social Features */}
-          <PixelSocialFeatures>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
-              <Users className="h-6 w-6" />
-            </Button>
-          </PixelSocialFeatures>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
+            <Users className="h-6 w-6" />
+          </Button>
           
           {/* Gamification */}
-          <PixelGameification>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
-              <Trophy className="h-6 w-6" />
-            </Button>
-          </PixelGameification>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+            <Trophy className="h-6 w-6" />
+          </Button>
           
           {/* Auction */}
-          <PixelAuction>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Gavel className="h-6 w-6" />
-            </Button>
-          </PixelAuction>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+            <Gavel className="h-6 w-6" />
+          </Button>
           
           {/* Collaborative Editor */}
-          <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
-              <Users className="h-6 w-6" />
-            </Button>
-          </PixelCollaborativeEditor>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
+            <Users className="h-6 w-6" />
+          </Button>
           
           {/* AR Button */}
-          <PixelAR>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-              <Camera className="h-6 w-6" />
-            </Button>
-          </PixelAR>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+            <Camera className="h-6 w-6" />
+          </Button>
           
           {/* Stories Button */}
-          <PixelStories>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Play className="h-6 w-6" />
-            </Button>
-          </PixelStories>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+            <Play className="h-6 w-6" />
+          </Button>
           
           {/* Live Stream Button */}
-          <PixelLiveStream>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
-              <Radio className="h-6 w-6" />
-            </Button>
-          </PixelLiveStream>
+          <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+            <Radio className="h-6 w-6" />
+          </Button>
           
           {/* Main Action Button */}
           <EnhancedTooltip
@@ -1025,9 +1052,9 @@ export default function PixelGrid() {
               <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
                 <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
                   <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
+                  <DialogDescription className="text-muted-foreground animate-fade-in animation-delay-200">
                     Explore, filtre e interaja com o mapa de pixels.
-                  </DialogDescriptionElement>
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>

@@ -1,6 +1,29 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// App Store for global app state
+interface AppState {
+  isOnline: boolean;
+  lastSync: number | null;
+  setOnline: (online: boolean) => void;
+  updateLastSync: () => void;
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      isOnline: true,
+      lastSync: null,
+      
+      setOnline: (online) => set({ isOnline: online }),
+      updateLastSync: () => set({ lastSync: Date.now() }),
+    }),
+    {
+      name: 'app-storage',
+    }
+  )
+);
+
 // User Store
 interface UserState {
   credits: number;
