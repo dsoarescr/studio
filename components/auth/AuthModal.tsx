@@ -17,8 +17,6 @@ import {
 } from '@/components/ui/dialog';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/hooks/use-toast';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -55,8 +53,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
   const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [playSuccessSound, setPlaySuccessSound] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   
@@ -77,7 +73,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      setPlaySuccessSound(true);
       setIsOpen(false);
       resetForm();
     } catch (error) {
@@ -119,8 +114,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
     setIsLoading(true);
     try {
       await signUp(email, password, username);
-      setShowConfetti(true);
-      setPlaySuccessSound(true);
       setIsOpen(false);
       resetForm();
     } catch (error: any) {
@@ -155,7 +148,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
           await signInWithGithub();
           break;
       }
-      setPlaySuccessSound(true);
       setIsOpen(false);
       resetForm();
     } catch (error) {
@@ -198,9 +190,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) setShowForgotPassword(false); }}>
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
-      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
-      
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>

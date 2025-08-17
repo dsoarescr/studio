@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { AuthProvider } from '@/lib/auth-context';
-import { StripeProvider } from '@/components/payment/StripePaymentProvider';
+import { I18nProvider } from '@/lib/i18n-context';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
@@ -48,11 +48,11 @@ export default function RootLayout({
       {/* h-full on body, overflow-hidden removed to allow MainLayout's overflow-y-auto to work */}
       <body className="font-body antialiased h-full">
         <AuthProvider>
-          <StripeProvider>
+          <I18nProvider>
             {children}
             <OfflineIndicator />
             <Toaster />
-          </StripeProvider>
+          </I18nProvider>
         </AuthProvider>
       </body>
     </html>
