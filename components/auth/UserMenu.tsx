@@ -1,4 +1,4 @@
-// src/components/auth/UserMenu.tsx
+// components/auth/UserMenu.tsx
 'use client';
 
 import React from 'react';

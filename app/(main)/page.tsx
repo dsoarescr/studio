@@ -1,5 +1,5 @@
 
-// src/app/(main)/page.tsx
+// app/(main)/page.tsx
 'use client';
 
 import React from 'react';

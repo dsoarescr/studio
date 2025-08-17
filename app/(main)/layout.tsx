@@ -1,7 +1,6 @@
 
 import BottomNavBar from '@/components/layout/BottomNavBar';
 import UserProfileHeader from '@/components/layout/UserProfileHeader';
-import { useSettingsStore } from '@/lib/store';
 
 export default function MainLayout({
   children,
@@ -9,12 +8,10 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300">
+    <div className="h-full">
       <UserProfileHeader /> 
-      <main className="flex-1 pt-14 pb-[var(--bottom-nav-height)] overflow-y-auto">
-        <div className="min-h-full">
-          {children}
-        </div>
+      <main className="h-[calc(100%-var(--header-height)-var(--bottom-nav-height))]">
+        {children}
       </main>
       <BottomNavBar />
     </div>
