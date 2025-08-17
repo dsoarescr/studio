@@ -1,309 +1,527 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { useUserStore } from '@/lib/store';
-import { 
-  Crown, Check, Star, Zap, Gift, Sparkles, 
-  Palette, Target, Award, Users, Shield, 
-  TrendingUp, Coins, Heart, Eye, MessageSquare
-} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { useUserStore } from "@/lib/store";
+import { useStripePayment, StripePaymentElements } from "@/components/payment/StripePaymentProvider";
+import CheckoutForm from "@/components/payment/CheckoutForm";
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { Confetti } from '@/components/ui/confetti';
+import { motion } from "framer-motion";
+import {
+  Crown, Star, Zap, Shield, Sparkles, Check, X, CreditCard, Gift,
+  Palette, Users, Globe, Headphones, Eye, Settings, Award, Gem,
+  Rocket, Heart, Lightning, Coins, Calendar, Clock, ArrowRight,
+  ChevronRight, Info, AlertTriangle, CheckCircle, Flame, Target
+} from "lucide-react";
 import { cn } from '@/lib/utils';
 
-interface PlanFeature {
-  text: string;
-  included: boolean;
-  premium?: boolean;
-}
-
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  price: number;
-  period: string;
-  description: string;
-  popular?: boolean;
-  features: PlanFeature[];
-  color: string;
-  icon: React.ReactNode;
-}
-
-const plans: SubscriptionPlan[] = [
+const subscriptionPlans = [
   {
-    id: 'free',
-    name: 'Gratuito',
+    id: 'basic',
+    name: 'Básico',
     price: 0,
-    period: 'para sempre',
-    description: 'Perfeito para começar a explorar o Pixel Universe',
+    period: 'Grátis',
+    description: 'Perfeito para começar',
     features: [
-      { text: 'Comprar até 10 pixels por dia', included: true },
-      { text: 'Paleta de cores básica', included: true },
-      { text: 'Acesso ao mapa completo', included: true },
-      { text: 'Conquistas básicas', included: true },
-      { text: 'Suporte por email', included: true },
-      { text: 'Cores premium', included: false },
-      { text: 'Pixels ilimitados', included: false },
-      { text: 'Análises avançadas', included: false },
-      { text: 'Suporte prioritário', included: false },
+      'Compra e venda de pixels',
+      'Personalização básica',
+      'Acesso ao mapa completo',
+      'Participação em eventos',
+      'Suporte por email'
     ],
-    color: 'border-gray-200',
-    icon: <Target className="h-6 w-6" />
+    limitations: [
+      'Máximo 10 pixels por dia',
+      'Sem acesso a pixels premium',
+      'Anúncios ocasionais'
+    ],
+    color: 'from-gray-500 to-gray-600',
+    icon: <Users className="h-6 w-6" />,
+    popular: false
   },
   {
     id: 'premium',
     name: 'Premium',
     price: 9.99,
-    period: 'por mês',
-    description: 'Para artistas sérios e colecionadores dedicados',
-    popular: true,
+    period: 'mês',
+    description: 'Para criadores sérios',
     features: [
-      { text: 'Pixels ilimitados por dia', included: true, premium: true },
-      { text: 'Paleta de cores completa', included: true, premium: true },
-      { text: 'Cores exclusivas premium', included: true, premium: true },
-      { text: 'Análises detalhadas', included: true, premium: true },
-      { text: 'Histórico completo', included: true, premium: true },
-      { text: 'Suporte prioritário', included: true, premium: true },
-      { text: 'Badge premium', included: true, premium: true },
-      { text: 'Desconto em pixels', included: true, premium: true },
-      { text: 'Acesso antecipado', included: true, premium: true },
+      'Pixels ilimitados',
+      'Acesso a pixels exclusivos',
+      'Ferramentas avançadas de edição',
+      'Sem anúncios',
+      'Suporte prioritário',
+      'Estatísticas detalhadas',
+      'Backup automático',
+      'Temas personalizados'
     ],
-    color: 'border-primary',
-    icon: <Crown className="h-6 w-6" />
+    bonuses: [
+      '100 créditos especiais/mês',
+      '15% desconto em compras',
+      'Acesso antecipado a funcionalidades'
+    ],
+    color: 'from-primary to-accent',
+    icon: <Crown className="h-6 w-6" />,
+    popular: true
   },
   {
-    id: 'annual',
-    name: 'Premium Anual',
-    price: 99.99,
-    period: 'por ano',
-    description: 'Melhor valor! Economize 17% com o plano anual',
+    id: 'ultimate',
+    name: 'Ultimate',
+    price: 19.99,
+    period: 'mês',
+    description: 'Para profissionais',
     features: [
-      { text: 'Tudo do Premium', included: true, premium: true },
-      { text: '2 meses grátis', included: true, premium: true },
-      { text: 'Créditos bônus mensais', included: true, premium: true },
-      { text: 'Acesso beta exclusivo', included: true, premium: true },
-      { text: 'Consultoria personalizada', included: true, premium: true },
+      'Tudo do Premium',
+      'API de desenvolvedor',
+      'Pixels animados',
+      'Colaboração em equipe',
+      'Analytics avançados',
+      'Suporte VIP 24/7',
+      'Consultoria personalizada',
+      'Eventos exclusivos'
     ],
-    color: 'border-amber-400',
-    icon: <Sparkles className="h-6 w-6" />
+    bonuses: [
+      '300 créditos especiais/mês',
+      '25% desconto em compras',
+      'Acesso beta a novas funcionalidades',
+      'Sessões de mentoria mensais'
+    ],
+    color: 'from-purple-500 to-pink-500',
+    icon: <Rocket className="h-6 w-6" />,
+    popular: false
   }
 ];
 
-const premiumBenefits = [
+const premiumFeatures = [
   {
-    icon: <Palette className="h-8 w-8 text-purple-500" />,
-    title: 'Cores Exclusivas',
-    description: 'Acesso a mais de 1000 cores premium e gradientes únicos'
+    icon: <Palette className="h-8 w-8" />,
+    title: 'Editor Avançado',
+    description: 'Ferramentas profissionais de pixel art com camadas, filtros e efeitos especiais.',
+    color: 'text-blue-500'
   },
   {
-    icon: <Target className="h-8 w-8 text-blue-500" />,
-    title: 'Pixels Ilimitados',
-    description: 'Compre quantos pixels quiser sem limites diários'
+    icon: <Users className="h-8 w-8" />,
+    title: 'Colaboração',
+    description: 'Trabalhe em projetos com outros artistas em tempo real.',
+    color: 'text-green-500'
   },
   {
-    icon: <TrendingUp className="h-8 w-8 text-green-500" />,
-    title: 'Análises Avançadas',
-    description: 'Estatísticas detalhadas e insights sobre seus investimentos'
+    icon: <Globe className="h-8 w-8" />,
+    title: 'Galeria Global',
+    description: 'Exponha suas criações para milhões de usuários ao redor do mundo.',
+    color: 'text-purple-500'
   },
   {
-    icon: <Shield className="h-8 w-8 text-red-500" />,
-    title: 'Suporte Prioritário',
-    description: 'Atendimento VIP com resposta em menos de 2 horas'
+    icon: <Shield className="h-8 w-8" />,
+    title: 'Backup Seguro',
+    description: 'Seus pixels são automaticamente salvos e protegidos na nuvem.',
+    color: 'text-orange-500'
+  },
+  {
+    icon: <Zap className="h-8 w-8" />,
+    title: 'Performance',
+    description: 'Renderização ultra-rápida e ferramentas otimizadas para produtividade.',
+    color: 'text-yellow-500'
+  },
+  {
+    icon: <Headphones className="h-8 w-8" />,
+    title: 'Suporte VIP',
+    description: 'Atendimento prioritário com especialistas em pixel art.',
+    color: 'text-red-500'
   }
 ];
 
 export default function PremiumSubscription() {
-  const [selectedPlan, setSelectedPlan] = useState<string>('premium');
+  const [selectedPlan, setSelectedPlan] = useState('premium');
+  const [isAnnual, setIsAnnual] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [playSuccessSound, setPlaySuccessSound] = useState(false);
+  
+  const { createSubscription } = useStripePayment();
   const { toast } = useToast();
   const { isPremium, addCredits, addSpecialCredits } = useUserStore();
 
+  const getDiscountedPrice = (price: number) => {
+    return isAnnual ? price * 10 : price; // 2 months free on annual
+  };
+
   const handleSubscribe = async (planId: string) => {
-    if (planId === 'free') return;
-    
+    if (planId === 'basic') {
+      toast({
+        title: "Plano Básico",
+        description: "Você já tem acesso ao plano básico gratuitamente!",
+      });
+      return;
+    }
+
     setIsProcessing(true);
     
-    // Simulate subscription process
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Mock price IDs - in real app these would come from Stripe
+      const priceId = `price_${planId}_${isAnnual ? 'annual' : 'monthly'}`;
+      
+      const result = await createSubscription(priceId);
+      
+      if (result?.clientSecret) {
+        setClientSecret(result.clientSecret);
+      }
+    } catch (error) {
+      toast({
+        title: "Erro na Subscrição",
+        description: "Não foi possível processar a subscrição. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowConfetti(true);
+    setPlaySuccessSound(true);
     
-    // Add bonus credits for subscription
-    const bonusCredits = planId === 'annual' ? 1000 : 500;
-    addCredits(bonusCredits);
+    // Add welcome bonus
+    addCredits(500);
     addSpecialCredits(100);
     
     toast({
-      title: "Subscrição Ativada!",
-      description: `Bem-vindo ao Pixel Universe Premium! Recebeu ${bonusCredits} créditos de bônus.`,
+      title: "Bem-vindo ao Premium!",
+      description: "Sua subscrição foi ativada com sucesso. Recebeu 500 créditos + 100 especiais de bônus!",
     });
     
-    setIsProcessing(false);
+    setClientSecret(null);
   };
+
+  if (clientSecret) {
+    return (
+      <div className="container mx-auto py-6 px-4 max-w-md">
+        <StripePaymentElements clientSecret={clientSecret}>
+          <CheckoutForm
+            amount={getDiscountedPrice(subscriptionPlans.find(p => p.id === selectedPlan)?.price || 0) * 100}
+            description={`Subscrição ${subscriptionPlans.find(p => p.id === selectedPlan)?.name} - ${isAnnual ? 'Anual' : 'Mensal'}`}
+            onSuccess={handlePaymentSuccess}
+            onCancel={() => setClientSecret(null)}
+          />
+        </StripePaymentElements>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto py-6 px-4 mb-16 space-y-8 max-w-6xl">
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
+      
+      <div className="container mx-auto py-6 px-4 space-y-8 max-w-7xl">
         {/* Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-               style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative z-10 text-center">
-            <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center justify-center">
-              <Crown className="h-8 w-8 mr-3 animate-glow" />
-              Pixel Universe Premium
-            </CardTitle>
-            <CardDescription className="text-lg mt-2">
-              Desbloqueie todo o potencial do Pixel Universe com funcionalidades exclusivas
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        {/* Current Status */}
-        {isPremium && (
-          <Card className="bg-gradient-to-r from-primary/20 to-accent/20 border-primary/50">
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Crown className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-semibold">Já é Premium!</h3>
-              </div>
-              <p className="text-muted-foreground">
-                Obrigado por apoiar o Pixel Universe. Sua subscrição está ativa.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Benefits Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {premiumBenefits.map((benefit, index) => (
-            <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="mb-4 flex justify-center">
-                  {benefit.icon}
-                </div>
-                <h3 className="font-semibold mb-2">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="text-center space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-headline font-bold text-gradient-gold-animated">
+              Desbloqueie Todo o Potencial
+            </h1>
+            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
+              Transforme sua experiência no Pixel Universe com ferramentas profissionais e recursos exclusivos
+            </p>
+          </motion.div>
+          
+          {/* Billing Toggle */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex items-center justify-center gap-4 mt-8"
+          >
+            <Label htmlFor="billing-toggle" className={cn("font-medium", !isAnnual && "text-primary")}>
+              Mensal
+            </Label>
+            <Switch
+              id="billing-toggle"
+              checked={isAnnual}
+              onCheckedChange={setIsAnnual}
+              className="data-[state=checked]:bg-primary"
+            />
+            <Label htmlFor="billing-toggle" className={cn("font-medium", isAnnual && "text-primary")}>
+              Anual
+            </Label>
+            {isAnnual && (
+              <Badge className="bg-green-500 text-white animate-pulse">
+                2 meses grátis!
+              </Badge>
+            )}
+          </motion.div>
         </div>
 
-        {/* Pricing Plans */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {plans.map((plan) => (
-            <Card 
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {subscriptionPlans.map((plan, index) => (
+            <motion.div
               key={plan.id}
-              className={cn(
-                "relative overflow-hidden transition-all duration-300 hover:shadow-xl",
-                plan.color,
-                selectedPlan === plan.id && "ring-2 ring-primary",
-                plan.popular && "scale-105 shadow-lg"
-              )}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              {plan.popular && (
-                <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
-                  Mais Popular
-                </Badge>
-              )}
-              
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
+              <Card className={cn(
+                "relative overflow-hidden transition-all duration-300 hover:shadow-2xl",
+                plan.popular && "border-primary/50 shadow-primary/20 scale-105",
+                selectedPlan === plan.id && "ring-2 ring-primary"
+              )}>
+                {plan.popular && (
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-accent text-primary-foreground text-center py-2 text-sm font-medium">
+                    <Sparkles className="inline h-4 w-4 mr-1" />
+                    Mais Popular
+                  </div>
+                )}
+                
+                <CardHeader className={cn("text-center", plan.popular && "pt-12")}>
                   <div className={cn(
-                    "p-3 rounded-full",
-                    plan.id === 'free' ? 'bg-gray-100' : 
-                    plan.id === 'premium' ? 'bg-primary/10' : 'bg-amber-100'
+                    "w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4",
+                    `bg-gradient-to-br ${plan.color} text-white shadow-lg`
                   )}>
                     {plan.icon}
                   </div>
-                </div>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription className="mt-2">{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">
-                    {plan.price === 0 ? 'Grátis' : `€${plan.price}`}
-                  </span>
-                  {plan.price > 0 && (
-                    <span className="text-muted-foreground ml-1">/{plan.period}</span>
-                  )}
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
-                {plan.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    {feature.included ? (
-                      <Check className={cn(
-                        "h-4 w-4",
-                        feature.premium ? "text-primary" : "text-green-500"
-                      )} />
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-muted" />
-                    )}
-                    <span className={cn(
-                      "text-sm",
-                      !feature.included && "text-muted-foreground line-through"
-                    )}>
-                      {feature.text}
-                    </span>
-                    {feature.premium && (
-                      <Badge variant="outline" className="text-xs">Premium</Badge>
+                  
+                  <CardTitle className="text-2xl font-headline">{plan.name}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{plan.description}</CardDescription>
+                  
+                  <div className="space-y-2">
+                    <div className="text-4xl font-bold">
+                      {plan.price === 0 ? (
+                        <span className="text-green-500">Grátis</span>
+                      ) : (
+                        <>
+                          <span className="text-primary">
+                            {getDiscountedPrice(plan.price).toFixed(2)}€
+                          </span>
+                          <span className="text-lg text-muted-foreground">
+                            /{isAnnual ? 'ano' : plan.period}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    {isAnnual && plan.price > 0 && (
+                      <p className="text-sm text-green-500">
+                        Poupa {(plan.price * 2).toFixed(2)}€ por ano
+                      </p>
                     )}
                   </div>
-                ))}
-              </CardContent>
-              
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={plan.id === 'free' ? 'outline' : 'default'}
-                  onClick={() => handleSubscribe(plan.id)}
-                  disabled={isProcessing || (isPremium && plan.id !== 'free')}
-                >
-                  {isProcessing ? (
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    {plan.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {plan.bonuses && (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Processando...
+                      <Separator />
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm text-accent flex items-center">
+                          <Gift className="h-4 w-4 mr-2" />
+                          Bônus Inclusos
+                        </h4>
+                        {plan.bonuses.map((bonus, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
+                            <Sparkles className="h-4 w-4 text-accent flex-shrink-0" />
+                            <span className="text-sm text-accent">{bonus}</span>
+                          </div>
+                        ))}
+                      </div>
                     </>
-                  ) : plan.id === 'free' ? (
-                    'Plano Atual'
-                  ) : isPremium ? (
-                    'Já Premium'
-                  ) : (
-                    `Escolher ${plan.name}`
                   )}
-                </Button>
-              </CardFooter>
-            </Card>
+                  
+                  {plan.limitations && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm text-muted-foreground">Limitações</h4>
+                        {plan.limitations.map((limitation, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
+                            <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm text-muted-foreground">{limitation}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+                
+                <CardFooter>
+                  <Button
+                    className={cn(
+                      "w-full transition-all duration-300",
+                      plan.id === 'basic' && isPremium && "opacity-50 cursor-not-allowed",
+                      plan.popular && "bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                    )}
+                    onClick={() => handleSubscribe(plan.id)}
+                    disabled={isProcessing || (plan.id === 'basic' && isPremium)}
+                  >
+                    {isProcessing ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Processando...
+                      </div>
+                    ) : plan.id === 'basic' ? (
+                      isPremium ? 'Plano Atual' : 'Começar Grátis'
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Subscrever Agora
+                      </>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
           ))}
         </div>
 
+        {/* Premium Features Showcase */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-headline text-primary">
+                Funcionalidades Premium
+              </CardTitle>
+              <CardDescription>
+                Descubra o que torna o Pixel Universe Premium tão especial
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {premiumFeatures.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                    className="text-center space-y-3 p-4 rounded-lg bg-background/50 hover:bg-background/70 transition-colors"
+                  >
+                    <div className={cn("mx-auto", feature.color)}>
+                      {feature.icon}
+                    </div>
+                    <h3 className="font-semibold">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* FAQ Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Perguntas Frequentes</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Posso cancelar a qualquer momento?</h4>
-              <p className="text-sm text-muted-foreground">
-                Sim, pode cancelar a sua subscrição a qualquer momento. Continuará a ter acesso premium até ao final do período pago.
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-headline">
+                Perguntas Frequentes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h3 className="font-semibold flex items-center">
+                    <Info className="h-4 w-4 mr-2 text-primary" />
+                    Posso cancelar a qualquer momento?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Sim! Você pode cancelar sua subscrição a qualquer momento sem taxas de cancelamento.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-green-500" />
+                    Meus pixels ficam seguros?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Absolutamente! Todos os seus pixels são salvos automaticamente e protegidos com backup na nuvem.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold flex items-center">
+                    <Coins className="h-4 w-4 mr-2 text-accent" />
+                    Como funcionam os créditos especiais?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Créditos especiais podem ser usados para pixels exclusivos, ferramentas premium e itens únicos.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold flex items-center">
+                    <Headphones className="h-4 w-4 mr-2 text-blue-500" />
+                    Que tipo de suporte recebo?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Premium inclui suporte prioritário por email, Ultimate inclui suporte VIP 24/7 e consultoria.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center"
+        >
+          <Card className="bg-gradient-to-r from-primary/20 to-accent/20 border-primary/30">
+            <CardContent className="p-8">
+              <h2 className="text-2xl font-headline font-bold mb-4">
+                Pronto para Começar?
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Junte-se a milhares de artistas que já descobriram o poder do Pixel Universe Premium.
+                Comece sua jornada hoje mesmo!
               </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">O que acontece aos meus pixels se cancelar?</h4>
-              <p className="text-sm text-muted-foreground">
-                Todos os pixels que comprou continuam seus para sempre. Apenas perderá acesso às funcionalidades premium.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Há desconto para estudantes?</h4>
-              <p className="text-sm text-muted-foreground">
-                Sim! Contacte o nosso suporte com comprovativo de estudante para receber 50% de desconto.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                  onClick={() => handleSubscribe('premium')}
+                >
+                  <Crown className="h-5 w-5 mr-2" />
+                  Começar Premium
+                </Button>
+                <Button variant="outline" size="lg">
+                  <Eye className="h-5 w-5 mr-2" />
+                  Ver Demonstração
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

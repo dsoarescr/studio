@@ -1,421 +1,462 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Shield, Lock, Key, Smartphone, AlertTriangle, 
-  CheckCircle, Eye, EyeOff, Laptop, Globe, 
-  Clock, MapPin, RefreshCw, X
+import { useAuth } from '@/lib/auth-context';
+import TwoFactorAuth from './TwoFactorAuth';
+import {
+  Shield, Lock, Key, Smartphone, AlertTriangle, CheckCircle, 
+  Eye, EyeOff, LogOut, RefreshCw, Laptop, Smartphone as SmartphoneIcon,
+  Globe, Clock, Info, Settings, User, Mail, CreditCard, FileText,
+  Trash2, Download, HelpCircle
 } from 'lucide-react';
 
-interface SecurityEvent {
-  id: string;
-  type: 'login' | 'password_change' | 'suspicious' | 'device_new';
-  description: string;
-  timestamp: string;
-  location: string;
-  device: string;
-  status: 'success' | 'warning' | 'error';
-}
-
-interface ActiveSession {
-  id: string;
-  device: string;
-  browser: string;
-  location: string;
-  lastActive: string;
-  current: boolean;
-}
-
-const mockSecurityEvents: SecurityEvent[] = [
-  {
-    id: '1',
-    type: 'login',
-    description: 'Login bem-sucedido',
-    timestamp: '2024-03-15 14:30',
-    location: 'Lisboa, Portugal',
-    device: 'Chrome - Windows',
-    status: 'success'
-  },
-  {
-    id: '2',
-    type: 'device_new',
-    description: 'Novo dispositivo detectado',
-    timestamp: '2024-03-14 09:15',
-    location: 'Porto, Portugal',
-    device: 'Safari - iPhone',
-    status: 'warning'
-  },
-  {
-    id: '3',
-    type: 'password_change',
-    description: 'Password alterada',
-    timestamp: '2024-03-10 16:45',
-    location: 'Lisboa, Portugal',
-    device: 'Chrome - Windows',
-    status: 'success'
-  }
-];
-
-const mockActiveSessions: ActiveSession[] = [
-  {
-    id: '1',
-    device: 'Windows PC',
-    browser: 'Chrome 122',
-    location: 'Lisboa, Portugal',
-    lastActive: 'Agora',
-    current: true
-  },
-  {
-    id: '2',
-    device: 'iPhone 15',
-    browser: 'Safari',
-    location: 'Porto, Portugal',
-    lastActive: '2 horas atrás',
-    current: false
-  }
-];
-
 export default function SecurityDashboard() {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPasswords, setShowPasswords] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [securityScore, setSecurityScore] = useState(65);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(true);
+  const [isPasswordStrong, setIsPasswordStrong] = useState(false);
+  const [isRecoveryEmailSet, setIsRecoveryEmailSet] = useState(false);
+  const [isActivityAlertsEnabled, setIsActivityAlertsEnabled] = useState(true);
+  const [isLocationTrackingEnabled, setIsLocationTrackingEnabled] = useState(false);
+  const [isDataEncryptionEnabled, setIsDataEncryptionEnabled] = useState(true);
+  
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handlePasswordChange = () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive"
-      });
+  const activeSessions = [
+    {
+      device: 'Chrome - Windows',
+      location: 'Lisboa, Portugal',
+      ip: '192.168.1.xxx',
+      lastActive: 'Agora',
+      isCurrent: true,
+    },
+    {
+      device: 'Safari - iPhone',
+      location: 'Porto, Portugal',
+      ip: '192.168.2.xxx',
+      lastActive: '2 horas atrás',
+      isCurrent: false,
+    },
+  ];
+
+  const recentActivity = [
+    {
+      action: 'Login bem-sucedido',
+      device: 'Chrome - Windows',
+      location: 'Lisboa, Portugal',
+      time: 'Agora',
+      status: 'success',
+    },
+    {
+      action: 'Alteração de password',
+      device: 'Chrome - Windows',
+      location: 'Lisboa, Portugal',
+      time: '2 dias atrás',
+      status: 'success',
+    },
+    {
+      action: 'Tentativa de login falhada',
+      device: 'Desconhecido',
+      location: 'Madrid, Espanha',
+      time: '5 dias atrás',
+      status: 'warning',
+    },
+  ];
+
+  const handleToggle2FA = (enabled: boolean) => {
+    if (enabled) {
+      // Don't actually enable here, the TwoFactorAuth component will handle it
       return;
     }
-
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords não coincidem",
-        description: "A nova password e confirmação devem ser iguais.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast({
-        title: "Password fraca",
-        description: "A password deve ter pelo menos 8 caracteres.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    
+    setIs2FAEnabled(false);
+    setSecurityScore(Math.max(30, securityScore - 30));
     toast({
-      title: "Password alterada",
-      description: "A sua password foi alterada com sucesso.",
+      title: 'Autenticação de Dois Fatores Desativada',
+      description: 'A sua conta está agora menos segura.',
+      variant: 'destructive',
     });
-
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
   };
 
-  const handleTerminateSession = (sessionId: string) => {
+  const handle2FASuccess = () => {
+    setIs2FAEnabled(true);
+    setSecurityScore(Math.min(100, securityScore + 30));
     toast({
-      title: "Sessão terminada",
-      description: "A sessão foi terminada com sucesso.",
+      title: 'Autenticação de Dois Fatores Ativada',
+      description: 'A sua conta está agora mais segura.',
     });
   };
 
-  const getEventIcon = (type: string, status: string) => {
-    switch (type) {
-      case 'login':
-        return status === 'success' ? 
-          <CheckCircle className="h-4 w-4 text-green-500" /> : 
-          <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'password_change':
-        return <Key className="h-4 w-4 text-blue-500" />;
-      case 'device_new':
-        return <Smartphone className="h-4 w-4 text-yellow-500" />;
-      case 'suspicious':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Shield className="h-4 w-4 text-gray-500" />;
-    }
+  const handleToggleActivityAlerts = (enabled: boolean) => {
+    setIsActivityAlertsEnabled(enabled);
+    setSecurityScore(Math.min(100, Math.max(0, securityScore + (enabled ? 5 : -5))));
+    toast({
+      title: enabled ? 'Alertas de Atividade Ativados' : 'Alertas de Atividade Desativados',
+      description: enabled 
+        ? 'Receberá notificações sobre atividades suspeitas.' 
+        : 'Não receberá notificações sobre atividades suspeitas.',
+    });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'success': return 'text-green-500';
-      case 'warning': return 'text-yellow-500';
-      case 'error': return 'text-red-500';
-      default: return 'text-gray-500';
-    }
+  const handleToggleLocationTracking = (enabled: boolean) => {
+    setIsLocationTrackingEnabled(enabled);
+    toast({
+      title: enabled ? 'Rastreio de Localização Ativado' : 'Rastreio de Localização Desativado',
+      description: enabled 
+        ? 'A sua localização será verificada para detetar acessos suspeitos.' 
+        : 'A sua localização não será verificada para detetar acessos suspeitos.',
+    });
+  };
+
+  const handleToggleDataEncryption = (enabled: boolean) => {
+    setIsDataEncryptionEnabled(enabled);
+    setSecurityScore(Math.min(100, Math.max(0, securityScore + (enabled ? 10 : -10))));
+    toast({
+      title: enabled ? 'Encriptação de Dados Ativada' : 'Encriptação de Dados Desativada',
+      description: enabled 
+        ? 'Os seus dados serão encriptados para maior segurança.' 
+        : 'Os seus dados não serão encriptados.',
+    });
+  };
+
+  const handleTerminateSession = (index: number) => {
+    toast({
+      title: 'Sessão Terminada',
+      description: `A sessão em ${activeSessions[index].device} foi terminada com sucesso.`,
+    });
+  };
+
+  const handleTerminateAllSessions = () => {
+    toast({
+      title: 'Todas as Sessões Terminadas',
+      description: 'Todas as outras sessões foram terminadas com sucesso.',
+    });
+  };
+
+  const handleDownloadData = () => {
+    toast({
+      title: 'Exportação de Dados Iniciada',
+      description: 'Receberá um email quando os seus dados estiverem prontos para download.',
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    toast({
+      title: 'Pedido de Eliminação Recebido',
+      description: 'Receberá um email com instruções para confirmar a eliminação da sua conta.',
+      variant: 'destructive',
+    });
   };
 
   return (
-    <div className="space-y-6">
-      {/* Security Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl flex items-center">
-            <Shield className="h-6 w-6 mr-3 text-primary" />
-            Segurança da Conta
-          </CardTitle>
-          <CardDescription>
-            Gerencie as definições de segurança da sua conta
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-green-500/10 border-green-500/20">
-              <CardContent className="p-4 text-center">
-                <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-green-500">Conta Segura</h3>
-                <p className="text-xs text-muted-foreground">Sem atividade suspeita</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-blue-500/10 border-blue-500/20">
-              <CardContent className="p-4 text-center">
-                <Lock className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-blue-500">Password Forte</h3>
-                <p className="text-xs text-muted-foreground">Última alteração: 5 dias</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-yellow-500/10 border-yellow-500/20">
-              <CardContent className="p-4 text-center">
-                <Key className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-yellow-500">2FA Desativado</h3>
-                <p className="text-xs text-muted-foreground">Recomendamos ativar</p>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Change Password */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Alterar Password</CardTitle>
-          <CardDescription>
-            Mantenha a sua conta segura com uma password forte
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="current-password">Password Atual</Label>
-            <div className="relative">
-              <Input
-                id="current-password"
-                type={showPasswords ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="pr-10"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                onClick={() => setShowPasswords(!showPasswords)}
-              >
-                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="new-password">Nova Password</Label>
-            <Input
-              id="new-password"
-              type={showPasswords ? "text" : "password"}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirmar Nova Password</Label>
-            <Input
-              id="confirm-password"
-              type={showPasswords ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          
-          <Button onClick={handlePasswordChange}>
-            <Key className="h-4 w-4 mr-2" />
-            Alterar Password
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Two-Factor Authentication */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Autenticação de Dois Fatores</CardTitle>
-          <CardDescription>
-            Adicione uma camada extra de segurança à sua conta
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+    <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">
+      <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
+             style={{ backgroundSize: '200% 200%' }} />
+        <CardHeader className="relative">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h3 className="font-medium">Ativar 2FA</h3>
-              <p className="text-sm text-muted-foreground">
-                Use uma app de autenticação para gerar códigos
-              </p>
+              <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center">
+                <Shield className="h-8 w-8 mr-3 animate-glow" />
+                Centro de Segurança
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-2">
+                Proteja a sua conta e os seus dados no Pixel Universe
+              </CardDescription>
             </div>
-            <Switch
-              checked={twoFactorEnabled}
-              onCheckedChange={setTwoFactorEnabled}
-            />
+            
+            <div className="flex flex-col items-center bg-background/50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-medium">Pontuação de Segurança</h3>
+                <Badge variant={securityScore >= 80 ? 'default' : securityScore >= 50 ? 'secondary' : 'destructive'}>
+                  {securityScore}/100
+                </Badge>
+              </div>
+              <Progress 
+                value={securityScore} 
+                className="w-full h-2.5" 
+                style={{
+                  '--progress-background': securityScore >= 80 
+                    ? 'hsl(var(--primary))' 
+                    : securityScore >= 50 
+                      ? 'hsl(var(--warning))' 
+                      : 'hsl(var(--destructive))'
+                } as React.CSSProperties}
+              />
+            </div>
           </div>
-          
-          {!twoFactorEnabled && (
-            <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-yellow-500">Recomendação de Segurança</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Ative a autenticação de dois fatores para proteger melhor a sua conta.
+        </CardHeader>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Security Features */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <Lock className="h-5 w-5 mr-2 text-primary" />
+              Funcionalidades de Segurança
+            </CardTitle>
+            <CardDescription>
+              Configure as funcionalidades de segurança da sua conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Autenticação de Dois Fatores (2FA)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione uma camada extra de segurança à sua conta
                   </p>
                 </div>
+                <TwoFactorAuth onSuccess={handle2FASuccess}>
+                  <Switch checked={is2FAEnabled} onCheckedChange={handleToggle2FA} />
+                </TwoFactorAuth>
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Alertas de Atividade Suspeita</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receba notificações sobre logins de novos dispositivos ou localizações
+                  </p>
+                </div>
+                <Switch checked={isActivityAlertsEnabled} onCheckedChange={handleToggleActivityAlerts} />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Verificação de Localização</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Verificar a localização para detetar acessos suspeitos
+                  </p>
+                </div>
+                <Switch checked={isLocationTrackingEnabled} onCheckedChange={handleToggleLocationTracking} />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Encriptação de Dados</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Encriptar os seus dados para maior segurança
+                  </p>
+                </div>
+                <Switch checked={isDataEncryptionEnabled} onCheckedChange={handleToggleDataEncryption} />
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Active Sessions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Sessões Ativas</CardTitle>
-          <CardDescription>
-            Gerencie os dispositivos com acesso à sua conta
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {mockActiveSessions.map((session) => (
-            <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  {session.device.includes('iPhone') ? 
-                    <Smartphone className="h-5 w-5" /> : 
-                    <Laptop className="h-5 w-5" />
-                  }
-                </div>
-                <div>
-                  <h4 className="font-medium">{session.device}</h4>
-                  <p className="text-sm text-muted-foreground">{session.browser}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {session.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {session.lastActive}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {session.current ? (
-                  <Badge className="bg-green-500">Atual</Badge>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleTerminateSession(session.id)}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Terminar
-                  </Button>
+            
+            <div className="bg-muted/30 p-4 rounded-lg">
+              <h3 className="font-medium flex items-center mb-2">
+                <Info className="h-4 w-4 mr-2 text-primary" />
+                Recomendações de Segurança
+              </h3>
+              <ul className="space-y-2 text-sm">
+                {!is2FAEnabled && (
+                  <li className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <span>Ative a autenticação de dois fatores para maior segurança</span>
+                  </li>
                 )}
-              </div>
+                {!isPasswordStrong && (
+                  <li className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <span>A sua password não é suficientemente forte. Considere alterá-la.</span>
+                  </li>
+                )}
+                {!isRecoveryEmailSet && (
+                  <li className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <span>Configure um email de recuperação para recuperar a sua conta em caso de perda de acesso.</span>
+                  </li>
+                )}
+                {is2FAEnabled && isPasswordStrong && isRecoveryEmailSet && (
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>A sua conta está bem protegida. Continue a verificar regularmente a atividade da conta.</span>
+                  </li>
+                )}
+              </ul>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Security Events */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Atividade de Segurança</CardTitle>
-          <CardDescription>
-            Histórico recente de eventos de segurança
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {mockSecurityEvents.map((event) => (
-              <div key={event.id} className="flex items-start gap-3 p-3 border rounded-lg">
-                <div className="p-1 rounded-full bg-muted">
-                  {getEventIcon(event.type, event.status)}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{event.description}</h4>
-                    <span className={`text-xs ${getStatusColor(event.status)}`}>
-                      {event.status === 'success' ? 'Sucesso' : 
-                       event.status === 'warning' ? 'Aviso' : 'Erro'}
-                    </span>
+        {/* Active Sessions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <Laptop className="h-5 w-5 mr-2 text-primary" />
+              Sessões Ativas
+            </CardTitle>
+            <CardDescription>
+              Dispositivos atualmente conectados à sua conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {activeSessions.map((session, index) => (
+              <div key={index} className="p-3 bg-muted/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    {session.device.includes('Windows') ? (
+                      <Laptop className="h-4 w-4 mr-2 text-blue-500" />
+                    ) : (
+                      <SmartphoneIcon className="h-4 w-4 mr-2 text-green-500" />
+                    )}
+                    <span className="font-medium">{session.device}</span>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                    <span>{event.timestamp}</span>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {event.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Globe className="h-3 w-3" />
-                      {event.device}
-                    </span>
+                  {session.isCurrent ? (
+                    <Badge className="bg-green-500">Atual</Badge>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                      onClick={() => handleTerminateSession(index)}
+                    >
+                      Terminar
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center">
+                    <Globe className="h-3 w-3 mr-1" />
+                    <span>{session.location}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>{session.lastActive}</span>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full text-xs"
+              onClick={handleTerminateAllSessions}
+            >
+              <LogOut className="h-3 w-3 mr-2" />
+              Terminar Todas as Outras Sessões
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Notification Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Notificações de Segurança</CardTitle>
-          <CardDescription>
-            Configure como quer ser notificado sobre atividade suspeita
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">Notificações por Email</h3>
-              <p className="text-sm text-muted-foreground">
-                Receber alertas de segurança por email
-              </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Activity */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <Clock className="h-5 w-5 mr-2 text-primary" />
+              Atividade Recente
+            </CardTitle>
+            <CardDescription>
+              Histórico recente de atividade da sua conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="p-3 bg-muted/20 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      {activity.status === 'success' ? (
+                        <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                      ) : activity.status === 'warning' ? (
+                        <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
+                      ) : (
+                        <Info className="h-4 w-4 mr-2 text-blue-500" />
+                      )}
+                      <span className="font-medium">{activity.action}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{activity.time}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center">
+                      {activity.device.includes('Windows') ? (
+                        <Laptop className="h-3 w-3 mr-1" />
+                      ) : activity.device.includes('iPhone') ? (
+                        <SmartphoneIcon className="h-3 w-3 mr-1" />
+                      ) : (
+                        <Globe className="h-3 w-3 mr-1" />
+                      )}
+                      <span>{activity.device}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Globe className="h-3 w-3 mr-1" />
+                      <span>{activity.location}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              <Button variant="outline" size="sm" className="w-full">
+                Ver Histórico Completo
+              </Button>
             </div>
-            <Switch
-              checked={emailNotifications}
-              onCheckedChange={setEmailNotifications}
-            />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Privacy & Data */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-primary" />
+              Privacidade & Dados
+            </CardTitle>
+            <CardDescription>
+              Gerencie os seus dados pessoais
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start text-sm" onClick={handleDownloadData}>
+                <Download className="h-4 w-4 mr-2" />
+                Exportar Dados Pessoais
+              </Button>
+              
+              <Button variant="outline" className="w-full justify-start text-sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Preferências de Privacidade
+              </Button>
+              
+              <Button variant="outline" className="w-full justify-start text-sm">
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Política de Privacidade
+              </Button>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-destructive">Zona de Perigo</h3>
+              <Button 
+                variant="destructive" 
+                className="w-full justify-start text-sm"
+                onClick={handleDeleteAccount}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Eliminar Conta
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -42,9 +42,6 @@ import { useAuth } from '@/lib/auth-context';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
 import { useAppStore } from '@/lib/store';
-import HelpCenter from '@/components/features/HelpCenter';
-import TwoFactorAuth from '@/components/security/TwoFactorAuth';
-import FeedbackSystem from '@/components/features/FeedbackSystem';
 
 const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
@@ -248,10 +245,6 @@ export default function UserProfileHeader() {
                       Ajuda & Suporte
                     </Button>
                   </HelpCenter>
-                  <Button variant="outline" className="w-full justify-start hover:scale-105 transition-transform duration-200" size="sm">
-                    <HelpCircle className="h-4 w-4 mr-2" />
-                    Ajuda & Suporte
-                  </Button>
                   <Link href="/security">
                     <Button variant="outline" className="w-full justify-start hover:scale-105 transition-transform duration-200" size="sm">
                       <Shield className="h-4 w-4 mr-2" />

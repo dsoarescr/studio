@@ -1,4 +1,4 @@
-// components/auth/RequireAuth.tsx
+// src/components/auth/RequireAuth.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
