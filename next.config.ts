@@ -16,9 +16,7 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@genkit-ai/ai', 'genkit'],
-  },
+  serverExternalPackages: ['@genkit-ai/ai', 'genkit'],
 };
 
 module.exports = nextConfig;
