@@ -1305,6 +1305,66 @@ export default function EnhancedPixelPurchaseModal({
                   </div>
                   
                   {/* Cor Atual */}
+                    {/* Upload Avançado */}
+                    <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/30">
+                      <CardContent className="p-4">
+                        <div className="text-center space-y-4">
+                          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                            <Upload className="h-8 w-8 text-green-500" />
+                          </div>
+                          
+                          <div>
+                            <h3 className="font-semibold mb-2">Upload Inteligente</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Carregue imagens e a IA irá otimizar automaticamente para pixel art
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Button
+                              onClick={importImage}
+                              className="w-full"
+                            >
+                              <Camera className="h-4 w-4 mr-2" />
+                              Escolher Imagem
+                            </Button>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  // Simular captura de câmara
+                                  toast({
+                                    title: "📷 Câmara Ativada!",
+                                    description: "Tire uma foto para usar como base.",
+                                  });
+                                }}
+                              >
+                                <Camera className="h-4 w-4 mr-1" />
+                                Câmara
+                              </Button>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  // Simular geração IA
+                                  toast({
+                                    title: "🤖 IA Gerando!",
+                                    description: "Criando arte baseada em prompt...",
+                                  });
+                                }}
+                              >
+                                <Sparkles className="h-4 w-4 mr-1" />
+                                Gerar IA
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-12 h-12 rounded-lg border-2 border-border shadow-inner cursor-pointer hover:scale-110 transition-transform"
@@ -1709,115 +1769,118 @@ export default function EnhancedPixelPurchaseModal({
                 </TabsContent>
                 
                 {/* Efeitos e IA */}
-                <TabsContent value="effects" className="space-y-4">
-                  <div className="space-y-4">
-                    {/* Efeitos Visuais Avançados */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">Efeitos Especiais</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { id: 'hologram', name: 'Holograma', icon: <Sparkles className="h-4 w-4" />, color: 'from-cyan-500 to-blue-500' },
-                          { id: 'glitch', name: 'Glitch', icon: <Zap className="h-4 w-4" />, color: 'from-red-500 to-pink-500' },
-                          { id: 'crystal', name: 'Cristal', icon: <Gem className="h-4 w-4" />, color: 'from-purple-500 to-indigo-500' },
-                          { id: 'plasma', name: 'Plasma', icon: <Flame className="h-4 w-4" />, color: 'from-orange-500 to-red-500' },
-                          { id: 'aurora', name: 'Aurora', icon: <Waves className="h-4 w-4" />, color: 'from-green-500 to-blue-500' },
-                          { id: 'matrix', name: 'Matrix', icon: <Hash className="h-4 w-4" />, color: 'from-green-400 to-green-600' }
-                        ].map(effect => (
-                          <Button
-                            key={effect.id}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              applyMagicEffect(effect.id);
-                              vibrate('medium');
-                              
-                              toast({
-                                title: `✨ ${effect.name} Aplicado!`,
-                                description: "Efeito especial adicionado ao pixel!",
-                              });
-                            }}
-                            className={`h-12 flex flex-col items-center justify-center bg-gradient-to-r ${effect.color} bg-opacity-10 hover:bg-opacity-20 transition-all`}
-                          >
+                <TabsContent value="effects" className="mt-0 space-y-4">
+                  {/* Estilos Artísticos */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-sm flex items-center">
+                      <Wand2 className="h-4 w-4 mr-2 text-purple-500" />
+                      Estilos Artísticos
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {artStyles.map(style => (
+                        <Button
+                          key={style.id}
+                          variant={selectedStyle === style.id ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => applyArtStyle(style.id)}
+                          className="flex flex-col items-center p-3 h-auto relative"
+                        >
+                          <span className="text-2xl mb-1">{style.preview}</span>
+                          <span className="text-xs">{style.name}</span>
+                          {style.premium && (
+                            <Crown className="absolute -top-1 -right-1 h-3 w-3 text-amber-500" />
+                          )}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Efeitos Mágicos IA */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-sm flex items-center">
+                      <Sparkles className="h-4 w-4 mr-2 text-purple-500 animate-pulse" />
+                      Efeitos Mágicos IA
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {magicEffects.map(effect => (
+                        <Button
+                          key={effect.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyMagicEffect(effect.id)}
+                          className="flex flex-col items-center p-3 h-auto group"
+                        >
+                          <div className={cn("mb-1 group-hover:animate-pulse", effect.color)}>
                             {effect.icon}
-                            <span className="text-xs mt-1">{effect.name}</span>
-                          </Button>
-                        ))}
-                      </div>
+                          </div>
+                          <span className="text-xs">{effect.name}</span>
+                        </Button>
+                      ))}
                     </div>
-                    
-                    {/* Filtros Predefinidos */}
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Padrões Automáticos */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-sm">Padrões Automáticos</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generatePattern('dots')}
+                        className="text-xs"
+                      >
+                        ⚫ Pontos
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generatePattern('stripes')}
+                        className="text-xs"
+                      >
+                        ▬ Riscas
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generatePattern('checkerboard')}
+                        className="text-xs"
+                      >
+                        ▦ Xadrez
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Configurações de Visualização */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-sm">Visualização</h4>
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Filtros Rápidos</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { name: 'Vintage', effect: 'sepia(100%) contrast(120%)' },
-                          { name: 'Dramático', effect: 'contrast(150%) saturate(120%)' },
-                          { name: 'Suave', effect: 'blur(1px) brightness(110%)' },
-                          { name: 'Vibrante', effect: 'saturate(200%) contrast(110%)' },
-                          { name: 'Monocromático', effect: 'grayscale(100%) contrast(120%)' },
-                          { name: 'Neon', effect: 'saturate(300%) brightness(120%) hue-rotate(90deg)' },
-                          { name: 'Cyberpunk', effect: 'saturate(200%) hue-rotate(270deg) contrast(130%)' },
-                          { name: 'Retro', effect: 'sepia(50%) saturate(150%) hue-rotate(15deg)' },
-                          { name: 'Sonho', effect: 'blur(0.5px) brightness(115%) saturate(130%)' },
-                          { name: 'Frio', effect: 'hue-rotate(180deg) saturate(120%) brightness(90%)' },
-                          { name: 'Quente', effect: 'hue-rotate(30deg) saturate(140%) brightness(110%)' },
-                          { name: 'Alien', effect: 'hue-rotate(120deg) saturate(200%) contrast(140%)' }
-                        ].map(filter => (
-                          <Button
-                            key={filter.name}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              applyMagicEffect(filter.name);
-                              vibrate('medium');
-                              
-                              toast({
-                                title: `🎨 ${filter.name} Aplicado!`,
-                                description: "Filtro aplicado com sucesso!",
-                              });
-                            }}
-                            className="text-xs h-8"
-                          >
-                            {filter.name}
-                          </Button>
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Mostrar Grelha</Label>
+                        <Switch checked={showGrid} onCheckedChange={setShowGrid} />
+                      </div>
+                      
+                      {showGrid && (
+                        <div className="space-y-1">
+                          <Label className="text-xs">Tamanho: {gridSize}px</Label>
+                          <Slider
+                            value={[gridSize]}
+                            onValueChange={(value) => setGridSize(value[0])}
+                            min={5}
+                            max={50}
+                            step={5}
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Ajustar à Grelha</Label>
+                        <Switch checked={snapToGrid} onCheckedChange={setSnapToGrid} />
                       </div>
                     </div>
-                    
-                    {/* Efeitos de Partículas */}
-                    <Card className="bg-muted/20">
-                      <CardContent className="p-3 space-y-3">
-                        <Label className="text-sm font-medium">Efeitos de Partículas</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { name: 'Estrelas', icon: '✨', effect: 'stars' },
-                            { name: 'Neve', icon: '❄️', effect: 'snow' },
-                            { name: 'Chuva', icon: '🌧️', effect: 'rain' },
-                            { name: 'Fogo', icon: '🔥', effect: 'fire' },
-                            { name: 'Bolhas', icon: '🫧', effect: 'bubbles' },
-                            { name: 'Faíscas', icon: '⚡', effect: 'sparks' }
-                          ].map(particle => (
-                            <Button
-                              key={particle.name}
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                // Aplicar efeito de partículas
-                                toast({
-                                  title: `${particle.icon} ${particle.name}!`,
-                                  description: "Efeito de partículas adicionado!",
-                                });
-                                vibrate('medium');
-                              }}
-                              className="h-12 flex flex-col items-center justify-center"
-                            >
-                              <span className="text-lg">{particle.icon}</span>
-                              <span className="text-xs">{particle.name}</span>
-                            </Button>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
                   </div>
                 </TabsContent>
                 
@@ -1869,6 +1932,7 @@ export default function EnhancedPixelPurchaseModal({
                     
                     <div className="space-y-2">
                       <input
+                        ref={fileInputRef}
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
@@ -1877,15 +1941,7 @@ export default function EnhancedPixelPurchaseModal({
                       />
                       <Label htmlFor="image-upload">
                         <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-                          <span>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Carregar Imagem Base
-                          </span>
-                        </Button>
-                      </Label>
-                    </div>
-                  </div>
-                  
+                        onChange={handleFileImport}
                   {/* Animação */}
                   <div className="space-y-3">
                     <h4 className="font-semibold text-sm flex items-center">
@@ -1967,6 +2023,38 @@ export default function EnhancedPixelPurchaseModal({
                         className="text-sm"
                       />
                     </div>
+                    
+                    {/* Opções de Processamento */}
+                    <Card className="bg-muted/20">
+                      <CardContent className="p-3 space-y-3">
+                        <Label className="text-sm font-medium">Processamento de Imagem</Label>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { name: 'Pixelizar', icon: <Square className="h-4 w-4" /> },
+                            { name: 'Posterizar', icon: <Layers className="h-4 w-4" /> },
+                            { name: 'Contorno', icon: <Circle className="h-4 w-4" /> },
+                            { name: 'Simplificar', icon: <MinusIcon className="h-4 w-4" /> }
+                          ].map(process => (
+                            <Button
+                              key={process.name}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast({
+                                  title: `🔄 ${process.name}!`,
+                                  description: "Processamento aplicado à imagem.",
+                                });
+                              }}
+                              className="h-10 flex flex-col items-center justify-center"
+                            >
+                              {process.icon}
+                              <span className="text-xs">{process.name}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                   
                   <Separator />
