@@ -253,7 +253,12 @@ export default function EnhancedPixelPurchaseModal({
         ctx.stroke();
       }
     }
-  }, [layers, showGrid, pixelData]);
+  }, [layers, showGrid, pixelData, activeLayerIndex]);
+
+  // Redesenhar canvas quando camadas mudam
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
 
   const getCanvasCoordinates = (e: React.PointerEvent) => {
     const canvas = canvasRef.current;
@@ -270,8 +275,10 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   const drawPixel = (x: number, y: number) => {
+    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    
     const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer) return;
+    if (!activeLayer || !activeLayer.canvas) return;
     
     const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
@@ -280,6 +287,9 @@ export default function EnhancedPixelPurchaseModal({
     
     const pixelX = Math.floor(x / PIXEL_SIZE) * PIXEL_SIZE;
     const pixelY = Math.floor(y / PIXEL_SIZE) * PIXEL_SIZE;
+    
+    // Verificar se as coordenadas estão dentro dos limites
+    if (pixelX < 0 || pixelY < 0 || pixelX >= CANVAS_SIZE || pixelY >= CANVAS_SIZE) return;
     
     if (selectedTool === 'eraser') {
       ctx.clearRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
@@ -290,46 +300,53 @@ export default function EnhancedPixelPurchaseModal({
       // Aplicar simetria
       if (symmetryMode === 'horizontal' || symmetryMode === 'both') {
         const mirrorX = CANVAS_SIZE - pixelX - PIXEL_SIZE;
-        ctx.fillRect(mirrorX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
+        if (mirrorX >= 0 && mirrorX < CANVAS_SIZE) {
+          ctx.fillRect(mirrorX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
+        }
       }
       if (symmetryMode === 'vertical' || symmetryMode === 'both') {
         const mirrorY = CANVAS_SIZE - pixelY - PIXEL_SIZE;
-        ctx.fillRect(pixelX, mirrorY, PIXEL_SIZE, PIXEL_SIZE);
+        if (mirrorY >= 0 && mirrorY < CANVAS_SIZE) {
+          ctx.fillRect(pixelX, mirrorY, PIXEL_SIZE, PIXEL_SIZE);
+        }
       }
       if (symmetryMode === 'both') {
         const mirrorX = CANVAS_SIZE - pixelX - PIXEL_SIZE;
         const mirrorY = CANVAS_SIZE - pixelY - PIXEL_SIZE;
-        ctx.fillRect(mirrorX, mirrorY, PIXEL_SIZE, PIXEL_SIZE);
+        if (mirrorX >= 0 && mirrorX < CANVAS_SIZE && mirrorY >= 0 && mirrorY < CANVAS_SIZE) {
+          ctx.fillRect(mirrorX, mirrorY, PIXEL_SIZE, PIXEL_SIZE);
+        }
       }
     }
     
-    // Redesenhar o canvas principal imediatamente
-    requestAnimationFrame(() => drawCanvas());
+    // Redesenhar o canvas principal
+    drawCanvas();
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Capturar o ponteiro para garantir que recebemos todos os eventos
+    const coords = getCanvasCoordinates(e);
+    if (!coords) return;
+    
+    // Capturar o ponteiro APÓS verificar coordenadas
     const target = e.currentTarget as HTMLCanvasElement;
     target.setPointerCapture(e.pointerId);
     
-    const coords = getCanvasCoordinates(e);
-    if (!coords) return;
+    // Salvar estado para undo ANTES de desenhar
+    saveToUndoStack();
     
     setIsDrawing(true);
     setLastPoint(coords);
     drawPixel(coords.x, coords.y);
     vibrate('light');
-    
-    // Salvar estado para undo
-    saveToUndoStack();
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
     if (!isDrawing) return;
     
     const coords = getCanvasCoordinates(e);
@@ -339,7 +356,7 @@ export default function EnhancedPixelPurchaseModal({
     const dx = coords.x - lastPoint.x;
     const dy = coords.y - lastPoint.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const steps = Math.max(1, Math.floor(distance / 2));
+    const steps = Math.max(1, Math.floor(distance / PIXEL_SIZE));
     
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
@@ -355,17 +372,23 @@ export default function EnhancedPixelPurchaseModal({
     e.preventDefault();
     e.stopPropagation();
     
-    // Liberar a captura do ponteiro
-    const target = e.currentTarget as HTMLCanvasElement;
-    target.releasePointerCapture(e.pointerId);
+    if (isDrawing) {
+      // Liberar a captura do ponteiro
+      const target = e.currentTarget as HTMLCanvasElement;
+      if (target.hasPointerCapture(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+    }
     
     setIsDrawing(false);
     setLastPoint(null);
   };
 
   const saveToUndoStack = () => {
+    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    
     const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer) return;
+    if (!activeLayer || !activeLayer.canvas) return;
     
     const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
@@ -378,8 +401,10 @@ export default function EnhancedPixelPurchaseModal({
   const undo = () => {
     if (undoStack.length === 0) return;
     
+    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    
     const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer) return;
+    if (!activeLayer || !activeLayer.canvas) return;
     
     const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
@@ -391,15 +416,17 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(previousState, 0, 0);
     setUndoStack(prev => prev.slice(0, -1));
     
-    requestAnimationFrame(() => drawCanvas());
+    drawCanvas();
     vibrate('medium');
   };
 
   const redo = () => {
     if (redoStack.length === 0) return;
     
+    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    
     const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer) return;
+    if (!activeLayer || !activeLayer.canvas) return;
     
     const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
@@ -411,7 +438,7 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(nextState, 0, 0);
     setRedoStack(prev => prev.slice(0, -1));
     
-    requestAnimationFrame(() => drawCanvas());
+    drawCanvas();
     vibrate('medium');
   };
 
@@ -425,6 +452,12 @@ export default function EnhancedPixelPurchaseModal({
     };
     newLayer.canvas.width = CANVAS_SIZE;
     newLayer.canvas.height = CANVAS_SIZE;
+    
+    // Inicializar o contexto da nova camada
+    const ctx = newLayer.canvas.getContext('2d');
+    if (ctx) {
+      ctx.imageSmoothingEnabled = false;
+    }
     
     setLayers(prev => [...prev, newLayer]);
     setActiveLayerIndex(layers.length);
