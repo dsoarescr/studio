@@ -21,21 +21,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import {
-  User, Edit3, Camera, MapPin, Calendar, Clock, Star, Crown, Gem, 
-  Trophy, Award, Coins, Gift, Eye, Heart, MessageSquare, Share2,
-  Settings, Bell, Lock, Globe, Mail, Phone, Link as LinkIcon,
-  Plus, Minus, X, Check, Save, RefreshCw, Download, Upload,
-  Palette, Brush, Sparkles, Zap, Target, Activity, BarChart3,
-  TrendingUp, Users, BookImage, Image as ImageIcon, Video,
-  Music, Headphones, Gamepad2, Coffee, Plane, Car, Home,
-  Briefcase, GraduationCap, Heart as HeartIcon, Smile, Frown,
-  ThumbsUp, MessageCircle, Send, Copy, ExternalLink, Trash2,
-  Archive, Bookmark, Flag, Shield, AlertTriangle, Info,
-  ChevronRight, ChevronDown, ChevronUp, MoreHorizontal,
-  Filter, Search, SortAsc, Grid, List, Calendar as CalendarIcon,
-  Clock as ClockIcon, Flame, Lightning, Snowflake, Sun, Moon
-} from "lucide-react";
+import { User, Edit3, Camera, MapPin, Calendar, Clock, Star, Crown, Gem, Trophy, Award, Coins, Gift, Eye, Heart, MessageSquare, Share2, Settings, Bell, Lock, Globe, Mail, Phone, Link as LinkIcon, Plus, Minus, X, Check, Save, RefreshCw, Download, Upload, Palette, Brush, Sparkles, Zap, Target, Activity, BarChart3, TrendingUp, Users, BookImage, Image as ImageIcon, Video, Music, Headphones, Gamepad2, Coffee, Plane, Car, Home, Briefcase, GraduationCap, Heart as HeartIcon, Smile, Frown, ThumbsUp, MessageCircle, Send, Copy, ExternalLink, Trash2, Archive, Bookmark, Flag, Shield, AlertTriangle, Info, ChevronRight, ChevronDown, ChevronUp, MoreHorizontal, Filter, Search, SortAsc, Grid, List, Calendar as CalendarIcon, Clock as ClockIcon, Flame, CloudLightning as Lightning, Snowflake, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
