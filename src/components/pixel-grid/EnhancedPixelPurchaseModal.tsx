@@ -308,6 +308,7 @@ export default function EnhancedPixelPurchaseModal({
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const coords = getCanvasCoordinates(e);
     if (!coords) return;
     
@@ -322,6 +323,7 @@ export default function EnhancedPixelPurchaseModal({
 
   const handlePointerMove = (e: React.PointerEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!isDrawing) return;
     
     const coords = getCanvasCoordinates(e);
@@ -349,10 +351,10 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   const saveToUndoStack = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const activeLayer = layers[activeLayerIndex];
+    if (!activeLayer) return;
     
-    const ctx = canvas.getContext('2d');
+    const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
     
     const imageData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -363,10 +365,10 @@ export default function EnhancedPixelPurchaseModal({
   const undo = () => {
     if (undoStack.length === 0) return;
     
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const activeLayer = layers[activeLayerIndex];
+    if (!activeLayer) return;
     
-    const ctx = canvas.getContext('2d');
+    const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
     
     const currentState = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -376,16 +378,17 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(previousState, 0, 0);
     setUndoStack(prev => prev.slice(0, -1));
     
+    drawCanvas();
     vibrate('medium');
   };
 
   const redo = () => {
     if (redoStack.length === 0) return;
     
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const activeLayer = layers[activeLayerIndex];
+    if (!activeLayer) return;
     
-    const ctx = canvas.getContext('2d');
+    const ctx = activeLayer.canvas.getContext('2d');
     if (!ctx) return;
     
     const currentState = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -395,6 +398,7 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(nextState, 0, 0);
     setRedoStack(prev => prev.slice(0, -1));
     
+    drawCanvas();
     vibrate('medium');
   };
 
@@ -608,6 +612,9 @@ export default function EnhancedPixelPurchaseModal({
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerLeave={handlePointerUp}
+              onTouchStart={(e) => e.preventDefault()}
+              onTouchMove={(e) => e.preventDefault()}
+              onTouchEnd={(e) => e.preventDefault()}
             />
             
             {/* Indicador de Camada Ativa */}
