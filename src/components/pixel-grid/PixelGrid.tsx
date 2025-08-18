@@ -2,13 +2,13 @@
 // src/components/pixel-grid/PixelGrid.tsx
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   ZoomIn, ZoomOut, Expand, Search, Sparkles, Info, User, CalendarDays,
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users, Activity
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ import { useAuth } from '@/lib/auth-context';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { EnhancedTooltip, PixelTooltip } from '@/components/ui/enhanced-tooltip';
 import { LoadingOverlay, MapLoadingState } from '@/components/ui/loading-states';
-import { useAppStore, usePixelStore, useUserStore } from '@/lib/store';
+import { useAppStore, usePixelStore } from '@/lib/store';
 import {
   Dialog,
   DialogContent,
@@ -54,9 +54,6 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
 
 
 // Configuration constants
@@ -98,39 +95,6 @@ const USER_BOUGHT_PIXEL_COLOR = 'hsl(var(--primary))';
 
 const MOCK_CURRENT_USER_ID = 'currentUserPixelMaster';
 
-// Animation and interaction constants
-const PIXEL_HOVER_SCALE = 1.2;
-const PIXEL_PULSE_DURATION = 2000;
-const ACTIVITY_ANIMATION_DURATION = 500;
-const RARE_PIXEL_GLOW_INTENSITY = 0.8;
-
-// Pixel activity types
-type PixelActivity = 'purchase' | 'edit' | 'view' | 'like' | 'comment';
-
-interface PixelActivityEvent {
-  id: string;
-  x: number;
-  y: number;
-  type: PixelActivity;
-  timestamp: number;
-  user: string;
-  color?: string;
-}
-
-interface AnimatedPixel {
-  x: number;
-  y: number;
-  scale: number;
-  opacity: number;
-  rotation: number;
-  glowIntensity: number;
-  lastActivity: number;
-  activityType?: PixelActivity;
-  isHovered: boolean;
-  isPulsing: boolean;
-  isNew: boolean;
-}
-
 interface SoldPixel {
   x: number;
   y: number;
@@ -138,10 +102,6 @@ interface SoldPixel {
   ownerId?: string;
   title?: string;
   pixelImageUrl?: string;
-  rarity?: 'Comum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
-  lastActivity?: number;
-  views?: number;
-  likes?: number;
 }
 
 interface SelectedPixelDetails {
@@ -221,7 +181,6 @@ export default function PixelGrid() {
   
   const { isOnline } = useAppStore();
   const { soldPixels, addSoldPixel } = usePixelStore();
-  const { addXp, addCredits } = useUserStore();
   
   const autoResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -232,21 +191,6 @@ export default function PixelGrid() {
 
   const containerSizeRef = useRef({ width: 0, height: 0 });
   const { vibrate } = useHapticFeedback();
-  
-  // New state for living grid
-  const [animatedPixels, setAnimatedPixels] = useState<Map<string, AnimatedPixel>>(new Map());
-  const [recentActivity, setRecentActivity] = useState<PixelActivityEvent[]>([]);
-  const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
-  const [showActivityRipples, setShowActivityRipples] = useState(true);
-  const [showPixelPulse, setShowPixelPulse] = useState(true);
-  const [showRarityGlow, setShowRarityGlow] = useState(true);
-  const [playHoverSound, setPlayHoverSound] = useState(false);
-  const [playActivitySound, setPlayActivitySound] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [currentTime, setCurrentTime] = useState(Date.now());
-  
-  const animationFrameRef = useRef<number>();
-  const lastFrameTimeRef = useRef<number>(0);
 
   const clearAutoResetTimeout = useCallback(() => {
     if (autoResetTimeoutRef.current) {
@@ -257,123 +201,6 @@ export default function PixelGrid() {
   
   // Enhanced loading state with better UX
   const [loadingProgress, setLoadingProgress] = useState(0);
-  
-  // Simulate real-time pixel activity
-  useEffect(() => {
-    const activityInterval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% chance every 3 seconds
-        const activities: PixelActivity[] = ['purchase', 'edit', 'view', 'like', 'comment'];
-        const activity = activities[Math.floor(Math.random() * activities.length)];
-        
-        const newActivity: PixelActivityEvent = {
-          id: Date.now().toString(),
-          x: Math.floor(Math.random() * LOGICAL_GRID_COLS_CONFIG),
-          y: Math.floor(Math.random() * logicalGridRows),
-          type: activity,
-          timestamp: Date.now(),
-          user: `User${Math.floor(Math.random() * 1000)}`,
-          color: activity === 'edit' ? `hsl(${Math.random() * 360}, 70%, 60%)` : undefined
-        };
-        
-        setRecentActivity(prev => [newActivity, ...prev.slice(0, 19)]);
-        
-        // Create animated pixel for this activity
-        const pixelKey = `${newActivity.x}-${newActivity.y}`;
-        setAnimatedPixels(prev => {
-          const newMap = new Map(prev);
-          newMap.set(pixelKey, {
-            x: newActivity.x,
-            y: newActivity.y,
-            scale: activity === 'purchase' ? 1.5 : 1.2,
-            opacity: 1,
-            rotation: 0,
-            glowIntensity: activity === 'purchase' ? 1 : 0.6,
-            lastActivity: Date.now(),
-            activityType: activity,
-            isHovered: false,
-            isPulsing: true,
-            isNew: true
-          });
-          return newMap;
-        });
-        
-        // Play activity sound
-        if (activity === 'purchase') {
-          setPlayActivitySound(true);
-          setShowConfetti(true);
-        }
-      }
-    }, 3000);
-    
-    return () => clearInterval(activityInterval);
-  }, []);
-  
-  // Animation loop for living pixels
-  useEffect(() => {
-    const animate = (currentTime: number) => {
-      const deltaTime = currentTime - lastFrameTimeRef.current;
-      lastFrameTimeRef.current = currentTime;
-      
-      setCurrentTime(currentTime);
-      
-      // Update animated pixels
-      setAnimatedPixels(prev => {
-        const newMap = new Map();
-        
-        prev.forEach((pixel, key) => {
-          const age = currentTime - pixel.lastActivity;
-          
-          // Remove old animations after 5 seconds
-          if (age > 5000) return;
-          
-          // Calculate animation values
-          const progress = Math.min(age / 2000, 1); // 2 second animation
-          const pulseValue = Math.sin((currentTime / 1000) * Math.PI) * 0.5 + 0.5;
-          
-          const updatedPixel: AnimatedPixel = {
-            ...pixel,
-            scale: pixel.isHovered ? PIXEL_HOVER_SCALE : 1 + (1 - progress) * 0.3,
-            opacity: Math.max(0.3, 1 - progress * 0.7),
-            rotation: pixel.activityType === 'edit' ? (progress * 360) % 360 : 0,
-            glowIntensity: pixel.isHovered ? 1 : (1 - progress) * pixel.glowIntensity,
-            isPulsing: age < 3000,
-            isNew: age < 1000
-          };
-          
-          newMap.set(key, updatedPixel);
-        });
-        
-        return newMap;
-      });
-      
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-    
-    animationFrameRef.current = requestAnimationFrame(animate);
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-  
-  // Generate rare pixels with special effects
-  const rarePixels = useMemo(() => {
-    const rares: Array<{ x: number; y: number; rarity: string; color: string }> = [];
-    
-    // Add some rare pixels for demonstration
-    for (let i = 0; i < 20; i++) {
-      rares.push({
-        x: Math.floor(Math.random() * LOGICAL_GRID_COLS_CONFIG),
-        y: Math.floor(Math.random() * logicalGridRows),
-        rarity: ['Raro', 'Épico', 'Lendário'][Math.floor(Math.random() * 3)],
-        color: `hsl(${Math.random() * 360}, 80%, 60%)`
-      });
-    }
-    
-    return rares;
-  }, []);
   
   useEffect(() => {
     setIsClient(true);
@@ -499,109 +326,27 @@ export default function PixelGrid() {
     
     ctx.imageSmoothingEnabled = false;
 
-    // 1. Clear canvas
+    // 1. Clear and draw the base map (unsold pixels)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 2. Draw base map with living effects
+    ctx.fillStyle = unsoldColor;
     for (let row = 0; row < logicalGridRows; row++) {
         for (let col = 0; col < LOGICAL_GRID_COLS_CONFIG; col++) {
             if (pixelBitmap[row * LOGICAL_GRID_COLS_CONFIG + col] === 1) {
-                const pixelKey = `${col}-${row}`;
-                const animatedPixel = animatedPixels.get(pixelKey);
-                const rarePixel = rarePixels.find(r => r.x === col && r.y === row);
-                
-                ctx.save();
-                
-                // Apply transformations for animated pixels
-                if (animatedPixel) {
-                  const centerX = col * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2;
-                  const centerY = row * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2;
-                  
-                  ctx.translate(centerX, centerY);
-                  ctx.scale(animatedPixel.scale, animatedPixel.scale);
-                  ctx.rotate((animatedPixel.rotation * Math.PI) / 180);
-                  ctx.globalAlpha = animatedPixel.opacity;
-                  
-                  // Add glow effect for active pixels
-                  if (animatedPixel.glowIntensity > 0) {
-                    ctx.shadowColor = getActivityColor(animatedPixel.activityType);
-                    ctx.shadowBlur = 10 * animatedPixel.glowIntensity;
-                  }
-                  
-                  ctx.fillStyle = getActivityColor(animatedPixel.activityType) || unsoldColor;
-                  ctx.fillRect(-RENDERED_PIXEL_SIZE_CONFIG / 2, -RENDERED_PIXEL_SIZE_CONFIG / 2, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-                } else if (rarePixel && showRarityGlow) {
-                  // Rare pixel glow effect
-                  const pulseValue = Math.sin((currentTime / 1000) * Math.PI) * 0.5 + 0.5;
-                  ctx.shadowColor = rarePixel.color;
-                  ctx.shadowBlur = 5 + pulseValue * 10;
-                  ctx.fillStyle = rarePixel.color;
-                  ctx.fillRect(
-                      col * RENDERED_PIXEL_SIZE_CONFIG,
-                      row * RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG
-                  );
-                } else {
-                  // Regular unsold pixel with subtle pulse
-                  if (showPixelPulse) {
-                    const pulseValue = Math.sin((currentTime / 3000 + col * 0.1 + row * 0.1) * Math.PI) * 0.1 + 0.9;
-                    ctx.globalAlpha = pulseValue;
-                  }
-                  
-                  ctx.fillStyle = unsoldColor;
-                  ctx.fillRect(
-                      col * RENDERED_PIXEL_SIZE_CONFIG,
-                      row * RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG
-                  );
-                }
-                
-                ctx.restore();
+                ctx.fillRect(
+                    col * RENDERED_PIXEL_SIZE_CONFIG,
+                    row * RENDERED_PIXEL_SIZE_CONFIG,
+                    RENDERED_PIXEL_SIZE_CONFIG,
+                    RENDERED_PIXEL_SIZE_CONFIG
+                );
             }
         }
     }
 
-    // 3. Draw sold pixels with enhanced effects
+    // 2. Draw sold pixels over the base map
     soldPixels.forEach(pixel => {
       const renderX = pixel.x * RENDERED_PIXEL_SIZE_CONFIG;
       const renderY = pixel.y * RENDERED_PIXEL_SIZE_CONFIG;
-      const pixelKey = `${pixel.x}-${pixel.y}`;
-      const animatedPixel = animatedPixels.get(pixelKey);
       
-      ctx.save();
-      
-      // Apply hover effects
-      if (hoveredPixel && hoveredPixel.x === pixel.x && hoveredPixel.y === pixel.y) {
-        const centerX = renderX + RENDERED_PIXEL_SIZE_CONFIG / 2;
-        const centerY = renderY + RENDERED_PIXEL_SIZE_CONFIG / 2;
-        
-        ctx.translate(centerX, centerY);
-        ctx.scale(PIXEL_HOVER_SCALE, PIXEL_HOVER_SCALE);
-        ctx.shadowColor = pixel.color;
-        ctx.shadowBlur = 15;
-        ctx.translate(-centerX, -centerY);
-      }
-      
-      // Apply activity animations
-      if (animatedPixel) {
-        const centerX = renderX + RENDERED_PIXEL_SIZE_CONFIG / 2;
-        const centerY = renderY + RENDERED_PIXEL_SIZE_CONFIG / 2;
-        
-        ctx.translate(centerX, centerY);
-        ctx.scale(animatedPixel.scale, animatedPixel.scale);
-        ctx.rotate((animatedPixel.rotation * Math.PI) / 180);
-        ctx.globalAlpha = animatedPixel.opacity;
-        ctx.translate(-centerX, -centerY);
-        
-        if (animatedPixel.glowIntensity > 0) {
-          ctx.shadowColor = pixel.color;
-          ctx.shadowBlur = 20 * animatedPixel.glowIntensity;
-        }
-      }
-      
-      // Draw pixel with image or color
       if (pixel.pixelImageUrl) {
         const img = loadedPixelImages.get(pixel.pixelImageUrl);
         if (img && img.complete) {
@@ -614,69 +359,9 @@ export default function PixelGrid() {
         ctx.fillStyle = pixel.color;
         ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
       }
-      
-      // Add rarity indicators for sold pixels
-      if (pixel.rarity && pixel.rarity !== 'Comum') {
-        const rarityColor = getRarityColor(pixel.rarity);
-        ctx.strokeStyle = rarityColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(renderX - 1, renderY - 1, RENDERED_PIXEL_SIZE_CONFIG + 2, RENDERED_PIXEL_SIZE_CONFIG + 2);
-      }
-      
-      ctx.restore();
     });
 
-    // 4. Draw activity ripples
-    if (showActivityRipples) {
-      recentActivity.forEach(activity => {
-        const age = currentTime - activity.timestamp;
-        if (age < 2000) { // Show ripples for 2 seconds
-          const progress = age / 2000;
-          const rippleRadius = progress * 50;
-          const rippleOpacity = (1 - progress) * 0.5;
-          
-          ctx.save();
-          ctx.globalAlpha = rippleOpacity;
-          ctx.strokeStyle = getActivityColor(activity.type);
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.arc(
-            activity.x * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2,
-            activity.y * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2,
-            rippleRadius,
-            0,
-            2 * Math.PI
-          );
-          ctx.stroke();
-          ctx.restore();
-        }
-      });
-    }
-
-  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages, animatedPixels, rarePixels, hoveredPixel, showRarityGlow, showPixelPulse, showActivityRipples, recentActivity, currentTime]);
-  
-  // Helper function to get activity colors
-  const getActivityColor = (activityType?: PixelActivity): string => {
-    switch (activityType) {
-      case 'purchase': return '#10B981'; // Green
-      case 'edit': return '#8B5CF6'; // Purple
-      case 'view': return '#3B82F6'; // Blue
-      case 'like': return '#EF4444'; // Red
-      case 'comment': return '#F59E0B'; // Orange
-      default: return '#D4A757'; // Primary
-    }
-  };
-  
-  // Helper function to get rarity colors
-  const getRarityColor = (rarity: string): string => {
-    switch (rarity) {
-      case 'Raro': return '#3B82F6'; // Blue
-      case 'Épico': return '#8B5CF6'; // Purple
-      case 'Lendário': return '#F59E0B'; // Gold
-      case 'Marco Histórico': return '#EF4444'; // Red
-      default: return '#6B7280'; // Gray
-    }
-  };
+  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages]);
   
   useEffect(() => {
     const container = containerRef.current;
@@ -875,40 +560,6 @@ export default function PixelGrid() {
       const existingSoldPixel = soldPixels.find(p => p.x === logicalCol && p.y === logicalRow);
       
       if (pixelBitmap[bitmapIdx] === 1) {
-        // Add click activity
-        const clickActivity: PixelActivityEvent = {
-          id: Date.now().toString(),
-          x: logicalCol,
-          y: logicalRow,
-          type: 'view',
-          timestamp: Date.now(),
-          user: 'Você'
-        };
-        
-        setRecentActivity(prev => [clickActivity, ...prev.slice(0, 19)]);
-        
-        // Create click animation
-        const pixelKey = `${logicalCol}-${logicalRow}`;
-        setAnimatedPixels(prev => {
-          const newMap = new Map(prev);
-          newMap.set(pixelKey, {
-            x: logicalCol,
-            y: logicalRow,
-            scale: 1.3,
-            opacity: 1,
-            rotation: 0,
-            glowIntensity: 0.8,
-            lastActivity: Date.now(),
-            activityType: 'view',
-            isHovered: false,
-            isPulsing: true,
-            isNew: true
-          });
-          return newMap;
-        });
-        
-        setPlayHoverSound(true);
-        
         setHighlightedPixel({ x: logicalCol, y: logicalRow });
 
         let mockDetails: SelectedPixelDetails;
@@ -956,69 +607,6 @@ export default function PixelGrid() {
       setSelectedPixelDetails(null);
     }
   };
-  
-  // Enhanced mouse move handler for hover effects
-  const handleMouseMoveCanvas = (event: React.MouseEvent) => {
-    if (!containerRef.current || !pixelBitmap) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const mouseXInContainer = event.clientX - rect.left;
-    const mouseYInContainer = event.clientY - rect.top;
-
-    const xOnContent = (mouseXInContainer - position.x) / zoom;
-    const yOnContent = (mouseYInContainer - position.y) / zoom;
-
-    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-
-    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
-      const bitmapIdx = logicalRow * LOGICAL_GRID_COLS_CONFIG + logicalCol;
-      
-      if (pixelBitmap[bitmapIdx] === 1) {
-        const newHovered = { x: logicalCol, y: logicalRow };
-        
-        // Only update if different pixel
-        if (!hoveredPixel || hoveredPixel.x !== newHovered.x || hoveredPixel.y !== newHovered.y) {
-          setHoveredPixel(newHovered);
-          
-          // Create hover animation
-          const pixelKey = `${logicalCol}-${logicalRow}`;
-          setAnimatedPixels(prev => {
-            const newMap = new Map(prev);
-            const existing = newMap.get(pixelKey);
-            
-            newMap.set(pixelKey, {
-              x: logicalCol,
-              y: logicalRow,
-              scale: PIXEL_HOVER_SCALE,
-              opacity: 1,
-              rotation: existing?.rotation || 0,
-              glowIntensity: 0.6,
-              lastActivity: Date.now(),
-              activityType: 'view',
-              isHovered: true,
-              isPulsing: false,
-              isNew: false
-            });
-            return newMap;
-          });
-          
-          // Subtle haptic feedback on hover
-          vibrate('light');
-          setPlayHoverSound(true);
-        }
-      } else {
-        setHoveredPixel(null);
-      }
-    } else {
-      setHoveredPixel(null);
-    }
-    
-    // Continue with drag logic if dragging
-    if (isDragging) {
-      handleMouseMove(event);
-    }
-  };
 
   const handleMouseUpOrLeave = (event: React.MouseEvent) => {
     if (isDragging) {
@@ -1046,25 +634,6 @@ export default function PixelGrid() {
         return false;
     }
 
-    // Create purchase activity with celebration
-    const purchaseActivity: PixelActivityEvent = {
-      id: Date.now().toString(),
-      x: pixelData.x,
-      y: pixelData.y,
-      type: 'purchase',
-      timestamp: Date.now(),
-      user: 'Você',
-      color: customizations.color || USER_BOUGHT_PIXEL_COLOR
-    };
-    
-    setRecentActivity(prev => [purchaseActivity, ...prev.slice(0, 19)]);
-    setShowConfetti(true);
-    setPlayActivitySound(true);
-    
-    // Add XP and credits for purchase
-    addXp(50);
-    addCredits(10);
-    
     const newSoldPixel: SoldPixel = {
       x: pixelData.x,
       y: pixelData.y,
@@ -1072,10 +641,6 @@ export default function PixelGrid() {
       ownerId: MOCK_CURRENT_USER_ID,
       title: customizations.title || `Meu Pixel (${pixelData.x},${pixelData.y})`,
       pixelImageUrl: customizations.image, 
-      rarity: customizations.rarity || 'Comum',
-      lastActivity: Date.now(),
-      views: 1,
-      likes: 0
     };
     
     addSoldPixel(newSoldPixel);
@@ -1208,10 +773,6 @@ export default function PixelGrid() {
   return (
 
     <MobileOptimizations>
-      <SoundEffect src={SOUND_EFFECTS.HOVER} play={playHoverSound} onEnd={() => setPlayHoverSound(false)} volume={0.1} />
-      <SoundEffect src={SOUND_EFFECTS.PURCHASE} play={playActivitySound} onEnd={() => setPlayActivitySound(false)} />
-      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} particleCount={150} />
-      
       <div className="flex flex-col h-full w-full overflow-hidden relative animate-fade-in">
         {/* Enhanced loading overlay */}
         <LoadingOverlay 
@@ -1222,45 +783,13 @@ export default function PixelGrid() {
           <div />
         </LoadingOverlay>
         
-        {/* Living Grid Activity Feed */}
-        <AnimatePresence>
-          {recentActivity.slice(0, 3).map((activity, index) => (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, x: 300, scale: 0.8 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -300, scale: 0.8 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="absolute top-20 right-4 z-30 pointer-events-none"
-              style={{ top: `${80 + index * 60}px` }}
-            >
-              <div className="bg-card/90 backdrop-blur-md p-3 rounded-lg shadow-lg border border-primary/30 max-w-xs">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full animate-pulse`} style={{ backgroundColor: getActivityColor(activity.type) }} />
-                  <span className="text-sm font-medium">{activity.user}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {activity.type === 'purchase' ? 'comprou' : 
-                     activity.type === 'edit' ? 'editou' :
-                     activity.type === 'view' ? 'visualizou' :
-                     activity.type === 'like' ? 'curtiu' : 'comentou'}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Pixel ({activity.x}, {activity.y})
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
           <EnhancedTooltip
             title="Controles do Mapa"
-            description="Use estes controles para navegar pelo mapa vivo"
+            description="Use estes controles para navegar pelo mapa"
             stats={[
               { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> },
-              { label: 'Atividade', value: recentActivity.length.toString(), icon: <Activity className="h-4 w-4" /> }
+              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
             ]}
           >
             <div className="space-y-2">
@@ -1289,20 +818,6 @@ export default function PixelGrid() {
                   </TooltipTrigger>
                   <TooltipContent><p>Resetar Vista</p></TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      pointerEvents="auto" 
-                      variant={showActivityRipples ? "default" : "outline"} 
-                      size="icon" 
-                      onClick={() => setShowActivityRipples(!showActivityRipples)}
-                      aria-label="Toggle Activity"
-                    >
-                      <Activity className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Atividade em Tempo Real</p></TooltipContent>
-                </Tooltip>
               </TooltipProvider>
             </div>
           </EnhancedTooltip>
@@ -1323,19 +838,9 @@ export default function PixelGrid() {
                 <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
               </div>
             )}
-            {hoveredPixel && (
-              <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-                <span className="text-muted-foreground">Hover:</span>
-                <span className="text-accent font-bold">({hoveredPixel.x}, {hoveredPixel.y})</span>
-              </div>
-            )}
             <div className="flex items-center justify-between border-t border-primary/20 pt-1">
               <span className="text-muted-foreground">Pixels Ativos:</span>
               <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-              <span className="text-muted-foreground">Atividade:</span>
-              <span className="text-blue-500 font-bold">{recentActivity.length}</span>
             </div>
             
             {/* Online status indicator */}
@@ -1347,46 +852,6 @@ export default function PixelGrid() {
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
-            </div>
-          </div>
-          
-          {/* Living Grid Controls */}
-          <div className="mt-2 p-2 bg-background/90 rounded-md border border-accent/20 space-y-2">
-            <div className="text-xs font-semibold text-accent flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Efeitos Vivos
-            </div>
-            
-            <div className="space-y-1">
-              <Button
-                variant={showActivityRipples ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowActivityRipples(!showActivityRipples)}
-                className="w-full text-xs h-7"
-              >
-                <Activity className="h-3 w-3 mr-1" />
-                Ondas
-              </Button>
-              
-              <Button
-                variant={showPixelPulse ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowPixelPulse(!showPixelPulse)}
-                className="w-full text-xs h-7"
-              >
-                <Radio className="h-3 w-3 mr-1" />
-                Pulso
-              </Button>
-              
-              <Button
-                variant={showRarityGlow ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowRarityGlow(!showRarityGlow)}
-                className="w-full text-xs h-7"
-              >
-                <Crown className="h-3 w-3 mr-1" />
-                Brilho
-              </Button>
             </div>
           </div>
         </div>
@@ -1445,7 +910,7 @@ export default function PixelGrid() {
               ref={containerRef}
               className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
               onMouseDown={handleMouseDown} 
-              onMouseMove={handleMouseMoveCanvas}
+              onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
           >
@@ -1505,104 +970,66 @@ export default function PixelGrid() {
 
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
-          {/* Quick Activity Toggle */}
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Button 
-              size="icon" 
-              variant={showActivityRipples ? "default" : "outline"}
-              onClick={() => {
-                setShowActivityRipples(!showActivityRipples);
-                vibrate('medium');
-                toast({
-                  title: showActivityRipples ? "Atividade Desativada" : "Atividade Ativada",
-                  description: showActivityRipples ? "Ondas de atividade ocultadas" : "Veja a atividade em tempo real!",
-                });
-              }}
-              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-            >
-              <Activity className="h-6 w-6" />
-            </Button>
-          </motion.div>
-          
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-                <Brain className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+              <Brain className="h-6 w-6" />
+            </Button>
           </PixelAI>
           
           {/* Social Features */}
           <PixelSocialFeatures>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
-                <Users className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
+              <Users className="h-6 w-6" />
+            </Button>
           </PixelSocialFeatures>
           
           {/* Gamification */}
           <PixelGameification>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
-                <Trophy className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+              <Trophy className="h-6 w-6" />
+            </Button>
           </PixelGameification>
           
           {/* Auction */}
           <PixelAuction>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-                <Gavel className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+              <Gavel className="h-6 w-6" />
+            </Button>
           </PixelAuction>
           
           {/* Collaborative Editor */}
           <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
-                <Edit3 className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
+              <Users className="h-6 w-6" />
+            </Button>
           </PixelCollaborativeEditor>
           
           {/* AR Button */}
           <PixelAR>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                <Camera className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+              <Camera className="h-6 w-6" />
+            </Button>
           </PixelAR>
           
           {/* Stories Button */}
           <PixelStories>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-                <Play className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+              <Play className="h-6 w-6" />
+            </Button>
           </PixelStories>
           
           {/* Live Stream Button */}
           <PixelLiveStream>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
-                <Radio className="h-6 w-6" />
-              </Button>
-            </motion.div>
+            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+              <Radio className="h-6 w-6" />
+            </Button>
           </PixelLiveStream>
           
           {/* Main Action Button */}
           <EnhancedTooltip
             title="Ações Rápidas"
-            description="Acesso rápido às funcionalidades do universo vivo"
+            description="Acesso rápido às funcionalidades principais"
             actions={[
               { 
                 label: 'Explorar', 
@@ -1610,83 +1037,38 @@ export default function PixelGrid() {
                 icon: <Search className="h-4 w-4" /> 
               },
               { 
-                label: 'Efeitos Vivos', 
-                onClick: () => {
-                  setShowActivityRipples(!showActivityRipples);
-                  setShowPixelPulse(!showPixelPulse);
-                  setShowRarityGlow(!showRarityGlow);
-                }, 
-                icon: <Sparkles className="h-4 w-4" /> 
+                label: 'Filtros', 
+                onClick: () => {}, 
+                icon: <PaletteIconLucide className="h-4 w-4" /> 
               }
             ]}
             interactive={true}
           >
             <Dialog>
               <DialogTrigger asChild>
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95 animate-pulse-slow">
-                     <Star className="h-7 w-7 animate-glow" />
-                  </Button>
-                </motion.div>
+                 <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
+                    <Star className="h-7 w-7" />
+                </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
                 <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
-                  <DialogTitle className="font-headline text-shadow-gold-sm">Universo Vivo - Ações Rápidas</DialogTitle>
+                  <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
                   <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
-                    Explore e interaja com o mapa de pixels vivo em tempo real.
+                    Explore, filtre e interaja com o mapa de pixels.
                   </DialogDescriptionElement>
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
-                  <Button 
-                    style={{ pointerEvents: 'auto' }} 
-                    variant="outline" 
-                    className="button-3d-effect-outline"
-                    onClick={() => {
-                      setShowActivityRipples(!showActivityRipples);
-                      setShowPixelPulse(!showPixelPulse);
-                      setShowRarityGlow(!showRarityGlow);
-                    }}
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {showActivityRipples ? 'Desativar' : 'Ativar'} Efeitos Vivos
-                  </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Activity className="mr-2 h-4 w-4" />Feed de Atividade ({recentActivity.length})</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
                     <Brain className="mr-2 h-4 w-4" />
                     Assistente IA
                   </Button>
-                  <Button 
-                    style={{ pointerEvents: 'auto' }} 
-                    variant="outline" 
-                    className="button-3d-effect-outline"
-                    onClick={() => {
-                      // Simulate finding rare pixels
-                      const rarePixel = rarePixels[Math.floor(Math.random() * rarePixels.length)];
-                      if (rarePixel) {
-                        setHighlightedPixel({ x: rarePixel.x, y: rarePixel.y });
-                        
-                        // Center on rare pixel
-                        const targetZoom = 10;
-                        const containerWidth = containerRef.current?.offsetWidth || 0;
-                        const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-                        
-                        const targetX = -rarePixel.x * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
-                        const targetY = -rarePixel.y * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
-                        
-                        setPosition({ x: targetX, y: targetY });
-                        setZoom(targetZoom);
-                        
-                        toast({
-                          title: "🌟 Pixel Raro Encontrado!",
-                          description: `Pixel ${rarePixel.rarity} em (${rarePixel.x}, ${rarePixel.y})`,
-                        });
-                      }
-                    }}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Encontrar Pixel Raro
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
+                    <Crosshair className="mr-2 h-4 w-4" />
+                    Modo Precisão
                   </Button>
                   <Separator />
                   <Link href="/premium" className="w-full">
@@ -1701,18 +1083,6 @@ export default function PixelGrid() {
             </Dialog>
           </EnhancedTooltip>
         </div>
-        
-        {/* Floating Activity Counter */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="absolute top-4 right-20 z-20 pointer-events-none"
-        >
-          <div className="bg-card/90 backdrop-blur-md p-2 rounded-full shadow-lg border border-primary/30 flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-xs font-medium text-primary">{recentActivity.length} atividades</span>
-          </div>
-        </motion.div>
       </div>
     </MobileOptimizations>
   );
