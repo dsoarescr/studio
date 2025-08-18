@@ -1662,15 +1662,28 @@ export default function EnhancedPixelPurchaseModal({
                           const randomColor = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
                           setSelectedColor(randomColor);
                           vibrate('light');
+                    {/* Categorias de Stickers Expandidas */}
                         }}
-                        className="text-xs"
+                      {Object.keys(stickers).map((category, index) => (
                       >
                         <Shuffle className="h-3 w-3 mr-1" />
                         Aleatória
                       </Button>
                       <Button
-                        variant="outline"
+                          className="text-xs capitalize h-10 flex flex-col items-center justify-center"
                         size="sm"
+                          <span className="text-lg mb-1">
+                            {category === 'emojis' && '😀'}
+                            {category === 'symbols' && '⭐'}
+                            {category === 'nature' && '🌸'}
+                            {category === 'portugal' && '🇵🇹'}
+                            {category === 'gaming' && '🎮'}
+                            {category === 'tech' && '💻'}
+                            {category === 'faces' && '😊'}
+                            {category === 'hands' && '👍'}
+                            {category === 'objects' && '🎨'}
+                            {category === 'weather' && '☀️'}
+                          </span>
                         onClick={randomizeColors}
                         className="text-xs"
                       >
@@ -1705,6 +1718,40 @@ export default function EnhancedPixelPurchaseModal({
                         </Button>
                       ))}
                     </div>
+                    
+                    {/* Opções de Sticker */}
+                    <Card className="bg-muted/20">
+                      <CardContent className="p-3 space-y-3">
+                        <Label className="text-sm font-medium">Opções de Sticker</Label>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <Label className="text-xs">Tamanho</Label>
+                            <span className="text-xs font-mono">{fontSize}px</span>
+                          </div>
+                          <Slider
+                            value={[fontSize]}
+                            onValueChange={(value) => setFontSize(value[0])}
+                            min={8}
+                            max={48}
+                            step={2}
+                            className="w-full"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label className="text-xs">Rotação</Label>
+                          <Slider
+                            value={[brushRotation]}
+                            onValueChange={(value) => setBrushRotation(value[0])}
+                            min={0}
+                            max={360}
+                            step={15}
+                            className="w-full"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </TabsContent>
                 
@@ -1795,72 +1842,11 @@ export default function EnhancedPixelPurchaseModal({
                   </div>
                   
                   {/* Configurações de Visualização */}
-                    {/* Seletor de Paleta */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Paletas Temáticas</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {colorPalettes.map((palette, index) => (
-                          <Button
-                            key={index}
-                            variant={selectedPalette === index ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSelectedPalette(index)}
-                            className="h-8 text-xs"
-                          >
-                            {palette.name}
-                          </Button>
-                        ))}
-                      </div>
-                      
-                      {/* Cores Personalizadas */}
-                      {customColors.length > 0 && (
-                        <div className="space-y-2">
-                          <Label className="text-xs text-muted-foreground">Cores Recentes</Label>
-                          <div className="grid grid-cols-8 gap-1">
-                            {customColors.map((color, index) => (
-                              <button
-                                key={index}
-                                className={cn(
-                                  "w-6 h-6 rounded border transition-all duration-200 hover:scale-110",
-                                  selectedColor === color ? "border-foreground scale-110" : "border-border"
-                                )}
-                                style={{ backgroundColor: color }}
-                                onClick={() => setSelectedColor(color)}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Seletor de Cor Personalizado */}
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowColorPicker(!showColorPicker)}
-                          className="flex-1"
-                        >
-                          <Palette className="h-4 w-4 mr-2" />
-                          Cor Personalizada
-                        </Button>
-                        <input
-                          ref={colorPickerRef}
-                          type="color"
-                          value={selectedColor}
-                          onChange={(e) => {
-                            setSelectedColor(e.target.value);
-                            addCustomColor(e.target.value);
-                          }}
-                          className="w-12 h-8 rounded border border-input cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                    
                   <div className="space-y-3">
                     <h4 className="font-semibold text-sm">Visualização</h4>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        {colorPalettes[selectedPalette].colors.map(color => (
+                        <Label className="text-xs">Mostrar Grelha</Label>
                         <Switch checked={showGrid} onCheckedChange={setShowGrid} />
                       </div>
                       
@@ -1870,7 +1856,6 @@ export default function EnhancedPixelPurchaseModal({
                           <Slider
                             value={[gridSize]}
                             onValueChange={(value) => setGridSize(value[0])}
-                              addCustomColor(color);
                             min={5}
                             max={50}
                             step={5}
