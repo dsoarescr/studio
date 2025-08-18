@@ -74,19 +74,35 @@ Os componentes reutilizáveis estão na pasta `src/components`.
 
 ---
 
-## ⚠️ Regra Crítica: Como Modificar a Grelha de Píxeis
+## ⚠️ Regras Críticas para Manter a Aplicação Estável
 
-Esta é a regra mais importante para garantir a estabilidade da aplicação:
+Existem duas regras fundamentais que **devem** ser seguidas para evitar quebrar a aplicação.
+
+### 1. Como Modificar a Grelha de Píxeis
 
 | Se quiser alterar...                                                                   | Modifique este ficheiro:                               | **NÃO MODIFIQUE ESTE FICHEIRO**                           |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- |
 | **Toda a lógica visual e interativa da grelha**:<br>- Cor dos píxeis<br>- Destaques (hover/seleção)<br>- Animações<br>- Interações de clique<br>- Preços, donos, etc. | `src/components/pixel-grid/PixelGrid.tsx`              | `src/components/pixel-grid/PortugalMapSvg.tsx`            |
 
-### Explicação
+#### Explicação
 
 -   **`PortugalMapSvg.tsx` (O MOLDE):** Este ficheiro contém apenas os dados vetoriais do mapa. Ele é usado **uma única vez** para criar a "forma" da grelha. **Qualquer alteração neste ficheiro irá corromper o mapa.** Ele deve ser tratado como um recurso estático e imutável.
 
 -   **`PixelGrid.tsx` (O DECORADOR):** Este ficheiro pega na forma do mapa e aplica toda a lógica por cima. É aqui que se desenham os píxeis no `<canvas>`, se decide a cor de cada um, se adicionam efeitos de brilho, e se gere o que acontece quando um utilizador interage com a grelha.
+
+### 2. Como Preservar o Layout (Cabeçalho e Rodapé)
+
+| Se quiser alterar...                                                | Modifique este ficheiro:                               | **NÃO FAÇA ISTO**                                                                 |
+| ------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| **O conteúdo de uma página** (ex: marketplace, comunidade, perfil). | `src/app/(main)/marketplace/page.tsx`                  | Não crie um novo `layout.tsx` dentro de `/marketplace` (ou qualquer outra pasta). |
+| **O cabeçalho ou rodapé** para todas as páginas principais.         | `src/app/(main)/layout.tsx`                            | Não edite os layouts de páginas individuais para adicionar o cabeçalho.           |
+
+#### Explicação
+
+A aplicação usa um sistema de "layouts aninhados":
+-   **`app/(main)/layout.tsx`** define o layout principal com o cabeçalho e o rodapé.
+-   Qualquer página dentro de `app/(main)/...` (como `community/page.tsx`) herda automaticamente esse layout.
+-   Se um novo `layout.tsx` for criado dentro de uma subpasta (ex: `community/layout.tsx`), ele irá **substituir** o layout principal, fazendo com que o cabeçalho e o rodapé desapareçam *apenas nessa página*.
 
 ---
 
