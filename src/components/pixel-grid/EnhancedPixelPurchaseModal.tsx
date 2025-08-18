@@ -167,21 +167,15 @@ export default function EnhancedPixelPurchaseModal({
   
   // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasInitialized, setCanvasInitialized] = useState(false);
   const { toast } = useToast();
   const { vibrate } = useHapticFeedback();
 
-  // Inicializar canvas
+  // Inicializar canvas - CORRIGIDO
   useEffect(() => {
-    if (isOpen && canvasRef.current) {
+    if (isOpen && canvasRef.current && !canvasRef.current.getContext('2d')) {
       const canvas = canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
-      
       canvas.width = CANVAS_SIZE;
       canvas.height = CANVAS_SIZE;
-      canvas.style.width = '280px';
-      canvas.style.height = '280px';
       
       const ctx = canvas.getContext('2d');
       if (ctx) {
@@ -189,27 +183,84 @@ export default function EnhancedPixelPurchaseModal({
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         
-        // Desenhar grelha inicial
-        if (showGrid) {
-          drawGrid(ctx);
-        }
-        
-        setCanvasInitialized(true);
+        console.log('Canvas inicializado:', canvas.width, 'x', canvas.height);
+      }
+    }
+  }, [isOpen]);
+
+  // Desenhar grelha separadamente
+  useEffect(() => {
+    if (isOpen && canvasRef.current && showGrid) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        drawGrid(ctx);
       }
     }
   }, [isOpen, showGrid]);
 
-  // Timer de gravação
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
-        captureFrame();
-      }, 100);
+  const drawGrid = (ctx: CanvasRenderingContext2D) => {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 1;
+    
+    // Desenhar linhas verticais
+    for (let i = 0; i <= GRID_SIZE; i++) {
+      const x = i * PIXEL_SIZE;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, CANVAS_SIZE);
+      ctx.stroke();
     }
-    return () => clearInterval(interval);
-  }, [isRecording]);
+    
+    // Desenhar linhas horizontais
+    for (let i = 0; i <= GRID_SIZE; i++) {
+      const y = i * PIXEL_SIZE;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(CANVAS_SIZE, y);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
+  };
+
+  const drawPixel = (x: number, y: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.log('Canvas não encontrado');
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.log('Contexto 2D não encontrado');
+      return;
+    }
+    
+    // Calcular posição do pixel na grelha
+    const pixelX = Math.floor(x / PIXEL_SIZE) * PIXEL_SIZE;
+    const pixelY = Math.floor(y / PIXEL_SIZE) * PIXEL_SIZE;
+    
+    console.log('Desenhando pixel em:', pixelX, pixelY, 'cor:', selectedColor);
+    
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    
+    if (selectedTool === 'eraser') {
+      ctx.fillStyle = '#FFFFFF';
+    } else {
+      ctx.fillStyle = selectedColor;
+    }
+    
+    ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
+    ctx.restore();
+    
+    // Redesenhar grelha por cima
+    if (showGrid) {
+      drawGrid(ctx);
+    }
+  };
 
   const getCanvasCoordinates = (e: React.PointerEvent) => {
     const canvas = canvasRef.current;
@@ -219,108 +270,25 @@ export default function EnhancedPixelPurchaseModal({
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
-    };
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    console.log('Coordenadas do clique:', x, y);
+    return { x, y };
   };
 
-  const drawPixel = (x: number, y: number, forceRedraw = false) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.imageSmoothingEnabled = false;
-    
-    // Salvar estado antes de desenhar
-    ctx.save();
-    
-    const pixelX = Math.floor(x / PIXEL_SIZE) * PIXEL_SIZE;
-    const pixelY = Math.floor(y / PIXEL_SIZE) * PIXEL_SIZE;
-    
-    // Verificar se as coordenadas estão dentro dos limites
-    if (pixelX < 0 || pixelY < 0 || pixelX >= CANVAS_SIZE || pixelY >= CANVAS_SIZE) return;
-    
-    if (selectedTool === 'eraser') {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
-    } else {
-      // Limpar área primeiro
-      ctx.clearRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
-      ctx.fillStyle = selectedColor;
-      ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
-      
-      // Aplicar simetria
-      if (symmetryMode === 'horizontal' || symmetryMode === 'both') {
-        const mirrorX = CANVAS_SIZE - pixelX - PIXEL_SIZE;
-        if (mirrorX >= 0 && mirrorX < CANVAS_SIZE) {
-          ctx.fillRect(mirrorX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
-        }
-      }
-      if (symmetryMode === 'vertical' || symmetryMode === 'both') {
-        const mirrorY = CANVAS_SIZE - pixelY - PIXEL_SIZE;
-        if (mirrorY >= 0 && mirrorY < CANVAS_SIZE) {
-          ctx.fillRect(pixelX, mirrorY, PIXEL_SIZE, PIXEL_SIZE);
-        }
-      }
-      if (symmetryMode === 'both') {
-        const mirrorX = CANVAS_SIZE - pixelX - PIXEL_SIZE;
-        const mirrorY = CANVAS_SIZE - pixelY - PIXEL_SIZE;
-        if (mirrorX >= 0 && mirrorX < CANVAS_SIZE && mirrorY >= 0 && mirrorY < CANVAS_SIZE) {
-          ctx.fillRect(mirrorX, mirrorY, PIXEL_SIZE, PIXEL_SIZE);
-        }
-      }
-    }
-    
-    ctx.restore();
-
-    // Redesenhar grelha se necessário
-    if (showGrid || forceRedraw) {
-      drawGrid(ctx);
-    }
-  };
-
-  const drawGrid = (ctx: CanvasRenderingContext2D) => {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-    ctx.lineWidth = 1;
-    ctx.globalCompositeOperation = 'source-over';
-    
-    for (let i = 0; i <= GRID_SIZE; i++) {
-      const pos = i * PIXEL_SIZE;
-      ctx.beginPath();
-      ctx.moveTo(pos, 0);
-      ctx.lineTo(pos, CANVAS_SIZE);
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.moveTo(0, pos);
-      ctx.lineTo(CANVAS_SIZE, pos);
-      ctx.stroke();
-    }
-    ctx.restore();
-  };
-  
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button !== 0 && e.button !== undefined) return;
+    console.log('Pointer down detectado');
+    e.preventDefault();
+    e.stopPropagation();
     
     const coords = getCanvasCoordinates(e);
     if (!coords) return;
     
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!isDrawing) {
-      // Salvar estado para undo ANTES de desenhar
-      saveToUndoStack();
-      
-      setIsDrawing(true);
-      setLastPoint(coords);
-      drawPixel(coords.x, coords.y);
-      vibrate('light');
-    }
+    setIsDrawing(true);
+    setLastPoint(coords);
+    drawPixel(coords.x, coords.y);
+    vibrate('light');
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -330,20 +298,67 @@ export default function EnhancedPixelPurchaseModal({
     e.stopPropagation();
     
     const coords = getCanvasCoordinates(e);
-    if (!coords || !lastPoint) return;
+    if (!coords) return;
     
     drawPixel(coords.x, coords.y);
-    
     setLastPoint(coords);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    console.log('Pointer up detectado');
     e.preventDefault();
     e.stopPropagation();
     
     setIsDrawing(false);
     setLastPoint(null);
   };
+
+  const testDraw = () => {
+    console.log('Teste de desenho iniciado');
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.log('Canvas não encontrado no teste');
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.log('Contexto não encontrado no teste');
+      return;
+    }
+    
+    // Desenhar um pixel de teste no centro
+    const centerX = Math.floor(GRID_SIZE / 2) * PIXEL_SIZE;
+    const centerY = Math.floor(GRID_SIZE / 2) * PIXEL_SIZE;
+    
+    ctx.fillStyle = '#FF0000'; // Vermelho para teste
+    ctx.fillRect(centerX, centerY, PIXEL_SIZE, PIXEL_SIZE);
+    
+    console.log('Pixel de teste desenhado em:', centerX, centerY);
+    
+    // Redesenhar grelha
+    if (showGrid) {
+      drawGrid(ctx);
+    }
+    
+    toast({
+      title: "Teste Executado",
+      description: `Pixel vermelho desenhado no centro (${centerX}, ${centerY})`,
+    });
+  };
+
+  // Timer de gravação
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+        captureFrame();
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   const saveToUndoStack = () => {
     const canvas = canvasRef.current;
@@ -439,28 +454,6 @@ export default function EnhancedPixelPurchaseModal({
     });
   };
 
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    saveToUndoStack();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    
-    if (showGrid) {
-      drawGrid(ctx);
-    }
-    
-    vibrate('medium');
-    toast({
-      title: "Canvas Limpo",
-      description: "Canvas foi limpo com sucesso.",
-    });
-  };
-
   const applyAIEffect = async (effectType: string) => {
     setIsProcessingAI(true);
     setAiProgress(0);
@@ -511,22 +504,6 @@ export default function EnhancedPixelPurchaseModal({
       description: `${sticker} adicionado ao seu pixel.`,
     });
   };
-
-  // Atualizar grelha quando toggle muda
-  useEffect(() => {
-    if (!canvasInitialized) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Redesenhar apenas a grelha
-    const imageData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    ctx.putImageData(imageData, 0, 0);
-    if (showGrid) drawGrid(ctx);
-  }, [showGrid, canvasInitialized]);
 
   const calculateTotalPrice = () => {
     let total = pixelData?.price || 0;
@@ -612,13 +589,24 @@ export default function EnhancedPixelPurchaseModal({
             <Button size="sm" variant="outline" onClick={() => setShowGrid(!showGrid)}>
               <Grid3X3 className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="outline" onClick={clearCanvas}>
+            <Button size="sm" variant="outline" onClick={() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  saveToUndoStack();
+                  ctx.fillStyle = '#FFFFFF';
+                  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+                  if (showGrid) drawGrid(ctx);
+                  toast({ title: "Canvas Limpo", description: "Canvas foi limpo com sucesso." });
+                }
+              }
+            }}>
               <Trash2 className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="outline" onClick={() => {
-              saveToUndoStack();
-              drawPixel(CANVAS_SIZE/2, CANVAS_SIZE/2, true);
-            }}>Teste</Button>
+            <Button size="sm" variant="outline" onClick={testDraw}>
+              Teste
+            </Button>
           </div>
         </div>
       </div>
