@@ -167,6 +167,7 @@ export default function EnhancedPixelPurchaseModal({
   
   // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasInitialized, setCanvasInitialized] = useState(false);
   const { toast } = useToast();
   const { vibrate } = useHapticFeedback();
 
@@ -174,19 +175,29 @@ export default function EnhancedPixelPurchaseModal({
   useEffect(() => {
     if (isOpen && canvasRef.current) {
       const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      
       canvas.width = CANVAS_SIZE;
       canvas.height = CANVAS_SIZE;
+      canvas.style.width = '280px';
+      canvas.style.height = '280px';
       
-      // Inicializar canvas com cor base
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.imageSmoothingEnabled = false;
-        ctx.fillStyle = pixelData?.color || '#F0F0F0';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        
+        // Desenhar grelha inicial
+        if (showGrid) {
+          drawGrid(ctx);
+        }
+        
+        setCanvasInitialized(true);
       }
-      drawCanvas();
     }
-  }, [isOpen, pixelData]);
+  }, [isOpen, showGrid]);
 
   // Timer de gravação
   useEffect(() => {
@@ -200,28 +211,13 @@ export default function EnhancedPixelPurchaseModal({
     return () => clearInterval(interval);
   }, [isRecording]);
 
-  const drawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.imageSmoothingEnabled = false;
-  }, [showGrid]);
-
-  // Redesenhar canvas quando necessário
-  useEffect(() => {
-    drawCanvas();
-  }, [drawCanvas]);
-
   const getCanvasCoordinates = (e: React.PointerEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
     
     const rect = canvas.getBoundingClientRect();
-    const scaleX = CANVAS_SIZE / rect.width;
-    const scaleY = CANVAS_SIZE / rect.height;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     
     return {
       x: (e.clientX - rect.left) * scaleX,
@@ -229,7 +225,7 @@ export default function EnhancedPixelPurchaseModal({
     };
   };
 
-  const drawPixel = (x: number, y: number) => {
+  const drawPixel = (x: number, y: number, forceRedraw = false) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -237,6 +233,9 @@ export default function EnhancedPixelPurchaseModal({
     if (!ctx) return;
     
     ctx.imageSmoothingEnabled = false;
+    
+    // Salvar estado antes de desenhar
+    ctx.save();
     
     const pixelX = Math.floor(x / PIXEL_SIZE) * PIXEL_SIZE;
     const pixelY = Math.floor(y / PIXEL_SIZE) * PIXEL_SIZE;
@@ -245,11 +244,11 @@ export default function EnhancedPixelPurchaseModal({
     if (pixelX < 0 || pixelY < 0 || pixelX >= CANVAS_SIZE || pixelY >= CANVAS_SIZE) return;
     
     if (selectedTool === 'eraser') {
-      ctx.clearRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
-      // Redesenhar fundo branco onde foi apagado
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
     } else {
+      // Limpar área primeiro
+      ctx.clearRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
       ctx.fillStyle = selectedColor;
       ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
       
@@ -274,18 +273,20 @@ export default function EnhancedPixelPurchaseModal({
         }
       }
     }
+    
+    ctx.restore();
 
-    // Desenhar grelha por cima se ativa
-    if (showGrid) {
+    // Redesenhar grelha se necessário
+    if (showGrid || forceRedraw) {
       drawGrid(ctx);
     }
   };
 
   const drawGrid = (ctx: CanvasRenderingContext2D) => {
     ctx.save();
-    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
     ctx.lineWidth = 1;
-    ctx.setLineDash([]);
+    ctx.globalCompositeOperation = 'source-over';
     
     for (let i = 0; i <= GRID_SIZE; i++) {
       const pos = i * PIXEL_SIZE;
@@ -301,8 +302,9 @@ export default function EnhancedPixelPurchaseModal({
     }
     ctx.restore();
   };
+  
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return; // Apenas botão esquerdo do mouse
+    if (e.button !== 0 && e.button !== undefined) return;
     
     const coords = getCanvasCoordinates(e);
     if (!coords) return;
@@ -310,13 +312,15 @@ export default function EnhancedPixelPurchaseModal({
     e.preventDefault();
     e.stopPropagation();
     
-    // Salvar estado para undo ANTES de desenhar
-    saveToUndoStack();
-    
-    setIsDrawing(true);
-    setLastPoint(coords);
-    drawPixel(coords.x, coords.y);
-    vibrate('light');
+    if (!isDrawing) {
+      // Salvar estado para undo ANTES de desenhar
+      saveToUndoStack();
+      
+      setIsDrawing(true);
+      setLastPoint(coords);
+      drawPixel(coords.x, coords.y);
+      vibrate('light');
+    }
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -328,25 +332,12 @@ export default function EnhancedPixelPurchaseModal({
     const coords = getCanvasCoordinates(e);
     if (!coords || !lastPoint) return;
     
-    // Interpolação para traços suaves
-    const dx = coords.x - lastPoint.x;
-    const dy = coords.y - lastPoint.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const steps = Math.max(1, Math.floor(distance / (PIXEL_SIZE / 2)));
-    
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const x = lastPoint.x + dx * t;
-      const y = lastPoint.y + dy * t;
-      drawPixel(x, y);
-    }
+    drawPixel(coords.x, coords.y);
     
     setLastPoint(coords);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDrawing) return;
-    
     e.preventDefault();
     e.stopPropagation();
     
@@ -361,7 +352,7 @@ export default function EnhancedPixelPurchaseModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    const imageData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setUndoStack(prev => [...prev.slice(-49), imageData]);
     setRedoStack([]);
   };
@@ -375,12 +366,17 @@ export default function EnhancedPixelPurchaseModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    const currentState = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const currentState = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setRedoStack(prev => [...prev, currentState]);
     
     const previousState = undoStack[undoStack.length - 1];
     ctx.putImageData(previousState, 0, 0);
     setUndoStack(prev => prev.slice(0, -1));
+    
+    // Redesenhar grelha se necessário
+    if (showGrid) {
+      drawGrid(ctx);
+    }
     
     vibrate('medium');
   };
@@ -394,12 +390,17 @@ export default function EnhancedPixelPurchaseModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    const currentState = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const currentState = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setUndoStack(prev => [...prev, currentState]);
     
     const nextState = redoStack[redoStack.length - 1];
     ctx.putImageData(nextState, 0, 0);
     setRedoStack(prev => prev.slice(0, -1));
+    
+    // Redesenhar grelha se necessário
+    if (showGrid) {
+      drawGrid(ctx);
+    }
     
     vibrate('medium');
   };
@@ -411,7 +412,7 @@ export default function EnhancedPixelPurchaseModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    const imageData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setTimelapseFrames(prev => [...prev, {
       timestamp: Date.now(),
       imageData
@@ -435,6 +436,28 @@ export default function EnhancedPixelPurchaseModal({
     toast({
       title: "🎬 Timelapse Criado!",
       description: `${timelapseFrames.length} frames capturados em ${recordingTime}s`,
+    });
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    saveToUndoStack();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    
+    if (showGrid) {
+      drawGrid(ctx);
+    }
+    
+    vibrate('medium');
+    toast({
+      title: "Canvas Limpo",
+      description: "Canvas foi limpo com sucesso.",
     });
   };
 
@@ -472,17 +495,38 @@ export default function EnhancedPixelPurchaseModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Simular aplicação de sticker no centro
+    saveToUndoStack();
+    
+    ctx.save();
     ctx.font = '32px Arial';
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText(sticker, CANVAS_SIZE / 2, CANVAS_SIZE / 2);
+    ctx.restore();
     
+    if (showGrid) drawGrid(ctx);
     vibrate('light');
     toast({
       title: "Sticker Aplicado! ✨",
       description: `${sticker} adicionado ao seu pixel.`,
     });
   };
+
+  // Atualizar grelha quando toggle muda
+  useEffect(() => {
+    if (!canvasInitialized) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Redesenhar apenas a grelha
+    const imageData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.putImageData(imageData, 0, 0);
+    if (showGrid) drawGrid(ctx);
+  }, [showGrid, canvasInitialized]);
 
   const calculateTotalPrice = () => {
     let total = pixelData?.price || 0;
@@ -568,6 +612,13 @@ export default function EnhancedPixelPurchaseModal({
             <Button size="sm" variant="outline" onClick={() => setShowGrid(!showGrid)}>
               <Grid3X3 className="h-4 w-4" />
             </Button>
+            <Button size="sm" variant="outline" onClick={clearCanvas}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              saveToUndoStack();
+              drawPixel(CANVAS_SIZE/2, CANVAS_SIZE/2, true);
+            }}>Teste</Button>
           </div>
         </div>
       </div>
@@ -578,7 +629,7 @@ export default function EnhancedPixelPurchaseModal({
           <div className="relative">
             <canvas
               ref={canvasRef}
-              className="border-2 border-primary/30 rounded-lg bg-white cursor-crosshair"
+              className="border-2 border-primary/30 rounded-lg bg-white cursor-crosshair touch-none"
               style={{ 
                 width: '280px', 
                 height: '280px',
@@ -588,8 +639,9 @@ export default function EnhancedPixelPurchaseModal({
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
+              onPointerLeave={handlePointerUp}
               onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
             />
             
             {/* Indicador de Simetria */}
