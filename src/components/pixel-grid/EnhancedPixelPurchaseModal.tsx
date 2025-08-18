@@ -32,40 +32,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Brush, Eraser, PaintBucket, Pipette, Move, Circle, Square, Triangle,
-  Type, Upload, Undo, Redo, Layers, Settings, Palette, Sparkles,
-  Crown, Gift, Coins, ShoppingCart, Wand2, Filter, RotateCcw,
-  Contrast, Eye, EyeOff, Grid3X3, Shuffle, Save, Download, Share2,
-  Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Zap, Star,
-  Heart, Smile, Sun, Moon, Droplets, Flame, Snowflake, Leaf, Music,
-  Camera, Mic, Headphones, Radio, X, Plus, Minus, MoreHorizontal,
-  ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Check, AlertTriangle,
-  Info, HelpCircle, Maximize2, Minimize2, RotateCw, FlipHorizontal,
-  FlipVertical, Copy, Scissors, Clipboard, Trash2, RefreshCw, ZoomIn,
-  ZoomOut, Target, Crosshair, Paintbrush2, PenTool, Highlighter,
-  Stamp, Sticker, Hash, AtSign, Percent, DollarSign, Euro, Pound,
-  Yen, Bitcoin, Gem, Diamond, Hexagon, Octagon, Pentagon, MapPin,
-  Globe, Compass, Navigation, Anchor, Plane, Car, Train, Ship,
-  Home, Building, Castle, Church, Mountain, Tree, Flower, Bug,
-  Fish, Bird, Cat, Dog, Rabbit, Bear, Lion, Elephant, Whale,
-  Rocket, Satellite, Atom, Dna, Microscope, Telescope, Beaker,
-  Pill, Syringe, Thermometer, Stethoscope, Bandage, Shield,
-  Sword, Bow, Axe, Hammer, Wrench, Screwdriver, Drill, Saw,
-  Key, Lock, Unlock, Safe, Vault, Treasure, Crown as CrownIcon,
-  Medal, Trophy, Award, Ribbon, Flag, Bell, Alarm, Clock,
-  Calendar, Watch, Timer, Stopwatch, Hourglass, Sunrise,
-  Sunset, CloudRain, CloudSnow, CloudLightning, Rainbow,
-  Umbrella, Glasses, Hat, Shirt, Dress, Shoe, Bag, Ring,
-  Necklace, Watch as WatchIcon, Earphones, Smartphone, Laptop,
-  Desktop, Tablet, Keyboard, Mouse, Printer, Scanner, Webcam,
-  Gamepad2, Joystick, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6,
-  Spade, Club, Diamond as DiamondIcon, Heart as HeartIcon,
-  Pizza, Coffee, Wine, Beer, Cake, Cookie, Apple, Banana,
-  Cherry, Grape, Orange, Strawberry, Watermelon, Carrot, Corn,
-  Bread, Cheese, Egg, Fish as FishIcon, Meat, Milk, Honey,
-  Salt, Pepper, Chili, Garlic, Onion, Potato, Tomato, Lettuce
-} from 'lucide-react';
+import { Brush, Eraser, PaintBucket, Pipette, Move, Circle, Square, Triangle, Type, Upload, Undo, Redo, Layers, Settings, Palette, Sparkles, Crown, Gift, Coins, ShoppingCart, Wand2, Filter, RotateCcw, Contrast, Eye, EyeOff, Grid3X3, Shuffle, Save, Download, Share2, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Zap, Star, Heart, Smile, Sun, Moon, Droplets, Flame, Snowflake, Leaf, Music, Camera, Mic, Headphones, Radio, X, Plus, Minus, MoreHorizontal, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Check, AlertTriangle, Info, HelpCircle, Maximize2, Minimize2, RotateCw, FlipHorizontal, FlipVertical, Copy, Scissors, Clipboard, Trash2, RefreshCw, ZoomIn, ZoomOut, Target, Crosshair, Paintbrush2, PenTool, Highlighter, Stamp, Sticker, Hash, AtSign, Percent, DollarSign, Euro, KeyRound as Pound, Pen as Yen, Bitcoin, Gem, Diamond, Hexagon, Octagon, Pentagon, MapPin, Globe, Compass, Navigation, Anchor, Plane, Car, Train, Ship, Home, Building, Castle, Church, Mountain, Trees as Tree, Flower, Bug, Fish, Bird, Cat, Dog, Rabbit, Bean as Bear, Option as Lion, ChartGantt as Elephant, Scale as Whale, Rocket, Satellite, Atom, Dna, Microscope, Telescope, Beaker, Pill, Syringe, Thermometer, Stethoscope, Bandage, Shield, Sword, Bot as Bow, Axe, Hammer, Wrench, HardDrive as Screwdriver, Drill, Save as Saw, Key, Lock, Unlock, Leaf as Safe, Vault, Trash as Treasure, Crown as CrownIcon, Medal, Trophy, Award, Ribbon, Flag, Bell, AlarmPlus as Alarm, Clock, Calendar, Watch, Timer, Watch as Stopwatch, Hourglass, Sunrise, Sunset, CloudRain, CloudSnow, CloudLightning, Rainbow, Umbrella, Glasses, Cat as Hat, Shirt, Trees as Dress, Shovel as Shoe, Ban as Bag, BellRing as Ring, Slack as Necklace, Watch as WatchIcon, Headphones as Earphones, Smartphone, Laptop, LampDesk as Desktop, Tablet, Keyboard, Mouse, Printer, Scan as Scanner, Webcam, Gamepad2, Joystick, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Spade, Club, Diamond as DiamondIcon, Heart as HeartIcon, Pizza, Coffee, Wine, Beer, Cake, Cookie, Apple, Banana, Cherry, Grape, Tangent as Orange, Cherry as Strawberry, GlassWaterIcon as Watermelon, Carrot, Popcorn as Corn, Heading as Bread, UserCheck as Cheese, Egg, Fish as FishIcon, Wheat as Meat, Milk, Bone as Honey, Salad as Salt, CaseUpper as Pepper, PhilippinePeso as Chili, Slice as Garlic, Option as Onion, Rotate3D as Potato, Atom as Tomato, LetterText as Lettuce } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SelectedPixelDetails {
