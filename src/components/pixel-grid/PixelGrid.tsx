@@ -426,9 +426,21 @@ export default function PixelGrid() {
             RENDERED_PIXEL_SIZE_CONFIG
         );
     }
+    // New: Pulsating border for selected pixel
+    if (selectedPixelDetails && selectedPixelDetails.x === highlightedPixel?.x && selectedPixelDetails.y === highlightedPixel?.y) {
+      const pulseAnimation = Math.abs(Math.sin(Date.now() / 300));
+      ctx.strokeStyle = `hsla(var(--foreground), ${0.5 + pulseAnimation * 0.5})`;
+      ctx.lineWidth = ((0.5 + pulseAnimation * 1.5) / zoom) * RENDERED_PIXEL_SIZE_CONFIG;
+      ctx.strokeRect(
+        selectedPixelDetails.x * RENDERED_PIXEL_SIZE_CONFIG - ctx.lineWidth/2,
+        selectedPixelDetails.y * RENDERED_PIXEL_SIZE_CONFIG - ctx.lineWidth/2,
+        RENDERED_PIXEL_SIZE_CONFIG + ctx.lineWidth,
+        RENDERED_PIXEL_SIZE_CONFIG + ctx.lineWidth
+      );
+    }
     ctx.restore();
 
-  }, [mapData, zoom, position, strokeColor, highlightedPixel]);
+  }, [mapData, zoom, position, strokeColor, highlightedPixel, selectedPixelDetails]);
   
 
   useEffect(() => { 
@@ -1079,5 +1091,3 @@ const getCursorStyle = (tool: string) => {
       return 'cursor-default';
   }
 };
-
-    
