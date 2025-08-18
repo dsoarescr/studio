@@ -589,7 +589,7 @@ export default function PixelGrid() {
             };
         } else { 
              mockDetails = {
-                x: logicalCol, y: logicalRow, owner: 'Disponível (Sistema)', price: basePrice,
+                x: logicalCol, y: logicalRow, owner: undefined, price: basePrice,
                 color: unsoldColor, isOwnedByCurrentUser: false, isForSaleBySystem: true,
                 history: [], isFavorited: Math.random() > 0.8, rarity: randomRarity, loreSnippet: randomLore,
                 gpsCoords: approxGps, views: Math.floor(Math.random() * 1000),

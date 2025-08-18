@@ -409,13 +409,13 @@ export default function PixelInfoModal({
 
   const getStatusColor = () => {
     if (pixelData.isOwnedByCurrentUser) return 'text-green-500 bg-green-500/10';
-    if (pixelData.owner && pixelData.owner !== 'Sistema') return 'text-blue-500 bg-blue-500/10';
+    if (pixelData.owner && pixelData.owner !== 'Sistema' && pixelData.owner !== 'Disponível (Sistema)') return 'text-blue-500 bg-blue-500/10';
     return 'text-primary bg-primary/10';
   };
 
   const getStatusText = () => {
     if (pixelData.isOwnedByCurrentUser) return 'Seu Pixel';
-    if (pixelData.owner && pixelData.owner !== 'Sistema') return 'Pixel Privado';
+    if (pixelData.owner && pixelData.owner !== 'Sistema' && pixelData.owner !== 'Disponível (Sistema)') return 'Pixel Privado';
     return 'Disponível';
   };
 
@@ -571,7 +571,7 @@ export default function PixelInfoModal({
             </div>
 
             {/* Owner Info - Mais Limpo */}
-            {pixelData.owner && pixelData.owner !== 'Sistema' && (
+            {pixelData.owner && pixelData.owner !== 'Sistema' && pixelData.owner !== 'Disponível (Sistema)' && !pixelData.isForSaleBySystem && (
               <Card className="bg-gradient-to-r from-primary/5 to-accent/5">
                 <CardContent className="p-4">
                   <div 
@@ -801,7 +801,7 @@ export default function PixelInfoModal({
                         Editar Pixel
                       </Button>
                     </>
-                  ) : pixelData.owner && pixelData.owner !== 'Sistema' ? (
+                  ) : pixelData.owner && pixelData.owner !== 'Sistema' && pixelData.owner !== 'Disponível (Sistema)' && !pixelData.isForSaleBySystem ? (
                     <>
                       <div className="space-y-2">
                         <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto">
