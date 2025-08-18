@@ -1046,6 +1046,25 @@ export default function PixelGrid() {
         return false;
     }
 
+    // Create purchase activity with celebration
+    const purchaseActivity: PixelActivityEvent = {
+      id: Date.now().toString(),
+      x: pixelData.x,
+      y: pixelData.y,
+      type: 'purchase',
+      timestamp: Date.now(),
+      user: 'Você',
+      color: customizations.color || USER_BOUGHT_PIXEL_COLOR
+    };
+    
+    setRecentActivity(prev => [purchaseActivity, ...prev.slice(0, 19)]);
+    setShowConfetti(true);
+    setPlayActivitySound(true);
+    
+    // Add XP and credits for purchase
+    addXp(50);
+    addCredits(10);
+    
     const newSoldPixel: SoldPixel = {
       x: pixelData.x,
       y: pixelData.y,
@@ -1053,6 +1072,10 @@ export default function PixelGrid() {
       ownerId: MOCK_CURRENT_USER_ID,
       title: customizations.title || `Meu Pixel (${pixelData.x},${pixelData.y})`,
       pixelImageUrl: customizations.image, 
+      rarity: customizations.rarity || 'Comum',
+      lastActivity: Date.now(),
+      views: 1,
+      likes: 0
     };
     
     addSoldPixel(newSoldPixel);
