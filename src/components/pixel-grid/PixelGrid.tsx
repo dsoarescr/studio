@@ -8,7 +8,7 @@ import {
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users, Activity
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -1208,6 +1208,10 @@ export default function PixelGrid() {
   return (
 
     <MobileOptimizations>
+      <SoundEffect src={SOUND_EFFECTS.HOVER} play={playHoverSound} onEnd={() => setPlayHoverSound(false)} volume={0.1} />
+      <SoundEffect src={SOUND_EFFECTS.PURCHASE} play={playActivitySound} onEnd={() => setPlayActivitySound(false)} />
+      <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} particleCount={150} />
+      
       <div className="flex flex-col h-full w-full overflow-hidden relative animate-fade-in">
         {/* Enhanced loading overlay */}
         <LoadingOverlay 
@@ -1218,13 +1222,45 @@ export default function PixelGrid() {
           <div />
         </LoadingOverlay>
         
+        {/* Living Grid Activity Feed */}
+        <AnimatePresence>
+          {recentActivity.slice(0, 3).map((activity, index) => (
+            <motion.div
+              key={activity.id}
+              initial={{ opacity: 0, x: 300, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -300, scale: 0.8 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="absolute top-20 right-4 z-30 pointer-events-none"
+              style={{ top: `${80 + index * 60}px` }}
+            >
+              <div className="bg-card/90 backdrop-blur-md p-3 rounded-lg shadow-lg border border-primary/30 max-w-xs">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full animate-pulse`} style={{ backgroundColor: getActivityColor(activity.type) }} />
+                  <span className="text-sm font-medium">{activity.user}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {activity.type === 'purchase' ? 'comprou' : 
+                     activity.type === 'edit' ? 'editou' :
+                     activity.type === 'view' ? 'visualizou' :
+                     activity.type === 'like' ? 'curtiu' : 'comentou'}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Pixel ({activity.x}, {activity.y})
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
           <EnhancedTooltip
             title="Controles do Mapa"
-            description="Use estes controles para navegar pelo mapa"
+            description="Use estes controles para navegar pelo mapa vivo"
             stats={[
               { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
+              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> },
+              { label: 'Atividade', value: recentActivity.length.toString(), icon: <Activity className="h-4 w-4" /> }
             ]}
           >
             <div className="space-y-2">
@@ -1252,6 +1288,20 @@ export default function PixelGrid() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent><p>Resetar Vista</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      pointerEvents="auto" 
+                      variant={showActivityRipples ? "default" : "outline"} 
+                      size="icon" 
+                      onClick={() => setShowActivityRipples(!showActivityRipples)}
+                      aria-label="Toggle Activity"
+                    >
+                      <Activity className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Atividade em Tempo Real</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
