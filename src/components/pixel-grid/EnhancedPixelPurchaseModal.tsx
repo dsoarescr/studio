@@ -1905,35 +1905,87 @@ export default function EnhancedPixelPurchaseModal({
               </ScrollArea>
             </Tabs>
           </div>
-        </div>
+        <div className="w-full sm:w-80 border-t sm:border-l sm:border-t-0 flex flex-col bg-gradient-to-b from-card to-muted/10">
 
-        {/* Footer com Resumo e Compra */}
-        <div className="p-4 border-t bg-gradient-to-r from-card to-primary/5">
-          <div className="flex items-center justify-between">
+          <div className="p-4 border-b border-border/50">
+            <h3 className="font-semibold mb-3 flex items-center">
+              <Palette className="h-4 w-4 mr-2 text-primary" />
+              Paletas de Cores
+            </h3>
+            
+            {/* Quick Colors */}
+            <div className="grid grid-cols-8 gap-2 mb-4">
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
+                '#D4A757', '#7DF9FF', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
+                '#98D8C8', '#F7DC6F', '#FF7675', '#74B9FF', '#A29BFE', '#FD79A8', '#FDCB6E', '#6C5CE7'
                 <span className="font-medium">
                   Pixel ({pixelData.x}, {pixelData.y}) • {pixelData.region}
                 </span>
               </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    "w-10 h-10 rounded-lg border-2 transition-all hover:scale-110 touch-target shadow-md",
                 <span>Base: €{getBasePrice()}</span>
                 {selectedEffects.length > 0 && (
                   <span>Efeitos: €{getEffectsPrice()}</span>
-                )}
+                  onClick={() => {
+                    setSelectedColor(color);
+                    vibrate('light');
+                  }}
                 <span className="font-bold text-primary">Total: €{getTotalPrice()}</span>
               </div>
             </div>
             
+            {/* Color Palettes */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Paletas Temáticas</span>
+                <Button variant="ghost" size="sm" className="text-xs">
+                  <Plus className="h-3 w-3 mr-1" />
+                  Criar
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                {[
+                  { name: 'Portugal', colors: ['#D4A757', '#7DF9FF', '#228B22', '#DC143C'] },
+                  { name: 'Natureza', colors: ['#228B22', '#32CD32', '#8FBC8F', '#006400'] },
+                  { name: 'Oceano', colors: ['#4169E1', '#00BFFF', '#87CEEB', '#191970'] },
+                  { name: 'Pôr do Sol', colors: ['#FF4500', '#FF6347', '#FFD700', '#FF1493'] }
+                ].map(palette => (
+                  <div key={palette.name} className="flex items-center gap-2">
+                    <span className="text-xs font-medium w-16">{palette.name}</span>
+                    <div className="flex gap-1 flex-1">
+                      {palette.colors.map(color => (
+                        <button
+                          key={color}
+                          className="w-6 h-6 rounded border border-border hover:scale-110 transition-transform touch-target"
+                          style={{ backgroundColor: color }}
+                          onClick={() => {
+                            setSelectedColor(color);
+                            vibrate('light');
+                          }}
+                        />
+                      ))}
+                    </div>
+            <div className="space-y-2 mt-4 pt-3 border-t border-border/30">
+              <Label className="text-sm font-medium">Cor Personalizada</Label>
+              </div>
+            </div>
+            
             <div className="flex items-center gap-3">
-              <div className="text-right text-sm">
-                <div className="flex items-center gap-1">
+                  onChange={(e) => {
+                    setSelectedColor(e.target.value);
+                    vibrate('light');
+                  }}
+                  className="w-12 h-10 rounded-lg border-2 border-border cursor-pointer touch-target"
                   <Coins className="h-4 w-4 text-primary" />
                   <span>{userCredits.toLocaleString()}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Gift className="h-4 w-4 text-accent" />
+                  onChange={(e) => {
+                    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                      setSelectedColor(e.target.value);
+                    }
+                  }}
+                  className="flex-1 font-mono text-sm touch-target"
                   <span>{userSpecialCredits.toLocaleString()}</span>
                 </div>
               </div>
