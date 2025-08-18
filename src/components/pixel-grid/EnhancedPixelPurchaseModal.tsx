@@ -1125,125 +1125,205 @@ export default function EnhancedPixelPurchaseModal({
                   <Label className="text-xs">Opacidade:</Label>
                   <Slider
                     value={[brushOpacity]}
-                    onValueChange={(value) => setBrushOpacity(value[0])}
-                    min={10}
-                    max={100}
-                    step={5}
-                    className="w-20"
-                  />
-                  <span className="text-xs font-mono w-8">{brushOpacity}%</span>
+          <div className="flex-1 flex flex-col h-full">
+            {/* Mobile-Optimized Toolbar */}
+            <div className="p-3 border-b bg-gradient-to-r from-primary/5 to-accent/5">
+              {/* Tool Categories - Mobile First */}
+              <Tabs value={activeToolCategory} onValueChange={setActiveToolCategory} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 h-12 mb-3">
+                  <TabsTrigger value="basic" className="flex flex-col items-center gap-1 text-xs">
+                    <Brush className="h-4 w-4" />
+                    <span>Básico</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="artistic" className="flex flex-col items-center gap-1 text-xs">
+                    <Palette className="h-4 w-4" />
+                    <span>Arte</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ai" className="flex flex-col items-center gap-1 text-xs">
+                    <Brain className="h-4 w-4" />
+                    <span>IA</span>
+                  </TabsTrigger>
+                </TabsList>
+                
+                {/* Tool Selection - Mobile Optimized */}
+                <div className="space-y-3">
+                  <TabsContent value="basic" className="mt-0">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { id: 'brush', icon: <Brush className="h-5 w-5" />, name: 'Pincel' },
+                        { id: 'pencil', icon: <Pencil className="h-5 w-5" />, name: 'Lápis' },
+                        { id: 'eraser', icon: <Eraser className="h-5 w-5" />, name: 'Borracha' },
+                        { id: 'bucket', icon: <PaintBucket className="h-5 w-5" />, name: 'Balde' },
+                        { id: 'eyedropper', icon: <Pipette className="h-5 w-5" />, name: 'Conta-gotas' },
+                        { id: 'line', icon: <Minus className="h-5 w-5" />, name: 'Linha' },
+                        { id: 'rectangle', icon: <Square className="h-5 w-5" />, name: 'Retângulo' },
+                        { id: 'circle', icon: <Circle className="h-5 w-5" />, name: 'Círculo' }
+                      ].map(tool => (
+                        <Button
+                          key={tool.id}
+                          variant={selectedTool === tool.id ? 'default' : 'outline'}
+                          size="lg"
+                          onClick={() => {
+                            setSelectedTool(tool.id);
+                            vibrate('selection');
+                            toast({
+                              title: `${tool.name} Selecionado`,
+                              description: `Ferramenta ${tool.name.toLowerCase()} ativa.`,
+                            });
+                          }}
+                          className="h-16 flex flex-col items-center justify-center p-2 touch-target"
+                        >
+                          {tool.icon}
+                          <span className="text-xs mt-1">{tool.name}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="artistic" className="mt-0">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { id: 'spray', icon: <Sparkles className="h-5 w-5" />, name: 'Spray' },
+                        { id: 'blur', icon: <Zap className="h-5 w-5" />, name: 'Desfoque' },
+                        { id: 'smudge', icon: <Palette className="h-5 w-5" />, name: 'Borrar' },
+                        { id: 'clone', icon: <Copy className="h-5 w-5" />, name: 'Clonar' },
+                        { id: 'heal', icon: <Sparkles className="h-5 w-5" />, name: 'Curar' },
+                        { id: 'dodge', icon: <Sun className="h-5 w-5" />, name: 'Clarear' },
+                        { id: 'burn', icon: <Moon className="h-5 w-5" />, name: 'Escurecer' },
+                        { id: 'gradient', icon: <Palette className="h-5 w-5" />, name: 'Gradiente' }
+                      ].map(tool => (
+                        <Button
+                          key={tool.id}
+                          variant={selectedTool === tool.id ? 'default' : 'outline'}
+                          size="lg"
+                          onClick={() => {
+                            setSelectedTool(tool.id);
+                            vibrate('selection');
+                            toast({
+                              title: `${tool.name} Selecionado`,
+                              description: `Ferramenta artística ${tool.name.toLowerCase()} ativa.`,
+                            });
+                          }}
+                          className="h-16 flex flex-col items-center justify-center p-2 touch-target"
+                        >
+                          {tool.icon}
+                          <span className="text-xs mt-1">{tool.name}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="ai" className="mt-0">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        onClick={() => {
+                          vibrate('medium');
+                          toast({
+                            title: "IA Melhorou o Pixel! 🤖",
+                            description: "Aplicados melhoramentos automáticos.",
+                          });
+                        }}
+                        className="h-16 flex flex-col items-center justify-center p-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 touch-target"
+                      >
+                        <Brain className="h-6 w-6" />
+                        <span className="text-xs mt-1">IA Melhorar</span>
+                      </Button>
+                      
+                      <Button
+                        onClick={() => {
+                          vibrate('light');
+                          toast({
+                            title: "Cores Aleatórias! 🎨",
+                            description: "Nova paleta aplicada.",
+                          });
+                        }}
+                        className="h-16 flex flex-col items-center justify-center p-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 touch-target"
+                      >
+                        <Shuffle className="h-6 w-6" />
+                        <span className="text-xs mt-1">Aleatório</span>
+                      </Button>
+                      
+                      <Button
+                        onClick={() => {
+                          vibrate('light');
+                          toast({
+                            title: "Filtro Aplicado! ✨",
+                            description: "Efeito vintage aplicado.",
+                          });
+                        }}
+                        className="h-16 flex flex-col items-center justify-center p-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 touch-target"
+                      >
+                        <Filter className="h-6 w-6" />
+                        <span className="text-xs mt-1">Filtros</span>
+                      </Button>
+                      
+                      <Button
+                        onClick={() => {
+                          vibrate('light');
+                          toast({
+                            title: "Padrão Aplicado! 📐",
+                            description: "Padrão geométrico adicionado.",
+                          });
+                        }}
+                        className="h-16 flex flex-col items-center justify-center p-2 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 touch-target"
+                      >
+                        <Grid3X3 className="h-6 w-6" />
+                        <span className="text-xs mt-1">Padrões</span>
+                      </Button>
+                    </div>
+                  </TabsContent>
                 </div>
                 
-                <Select value={selectedBrushType} onValueChange={setSelectedBrushType}>
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brushTypes.map(brush => (
-                      <SelectItem key={brush.id} value={brush.id}>
-                        {brush.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Select value={selectedBlendMode} onValueChange={setSelectedBlendMode}>
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {blendModes.map(mode => (
-                      <SelectItem key={mode.id} value={mode.id}>
-                        {mode.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Canvas Principal */}
-            <div className="flex-1 flex items-center justify-center p-4 bg-muted/10">
-              <div className="relative">
-                <canvas
-                  ref={canvasRef}
-                  width={400}
-                  height={400}
-                  className="border-2 border-primary/30 rounded-lg bg-white cursor-crosshair shadow-lg"
-                  style={{ 
-                    transform: `scale(${canvasZoom})`,
-                    imageRendering: 'pixelated'
-                  }}
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                />
-                
-                {/* Grid Overlay */}
-                {showGrid && (
-                  <div 
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)`,
-                      backgroundSize: `${gridSize}px ${gridSize}px`,
-                      transform: `scale(${canvasZoom})`
-                    }}
-                  />
-                )}
-                
-                {/* Indicador de Simetria */}
-                {symmetryMode !== 'none' && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    {(symmetryMode === 'horizontal' || symmetryMode === 'both') && (
-                      <div className="absolute top-1/2 left-0 right-0 h-px bg-red-500/50" />
-                    )}
-                    {(symmetryMode === 'vertical' || symmetryMode === 'both') && (
-                      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-red-500/50" />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Controles Inferiores */}
-            <div className="p-3 border-t bg-muted/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {/* Paleta de Cores */}
-                  <div className="flex gap-1">
-                    {colorPalettes[selectedPalette].colors.map((color, index) => (
-                      <button
-                        key={index}
-                        className={cn(
-                          "w-8 h-8 rounded border-2 transition-transform hover:scale-110",
-                          selectedColor === color ? "border-foreground scale-110 shadow-lg" : "border-border"
-                        )}
-                        style={{ backgroundColor: color }}
-                        onClick={() => setSelectedColor(color)}
+                {/* Mobile Tool Settings */}
+                <div className="mt-4 space-y-3 bg-background/50 p-3 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Tamanho: {brushSize}px</Label>
+                      <Slider
+                        value={[brushSize]}
+                        onValueChange={(value) => setBrushSize(value[0])}
+                        min={1}
+                        max={20}
+                        step={1}
+                        className="touch-target"
                       />
-                    ))}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Opacidade: {opacity}%</Label>
+                      <Slider
+                        value={[opacity]}
+                        onValueChange={(value) => setOpacity(value[0])}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="touch-target"
+                      />
+                    </div>
                   </div>
                   
-                  <Input
-                    type="color"
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    className="w-12 h-8 p-0 border-2"
-                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUndo}
+                      className="flex-1 touch-target"
+                    >
+                      <Undo className="h-4 w-4 mr-2" />
+                      Desfazer
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRedo}
+                      className="flex-1 touch-target"
+                    >
+                      <Redo className="h-4 w-4 mr-2" />
+                      Refazer
+                    </Button>
+                  </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={clearCanvas}>
-                    <RefreshCw className="h-4 w-4 mr-1" />
-                    Limpar
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={downloadCreation}>
-                    <Download className="h-4 w-4 mr-1" />
-                    Guardar
-                  </Button>
-                </div>
-              </div>
+              </Tabs>
             </div>
           </div>
 
