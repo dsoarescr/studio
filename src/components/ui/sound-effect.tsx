@@ -25,6 +25,11 @@ export function SoundEffect({
     if (!audioRef.current) {
       audioRef.current = new Audio(src);
       audioRef.current.preload = 'auto';
+      
+      // Add error handling for missing audio files
+      audioRef.current.addEventListener('error', (e) => {
+        console.warn(`Audio file not found or cannot be loaded: ${src}`);
+      });
     }
     
     // Update properties on every render where they might change
@@ -56,7 +61,8 @@ export function SoundEffect({
       
       if (playPromise !== undefined) {
         playPromise.catch(err => {
-          console.error('Error playing sound:', err);
+          // Silently handle audio play errors (common in browsers with autoplay restrictions)
+          console.warn('Audio play prevented by browser policy or missing file:', src);
         });
       }
     } else {

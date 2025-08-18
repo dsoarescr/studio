@@ -24,7 +24,8 @@ import {
   UserPlus, Settings, Search, Filter, Bookmark, Flag, MoreHorizontal,
   Image as ImageIcon, Video, Mic, Smile, Gift, Coins, Award,
   Globe, Clock, TrendingUp, Flame, Target, Sparkles, Edit3,
-  ChevronRight, Bell, Hash, AtSign, Calendar, Map, Palette,
+  Play, Pause, Volume2, X, ChevronRight, Info, CheckCircle,
+  Compass
   ShoppingCart, Play, Pause, Volume2, VolumeX, X, Check,
   ArrowUp, ArrowDown, Reply, Forward, Download, Upload, Link2,
   PinIcon, Lock, Unlock, AlertTriangle, Info, CheckCircle,
