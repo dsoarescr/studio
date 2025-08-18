@@ -26,22 +26,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import { 
-  Palette, Brush, Eraser, PaintBucket, Pipette, Type, Upload, Download, Save, X, 
-  Undo, Redo, RotateCcw, Grid3X3, Sparkles, Wand2, Shuffle, Star, Crown, Gem, 
-  Coins, Gift, ShoppingCart, CreditCard, Eye, EyeOff, Layers, Circle, Square, 
-  Triangle, Heart, Smile, Sun, Leaf, Flag, Music, Camera, Image as ImageIcon, 
-  Zap, Target, Award, Settings, Maximize2, Minimize2, Copy, Share2, Info, 
-  HelpCircle, Move, RotateCw, FlipHorizontal, FlipVertical, Filter, 
-  Sliders, Minus, Plus, Scissors, Crosshair, Droplets, Feather, Stamp,
-  Aperture, Contrast, Brightness, Saturation, Hue, Volume2, VolumeX,
-  Play, Pause, SkipForward, SkipBack, Repeat, Clock, Timer, Gauge,
-  Paintbrush2, PenTool, Highlighter, Marker, Crayon, Pencil, Pen,
-  Rainbow, Waves, Flame, Snowflake, Flower, TreePine, Mountain,
-  Building, Car, Plane, Ship, Anchor, Compass, Map, Globe2,
-  Smartphone, Tablet, Monitor, Headphones, Gamepad2, Joystick,
-  Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Spade, Club, Diamond, Hash
-} from 'lucide-react';
+import { Palette, Brush, Eraser, PaintBucket, Pipette, Type, Upload, Download, Save, X, Undo, Redo, RotateCcw, Grid3X3, Sparkles, Wand2, Shuffle, Star, Crown, Gem, Coins, Gift, ShoppingCart, CreditCard, Eye, EyeOff, Layers, Circle, Square, Triangle, Heart, Smile, Sun, Leaf, Flag, Music, Camera, Image as ImageIcon, Zap, Target, Award, Settings, Maximize2, Minimize2, Copy, Share2, Info, HelpCircle, Move, RotateCw, FlipHorizontal, FlipVertical, Filter, Sliders, Minus, Plus, Scissors, Crosshair, Droplets, Feather, Stamp, Aperture, Contrast, Copyright as Brightness, IterationCw as Saturation, Fuel as Hue, Volume2, VolumeX, Play, Pause, SkipForward, SkipBack, Repeat, Clock, Timer, Gauge, Paintbrush2, PenTool, Highlighter, BookMarked as Marker, LayoutIcon as Crayon, Pencil, Pen, Rainbow, Waves, Flame, Snowflake, Flower, TreePine, Mountain, Building, Car, Plane, Ship, Anchor, Compass, Map, Globe2, Smartphone, Tablet, Monitor, Headphones, Gamepad2, Joystick, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Spade, Club, Diamond, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SelectedPixelDetails {
