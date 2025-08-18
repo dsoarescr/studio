@@ -54,21 +54,8 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
-import { Search as SearchIcon, Eye, Grid3X3, Bookmark, MapPin as MapPinIcon, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown } from 'lucide-react';
-  Search, Eye, Grid3X3, Bookmark, MapPinIconLucide, 
-  ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown
-} from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-
-
-// Configuration constants
-const SVG_VIEWBOX_WIDTH = 12969;
-const SVG_VIEWBOX_HEIGHT = 26674;
-const LOGICAL_GRID_COLS_CONFIG = 1273;
-const RENDERED_PIXEL_SIZE_CONFIG = 1;
+import { Search, Eye, Grid3X3, Bookmark, LucideMapPin as MapPinIconLucide, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown } from 'lucide-react'ERED_PIXEL_SIZE_CONFIG = 1;
+import { Search, Eye, Grid3X3, Bookmark, LucideMapPin as MapPinIconLucide, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown, Plus, X, BarChart3, Activity, User, Clock, Star, Coins } from 'lucide-react';
 
 // Navigation and visualization constants
 const ZOOM_BOOKMARKS_KEY = 'pixel-universe-zoom-bookmarks';
@@ -91,6 +78,36 @@ const POSTAL_CODE_COORDINATES = {
   '3000': { x: 650, y: 1180, region: 'Coimbra Centro' },
   '8000': { x: 706, y: 1562, region: 'Faro Centro' }
 };
+
+// Visualization modes
+type VisualizationMode = 'normal' | 'thermal' | 'value' | 'ownership' | 'temporal' | 'rarity';
+
+const VISUALIZATION_MODES = {
+  normal: { name: 'Normal', icon: <Eye className="h-4 w-4" />, description: 'Vista padrão do mapa' },
+  thermal: { name: 'Térmico', icon: <Activity className="h-4 w-4" />, description: 'Densidade de pixels por cor' },
+  value: { name: 'Valor', icon: <Coins className="h-4 w-4" />, description: 'Preços por gradiente' },
+  ownership: { name: 'Propriedade', icon: <User className="h-4 w-4" />, description: 'Cores por proprietário' },
+  temporal: { name: 'Temporal', icon: <Clock className="h-4 w-4" />, description: 'Idade dos pixels' },
+  rarity: { name: 'Raridade', icon: <Star className="h-4 w-4" />, description: 'Pixels por raridade' }
+};
+
+// Bookmarks system
+interface ZoomBookmark {
+  id: string;
+  name: string;
+  position: { x: number; y: number };
+  zoom: number;
+  timestamp: Date;
+}
+
+// Search functionality
+interface SearchResult {
+  type: 'landmark' | 'postal' | 'region' | 'coordinates';
+  name: string;
+  coordinates: { x: number; y: number };
+  zoom?: number;
+  description?: string;
+}
 
 // Pixel pricing constants
 const PIXEL_BASE_PRICE = 1; // Base price in euros
@@ -172,18 +189,6 @@ const ZOOM_SENSITIVITY_FACTOR = 1.1;
 const HEADER_HEIGHT_PX = 64;
 const BOTTOM_NAV_HEIGHT_PX = 64;
 
-// Visualization modes
-type VisualizationMode = 'default' | 'thermal' | 'value' | 'ownership' | 'temporal' | 'rarity';
-
-interface ZoomBookmark {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  zoom: number;
-  timestamp: Date;
-}
-
 const mockRarities: SelectedPixelDetails['rarity'][] = ['Comum', 'Raro', 'Épico', 'Lendário', 'Marco Histórico'];
 const mockLoreSnippets: string[] = [
   "Dizem que este pixel brilha sob a lua cheia.",
@@ -199,23 +204,26 @@ export default function PixelGrid() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [defaultView, setDefaultView] = useState<{ zoom: number; position: { x: number; y: number } } | null>(null);
+  
+  // New navigation and visualization states
+  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('normal');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const [zoomBookmarks, setZoomBookmarks] = useState<ZoomBookmark[]>([]);
+  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showCoordinates, setShowCoordinates] = useState(false);
+  const [currentGPS, setCurrentGPS] = useState<{ lat: number; lon: number } | null>(null);
+  const [showLandmarks, setShowLandmarks] = useState(true);
+  const [pixelDensityOverlay, setPixelDensityOverlay] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
+  const [animateTransitions, setAnimateTransitions] = useState(true);
 
   const didDragRef = useRef(false);
   const dragThreshold = 5;
 
   const [highlightedPixel, setHighlightedPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixelDetails, setSelectedPixelDetails] = useState<SelectedPixelDetails | null>(null);
-  
-  // New navigation and visualization states
-  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('default');
-  const [showGrid, setShowGrid] = useState(false);
-  const [showCoordinates, setShowCoordinates] = useState(false);
-  const [showDensityHeatmap, setShowDensityHeatmap] = useState(false);
-  const [zoomBookmarks, setZoomBookmarks] = useState<ZoomBookmark[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
-  const [densityData, setDensityData] = useState<Map<string, number>>(new Map());
-  const [valueData, setValueData] = useState<Map<string, number>>(new Map());
   
   const [showPixelInfoModal, setShowPixelInfoModal] = useState(false);
   const [showPixelEditModal, setShowPixelEditModal] = useState(false);
@@ -244,55 +252,6 @@ export default function PixelGrid() {
 
   const containerSizeRef = useRef({ width: 0, height: 0 });
   const { vibrate } = useHapticFeedback();
-
-  // Load saved bookmarks
-  useEffect(() => {
-    const savedBookmarks = localStorage.getItem(ZOOM_BOOKMARKS_KEY);
-    if (savedBookmarks) {
-      try {
-        const bookmarks = JSON.parse(savedBookmarks).map((b: any) => ({
-          ...b,
-          timestamp: new Date(b.timestamp)
-        }));
-        setZoomBookmarks(bookmarks);
-      } catch (error) {
-        console.error('Error loading zoom bookmarks:', error);
-      }
-    }
-  }, []);
-
-  // Generate density and value data
-  useEffect(() => {
-    if (pixelBitmap && soldPixels.length > 0) {
-      const newDensityData = new Map<string, number>();
-      const newValueData = new Map<string, number>();
-      
-      // Calculate density in 10x10 pixel chunks
-      for (let chunkY = 0; chunkY < logicalGridRows; chunkY += 10) {
-        for (let chunkX = 0; chunkX < LOGICAL_GRID_COLS_CONFIG; chunkX += 10) {
-          let pixelCount = 0;
-          let totalValue = 0;
-          
-          for (let y = chunkY; y < Math.min(chunkY + 10, logicalGridRows); y++) {
-            for (let x = chunkX; x < Math.min(chunkX + 10, LOGICAL_GRID_COLS_CONFIG); x++) {
-              const soldPixel = soldPixels.find(p => p.x === x && p.y === y);
-              if (soldPixel) {
-                pixelCount++;
-                totalValue += Math.random() * 100 + 50; // Mock value
-              }
-            }
-          }
-          
-          const chunkKey = `${chunkX}-${chunkY}`;
-          newDensityData.set(chunkKey, pixelCount);
-          newValueData.set(chunkKey, totalValue / Math.max(pixelCount, 1));
-        }
-      }
-      
-      setDensityData(newDensityData);
-      setValueData(newValueData);
-    }
-  }, [pixelBitmap, soldPixels, logicalGridRows]);
 
   const clearAutoResetTimeout = useCallback(() => {
     if (autoResetTimeoutRef.current) {
@@ -428,120 +387,62 @@ export default function PixelGrid() {
     
     ctx.imageSmoothingEnabled = false;
 
-    // 1. Clear canvas
+    // 1. Clear and draw the base map (unsold pixels)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 2. Draw based on visualization mode
-    if (visualizationMode === 'thermal' && showDensityHeatmap) {
-      // Draw density heatmap
-      for (let chunkY = 0; chunkY < logicalGridRows; chunkY += 10) {
-        for (let chunkX = 0; chunkX < LOGICAL_GRID_COLS_CONFIG; chunkX += 10) {
-          const chunkKey = `${chunkX}-${chunkY}`;
-          const density = densityData.get(chunkKey) || 0;
-          const intensity = Math.min(density / 10, 1); // Normalize to 0-1
-          
-          if (intensity > 0) {
-            ctx.fillStyle = `rgba(255, ${255 - Math.floor(intensity * 255)}, 0, ${intensity * 0.7})`;
-            ctx.fillRect(chunkX, chunkY, 10, 10);
-          }
+    for (let row = 0; row < logicalGridRows; row++) {
+        for (let col = 0; col < LOGICAL_GRID_COLS_CONFIG; col++) {
+            if (pixelBitmap[row * LOGICAL_GRID_COLS_CONFIG + col] === 1) {
+                // Apply visualization mode coloring
+                const pixelData = soldPixels.find(p => p.x === col && p.y === row);
+                ctx.fillStyle = getVisualizationColor(pixelData, visualizationMode);
+                
+                ctx.fillRect(
+                    col * RENDERED_PIXEL_SIZE_CONFIG,
+                    row * RENDERED_PIXEL_SIZE_CONFIG,
+                    RENDERED_PIXEL_SIZE_CONFIG,
+                    RENDERED_PIXEL_SIZE_CONFIG
+                );
+            }
         }
-      }
-    } else if (visualizationMode === 'value') {
-      // Draw value heatmap
-      for (let chunkY = 0; chunkY < logicalGridRows; chunkY += 10) {
-        for (let chunkX = 0; chunkX < LOGICAL_GRID_COLS_CONFIG; chunkX += 10) {
-          const chunkKey = `${chunkX}-${chunkY}`;
-          const value = valueData.get(chunkKey) || 0;
-          const intensity = Math.min(value / 200, 1); // Normalize to 0-1
-          
-          if (intensity > 0) {
-            ctx.fillStyle = `rgba(0, 255, ${255 - Math.floor(intensity * 255)}, ${intensity * 0.6})`;
-            ctx.fillRect(chunkX, chunkY, 10, 10);
-          }
-        }
-      }
-    } else {
-      // Default mode - draw base map
-      ctx.fillStyle = unsoldColor;
-      for (let row = 0; row < logicalGridRows; row++) {
-          for (let col = 0; col < LOGICAL_GRID_COLS_CONFIG; col++) {
-              if (pixelBitmap[row * LOGICAL_GRID_COLS_CONFIG + col] === 1) {
-                  ctx.fillRect(
-                      col * RENDERED_PIXEL_SIZE_CONFIG,
-                      row * RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG
-                  );
-              }
-          }
-      }
     }
 
-    // 3. Draw sold pixels with mode-specific styling
-    soldPixels.forEach(pixel => {
-      const renderX = pixel.x * RENDERED_PIXEL_SIZE_CONFIG;
-      const renderY = pixel.y * RENDERED_PIXEL_SIZE_CONFIG;
-      
-      let pixelColor = pixel.color;
-      
-      // Apply visualization mode effects
-      if (visualizationMode === 'ownership') {
-        if (pixel.ownerId === 'currentUserPixelMaster') {
-          pixelColor = '#00FF00'; // Green for user's pixels
-        } else if (pixel.ownerId) {
-          pixelColor = '#0080FF'; // Blue for other users
+    // 2. Draw sold pixels over the base map
+    if (visualizationMode === 'normal') {
+      soldPixels.forEach(pixel => {
+        const renderX = pixel.x * RENDERED_PIXEL_SIZE_CONFIG;
+        const renderY = pixel.y * RENDERED_PIXEL_SIZE_CONFIG;
+        
+        if (pixel.pixelImageUrl) {
+          const img = loadedPixelImages.get(pixel.pixelImageUrl);
+          if (img && img.complete) {
+              ctx.drawImage(img, renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          } else {
+              ctx.fillStyle = pixel.color;
+              ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
+          }
         } else {
-          pixelColor = '#FFD700'; // Gold for system pixels
+          ctx.fillStyle = pixel.color;
+          ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
         }
-      } else if (visualizationMode === 'temporal') {
-        // Color based on age (mock implementation)
-        const age = Math.random();
-        const red = Math.floor(255 * age);
-        const blue = Math.floor(255 * (1 - age));
-        pixelColor = `rgb(${red}, 100, ${blue})`;
-      } else if (visualizationMode === 'rarity') {
-        // Color based on rarity
-        const rarities = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário'];
-        const rarity = rarities[Math.floor(Math.random() * rarities.length)];
-        const rarityColors = {
-          'Comum': '#808080',
-          'Incomum': '#00FF00', 
-          'Raro': '#0080FF',
-          'Épico': '#8000FF',
-          'Lendário': '#FFD700'
-        };
-        pixelColor = rarityColors[rarity as keyof typeof rarityColors] || pixel.color;
-      }
-      
-      if (pixel.pixelImageUrl) {
-        const img = loadedPixelImages.get(pixel.pixelImageUrl);
-        if (img && img.complete) {
-            ctx.drawImage(img, renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-        } else {
-            ctx.fillStyle = pixelColor;
-            ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-        }
-      } else {
-        ctx.fillStyle = pixelColor;
-        ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-      }
-    });
-
-    // 4. Draw grid overlay if enabled
+      });
+    }
+    
+    // 3. Draw grid overlay if enabled
     if (showGrid && zoom > 5) {
-      ctx.strokeStyle = 'rgba(212, 167, 87, 0.3)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
       ctx.lineWidth = 0.5;
       
-      // Draw vertical lines
-      for (let x = 0; x < canvasDrawWidth; x += RENDERED_PIXEL_SIZE_CONFIG * 10) {
+      for (let col = 0; col <= LOGICAL_GRID_COLS_CONFIG; col++) {
+        const x = col * RENDERED_PIXEL_SIZE_CONFIG;
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvasDrawHeight);
         ctx.stroke();
       }
       
-      // Draw horizontal lines
-      for (let y = 0; y < canvasDrawHeight; y += RENDERED_PIXEL_SIZE_CONFIG * 10) {
+      for (let row = 0; row <= logicalGridRows; row++) {
+        const y = row * RENDERED_PIXEL_SIZE_CONFIG;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvasDrawWidth, y);
@@ -549,176 +450,100 @@ export default function PixelGrid() {
       }
     }
 
-  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages, visualizationMode, showGrid, zoom, showDensityHeatmap, densityData, valueData]);
-
-  // New navigation functions
-  const saveZoomBookmark = useCallback((name: string) => {
-    const bookmark: ZoomBookmark = {
-      id: Date.now().toString(),
-      name,
-      x: -position.x / zoom,
-      y: -position.y / zoom,
-      zoom,
-      timestamp: new Date()
-    };
+  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages, visualizationMode, showGrid, zoom]);
+  
+  // Draw landmarks overlay
+  useEffect(() => {
+    if (!showLandmarks || !mapData || !strokeColor || !outlineCanvasRef.current || containerSizeRef.current.width === 0) return;
     
-    const newBookmarks = [...zoomBookmarks, bookmark].slice(-10); // Keep last 10
-    setZoomBookmarks(newBookmarks);
-    localStorage.setItem(ZOOM_BOOKMARKS_KEY, JSON.stringify(newBookmarks));
+    const canvas = outlineCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     
-    toast({ 
-      title: "📍 Bookmark Guardado", 
-      description: `Localização "${name}" guardada com sucesso.` 
-    });
-  }, [position, zoom, zoomBookmarks, toast]);
-
-  const goToBookmark = useCallback((bookmark: ZoomBookmark) => {
-    clearAutoResetTimeout();
-    setZoom(bookmark.zoom);
-    setPosition({ x: -bookmark.x * bookmark.zoom, y: -bookmark.y * bookmark.zoom });
+    // Draw landmark indicators
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    ctx.scale(zoom, zoom);
     
-    toast({ 
-      title: "🎯 Navegando", 
-      description: `Indo para "${bookmark.name}"` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const goToLandmark = useCallback((landmarkName: string) => {
-    const landmark = LANDMARK_COORDINATES[landmarkName as keyof typeof LANDMARK_COORDINATES];
-    if (!landmark) return;
-    
-    clearAutoResetTimeout();
-    const containerWidth = containerRef.current?.offsetWidth || 0;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-    
-    const targetX = -landmark.x * RENDERED_PIXEL_SIZE_CONFIG * landmark.zoom + containerWidth / 2;
-    const targetY = -landmark.y * RENDERED_PIXEL_SIZE_CONFIG * landmark.zoom + effectiveContainerHeight / 2;
-    
-    setZoom(landmark.zoom);
-    setPosition({ x: targetX, y: targetY });
-    setHighlightedPixel({ x: landmark.x, y: landmark.y });
-    
-    toast({ 
-      title: "🏛️ Marco Histórico", 
-      description: `Navegando para ${landmarkName}` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const searchByPostalCode = useCallback((postalCode: string) => {
-    const coords = POSTAL_CODE_COORDINATES[postalCode as keyof typeof POSTAL_CODE_COORDINATES];
-    if (!coords) {
-      toast({ 
-        title: "❌ Código Postal", 
-        description: "Código postal não encontrado." 
-      });
-      return;
-    }
-    
-    clearAutoResetTimeout();
-    const containerWidth = containerRef.current?.offsetWidth || 0;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-    
-    const targetZoom = 15;
-    const targetX = -coords.x * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
-    const targetY = -coords.y * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
-    
-    setZoom(targetZoom);
-    setPosition({ x: targetX, y: targetY });
-    setHighlightedPixel({ x: coords.x, y: coords.y });
-    
-    toast({ 
-      title: "📮 Código Postal", 
-      description: `${postalCode} - ${coords.region}` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const zoomToRegion = useCallback((regionName: string) => {
-    // Define region bounds (mock implementation)
-    const regionBounds = {
-      'Lisboa': { x: 570, y: 1350, width: 30, height: 30, zoom: 8 },
-      'Porto': { x: 630, y: 1250, width: 25, height: 25, zoom: 10 },
-      'Coimbra': { x: 640, y: 1170, width: 20, height: 20, zoom: 12 },
-      'Braga': { x: 635, y: 1200, width: 15, height: 15, zoom: 15 },
-      'Faro': { x: 700, y: 1550, width: 20, height: 20, zoom: 12 }
-    };
-    
-    const region = regionBounds[regionName as keyof typeof regionBounds];
-    if (!region) return;
-    
-    clearAutoResetTimeout();
-    const containerWidth = containerRef.current?.offsetWidth || 0;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-    
-    const centerX = region.x + region.width / 2;
-    const centerY = region.y + region.height / 2;
-    
-    const targetX = -centerX * RENDERED_PIXEL_SIZE_CONFIG * region.zoom + containerWidth / 2;
-    const targetY = -centerY * RENDERED_PIXEL_SIZE_CONFIG * region.zoom + effectiveContainerHeight / 2;
-    
-    setZoom(region.zoom);
-    setPosition({ x: targetX, y: targetY });
-    
-    toast({ 
-      title: "🗺️ Região", 
-      description: `Navegando para ${regionName}` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const handleDoubleClick = useCallback((event: React.MouseEvent) => {
-    if (!containerRef.current || !pixelBitmap) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const clickXInContainer = event.clientX - rect.left;
-    const clickYInContainer = event.clientY - rect.top;
-
-    const xOnContent = (clickXInContainer - position.x) / zoom;
-    const yOnContent = (clickYInContainer - position.y) / zoom;
-
-    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-
-    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
-      // Smart zoom to this area
-      const targetZoom = Math.min(zoom * 2, MAX_ZOOM);
-      const containerWidth = containerRef.current.offsetWidth;
-      const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
+    Object.entries(LANDMARK_COORDINATES).forEach(([name, coords]) => {
+      const x = coords.x * RENDERED_PIXEL_SIZE_CONFIG;
+      const y = coords.y * RENDERED_PIXEL_SIZE_CONFIG;
       
-      const targetX = -logicalCol * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
-      const targetY = -logicalRow * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
-      
-      setZoom(targetZoom);
-      setPosition({ x: targetX, y: targetY });
-      
-      vibrate('medium');
-      toast({ 
-        title: "🔍 Zoom Inteligente", 
-        description: `Focando no pixel (${logicalCol}, ${logicalRow})` 
-      });
+      // Only draw if landmark is visible and zoom is appropriate
+      if (zoom > 5) {
+        ctx.fillStyle = '#FFD700';
+        ctx.strokeStyle = '#FF8800';
+        ctx.lineWidth = 2 / zoom;
+        
+        // Draw star shape
+        ctx.beginPath();
+        const size = 8 / zoom;
+        for (let i = 0; i < 5; i++) {
+          const angle = (i * 144 - 90) * Math.PI / 180;
+          const x1 = x + Math.cos(angle) * size;
+          const y1 = y + Math.sin(angle) * size;
+          if (i === 0) ctx.moveTo(x1, y1);
+          else ctx.lineTo(x1, y1);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        // Draw label if zoom is high enough
+        if (zoom > 15) {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = `${10 / zoom}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.fillText(name, x, y + 15 / zoom);
+        }
+      }
+    });
+    
+    ctx.restore();
+  }, [showLandmarks, mapData, strokeColor, position, zoom, outlineCanvasRef.current]);
+  
+  // Draw density overlay
+  useEffect(() => {
+    if (!pixelDensityOverlay || !pixelBitmap || !outlineCanvasRef.current) return;
+    
+    const canvas = outlineCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    ctx.scale(zoom, zoom);
+    
+    // Calculate density in 10x10 pixel blocks
+    const blockSize = 10;
+    for (let blockY = 0; blockY < logicalGridRows; blockY += blockSize) {
+      for (let blockX = 0; blockX < LOGICAL_GRID_COLS_CONFIG; blockX += blockSize) {
+        let pixelCount = 0;
+        
+        for (let y = blockY; y < Math.min(blockY + blockSize, logicalGridRows); y++) {
+          for (let x = blockX; x < Math.min(blockX + blockSize, LOGICAL_GRID_COLS_CONFIG); x++) {
+            if (pixelBitmap[y * LOGICAL_GRID_COLS_CONFIG + x] === 1) {
+              pixelCount++;
+            }
+          }
+        }
+        
+        const density = pixelCount / (blockSize * blockSize);
+        if (density > 0.3) {
+          const alpha = density * 0.5;
+          ctx.fillStyle = `rgba(255, 100, 100, ${alpha})`;
+          ctx.fillRect(
+            blockX * RENDERED_PIXEL_SIZE_CONFIG,
+            blockY * RENDERED_PIXEL_SIZE_CONFIG,
+            blockSize * RENDERED_PIXEL_SIZE_CONFIG,
+            blockSize * RENDERED_PIXEL_SIZE_CONFIG
+          );
+        }
+      }
     }
-  }, [containerRef, pixelBitmap, position, zoom, vibrate, toast]);
-
-  const getVisualizationModeColor = (mode: VisualizationMode) => {
-    switch (mode) {
-      case 'thermal': return 'text-red-500';
-      case 'value': return 'text-green-500';
-      case 'ownership': return 'text-blue-500';
-      case 'temporal': return 'text-purple-500';
-      case 'rarity': return 'text-yellow-500';
-      default: return 'text-primary';
-    }
-  };
-
-  const getVisualizationModeIcon = (mode: VisualizationMode) => {
-    switch (mode) {
-      case 'thermal': return '🔥';
-      case 'value': return '💰';
-      case 'ownership': return '👤';
-      case 'temporal': return '⏰';
-      case 'rarity': return '💎';
-      default: return '🗺️';
-    }
-  };
-
+    
+    ctx.restore();
+  }, [pixelDensityOverlay, pixelBitmap, position, zoom]);
   
   useEffect(() => {
     const container = containerRef.current;
@@ -799,31 +624,7 @@ export default function PixelGrid() {
     }
     ctx.restore();
 
-    // Draw coordinates overlay if enabled
-    if (showCoordinates && zoom > 10) {
-      ctx.save();
-      ctx.translate(position.x, position.y);
-      ctx.scale(zoom, zoom);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.font = `${8 / zoom}px monospace`;
-      ctx.textAlign = 'center';
-      
-      // Show coordinates every 10 pixels when zoomed in
-      for (let x = 0; x < LOGICAL_GRID_COLS_CONFIG; x += 10) {
-        for (let y = 0; y < logicalGridRows; y += 10) {
-          if (pixelBitmap && pixelBitmap[y * LOGICAL_GRID_COLS_CONFIG + x] === 1) {
-            ctx.fillText(
-              `${x},${y}`,
-              x * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2,
-              y * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2
-            );
-          }
-        }
-      }
-      ctx.restore();
-    }
-
-  }, [mapData, zoom, position, strokeColor, highlightedPixel, selectedPixelDetails, showCoordinates, pixelBitmap]);
+  }, [mapData, zoom, position, strokeColor, highlightedPixel, selectedPixelDetails]);
   
 
   useEffect(() => { 
@@ -882,6 +683,251 @@ export default function PixelGrid() {
 
   const handleZoomIn = () => { clearAutoResetTimeout(); setZoom((prevZoom) => Math.min(prevZoom * 1.2, MAX_ZOOM)); };
   const handleZoomOut = () => { clearAutoResetTimeout(); setZoom((prevZoom) => Math.max(prevZoom / 1.2, MIN_ZOOM)); };
+
+  // New navigation functions
+  const handleSearch = (query: string) => {
+    const results: SearchResult[] = [];
+    
+    // Search landmarks
+    Object.entries(LANDMARK_COORDINATES).forEach(([name, coords]) => {
+      if (name.toLowerCase().includes(query.toLowerCase())) {
+        results.push({
+          type: 'landmark',
+          name,
+          coordinates: { x: coords.x, y: coords.y },
+          zoom: coords.zoom,
+          description: `Marco histórico em ${name}`
+        });
+      }
+    });
+    
+    // Search postal codes
+    Object.entries(POSTAL_CODE_COORDINATES).forEach(([code, data]) => {
+      if (code.includes(query) || data.region.toLowerCase().includes(query.toLowerCase())) {
+        results.push({
+          type: 'postal',
+          name: `${code} - ${data.region}`,
+          coordinates: { x: data.x, y: data.y },
+          zoom: 20,
+          description: `Código postal ${code}`
+        });
+      }
+    });
+    
+    // Search coordinates (format: x,y or x y)
+    const coordMatch = query.match(/(\d+)[,\s]+(\d+)/);
+    if (coordMatch) {
+      const x = parseInt(coordMatch[1]);
+      const y = parseInt(coordMatch[2]);
+      if (x >= 0 && x < LOGICAL_GRID_COLS_CONFIG && y >= 0 && y < logicalGridRows) {
+        results.push({
+          type: 'coordinates',
+          name: `Pixel (${x}, ${y})`,
+          coordinates: { x, y },
+          zoom: 25,
+          description: 'Coordenadas específicas'
+        });
+      }
+    }
+    
+    setSearchResults(results);
+  };
+
+  const navigateToResult = (result: SearchResult) => {
+    if (!containerRef.current) return;
+    
+    clearAutoResetTimeout();
+    const targetZoom = result.zoom || 15;
+    const containerWidth = containerRef.current.offsetWidth;
+    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
+
+    const targetX = -result.coordinates.x * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
+    const targetY = -result.coordinates.y * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
+    
+    if (animateTransitions) {
+      // Smooth transition animation
+      const startZoom = zoom;
+      const startPos = { ...position };
+      const duration = 1000;
+      const startTime = Date.now();
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+        
+        const currentZoom = startZoom + (targetZoom - startZoom) * easeProgress;
+        const currentX = startPos.x + (targetX - startPos.x) * easeProgress;
+        const currentY = startPos.y + (targetY - startPos.y) * easeProgress;
+        
+        setZoom(currentZoom);
+        setPosition({ x: currentX, y: currentY });
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    } else {
+      setPosition({ x: targetX, y: targetY });
+      setZoom(targetZoom);
+    }
+    
+    setShowSearch(false);
+    setSearchQuery('');
+    
+    toast({ 
+      title: "Navegação Concluída", 
+      description: `Centrado em ${result.name}` 
+    });
+  };
+
+  const saveZoomBookmark = () => {
+    const bookmark: ZoomBookmark = {
+      id: Date.now().toString(),
+      name: `Bookmark ${zoomBookmarks.length + 1}`,
+      position: { ...position },
+      zoom,
+      timestamp: new Date()
+    };
+    
+    const newBookmarks = [bookmark, ...zoomBookmarks].slice(0, 10); // Max 10 bookmarks
+    setZoomBookmarks(newBookmarks);
+    localStorage.setItem(ZOOM_BOOKMARKS_KEY, JSON.stringify(newBookmarks));
+    
+    toast({
+      title: "Bookmark Guardado",
+      description: "Localização guardada nos seus favoritos."
+    });
+  };
+
+  const loadZoomBookmark = (bookmark: ZoomBookmark) => {
+    clearAutoResetTimeout();
+    setPosition(bookmark.position);
+    setZoom(bookmark.zoom);
+    setShowBookmarks(false);
+    
+    toast({
+      title: "Bookmark Carregado",
+      description: `Navegado para ${bookmark.name}`
+    });
+  };
+
+  const deleteZoomBookmark = (bookmarkId: string) => {
+    const newBookmarks = zoomBookmarks.filter(b => b.id !== bookmarkId);
+    setZoomBookmarks(newBookmarks);
+    localStorage.setItem(ZOOM_BOOKMARKS_KEY, JSON.stringify(newBookmarks));
+    
+    toast({
+      title: "Bookmark Eliminado",
+      description: "Localização removida dos favoritos."
+    });
+  };
+
+  const getVisualizationColor = (pixel: any, mode: VisualizationMode) => {
+    switch (mode) {
+      case 'thermal':
+        // Simulate density - more red for higher density areas
+        const density = Math.random();
+        return density > 0.7 ? '#FF0000' : density > 0.4 ? '#FF8800' : '#00FF00';
+      
+      case 'value':
+        // Simulate value - more expensive pixels are redder
+        const value = Math.random() * 1000;
+        const intensity = Math.min(value / 500, 1);
+        return `rgb(${Math.floor(255 * intensity)}, ${Math.floor(255 * (1 - intensity))}, 0)`;
+      
+      case 'ownership':
+        // Different colors for different owner types
+        if (pixel?.ownerId === 'currentUserPixelMaster') return '#00FF00'; // User's pixels
+        if (pixel?.ownerId && pixel.ownerId !== 'Sistema') return '#0088FF'; // Other users
+        return unsoldColor; // Available pixels
+      
+      case 'temporal':
+        // Simulate age - newer pixels are brighter
+        const age = Math.random();
+        const brightness = Math.floor(255 * (1 - age * 0.7));
+        return `rgb(${brightness}, ${brightness}, 255)`;
+      
+      case 'rarity':
+        // Different colors for different rarities
+        const rarities = ['#808080', '#00FF00', '#0088FF', '#8800FF', '#FFD700'];
+        return rarities[Math.floor(Math.random() * rarities.length)];
+      
+      default:
+        return pixel?.color || unsoldColor;
+    }
+  };
+
+  // Update GPS coordinates based on current view center
+  const updateCurrentGPS = () => {
+    if (!containerRef.current) return;
+    
+    const containerWidth = containerRef.current.offsetWidth;
+    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
+    
+    const centerX = (containerWidth / 2 - position.x) / zoom / RENDERED_PIXEL_SIZE_CONFIG;
+    const centerY = (effectiveContainerHeight / 2 - position.y) / zoom / RENDERED_PIXEL_SIZE_CONFIG;
+    
+    const gps = mapPixelToApproxGps(centerX, centerY, LOGICAL_GRID_COLS_CONFIG, logicalGridRows);
+    setCurrentGPS(gps);
+  };
+
+  // Load bookmarks from localStorage
+  useEffect(() => {
+    const savedBookmarks = localStorage.getItem(ZOOM_BOOKMARKS_KEY);
+    if (savedBookmarks) {
+      try {
+        const bookmarks = JSON.parse(savedBookmarks).map((b: any) => ({
+          ...b,
+          timestamp: new Date(b.timestamp)
+        }));
+        setZoomBookmarks(bookmarks);
+      } catch (error) {
+        console.error('Error loading bookmarks:', error);
+      }
+    }
+  }, []);
+
+  // Update GPS coordinates when view changes
+  useEffect(() => {
+    updateCurrentGPS();
+  }, [position, zoom]);
+
+  // Handle double-click for smart zoom
+  const handleDoubleClick = (event: React.MouseEvent) => {
+    if (!containerRef.current || !pixelBitmap) return;
+    
+    clearAutoResetTimeout();
+    const rect = containerRef.current.getBoundingClientRect();
+    const clickXInContainer = event.clientX - rect.left;
+    const clickYInContainer = event.clientY - rect.top;
+
+    const xOnContent = (clickXInContainer - position.x) / zoom;
+    const yOnContent = (clickYInContainer - position.y) / zoom;
+
+    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+
+    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
+      const targetZoom = zoom < 10 ? 15 : zoom < 25 ? 35 : 1; // Smart zoom levels
+      const containerWidth = containerRef.current.offsetWidth;
+      const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
+
+      const targetX = -logicalCol * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
+      const targetY = -logicalRow * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
+      
+      setPosition({ x: targetX, y: targetY });
+      setZoom(targetZoom);
+      
+      vibrate('medium');
+      toast({
+        title: "Zoom Inteligente",
+        description: `Focado no pixel (${logicalCol}, ${logicalRow})`
+      });
+    }
+  };
 
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -1167,11 +1213,10 @@ export default function PixelGrid() {
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
           <EnhancedTooltip
             title="Controles do Mapa"
-            description="Navegação e informações do mapa"
+            description="Use estes controles para navegar pelo mapa"
             stats={[
               { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> },
-              { label: 'Modo', value: visualizationMode, icon: <Eye className="h-4 w-4" /> }
+              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
             ]}
           >
             <div className="space-y-2">
@@ -1200,32 +1245,12 @@ export default function PixelGrid() {
                   </TooltipTrigger>
                   <TooltipContent><p>Resetar Vista</p></TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      pointerEvents="auto" 
-                      variant={showGrid ? "default" : "outline"} 
-                      size="icon" 
-                      onClick={() => setShowGrid(!showGrid)}
-                      aria-label="Toggle Grid"
-                    >
-                      <Grid3X3 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>{showGrid ? 'Ocultar' : 'Mostrar'} Grelha</p></TooltipContent>
-                </Tooltip>
               </TooltipProvider>
             </div>
           </EnhancedTooltip>
           
           {/* Enhanced info panel */}
           <div className="mt-2 p-3 bg-background/90 rounded-md text-xs font-code border border-primary/20 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Modo:</span>
-              <span className={`font-bold ${getVisualizationModeColor(visualizationMode)}`}>
-                {getVisualizationModeIcon(visualizationMode)} {visualizationMode}
-              </span>
-            </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Zoom:</span>
               <span className="text-primary font-bold">{zoom.toFixed(2)}x</span>
@@ -1235,28 +1260,39 @@ export default function PixelGrid() {
               <span className="text-accent">({Math.round(position.x)}, {Math.round(position.y)})</span>
             </div>
             {highlightedPixel && (
-              <>
-                <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-                  <span className="text-muted-foreground">Pixel:</span>
-                  <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
-                </div>
-                {highlightedPixel && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">GPS:</span>
-                    <span className="text-green-500 font-bold text-xs">
-                      {(() => {
-                        const gps = mapPixelToApproxGps(highlightedPixel.x, highlightedPixel.y, LOGICAL_GRID_COLS_CONFIG, logicalGridRows);
-                        return gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}` : 'N/A';
-                      })()}
-                    </span>
-                  </div>
-                )}
-              </>
+              <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+                <span className="text-muted-foreground">Pixel:</span>
+                <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
+              </div>
             )}
             <div className="flex items-center justify-between border-t border-primary/20 pt-1">
               <span className="text-muted-foreground">Pixels Ativos:</span>
               <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
             </div>
+            
+            {/* Visualization Mode Info */}
+            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+              <span className="text-muted-foreground">Modo:</span>
+              <span className="text-accent font-bold">{VISUALIZATION_MODES[visualizationMode].name}</span>
+            </div>
+            
+            {/* GPS Coordinates */}
+            {showCoordinates && currentGPS && (
+              <div className="border-t border-primary/20 pt-1 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">GPS:</span>
+                  <span className="text-blue-500 font-bold text-xs">
+                    {currentGPS.lat.toFixed(4)}°N
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground"></span>
+                  <span className="text-blue-500 font-bold text-xs">
+                    {Math.abs(currentGPS.lon).toFixed(4)}°W
+                  </span>
+                </div>
+              </div>
+            )}
             
             {/* Online status indicator */}
             <div className="flex items-center justify-between border-t border-primary/20 pt-1">
@@ -1356,6 +1392,133 @@ export default function PixelGrid() {
         
         {/* Zoom Controls */}
         <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
+          {/* Search */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => setShowSearch(!showSearch)}
+              className={showSearch ? 'bg-primary/20 border-primary' : ''}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {showSearch && (
+              <div className="absolute top-12 right-0 w-80 bg-card/95 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl p-4 space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Pesquisar landmarks, códigos postais..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (e.target.value) handleSearch(e.target.value);
+                    }}
+                    className="pl-10"
+                  />
+                </div>
+                
+                {searchResults.length > 0 && (
+                  <div className="max-h-48 overflow-y-auto space-y-2">
+                    {searchResults.map((result, index) => (
+                      <div
+                        key={index}
+                        className="p-2 hover:bg-primary/10 rounded cursor-pointer transition-colors"
+                        onClick={() => navigateToResult(result)}
+                      >
+                        <div className="font-medium text-sm">{result.name}</div>
+                        <div className="text-xs text-muted-foreground">{result.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="text-xs text-muted-foreground">
+                  Experimente: "Torre de Belém", "1000", "Lisboa", "580,1355"
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Visualization Mode */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => {
+                const modes = Object.keys(VISUALIZATION_MODES) as VisualizationMode[];
+                const currentIndex = modes.indexOf(visualizationMode);
+                const nextMode = modes[(currentIndex + 1) % modes.length];
+                setVisualizationMode(nextMode);
+                vibrate('light');
+                toast({
+                  title: "Modo de Visualização",
+                  description: `Mudou para: ${VISUALIZATION_MODES[nextMode].name}`
+                });
+              }}
+              className={visualizationMode !== 'normal' ? 'bg-accent/20 border-accent' : ''}
+            >
+              {VISUALIZATION_MODES[visualizationMode].icon}
+            </Button>
+          </div>
+          
+          {/* Bookmarks */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => setShowBookmarks(!showBookmarks)}
+              className={showBookmarks ? 'bg-yellow-500/20 border-yellow-500' : ''}
+            >
+              <Bookmark className="h-5 w-5" />
+            </Button>
+            
+            {showBookmarks && (
+              <div className="absolute top-12 right-0 w-72 bg-card/95 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">Localizações Guardadas</h3>
+                  <Button size="sm" onClick={saveZoomBookmark}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Guardar
+                  </Button>
+                </div>
+                
+                <div className="max-h-48 overflow-y-auto space-y-2">
+                  {zoomBookmarks.map((bookmark) => (
+                    <div
+                      key={bookmark.id}
+                      className="flex items-center justify-between p-2 hover:bg-primary/10 rounded"
+                    >
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => loadZoomBookmark(bookmark)}
+                      >
+                        <div className="font-medium text-sm">{bookmark.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Zoom: {bookmark.zoom.toFixed(1)}x • {bookmark.timestamp.toLocaleDateString()}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => deleteZoomBookmark(bookmark.id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  {zoomBookmarks.length === 0 && (
+                    <div className="text-center text-muted-foreground text-sm py-4">
+                      Nenhuma localização guardada
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1381,212 +1544,44 @@ export default function PixelGrid() {
               </TooltipTrigger>
               <TooltipContent><p>Resetar Vista</p></TooltipContent>
             </Tooltip>
+            
+            {/* Toggle Grid */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => {
+                    setShowGrid(!showGrid);
+                    vibrate('light');
+                  }}
+                  className={showGrid ? 'bg-primary/20 border-primary' : ''}
+                >
+                  <Grid3X3 className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Mostrar Grelha</p></TooltipContent>
+            </Tooltip>
+            
+            {/* Toggle Coordinates */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => setShowCoordinates(!showCoordinates)}
+                  className={showCoordinates ? 'bg-green-500/20 border-green-500' : ''}
+                >
+                  <MapPin className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Coordenadas GPS</p></TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </div>
 
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
-          {/* Search and Navigation */}
-          <EnhancedTooltip
-            title="Navegação Avançada"
-            description="Pesquisar por landmarks, códigos postais e regiões"
-            interactive={true}
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600">
-                  <Search className="h-6 w-6" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl">
-                <DialogHeader>
-                  <DialogTitle className="font-headline text-gradient-gold">Navegação Inteligente</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground">
-                    Encontre qualquer localização em Portugal
-                  </DialogDescriptionElement>
-                </DialogHeader>
-                
-                <div className="space-y-4">
-                  {/* Search Input */}
-                  <div className="space-y-2">
-                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Ex: Torre de Belém, 1000, Lisboa..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          // Try postal code first
-                          if (/^\d{4}/.test(searchQuery)) {
-                            searchByPostalCode(searchQuery.substring(0, 4));
-                          } else if (LANDMARK_COORDINATES[searchQuery as keyof typeof LANDMARK_COORDINATES]) {
-                            goToLandmark(searchQuery);
-                          } else {
-                            // Try region
-                            zoomToRegion(searchQuery);
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Quick Landmarks */}
-                  <div className="space-y-2">
-                    <Label>Marcos Históricos</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.keys(LANDMARK_COORDINATES).slice(0, 6).map(landmark => (
-                        <Button
-                          key={landmark}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => goToLandmark(landmark)}
-                          className="text-xs"
-                        >
-                          🏛️ {landmark.split(' ')[0]}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Quick Regions */}
-                  <div className="space-y-2">
-                    <Label>Regiões</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {['Lisboa', 'Porto', 'Coimbra', 'Braga', 'Faro'].map(region => (
-                        <Button
-                          key={region}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => zoomToRegion(region)}
-                          className="text-xs"
-                        >
-                          📍 {region}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Saved Bookmarks */}
-                  {zoomBookmarks.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Localizações Guardadas</Label>
-                      <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {zoomBookmarks.slice(-5).map(bookmark => (
-                          <div key={bookmark.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
-                            <span className="text-sm truncate">{bookmark.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => goToBookmark(bookmark)}
-                              className="h-6 px-2"
-                            >
-                              Ir
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Save Current Location */}
-                  <Button
-                    onClick={() => {
-                      const name = prompt('Nome para esta localização:');
-                      if (name) saveZoomBookmark(name);
-                    }}
-                    className="w-full"
-                  >
-                    <Bookmark className="h-4 w-4 mr-2" />
-                    Guardar Localização Atual
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </EnhancedTooltip>
-          
-          {/* Visualization Modes */}
-          <EnhancedTooltip
-            title="Modos de Visualização"
-            description="Diferentes formas de ver o mapa"
-            interactive={true}
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
-                  <Eye className="h-6 w-6" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl">
-                <DialogHeader>
-                  <DialogTitle className="font-headline text-gradient-gold">Modos de Visualização</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground">
-                    Explore o mapa de diferentes perspetivas
-                  </DialogDescriptionElement>
-                </DialogHeader>
-                
-                <div className="space-y-4">
-                  {/* Visualization Mode Buttons */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { mode: 'default' as VisualizationMode, label: 'Padrão', icon: '🗺️', desc: 'Vista normal' },
-                      { mode: 'thermal' as VisualizationMode, label: 'Térmico', icon: '🔥', desc: 'Densidade de pixels' },
-                      { mode: 'value' as VisualizationMode, label: 'Valor', icon: '💰', desc: 'Preços por cor' },
-                      { mode: 'ownership' as VisualizationMode, label: 'Propriedade', icon: '👤', desc: 'Por proprietário' },
-                      { mode: 'temporal' as VisualizationMode, label: 'Temporal', icon: '⏰', desc: 'Por idade' },
-                      { mode: 'rarity' as VisualizationMode, label: 'Raridade', icon: '💎', desc: 'Por raridade' }
-                    ].map(({ mode, label, icon, desc }) => (
-                      <Button
-                        key={mode}
-                        variant={visualizationMode === mode ? 'default' : 'outline'}
-                        onClick={() => setVisualizationMode(mode)}
-                        className="h-16 flex flex-col gap-1"
-                      >
-                        <span className="text-lg">{icon}</span>
-                        <span className="text-xs">{label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Display Options */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Mostrar Grelha</Label>
-                      <Switch checked={showGrid} onCheckedChange={setShowGrid} />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Coordenadas</Label>
-                      <Switch checked={showCoordinates} onCheckedChange={setShowCoordinates} />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Mapa de Calor</Label>
-                      <Switch checked={showDensityHeatmap} onCheckedChange={setShowDensityHeatmap} />
-                    </div>
-                  </div>
-                  
-                  {/* Current Mode Info */}
-                  <div className="p-3 bg-muted/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">{getVisualizationModeIcon(visualizationMode)}</span>
-                      <span className="font-medium">Modo: {visualizationMode}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {visualizationMode === 'default' && 'Vista normal do mapa com cores originais'}
-                      {visualizationMode === 'thermal' && 'Mostra densidade de pixels por área'}
-                      {visualizationMode === 'value' && 'Cores representam valores dos pixels'}
-                      {visualizationMode === 'ownership' && 'Verde=seus, Azul=outros, Dourado=sistema'}
-                      {visualizationMode === 'temporal' && 'Vermelho=recente, Azul=antigo'}
-                      {visualizationMode === 'rarity' && 'Cores representam raridade dos pixels'}
-                    </p>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </EnhancedTooltip>
-
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
             <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
@@ -1679,14 +1674,6 @@ export default function PixelGrid() {
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowGrid(!showGrid)}>
-                    <Grid3X3 className="mr-2 h-4 w-4" />
-                    {showGrid ? 'Ocultar' : 'Mostrar'} Grelha
-                  </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowCoordinates(!showCoordinates)}>
-                    <MapPinIconLucide className="mr-2 h-4 w-4" />
-                    {showCoordinates ? 'Ocultar' : 'Mostrar'} Coordenadas
-                  </Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
                     <Brain className="mr-2 h-4 w-4" />
                     Assistente IA
