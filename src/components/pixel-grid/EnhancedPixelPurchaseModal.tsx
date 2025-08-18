@@ -303,12 +303,18 @@ export default function EnhancedPixelPurchaseModal({
       }
     }
     
-    drawCanvas();
+    // Redesenhar o canvas principal imediatamente
+    requestAnimationFrame(() => drawCanvas());
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Capturar o ponteiro para garantir que recebemos todos os eventos
+    const target = e.currentTarget as HTMLCanvasElement;
+    target.setPointerCapture(e.pointerId);
+    
     const coords = getCanvasCoordinates(e);
     if (!coords) return;
     
@@ -345,7 +351,14 @@ export default function EnhancedPixelPurchaseModal({
     setLastPoint(coords);
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Liberar a captura do ponteiro
+    const target = e.currentTarget as HTMLCanvasElement;
+    target.releasePointerCapture(e.pointerId);
+    
     setIsDrawing(false);
     setLastPoint(null);
   };
@@ -378,7 +391,7 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(previousState, 0, 0);
     setUndoStack(prev => prev.slice(0, -1));
     
-    drawCanvas();
+    requestAnimationFrame(() => drawCanvas());
     vibrate('medium');
   };
 
@@ -398,7 +411,7 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(nextState, 0, 0);
     setRedoStack(prev => prev.slice(0, -1));
     
-    drawCanvas();
+    requestAnimationFrame(() => drawCanvas());
     vibrate('medium');
   };
 
@@ -606,15 +619,13 @@ export default function EnhancedPixelPurchaseModal({
               style={{ 
                 width: '280px', 
                 height: '280px',
-                imageRendering: 'pixelated'
+                imageRendering: 'pixelated',
+                touchAction: 'none'
               }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
-              onPointerLeave={handlePointerUp}
-              onTouchStart={(e) => e.preventDefault()}
-              onTouchMove={(e) => e.preventDefault()}
-              onTouchEnd={(e) => e.preventDefault()}
+              onPointerCancel={handlePointerUp}
             />
             
             {/* Indicador de Camada Ativa */}
