@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -50,7 +51,7 @@ import {
   CheckCircle, AlertTriangle, Info, Compass, Navigation,
   Layers, Brush, Eraser, PaintBucket, Type, Grid, Maximize,
   Minimize, RotateCcw, RotateCw, FlipHorizontal, FlipVertical,
-  Save, Undo, Redo, ZoomIn, ZoomOut, Move, Hand, Crosshair
+  Save, Undo, Redo, ZoomIn, ZoomOut, Move, Hand, Crosshair, Lock
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -1294,6 +1295,9 @@ export default function CommunityPage() {
     return (
       <Dialog open={isViewingStories} onOpenChange={setIsViewingStories}>
         <DialogContent className="max-w-md h-[90vh] p-0 bg-black border-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Story de {currentStory.author.name}</DialogTitle>
+          </DialogHeader>
           <div className="relative h-full overflow-hidden">
             {/* Progress bars - Fixed positioning */}
             <div className="absolute top-4 left-4 right-4 z-50 flex gap-1">
@@ -1724,6 +1728,10 @@ export default function CommunityPage() {
     );
   };
 
+  const GroupIcon: React.FC = () => {
+    return <Lock className="h-4 w-4 text-muted-foreground" />;
+  }
+
   const renderGroupModal = () => {
     if (!selectedGroup) return null;
 
@@ -1787,7 +1795,7 @@ export default function CommunityPage() {
               {/* Moderators */}
               <div>
                 <h3 className="font-semibold mb-3 flex items-center">
-                  <Shield className="h-4 w-4 mr-2" />
+                  <ShieldCheck className="h-4 w-4 mr-2" />
                   Moderadores
                 </h3>
                 <div className="space-y-2">
@@ -2845,16 +2853,14 @@ export default function CommunityPage() {
                           className="w-16 h-16 rounded-full"
                         />
                         <div className="flex-1">
-                          <h3 
-                            className="font-semibold text-lg cursor-pointer hover:text-primary"
+                          <div 
+                            className="font-semibold text-lg cursor-pointer hover:text-primary flex items-center gap-2"
                             onClick={() => setSelectedGroup(group)}
                           >
                             {group.name}
-                          </h3>
+                            {group.isPrivate && <GroupIcon />}
+                          </div>
                           <Badge variant="outline" className="text-xs">{group.category}</Badge>
-                          {group.isPrivate && (
-                            <Badge variant="outline" className="text-xs ml-2">Privado</Badge>
-                          )}
                         </div>
                       </div>
                       
