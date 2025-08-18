@@ -875,6 +875,40 @@ export default function PixelGrid() {
       const existingSoldPixel = soldPixels.find(p => p.x === logicalCol && p.y === logicalRow);
       
       if (pixelBitmap[bitmapIdx] === 1) {
+        // Add click activity
+        const clickActivity: PixelActivityEvent = {
+          id: Date.now().toString(),
+          x: logicalCol,
+          y: logicalRow,
+          type: 'view',
+          timestamp: Date.now(),
+          user: 'Você'
+        };
+        
+        setRecentActivity(prev => [clickActivity, ...prev.slice(0, 19)]);
+        
+        // Create click animation
+        const pixelKey = `${logicalCol}-${logicalRow}`;
+        setAnimatedPixels(prev => {
+          const newMap = new Map(prev);
+          newMap.set(pixelKey, {
+            x: logicalCol,
+            y: logicalRow,
+            scale: 1.3,
+            opacity: 1,
+            rotation: 0,
+            glowIntensity: 0.8,
+            lastActivity: Date.now(),
+            activityType: 'view',
+            isHovered: false,
+            isPulsing: true,
+            isNew: true
+          });
+          return newMap;
+        });
+        
+        setPlayHoverSound(true);
+        
         setHighlightedPixel({ x: logicalCol, y: logicalRow });
 
         let mockDetails: SelectedPixelDetails;
