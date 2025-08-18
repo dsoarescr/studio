@@ -34,32 +34,7 @@ import { Confetti } from '@/components/ui/confetti';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import {
-  Brush, Eraser, PaintBucket, Pipette, Move, Circle, Square, Triangle,
-  Type, Upload, Undo, Redo, Layers, Settings, Palette, Sparkles,
-  Wand2, RotateCcw, Filter, Contrast, Crown, Gift, Coins, ShoppingCart,
-  Save, X, Play, Pause, Download, Share2, Eye, EyeOff, Plus, Trash2,
-  Copy, Shuffle, ZoomIn, ZoomOut, Grid3X3, Maximize2, Minimize2,
-  Volume2, VolumeX, Camera, Video, Music, Mic, Heart, Star, Zap,
-  Target, Award, Gem, Flame, Snowflake, Droplets, Wind, Sun, Moon,
-  Smile, Frown, ThumbsUp, Hand, Users, MessageSquare, Phone, Mail,
-  Home, Car, Plane, Ship, Tree, Flower, Mountain, Cloud, Rainbow,
-  Coffee, Pizza, Cake, Apple, Grape, Fish, Cat, Dog, Bird, Butterfly,
-  Football, Basketball, Guitar, Piano, Gamepad2, Laptop, Smartphone,
-  Wifi, Battery, Clock, Calendar, Map, Compass, Flag, Shield, Lock,
-  Key, Search, Bell, Settings as SettingsIcon, HelpCircle, Info,
-  CheckCircle, AlertTriangle, XCircle, ArrowUp, ArrowDown, ArrowLeft,
-  ArrowRight, CornerDownLeft, CornerDownRight, CornerUpLeft, CornerUpRight,
-  Hexagon, Pentagon, Octagon, Diamond, Infinity, Anchor, Feather,
-  Paintbrush, Scissors, Ruler, Pen, PenTool, Edit3, Image as ImageIcon,
-  FileImage, Folder, FolderOpen, Archive, Package, Box, Cube,
-  Sphere, Cylinder, Cone, Pyramid, Prism, Torus, Helix, Spiral,
-  Waves, Pulse, Activity, TrendingUp, BarChart3, PieChart, LineChart,
-  Radio, Tv, Monitor, Tablet, Watch, Headphones, Speaker, Microphone,
-  Camera as CameraIcon, Aperture, Focus, Lens, Shutter, Flash,
-  Brightness, Contrast as ContrastIcon, Saturation, Hue, Temperature,
-  Exposure, Highlights, Shadows, Clarity, Vibrance, Warmth, Coolness
-} from 'lucide-react';
+import { Brush, Eraser, PaintBucket, Pipette, Move, Circle, Square, Triangle, Type, Upload, Undo, Redo, Layers, Settings, Palette, Sparkles, Wand2, RotateCcw, Filter, Contrast, Crown, Gift, Coins, ShoppingCart, Save, X, Play, Pause, Download, Share2, Eye, EyeOff, Plus, Trash2, Copy, Shuffle, ZoomIn, ZoomOut, Grid3X3, Maximize2, Minimize2, Volume2, VolumeX, Camera, Video, Music, Mic, Heart, Star, Zap, Target, Award, Gem, Flame, Snowflake, Droplets, Wind, Sun, Moon, Smile, Frown, ThumbsUp, Hand, Users, MessageSquare, Phone, Mail, Home, Car, Plane, Ship, Trees as Tree, Flower, Mountain, Cloud, Rainbow, Coffee, Pizza, Cake, Apple, Grape, Fish, Cat, Dog, Bird, Router as Butterfly, FolderRoot as Football, ShoppingBasket as Basketball, Guitar, Piano, Gamepad2, Laptop, Smartphone, Wifi, Battery, Clock, Calendar, Map, Compass, Flag, Shield, Lock, Key, Search, Bell, Settings as SettingsIcon, HelpCircle, Info, CheckCircle, AlertTriangle, XCircle, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, CornerDownLeft, CornerDownRight, CornerUpLeft, CornerUpRight, Hexagon, Pentagon, Octagon, Diamond, Infinity, Anchor, Feather, Paintbrush, Scissors, Ruler, Pen, PenTool, Edit3, Image as ImageIcon, FileImage, Folder, FolderOpen, Archive, Package, Box, Cuboid as Cube, Cherry as Sphere, Cylinder, Cone, Pyramid, Printer as Prism, Torus, Baseline as Helix, Hospital as Spiral, Waves, HeartPulse as Pulse, Activity, TrendingUp, BarChart3, PieChart, LineChart, Radio, Tv, Monitor, Tablet, Watch, Headphones, Speaker, Microscope as Microphone, Camera as CameraIcon, Aperture, Focus, Pen as Lens, Router as Shutter, Slash as Flash, Copyright as Brightness, Contrast as ContrastIcon, IterationCw as Saturation, Fuel as Hue, Aperture as Temperature, Expand as Exposure, Highlighter as Highlights, Rows as Shadows, AlarmClock as Clarity, Vibrate as Vibrance, Earth as Warmth, Cone as Coolness } from 'lucide-react';
 
 interface SelectedPixelDetails {
   x: number;
