@@ -28,7 +28,7 @@ import {
   Compass, ShoppingCart, VolumeX, Check,
   ArrowUp, ArrowDown, Reply, Forward, Download, Upload, Link2,
   PinIcon, Lock, Unlock, AlertTriangle,
-  Megaphone, Radio, Headphones, Music, Gamepad2, Coffee
+  Megaphone, Radio, Headphones, Music, Gamepad2, Coffee, Palette
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
