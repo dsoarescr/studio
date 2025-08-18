@@ -34,18 +34,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import {
-  ShoppingCart, Palette, Brush, Eraser, PaintBucket, Type, Upload, Download,
-  Save, Share2, Undo, Redo, Zap, Sparkles, Crown, Star, Gem, Heart,
-  Eye, MapPin, Calendar, Clock, Link as LinkIcon, Hash, Image as ImageIcon,
-  Camera, Wand2, Filter, Contrast, Brightness, Saturation, Blur, Crop,
-  RotateCw, FlipHorizontal, FlipVertical, Layers, Grid, Crosshair,
-  Move, ZoomIn, ZoomOut, Pipette, Square, Circle, Triangle, Minus,
-  Plus, X, Check, CreditCard, Coins, Gift, Info, AlertTriangle,
-  Smartphone, Tablet, Monitor, Globe, Users, MessageSquare, ThumbsUp,
-  Bookmark, Flag, Settings, HelpCircle, Play, Pause, SkipForward,
-  Volume2, Mic, Video, Music, Headphones, Radio, Tv, Film, Camera as CameraIcon
-} from 'lucide-react';
+import { ShoppingCart, Palette, Brush, Eraser, PaintBucket, Type, Upload, Download, Save, Share2, Undo, Redo, Zap, Sparkles, Crown, Star, Gem, Heart, Eye, MapPin, Calendar, Clock, Link as LinkIcon, Hash, Image as ImageIcon, Camera, Wand2, Filter, Contrast, Copyright as Brightness, IterationCw as Saturation, Bluetooth as Blur, Crop, RotateCw, FlipHorizontal, FlipVertical, Layers, Grid, Crosshair, Move, ZoomIn, ZoomOut, Pipette, Square, Circle, Triangle, Minus, Plus, X, Check, CreditCard, Coins, Gift, Info, AlertTriangle, Smartphone, Tablet, Monitor, Globe, Users, MessageSquare, ThumbsUp, Bookmark, Flag, Settings, HelpCircle, Play, Pause, SkipForward, Volume2, Mic, Video, Music, Headphones, Radio, Tv, Film, Camera as CameraIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SelectedPixelDetails {
