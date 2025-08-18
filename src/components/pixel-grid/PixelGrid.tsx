@@ -42,6 +42,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '../ui/separator';
 import { mapPixelToApproxGps, cn } from '@/lib/utils';
 import EnhancedPixelPurchaseModal from './EnhancedPixelPurchaseModal';
+import PixelInfoModal from './PixelInfoModal';
 import PixelAR from './PixelAR';
 import PixelStories from './PixelStories';
 import PixelLiveStream from './PixelLiveStream';
@@ -163,7 +164,8 @@ export default function PixelGrid() {
   const [highlightedPixel, setHighlightedPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixelDetails, setSelectedPixelDetails] = useState<SelectedPixelDetails | null>(null);
   
-  const [showPixelModal, setShowPixelModal] = useState(false);
+  const [showPixelInfoModal, setShowPixelInfoModal] = useState(false);
+  const [showPixelEditModal, setShowPixelEditModal] = useState(false);
   const { user } = useAuth();
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -587,7 +589,7 @@ export default function PixelGrid() {
             };
         } else { 
              mockDetails = {
-                x: logicalCol, y: logicalRow, owner: 'Disponível (Sistema)', price: basePrice,
+                x: logicalCol, y: logicalRow, owner: undefined, price: basePrice,
                 color: unsoldColor, isOwnedByCurrentUser: false, isForSaleBySystem: true,
                 history: [], isFavorited: Math.random() > 0.8, rarity: randomRarity, loreSnippet: randomLore,
                 gpsCoords: approxGps, views: Math.floor(Math.random() * 1000),
@@ -595,7 +597,7 @@ export default function PixelGrid() {
             };
         }
         setSelectedPixelDetails(mockDetails);
-        setShowPixelModal(true);
+        setShowPixelInfoModal(true);
       } else { 
         setHighlightedPixel(null);
         setSelectedPixelDetails(null);
@@ -706,7 +708,7 @@ export default function PixelGrid() {
     if (autoResetTimeoutRef.current) {
       clearTimeout(autoResetTimeoutRef.current);
     }
-    if (!defaultView || showPixelModal || isDragging) { 
+    if (!defaultView || showPixelInfoModal || showPixelEditModal || isDragging) { 
       return;
     } 
 
@@ -719,7 +721,7 @@ export default function PixelGrid() {
     if (!isDefaultZoom || !isDefaultPosition) {
       autoResetTimeoutRef.current = setTimeout(() => {
         handleResetView();
-      }, 15000); 
+      }, 15000);
     }
 
     return () => {
@@ -727,7 +729,7 @@ export default function PixelGrid() {
         clearTimeout(autoResetTimeoutRef.current);
       }
     };
-  }, [zoom, position, handleResetView, defaultView, showPixelModal, isDragging]);
+  }, [zoom, position, handleResetView, defaultView, showPixelInfoModal, showPixelEditModal, isDragging]);
   
   const showProgressIndicator = isLoadingMap || (progressMessage !== "");
 
@@ -855,14 +857,28 @@ export default function PixelGrid() {
         </div>
         
         <EnhancedPixelPurchaseModal
-          isOpen={showPixelModal}
-          onClose={() => setShowPixelModal(false)}
+          isOpen={showPixelEditModal}
+          onClose={() => setShowPixelEditModal(false)}
           pixelData={selectedPixelDetails}
           userCredits={12500} // Mocked value, ideally from user store
           userSpecialCredits={120} // Mocked value
           onPurchase={handlePurchase}
         />
 
+        <PixelInfoModal
+          isOpen={showPixelInfoModal}
+          onClose={() => setShowPixelInfoModal(false)}
+          onEdit={() => {
+            setShowPixelInfoModal(false);
+            setShowPixelEditModal(true);
+          }}
+          onPurchase={() => {
+            setShowPixelInfoModal(false);
+            setShowPixelEditModal(true);
+          }}
+          pixelData={selectedPixelDetails}
+        />
+        
         <SwipeGestures
           onSwipeLeft={() => {
             vibrate('light');
@@ -885,7 +901,7 @@ export default function PixelGrid() {
           onSwipeDown={() => {
             vibrate('medium');
             if (selectedPixelDetails) {
-              setShowPixelModal(true);
+             setShowPixelInfoModal(true);
             }
           }}
           className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center"
