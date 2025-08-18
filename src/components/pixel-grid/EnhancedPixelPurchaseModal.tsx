@@ -26,7 +26,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import { Palette, Brush, Eraser, PaintBucket, Pipette, Type, Sticker, Upload, Download, Save, X, Undo, Redo, RotateCcw, Grid3X3, Sparkles, Wand2, Shuffle, Star, Crown, Gem, Coins, Gift, ShoppingCart, CreditCard, Eye, EyeOff, Layers, Circle, Square, Triangle, Heart, Smile, Sun, Leaf, Flag, Music, Camera, Image as ImageIcon, Zap, Target, Award, Settings, Maximize2, Minimize2, Copy, Share2, Info, HelpCircle, Scissors, Move, RotateCw, FlipHorizontal, FlipVertical, Contrast, Copyright as Brightness4, IterationCw as Saturation, Bluetooth as Blur, Filter, Sliders } from 'lucide-react';
+import { Palette, Brush, Eraser, PaintBucket, Pipette, Type, Sticker, Upload, Download, Save, X, Undo, Redo, RotateCcw, Grid3X3, Sparkles, Wand2, Shuffle, Star, Crown, Gem, Coins, Gift, ShoppingCart, CreditCard, Eye, EyeOff, Layers, Circle, Square, Triangle, Heart, Smile, Sun, Leaf, Flag, Music, Camera, Image as ImageIcon, Zap, Target, Award, Settings, Maximize2, Minimize2, Copy, Share2, Info, HelpCircle, Scissors, Move, RotateCw, FlipHorizontal, FlipVertical, Contrast, Filter, Sliders, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SelectedPixelDetails {
@@ -92,7 +92,7 @@ const tools: Tool[] = [
   // Ferramentas Artísticas
   { id: 'spray', name: 'Spray', icon: <Circle className="h-4 w-4" />, category: 'artistic', description: 'Efeito de spray' },
   { id: 'smudge', name: 'Borrar', icon: <Move className="h-4 w-4" />, category: 'artistic', description: 'Borra e mistura cores' },
-  { id: 'blur', name: 'Desfoque', icon: <Blur className="h-4 w-4" />, category: 'artistic', premium: true, description: 'Aplica desfoque' },
+  { id: 'blur', name: 'Desfoque', icon: <Circle className="h-4 w-4" />, category: 'artistic', premium: true, description: 'Aplica desfoque' },
   { id: 'sharpen', name: 'Nitidez', icon: <Contrast className="h-4 w-4" />, category: 'artistic', premium: true, description: 'Aumenta nitidez' },
   
   // Formas
