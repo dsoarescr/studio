@@ -8,7 +8,7 @@ import {
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users, Eye, Grid3X3, Bookmark
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -1159,10 +1159,11 @@ export default function PixelGrid() {
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
           <EnhancedTooltip
             title="Controles do Mapa"
-            description="Use estes controles para navegar pelo mapa"
+            description="Navegação e informações do mapa"
             stats={[
               { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> }
+              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> },
+              { label: 'Modo', value: visualizationMode, icon: <Eye className="h-4 w-4" /> }
             ]}
           >
             <div className="space-y-2">
@@ -1190,6 +1191,20 @@ export default function PixelGrid() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent><p>Resetar Vista</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      pointerEvents="auto" 
+                      variant={showGrid ? "default" : "outline"} 
+                      size="icon" 
+                      onClick={() => setShowGrid(!showGrid)}
+                      aria-label="Toggle Grid"
+                    >
+                      <Grid3X3 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>{showGrid ? 'Ocultar' : 'Mostrar'} Grelha</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
@@ -1344,6 +1359,207 @@ export default function PixelGrid() {
 
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
+          {/* Search and Navigation */}
+          <EnhancedTooltip
+            title="Navegação Avançada"
+            description="Pesquisar por landmarks, códigos postais e regiões"
+            interactive={true}
+          >
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600">
+                  <Search className="h-6 w-6" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl">
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-gradient-gold">Navegação Inteligente</DialogTitle>
+                  <DialogDescriptionElement className="text-muted-foreground">
+                    Encontre qualquer localização em Portugal
+                  </DialogDescriptionElement>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Search Input */}
+                  <div className="space-y-2">
+                    <Label>Pesquisar Localização</Label>
+                    <Input
+                      placeholder="Ex: Torre de Belém, 1000, Lisboa..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          // Try postal code first
+                          if (/^\d{4}/.test(searchQuery)) {
+                            searchByPostalCode(searchQuery.substring(0, 4));
+                          } else if (LANDMARK_COORDINATES[searchQuery as keyof typeof LANDMARK_COORDINATES]) {
+                            goToLandmark(searchQuery);
+                          } else {
+                            // Try region
+                            zoomToRegion(searchQuery);
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Quick Landmarks */}
+                  <div className="space-y-2">
+                    <Label>Marcos Históricos</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.keys(LANDMARK_COORDINATES).slice(0, 6).map(landmark => (
+                        <Button
+                          key={landmark}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => goToLandmark(landmark)}
+                          className="text-xs"
+                        >
+                          🏛️ {landmark.split(' ')[0]}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Quick Regions */}
+                  <div className="space-y-2">
+                    <Label>Regiões</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Lisboa', 'Porto', 'Coimbra', 'Braga', 'Faro'].map(region => (
+                        <Button
+                          key={region}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => zoomToRegion(region)}
+                          className="text-xs"
+                        >
+                          📍 {region}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Saved Bookmarks */}
+                  {zoomBookmarks.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Localizações Guardadas</Label>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {zoomBookmarks.slice(-5).map(bookmark => (
+                          <div key={bookmark.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
+                            <span className="text-sm truncate">{bookmark.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => goToBookmark(bookmark)}
+                              className="h-6 px-2"
+                            >
+                              Ir
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Save Current Location */}
+                  <Button
+                    onClick={() => {
+                      const name = prompt('Nome para esta localização:');
+                      if (name) saveZoomBookmark(name);
+                    }}
+                    className="w-full"
+                  >
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    Guardar Localização Atual
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </EnhancedTooltip>
+          
+          {/* Visualization Modes */}
+          <EnhancedTooltip
+            title="Modos de Visualização"
+            description="Diferentes formas de ver o mapa"
+            interactive={true}
+          >
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
+                  <Eye className="h-6 w-6" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl">
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-gradient-gold">Modos de Visualização</DialogTitle>
+                  <DialogDescriptionElement className="text-muted-foreground">
+                    Explore o mapa de diferentes perspetivas
+                  </DialogDescriptionElement>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Visualization Mode Buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { mode: 'default' as VisualizationMode, label: 'Padrão', icon: '🗺️', desc: 'Vista normal' },
+                      { mode: 'thermal' as VisualizationMode, label: 'Térmico', icon: '🔥', desc: 'Densidade de pixels' },
+                      { mode: 'value' as VisualizationMode, label: 'Valor', icon: '💰', desc: 'Preços por cor' },
+                      { mode: 'ownership' as VisualizationMode, label: 'Propriedade', icon: '👤', desc: 'Por proprietário' },
+                      { mode: 'temporal' as VisualizationMode, label: 'Temporal', icon: '⏰', desc: 'Por idade' },
+                      { mode: 'rarity' as VisualizationMode, label: 'Raridade', icon: '💎', desc: 'Por raridade' }
+                    ].map(({ mode, label, icon, desc }) => (
+                      <Button
+                        key={mode}
+                        variant={visualizationMode === mode ? 'default' : 'outline'}
+                        onClick={() => setVisualizationMode(mode)}
+                        className="h-16 flex flex-col gap-1"
+                      >
+                        <span className="text-lg">{icon}</span>
+                        <span className="text-xs">{label}</span>
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Display Options */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Mostrar Grelha</Label>
+                      <Switch checked={showGrid} onCheckedChange={setShowGrid} />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Coordenadas</Label>
+                      <Switch checked={showCoordinates} onCheckedChange={setShowCoordinates} />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Mapa de Calor</Label>
+                      <Switch checked={showDensityHeatmap} onCheckedChange={setShowDensityHeatmap} />
+                    </div>
+                  </div>
+                  
+                  {/* Current Mode Info */}
+                  <div className="p-3 bg-muted/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">{getVisualizationModeIcon(visualizationMode)}</span>
+                      <span className="font-medium">Modo: {visualizationMode}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {visualizationMode === 'default' && 'Vista normal do mapa com cores originais'}
+                      {visualizationMode === 'thermal' && 'Mostra densidade de pixels por área'}
+                      {visualizationMode === 'value' && 'Cores representam valores dos pixels'}
+                      {visualizationMode === 'ownership' && 'Verde=seus, Azul=outros, Dourado=sistema'}
+                      {visualizationMode === 'temporal' && 'Vermelho=recente, Azul=antigo'}
+                      {visualizationMode === 'rarity' && 'Cores representam raridade dos pixels'}
+                    </p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </EnhancedTooltip>
+
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
             <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
@@ -1436,6 +1652,14 @@ export default function PixelGrid() {
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowGrid(!showGrid)}>
+                    <Grid3X3 className="mr-2 h-4 w-4" />
+                    {showGrid ? 'Ocultar' : 'Mostrar'} Grelha
+                  </Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowCoordinates(!showCoordinates)}>
+                    <MapPinIconLucide className="mr-2 h-4 w-4" />
+                    {showCoordinates ? 'Ocultar' : 'Mostrar'} Coordenadas
+                  </Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
                     <Brain className="mr-2 h-4 w-4" />
                     Assistente IA
