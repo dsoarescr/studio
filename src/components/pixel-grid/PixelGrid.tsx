@@ -956,6 +956,69 @@ export default function PixelGrid() {
       setSelectedPixelDetails(null);
     }
   };
+  
+  // Enhanced mouse move handler for hover effects
+  const handleMouseMoveCanvas = (event: React.MouseEvent) => {
+    if (!containerRef.current || !pixelBitmap) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseXInContainer = event.clientX - rect.left;
+    const mouseYInContainer = event.clientY - rect.top;
+
+    const xOnContent = (mouseXInContainer - position.x) / zoom;
+    const yOnContent = (mouseYInContainer - position.y) / zoom;
+
+    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
+
+    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
+      const bitmapIdx = logicalRow * LOGICAL_GRID_COLS_CONFIG + logicalCol;
+      
+      if (pixelBitmap[bitmapIdx] === 1) {
+        const newHovered = { x: logicalCol, y: logicalRow };
+        
+        // Only update if different pixel
+        if (!hoveredPixel || hoveredPixel.x !== newHovered.x || hoveredPixel.y !== newHovered.y) {
+          setHoveredPixel(newHovered);
+          
+          // Create hover animation
+          const pixelKey = `${logicalCol}-${logicalRow}`;
+          setAnimatedPixels(prev => {
+            const newMap = new Map(prev);
+            const existing = newMap.get(pixelKey);
+            
+            newMap.set(pixelKey, {
+              x: logicalCol,
+              y: logicalRow,
+              scale: PIXEL_HOVER_SCALE,
+              opacity: 1,
+              rotation: existing?.rotation || 0,
+              glowIntensity: 0.6,
+              lastActivity: Date.now(),
+              activityType: 'view',
+              isHovered: true,
+              isPulsing: false,
+              isNew: false
+            });
+            return newMap;
+          });
+          
+          // Subtle haptic feedback on hover
+          vibrate('light');
+          setPlayHoverSound(true);
+        }
+      } else {
+        setHoveredPixel(null);
+      }
+    } else {
+      setHoveredPixel(null);
+    }
+    
+    // Continue with drag logic if dragging
+    if (isDragging) {
+      handleMouseMove(event);
+    }
+  };
 
   const handleMouseUpOrLeave = (event: React.MouseEvent) => {
     if (isDragging) {
@@ -1259,7 +1322,7 @@ export default function PixelGrid() {
               ref={containerRef}
               className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
               onMouseDown={handleMouseDown} 
-              onMouseMove={handleMouseMove}
+              onMouseMove={handleMouseMoveCanvas}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
           >
