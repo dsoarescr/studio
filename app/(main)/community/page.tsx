@@ -22,13 +22,12 @@ import {
   Users, MessageSquare, Heart, Share2, Send, Plus, Camera, MapPin, 
   Trophy, Star, Crown, Gem, Zap, Eye, ThumbsUp, MessageCircle,
   UserPlus, Settings, Search, Filter, Bookmark, Flag, MoreHorizontal,
-  Image as ImageIcon, Video, Mic, Smile, Gift, Coins, Award,
-  Globe, Clock, TrendingUp, Flame, Target, Sparkles, Edit3,
+  Image as ImageIcon, Video, Mic, Smile, Gift, Coins, Award, Phone, ArrowLeft,
+  Globe, Clock, TrendingUp, Flame, Target, Sparkles, Edit3, Bell,
   Play, Pause, Volume2, X, ChevronRight, Info, CheckCircle,
-  Compass
-  ShoppingCart, Play, Pause, Volume2, VolumeX, X, Check,
+  Compass, ShoppingCart, VolumeX, Check,
   ArrowUp, ArrowDown, Reply, Forward, Download, Upload, Link2,
-  PinIcon, Lock, Unlock, AlertTriangle, Info, CheckCircle,
+  PinIcon, Lock, Unlock, AlertTriangle,
   Megaphone, Radio, Headphones, Music, Gamepad2, Coffee
 } from "lucide-react";
 import { cn } from '@/lib/utils';
