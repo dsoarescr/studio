@@ -791,7 +791,31 @@ export default function PixelGrid() {
     }
     ctx.restore();
 
-  }, [mapData, zoom, position, strokeColor, highlightedPixel, selectedPixelDetails]);
+    // Draw coordinates overlay if enabled
+    if (showCoordinates && zoom > 10) {
+      ctx.save();
+      ctx.translate(position.x, position.y);
+      ctx.scale(zoom, zoom);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.font = `${8 / zoom}px monospace`;
+      ctx.textAlign = 'center';
+      
+      // Show coordinates every 10 pixels when zoomed in
+      for (let x = 0; x < LOGICAL_GRID_COLS_CONFIG; x += 10) {
+        for (let y = 0; y < logicalGridRows; y += 10) {
+          if (pixelBitmap[y * LOGICAL_GRID_COLS_CONFIG + x] === 1) {
+            ctx.fillText(
+              `${x},${y}`,
+              x * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2,
+              y * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2
+            );
+          }
+        }
+      }
+      ctx.restore();
+    }
+
+  }, [mapData, zoom, position, strokeColor, highlightedPixel, selectedPixelDetails, showCoordinates, pixelBitmap]);
   
 
   useEffect(() => { 
