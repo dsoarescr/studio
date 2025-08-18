@@ -172,7 +172,7 @@ export default function EnhancedPixelPurchaseModal({
 
   // Inicializar canvas - CORRIGIDO
   useEffect(() => {
-    if (isOpen && canvasRef.current && !canvasRef.current.getContext('2d')) {
+    if (isOpen && canvasRef.current) {
       const canvas = canvasRef.current;
       canvas.width = CANVAS_SIZE;
       canvas.height = CANVAS_SIZE;
@@ -348,8 +348,6 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   // Timer de gravação
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     let interval: NodeJS.Timeout;
     if (isRecording) {
       interval = setInterval(() => {
