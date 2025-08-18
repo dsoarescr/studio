@@ -1,4 +1,3 @@
-
 // src/components/pixel-grid/PixelGrid.tsx
 'use client';
 
@@ -1480,7 +1479,7 @@ export default function PixelGrid() {
                               onClick={() => goToBookmark(bookmark)}
                               className="h-6 px-2"
                             >
-                              <SearchIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                              Ir
                             </Button>
                           </div>
                         ))}
@@ -1678,7 +1677,7 @@ export default function PixelGrid() {
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIcon className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowGrid(!showGrid)}>
                     <Grid3X3 className="mr-2 h-4 w-4" />
                     {showGrid ? 'Ocultar' : 'Mostrar'} Grelha
