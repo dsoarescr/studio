@@ -404,6 +404,52 @@ export default function MemberPage() {
     });
   };
 
+  const handleViewAlbum = (albumId: string) => {
+    vibrate('light');
+    toast({
+      title: "📚 Visualizar Álbum",
+      description: "Funcionalidade em desenvolvimento.",
+    });
+  };
+
+  const handleLikeAlbum = (albumId: string) => {
+    vibrate('light');
+    setUserAlbums(prev => prev.map(album => 
+      album.id === albumId 
+        ? { ...album, likes: album.likes + 1 }
+        : album
+    ));
+    
+    toast({
+      title: "❤️ Álbum Curtido!",
+      description: "Adicionado aos seus favoritos.",
+    });
+  };
+
+  const handleToggleAlbumVisibility = (albumId: string) => {
+    vibrate('medium');
+    setUserAlbums(prev => prev.map(album => 
+      album.id === albumId 
+        ? { ...album, isPublic: !album.isPublic }
+        : album
+    ));
+    
+    const album = userAlbums.find(a => a.id === albumId);
+    toast({
+      title: album?.isPublic ? "🔒 Álbum Privado" : "🌍 Álbum Público",
+      description: album?.isPublic ? "Agora apenas você pode ver este álbum." : "Agora todos podem ver este álbum.",
+    });
+  };
+
+  const handleShareAlbum = (album: UserAlbum) => {
+    vibrate('light');
+    navigator.clipboard.writeText(`${window.location.origin}/album/${album.id}`);
+    toast({
+      title: "🔗 Link Copiado!",
+      description: "Link do álbum copiado.",
+    });
+  };
+
   const handleClaimAchievement = (achievementId: string) => {
     vibrate('success');
     setPlaySound(true);
