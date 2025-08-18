@@ -1063,7 +1063,7 @@ export default function MemberPage() {
                         <span className="flex items-center gap-1">
                           <Eye className="h-3 w-3" />
                           {pixel.views}
-                    disabled={dailyBonusClaimed}
+                        </span>
                         <span className="flex items-center gap-1">
                           <Heart className="h-3 w-3" />
                           {pixel.likes}
