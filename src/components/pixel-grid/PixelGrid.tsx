@@ -1505,60 +1505,98 @@ export default function PixelGrid() {
 
         {/* Enhanced Mobile Action Menu */}
         <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
+          {/* Quick Activity Toggle */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Button 
+              size="icon" 
+              variant={showActivityRipples ? "default" : "outline"}
+              onClick={() => {
+                setShowActivityRipples(!showActivityRipples);
+                vibrate('medium');
+                toast({
+                  title: showActivityRipples ? "Atividade Desativada" : "Atividade Ativada",
+                  description: showActivityRipples ? "Ondas de atividade ocultadas" : "Veja a atividade em tempo real!",
+                });
+              }}
+              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+            >
+              <Activity className="h-6 w-6" />
+            </Button>
+          </motion.div>
+          
           {/* IA Assistant */}
           <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-              <Brain className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+                <Brain className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelAI>
           
           {/* Social Features */}
           <PixelSocialFeatures>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
-              <Users className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
+                <Users className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelSocialFeatures>
           
           {/* Gamification */}
           <PixelGameification>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
-              <Trophy className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+                <Trophy className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelGameification>
           
           {/* Auction */}
           <PixelAuction>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Gavel className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+                <Gavel className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelAuction>
           
           {/* Collaborative Editor */}
           <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
-              <Users className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
+                <Edit3 className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelCollaborativeEditor>
           
           {/* AR Button */}
           <PixelAR>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-              <Camera className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                <Camera className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelAR>
           
           {/* Stories Button */}
           <PixelStories>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Play className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+                <Play className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelStories>
           
           {/* Live Stream Button */}
           <PixelLiveStream>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
-              <Radio className="h-6 w-6" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+                <Radio className="h-6 w-6" />
+              </Button>
+            </motion.div>
           </PixelLiveStream>
           
           {/* Main Action Button */}
