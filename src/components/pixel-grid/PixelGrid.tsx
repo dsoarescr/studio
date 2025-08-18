@@ -1402,7 +1402,7 @@ export default function PixelGrid() {
                 <div className="space-y-4">
                   {/* Search Input */}
                   <div className="space-y-2">
-                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Label>Pesquisar Localização</Label>
                     <Input
                       placeholder="Ex: Torre de Belém, 1000, Lisboa..."
                       value={searchQuery}
