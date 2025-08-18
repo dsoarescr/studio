@@ -2,24 +2,22 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -32,16 +30,87 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserStore } from '@/lib/store';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import { Palette, Brush, Eraser, PaintBucket, Undo, Redo, Save, Download, Upload, ZoomIn, ZoomOut, RotateCcw, Eye, EyeOff, Layers, Plus, Minus, X, Check, Sparkles, Crown, Gem, Star, Coins, Gift, ShoppingCart, CreditCard, Zap, Image as ImageIcon, Link as LinkIcon, Hash, Type, Sliders, Sun, Moon, Contrast, Bluetooth as Blur, Copyright as Brightness, IterationCw as Saturation, Droplets, Flame, Hexagon, Circle, Square, Triangle, Pencil, Move, RotateCw, FlipHorizontal, FlipVertical, Copy, Clipboard, Grid, Crosshair, Target, Wand2, Scissors, Stamp, Pipette, MousePointer, Hand, Maximize, Minimize, RotateCw as RotateClockwise, Shuffle, Repeat, Layers3, PaintBucket as PaintBucket2, SprayCan as Spray, Pen, Highlighter, Ruler, Compass, Magnet, BadgeCent as Gradient, Text as Texture, Battery as Pattern, Sticker, Frame, Sword as Border, Share as Shadow, Globe as Glow, VideoIcon as Neon, Mountain as Vintage, Droplet as Retro, Code as Modern, Tractor as Abstract, Italic as Realistic, Car as Cartoon, Timer as Anime, Pi as Pixel, Twitch as Glitch, AArrowDown as VHS, AArrowDown as CRT, AArrowDown as LCD, AArrowDown as OLED, AArrowDown as HDR, BookAIcon as AI, Notebook as Robot, Magnet as Magic, Italic as Crystal, Diamond, Rainbow, Printer as Prism, Telescope as Kaleidoscope, Panda as Mandala, Contact as Fractal, Hospital as Spiral, Waves as Wave, HeartPulse as Pulse } from 'lucide-react'  specialCreditsPrice?: number;
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Palette, Brush, Eraser, PaintBucket, Pipette, Type, Image as ImageIcon,
+  Sparkles, Wand2, Grid3X3, ZoomIn, ZoomOut, RotateCcw, RotateCw,
+  Download, Upload, Save, X, Check, Crown, Coins, Gift, Star,
+  Layers, Eye, EyeOff, Plus, Minus, Copy, Scissors, Move,
+  Circle, Square, Triangle, Heart, Smile, Music, Camera,
+  Zap, Target, Droplets, Flame, Snowflake, Sun, Moon,
+  Pen, Pencil, Spray, Blur, Focus, Clone, Bandage, Shuffle,
+  RefreshCw, Undo, Redo, Settings, Info, ChevronDown, ChevronUp,
+  Hash, Link as LinkIcon, MapPin, CreditCard, ShoppingCart,
+  Maximize2, Minimize2, MoreHorizontal, Filter, Contrast,
+  Brightness, Saturation, Hue, Volume2, VolumeX, Play, Pause
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// Tipos e interfaces
+interface SelectedPixelDetails {
+  x: number;
+  y: number;
+  owner?: string;
+  price: number;
+  region: string;
+  rarity: 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
   isOwnedByCurrentUser?: boolean;
   isForSaleBySystem?: boolean;
+  specialCreditsPrice?: number;
   views: number;
   likes: number;
-  description?: string;
-  features?: string[];
+  isLiked?: boolean;
   gpsCoords?: { lat: number; lon: number } | null;
+  isProtected?: boolean;
+  features?: string[];
+  description?: string;
+  color?: string;
+  title?: string;
+  tags?: string[];
+  linkUrl?: string;
+}
+
+interface Layer {
+  id: string;
+  name: string;
+  visible: boolean;
+  opacity: number;
+  canvas: HTMLCanvasElement;
+}
+
+interface HistoryState {
+  layers: Layer[];
+  timestamp: number;
+}
+
+interface Tool {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  category: 'basic' | 'artistic' | 'effects' | 'shapes' | 'text' | 'ai' | 'filters';
+  premium?: boolean;
+  description: string;
+}
+
+interface BrushType {
+  id: string;
+  name: string;
+  shape: 'round' | 'square' | 'soft' | 'texture' | 'scatter' | 'calligraphy';
+  hardness: number;
+}
+
+interface BlendMode {
+  id: string;
+  name: string;
+  operation: GlobalCompositeOperation;
+}
+
+interface Sticker {
+  id: string;
+  emoji: string;
+  category: 'emojis' | 'symbols' | 'nature' | 'portugal';
+  name: string;
 }
 
 interface EnhancedPixelPurchaseModalProps {
@@ -53,78 +122,135 @@ interface EnhancedPixelPurchaseModalProps {
   onPurchase: (pixelData: SelectedPixelDetails, paymentMethod: string, customizations: any) => Promise<boolean>;
 }
 
-interface DrawingTool {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  cursor: string;
-  size?: number;
-  opacity?: number;
-}
-
-interface Layer {
-  id: string;
-  name: string;
-  visible: boolean;
-  opacity: number;
-  canvas: HTMLCanvasElement;
-}
-
-interface PixelEffect {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  description: string;
-  premium: boolean;
-}
-
-const drawingTools: DrawingTool[] = [
-  { id: 'brush', name: 'Pincel', icon: <Brush className="h-4 w-4" />, cursor: 'crosshair', size: 5 },
-  { id: 'eraser', name: 'Borracha', icon: <Eraser className="h-4 w-4" />, cursor: 'grab', size: 10 },
-  { id: 'bucket', name: 'Balde', icon: <PaintBucket className="h-4 w-4" />, cursor: 'pointer' },
-  { id: 'eyedropper', name: 'Conta-gotas', icon: <Pipette className="h-4 w-4" />, cursor: 'copy' },
-  { id: 'text', name: 'Texto', icon: <Type className="h-4 w-4" />, cursor: 'text' },
-  { id: 'line', name: 'Linha', icon: <Minus className="h-4 w-4" />, cursor: 'crosshair' },
-  { id: 'rectangle', name: 'Retângulo', icon: <Square className="h-4 w-4" />, cursor: 'crosshair' },
-  { id: 'circle', name: 'Círculo', icon: <Circle className="h-4 w-4" />, cursor: 'crosshair' },
-  { id: 'move', name: 'Mover', icon: <Move className="h-4 w-4" />, cursor: 'move' }
+// Dados das ferramentas organizadas por categoria
+const tools: Tool[] = [
+  // Básicas
+  { id: 'brush', name: 'Pincel', icon: <Brush className="h-5 w-5" />, category: 'basic', description: 'Pincel básico para desenhar' },
+  { id: 'pencil', name: 'Lápis', icon: <Pencil className="h-5 w-5" />, category: 'basic', description: 'Lápis para traços finos' },
+  { id: 'eraser', name: 'Borracha', icon: <Eraser className="h-5 w-5" />, category: 'basic', description: 'Remove partes da imagem' },
+  { id: 'bucket', name: 'Balde', icon: <PaintBucket className="h-5 w-5" />, category: 'basic', description: 'Preenche áreas com cor' },
+  { id: 'eyedropper', name: 'Conta-gotas', icon: <Pipette className="h-5 w-5" />, category: 'basic', description: 'Captura cor da imagem' },
+  
+  // Artísticas
+  { id: 'spray', name: 'Spray', icon: <Spray className="h-5 w-5" />, category: 'artistic', description: 'Efeito de spray aerossol' },
+  { id: 'blur', name: 'Desfocar', icon: <Blur className="h-5 w-5" />, category: 'artistic', description: 'Aplica desfoque suave' },
+  { id: 'smudge', name: 'Borrar', icon: <Move className="h-5 w-5" />, category: 'artistic', description: 'Efeito de smudge realista' },
+  { id: 'clone', name: 'Clonar', icon: <Copy className="h-5 w-5" />, category: 'artistic', premium: true, description: 'Duplica áreas da imagem' },
+  { id: 'heal', name: 'Curar', icon: <Bandage className="h-5 w-5" />, category: 'artistic', premium: true, description: 'Remove imperfeições' },
+  
+  // Efeitos
+  { id: 'glow', name: 'Brilho', icon: <Sun className="h-5 w-5" />, category: 'effects', description: 'Adiciona efeito de brilho' },
+  { id: 'shadow', name: 'Sombra', icon: <Moon className="h-5 w-5" />, category: 'effects', description: 'Cria sombras realistas' },
+  { id: 'fire', name: 'Fogo', icon: <Flame className="h-5 w-5" />, category: 'effects', premium: true, description: 'Efeito de chamas' },
+  { id: 'water', name: 'Água', icon: <Droplets className="h-5 w-5" />, category: 'effects', premium: true, description: 'Efeito aquático' },
+  
+  // Formas
+  { id: 'circle', name: 'Círculo', icon: <Circle className="h-5 w-5" />, category: 'shapes', description: 'Desenha círculos perfeitos' },
+  { id: 'square', name: 'Quadrado', icon: <Square className="h-5 w-5" />, category: 'shapes', description: 'Desenha quadrados' },
+  { id: 'triangle', name: 'Triângulo', icon: <Triangle className="h-5 w-5" />, category: 'shapes', description: 'Desenha triângulos' },
+  { id: 'heart', name: 'Coração', icon: <Heart className="h-5 w-5" />, category: 'shapes', description: 'Forma de coração' },
+  
+  // Texto
+  { id: 'text', name: 'Texto', icon: <Type className="h-5 w-5" />, category: 'text', description: 'Adiciona texto personalizado' },
+  
+  // IA
+  { id: 'ai-enhance', name: 'IA Melhorar', icon: <Wand2 className="h-5 w-5" />, category: 'ai', premium: true, description: 'IA melhora automaticamente' },
+  { id: 'ai-style', name: 'Estilo IA', icon: <Sparkles className="h-5 w-5" />, category: 'ai', premium: true, description: 'Aplica estilos artísticos' },
+  
+  // Filtros
+  { id: 'vintage', name: 'Vintage', icon: <Camera className="h-5 w-5" />, category: 'filters', description: 'Efeito vintage retrô' },
+  { id: 'neon', name: 'Neon', icon: <Zap className="h-5 w-5" />, category: 'filters', premium: true, description: 'Efeito neon brilhante' }
 ];
 
-const pixelEffects: PixelEffect[] = [
-  { id: 'glow', name: 'Brilho', icon: <Sparkles className="h-4 w-4" />, description: 'Adiciona um efeito de brilho', premium: false },
-  { id: 'shadow', name: 'Sombra', icon: <Layers className="h-4 w-4" />, description: 'Adiciona sombra projetada', premium: false },
-  { id: 'neon', name: 'Neon', icon: <Zap className="h-4 w-4" />, description: 'Efeito neon vibrante', premium: true },
-  { id: 'hologram', name: 'Holograma', icon: <Gem className="h-4 w-4" />, description: 'Efeito holográfico', premium: true },
-  { id: 'fire', name: 'Fogo', icon: <Wand2 className="h-4 w-4" />, description: 'Animação de fogo', premium: true },
-  { id: 'water', name: 'Água', icon: <Filter className="h-4 w-4" />, description: 'Efeito de água', premium: true }
+const brushTypes: BrushType[] = [
+  { id: 'round', name: 'Redondo', shape: 'round', hardness: 1.0 },
+  { id: 'square', name: 'Quadrado', shape: 'square', hardness: 1.0 },
+  { id: 'soft', name: 'Suave', shape: 'soft', hardness: 0.3 },
+  { id: 'texture', name: 'Textura', shape: 'texture', hardness: 0.8 },
+  { id: 'scatter', name: 'Disperso', shape: 'scatter', hardness: 0.6 },
+  { id: 'calligraphy', name: 'Caligrafia', shape: 'calligraphy', hardness: 0.9 }
+];
+
+const blendModes: BlendMode[] = [
+  { id: 'normal', name: 'Normal', operation: 'source-over' },
+  { id: 'multiply', name: 'Multiplicar', operation: 'multiply' },
+  { id: 'screen', name: 'Tela', operation: 'screen' },
+  { id: 'overlay', name: 'Sobreposição', operation: 'overlay' },
+  { id: 'soft-light', name: 'Luz Suave', operation: 'soft-light' },
+  { id: 'hard-light', name: 'Luz Forte', operation: 'hard-light' },
+  { id: 'color-dodge', name: 'Subexposição', operation: 'color-dodge' },
+  { id: 'color-burn', name: 'Superexposição', operation: 'color-burn' }
+];
+
+const stickers: Sticker[] = [
+  // Emojis
+  { id: 'smile', emoji: '😊', category: 'emojis', name: 'Sorriso' },
+  { id: 'heart', emoji: '❤️', category: 'emojis', name: 'Coração' },
+  { id: 'star', emoji: '⭐', category: 'emojis', name: 'Estrela' },
+  { id: 'fire', emoji: '🔥', category: 'emojis', name: 'Fogo' },
+  { id: 'gem', emoji: '💎', category: 'emojis', name: 'Diamante' },
+  { id: 'crown', emoji: '👑', category: 'emojis', name: 'Coroa' },
+  
+  // Símbolos
+  { id: 'check', emoji: '✓', category: 'symbols', name: 'Check' },
+  { id: 'cross', emoji: '✗', category: 'symbols', name: 'Cruz' },
+  { id: 'arrow', emoji: '→', category: 'symbols', name: 'Seta' },
+  { id: 'music', emoji: '♪', category: 'symbols', name: 'Música' },
+  { id: 'peace', emoji: '☮', category: 'symbols', name: 'Paz' },
+  { id: 'yin-yang', emoji: '☯', category: 'symbols', name: 'Yin Yang' },
+  
+  // Natureza
+  { id: 'tree', emoji: '🌳', category: 'nature', name: 'Árvore' },
+  { id: 'flower', emoji: '🌸', category: 'nature', name: 'Flor' },
+  { id: 'sun', emoji: '☀️', category: 'nature', name: 'Sol' },
+  { id: 'moon', emoji: '🌙', category: 'nature', name: 'Lua' },
+  { id: 'wave', emoji: '🌊', category: 'nature', name: 'Onda' },
+  { id: 'mountain', emoji: '⛰️', category: 'nature', name: 'Montanha' },
+  
+  // Portugal
+  { id: 'flag', emoji: '🇵🇹', category: 'portugal', name: 'Bandeira' },
+  { id: 'castle', emoji: '🏰', category: 'portugal', name: 'Castelo' },
+  { id: 'boat', emoji: '⛵', category: 'portugal', name: 'Barco' },
+  { id: 'wine', emoji: '🍷', category: 'portugal', name: 'Vinho' },
+  { id: 'fish', emoji: '🐟', category: 'portugal', name: 'Peixe' },
+  { id: 'anchor', emoji: '⚓', category: 'portugal', name: 'Âncora' }
 ];
 
 const colorPalettes = [
-  { name: 'Portugal', colors: ['#D4A757', '#7DF9FF', '#228B22', '#FF0000', '#0000FF'] },
-  { name: 'Natureza', colors: ['#228B22', '#32CD32', '#8FBC8F', '#006400', '#9ACD32'] },
-  { name: 'Oceano', colors: ['#0077BE', '#7DF9FF', '#4682B4', '#1E90FF', '#87CEEB'] },
-  { name: 'Pôr do Sol', colors: ['#FF6347', '#FF4500', '#FFD700', '#FFA500', '#FF69B4'] },
-  { name: 'Vintage', colors: ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F5DEB3'] },
-  { name: 'Neon', colors: ['#FF1493', '#00FF00', '#00FFFF', '#FF00FF', '#FFFF00'] }
+  {
+    name: 'Portugal',
+    colors: ['#D4A757', '#7DF9FF', '#228B22', '#DC143C', '#FFD700', '#4169E1']
+  },
+  {
+    name: 'Natureza',
+    colors: ['#228B22', '#32CD32', '#8FBC8F', '#6B8E23', '#9ACD32', '#00FF7F']
+  },
+  {
+    name: 'Oceano',
+    colors: ['#0077BE', '#7DF9FF', '#4682B4', '#5F9EA0', '#87CEEB', '#B0E0E6']
+  },
+  {
+    name: 'Pôr do Sol',
+    colors: ['#FF6347', '#FF4500', '#FFD700', '#FFA500', '#FF69B4', '#FF1493']
+  },
+  {
+    name: 'Vintage',
+    colors: ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#BC8F8F']
+  },
+  {
+    name: 'Neon',
+    colors: ['#FF00FF', '#00FFFF', '#FFFF00', '#FF0080', '#80FF00', '#8000FF']
+  }
 ];
 
-const rarityMultipliers = {
-  'Comum': 1,
-  'Incomum': 2.5,
-  'Raro': 5,
-  'Épico': 10,
-  'Lendário': 25,
-  'Marco Histórico': 50
-};
-
-const specialCreditsConversion = {
-  'Comum': 10,
-  'Incomum': 25,
-  'Raro': 50,
-  'Épico': 100,
-  'Lendário': 250,
-  'Marco Histórico': 500
-};
+const presetFilters = [
+  { id: 'vintage', name: 'Vintage', description: 'Efeito retrô clássico' },
+  { id: 'dramatic', name: 'Dramático', description: 'Alto contraste e saturação' },
+  { id: 'soft', name: 'Suave', description: 'Tons pastéis delicados' },
+  { id: 'vibrant', name: 'Vibrante', description: 'Cores intensas e vivas' },
+  { id: 'monochrome', name: 'Monocromático', description: 'Preto e branco artístico' },
+  { id: 'sepia', name: 'Sépia', description: 'Tom dourado nostálgico' }
+];
 
 export default function EnhancedPixelPurchaseModal({
   isOpen,
@@ -134,320 +260,439 @@ export default function EnhancedPixelPurchaseModal({
   userSpecialCredits,
   onPurchase
 }: EnhancedPixelPurchaseModalProps) {
-  // Drawing state
+  // Estados principais
+  const [activeTab, setActiveTab] = useState('design');
   const [selectedTool, setSelectedTool] = useState('brush');
   const [selectedColor, setSelectedColor] = useState('#D4A757');
-  const [brushSize, setBrushSize] = useState(5);
+  const [brushSize, setBrushSize] = useState(10);
   const [brushOpacity, setBrushOpacity] = useState(100);
+  const [selectedBrushType, setSelectedBrushType] = useState('round');
+  const [selectedBlendMode, setSelectedBlendMode] = useState('normal');
+  
+  // Estados do canvas e camadas
   const [layers, setLayers] = useState<Layer[]>([]);
   const [activeLayerIndex, setActiveLayerIndex] = useState(0);
+  const [history, setHistory] = useState<HistoryState[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
-  const [undoStack, setUndoStack] = useState<ImageData[]>([]);
-  const [redoStack, setRedoStack] = useState<ImageData[]>([]);
-
-  // Customization state
+  
+  // Estados de configuração
+  const [showGrid, setShowGrid] = useState(false);
+  const [gridSize, setGridSize] = useState(20);
+  const [symmetryMode, setSymmetryMode] = useState<'none' | 'horizontal' | 'vertical' | 'both'>('none');
+  const [pressureSensitive, setPressureSensitive] = useState(true);
+  const [smoothStrokes, setSmoothStrokes] = useState(true);
+  const [canvasZoom, setCanvasZoom] = useState(1);
+  
+  // Estados de customização
   const [pixelTitle, setPixelTitle] = useState('');
   const [pixelDescription, setPixelDescription] = useState('');
   const [pixelTags, setPixelTags] = useState<string[]>([]);
   const [pixelLink, setPixelLink] = useState('');
+  const [newTag, setNewTag] = useState('');
   const [selectedEffects, setSelectedEffects] = useState<string[]>([]);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // UI state
-  const [activeTab, setActiveTab] = useState('draw');
-  const [paymentMethod, setPaymentMethod] = useState('credits');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  
+  // Estados de filtros de imagem
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+  const [blur, setBlur] = useState(0);
+  
+  // Estados de texto
+  const [textContent, setTextContent] = useState('');
+  const [fontSize, setFontSize] = useState(24);
+  const [fontFamily, setFontFamily] = useState('Arial');
+  const [textPosition, setTextPosition] = useState({ x: 200, y: 200 });
+  
+  // Estados de interface
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [playPurchaseSound, setPlayPurchaseSound] = useState(false);
-  const [currentTagInput, setCurrentTagInput] = useState('');
+  const [playSuccessSound, setPlaySuccessSound] = useState(false);
+  const [selectedPalette, setSelectedPalette] = useState(0);
   const [showAdvancedTools, setShowAdvancedTools] = useState(false);
-  const [canvasZoom, setCanvasZoom] = useState(1);
-  const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
-
+  
   // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const colorPickerRef = useRef<HTMLInputElement>(null);
-
+  
+  // Hooks
   const { toast } = useToast();
-  const { addCredits, addXp, removeCredits, removeSpecialCredits } = useUserStore();
+  const { addCredits, addXp } = useUserStore();
   const { vibrate } = useHapticFeedback();
 
-  // Calculate prices
-  const basePrice = pixelData ? 1 * (rarityMultipliers[pixelData.rarity] || 1) : 1;
-  const specialCreditsPrice = pixelData ? specialCreditsConversion[pixelData.rarity] || 10 : 10;
-  const finalPrice = basePrice + (selectedEffects.filter(effect => 
-    pixelEffects.find(e => e.id === effect)?.premium
-  ).length * 5); // +5€ per premium effect
-
-  // Initialize canvas
+  // Inicialização do canvas e primeira camada
   useEffect(() => {
-    if (isOpen && canvasRef.current && layers.length === 0) {
-      const canvas = canvasRef.current;
-      canvas.width = 400;
-      canvas.height = 400;
-      
-      // Create initial layer
-      const initialLayer: Layer = {
-        id: 'layer-1',
-        name: 'Camada Base',
-        visible: true,
-        opacity: 100,
-        canvas: document.createElement('canvas')
-      };
-      initialLayer.canvas.width = 400;
-      initialLayer.canvas.height = 400;
-      
-      setLayers([initialLayer]);
-      
-      // Fill with white background
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        saveToUndoStack();
-      }
+    if (isOpen && canvasRef.current) {
+      initializeCanvas();
     }
-  }, [isOpen, layers.length]);
+  }, [isOpen]);
 
-  // Drawing functions
-  const saveToUndoStack = useCallback(() => {
+  const initializeCanvas = () => {
+    if (!canvasRef.current) return;
+    
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    canvas.width = 400;
+    canvas.height = 400;
     
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Criar primeira camada
+    const firstLayer: Layer = {
+      id: 'layer-1',
+      name: 'Camada 1',
+      visible: true,
+      opacity: 100,
+      canvas: document.createElement('canvas')
+    };
+    firstLayer.canvas.width = 400;
+    firstLayer.canvas.height = 400;
     
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    setUndoStack(prev => [...prev.slice(-19), imageData]); // Keep last 20 states
-    setRedoStack([]); // Clear redo stack when new action is performed
-  }, []);
+    setLayers([firstLayer]);
+    setActiveLayerIndex(0);
+    
+    // Salvar estado inicial
+    saveToHistory();
+  };
+
+  const saveToHistory = useCallback(() => {
+    const newState: HistoryState = {
+      layers: layers.map(layer => ({
+        ...layer,
+        canvas: cloneCanvas(layer.canvas)
+      })),
+      timestamp: Date.now()
+    };
+    
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newState);
+    
+    // Manter apenas os últimos 50 estados
+    if (newHistory.length > 50) {
+      newHistory.shift();
+    }
+    
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, [layers, history, historyIndex]);
+
+  const cloneCanvas = (originalCanvas: HTMLCanvasElement): HTMLCanvasElement => {
+    const clonedCanvas = document.createElement('canvas');
+    clonedCanvas.width = originalCanvas.width;
+    clonedCanvas.height = originalCanvas.height;
+    const ctx = clonedCanvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(originalCanvas, 0, 0);
+    }
+    return clonedCanvas;
+  };
 
   const undo = () => {
-    if (undoStack.length === 0) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const currentState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const previousState = undoStack[undoStack.length - 1];
-    
-    ctx.putImageData(previousState, 0, 0);
-    
-    setRedoStack(prev => [...prev, currentState]);
-    setUndoStack(prev => prev.slice(0, -1));
-    
-    vibrate('light');
-    toast({
-      title: "Ação Desfeita",
-      description: "Última ação foi desfeita.",
-    });
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      restoreFromHistory(history[historyIndex - 1]);
+      vibrate('light');
+    }
   };
 
   const redo = () => {
-    if (redoStack.length === 0) return;
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      restoreFromHistory(history[historyIndex + 1]);
+      vibrate('light');
+    }
+  };
+
+  const restoreFromHistory = (state: HistoryState) => {
+    setLayers(state.layers.map(layer => ({
+      ...layer,
+      canvas: cloneCanvas(layer.canvas)
+    })));
+    redrawCanvas();
+  };
+
+  const redrawCanvas = () => {
+    if (!canvasRef.current) return;
     
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
+    const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
     
-    const currentState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const nextState = redoStack[redoStack.length - 1];
+    ctx.clearRect(0, 0, 400, 400);
     
-    ctx.putImageData(nextState, 0, 0);
-    
-    setUndoStack(prev => [...prev, currentState]);
-    setRedoStack(prev => prev.slice(0, -1));
-    
-    vibrate('light');
-    toast({
-      title: "Ação Refeita",
-      description: "Ação foi refeita.",
+    layers.forEach(layer => {
+      if (layer.visible) {
+        ctx.globalAlpha = layer.opacity / 100;
+        ctx.drawImage(layer.canvas, 0, 0);
+      }
     });
-  };
-
-  const getCanvasPoint = (e: React.MouseEvent | React.TouchEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    
-    const rect = canvas.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    
-    return {
-      x: (clientX - rect.left) / canvasZoom - canvasOffset.x,
-      y: (clientY - rect.top) / canvasZoom - canvasOffset.y
-    };
-  };
-
-  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const point = getCanvasPoint(e);
-    if (!point) return;
-    
-    setIsDrawing(true);
-    setLastPoint(point);
-    
-    if (selectedTool === 'brush' || selectedTool === 'eraser') {
-      draw(point, point);
-    }
-    
-    vibrate('light');
-  };
-
-  const draw = (currentPoint: { x: number; y: number }, lastPoint: { x: number; y: number }) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = brushSize;
-    ctx.globalAlpha = brushOpacity / 100;
-    
-    if (selectedTool === 'brush') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
-    } else if (selectedTool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-    }
-    
-    ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(currentPoint.x, currentPoint.y);
-    ctx.stroke();
     
     ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
   };
 
-  const continueDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing) return;
-    e.preventDefault();
+  // Funções de desenho
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current || activeLayerIndex >= layers.length) return;
     
-    const point = getCanvasPoint(e);
-    if (!point || !lastPoint) return;
+    setIsDrawing(true);
+    vibrate('selection');
     
-    if (selectedTool === 'brush' || selectedTool === 'eraser') {
-      draw(point, lastPoint);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / canvasZoom;
+    const y = (e.clientY - rect.top) / canvasZoom;
+    
+    setLastPoint({ x, y });
+    
+    if (selectedTool === 'brush' || selectedTool === 'pencil') {
+      drawPoint(x, y);
+    } else if (selectedTool === 'bucket') {
+      floodFill(x, y);
+    } else if (selectedTool === 'eyedropper') {
+      pickColor(x, y);
+    }
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !canvasRef.current || !lastPoint) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / canvasZoom;
+    const y = (e.clientY - rect.top) / canvasZoom;
+    
+    if (selectedTool === 'brush' || selectedTool === 'pencil') {
+      if (smoothStrokes) {
+        drawSmoothLine(lastPoint.x, lastPoint.y, x, y);
+      } else {
+        drawLine(lastPoint.x, lastPoint.y, x, y);
+      }
+    } else if (selectedTool === 'eraser') {
+      erase(x, y);
     }
     
-    setLastPoint(point);
+    setLastPoint({ x, y });
+    
+    // Aplicar simetria se ativada
+    if (symmetryMode !== 'none') {
+      applySymmetry(x, y);
+    }
   };
 
   const stopDrawing = () => {
     if (isDrawing) {
       setIsDrawing(false);
       setLastPoint(null);
-      saveToUndoStack();
-      vibrate('medium');
-    }
-  };
-
-  const floodFill = (startX: number, startY: number, newColor: string) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    const startPos = (startY * canvas.width + startX) * 4;
-    const startR = data[startPos];
-    const startG = data[startPos + 1];
-    const startB = data[startPos + 2];
-    const startA = data[startPos + 3];
-    
-    const newColorRgb = hexToRgb(newColor);
-    if (!newColorRgb) return;
-    
-    const stack = [[startX, startY]];
-    const visited = new Set<string>();
-    
-    while (stack.length > 0) {
-      const [x, y] = stack.pop()!;
-      const key = `${x},${y}`;
-      
-      if (visited.has(key) || x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
-        continue;
-      }
-      
-      const pos = (y * canvas.width + x) * 4;
-      const r = data[pos];
-      const g = data[pos + 1];
-      const b = data[pos + 2];
-      const a = data[pos + 3];
-      
-      if (r !== startR || g !== startG || b !== startB || a !== startA) {
-        continue;
-      }
-      
-      visited.add(key);
-      
-      data[pos] = newColorRgb.r;
-      data[pos + 1] = newColorRgb.g;
-      data[pos + 2] = newColorRgb.b;
-      data[pos + 3] = 255;
-      
-      stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
-    }
-    
-    ctx.putImageData(imageData, 0, 0);
-    saveToUndoStack();
-  };
-
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  };
-
-  const handleCanvasClick = (e: React.MouseEvent) => {
-    const point = getCanvasPoint(e);
-    if (!point) return;
-    
-    if (selectedTool === 'bucket') {
-      floodFill(Math.floor(point.x), Math.floor(point.y), selectedColor);
-      vibrate('medium');
-    } else if (selectedTool === 'eyedropper') {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      const imageData = ctx.getImageData(Math.floor(point.x), Math.floor(point.y), 1, 1);
-      const data = imageData.data;
-      const hex = `#${((1 << 24) + (data[0] << 16) + (data[1] << 8) + data[2]).toString(16).slice(1)}`;
-      setSelectedColor(hex);
-      
-      toast({
-        title: "Cor Capturada",
-        description: `Cor ${hex} selecionada.`,
-      });
+      saveToHistory();
       vibrate('light');
     }
   };
 
+  const drawPoint = (x: number, y: number) => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.globalCompositeOperation = blendModes.find(m => m.id === selectedBlendMode)?.operation || 'source-over';
+    ctx.fillStyle = selectedColor;
+    ctx.globalAlpha = brushOpacity / 100;
+    
+    const size = brushSize * (pressureSensitive ? Math.random() * 0.5 + 0.5 : 1);
+    
+    if (selectedBrushType === 'round') {
+      ctx.beginPath();
+      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (selectedBrushType === 'square') {
+      ctx.fillRect(x - size / 2, y - size / 2, size, size);
+    } else if (selectedBrushType === 'soft') {
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size / 2);
+      gradient.addColorStop(0, selectedColor);
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    redrawCanvas();
+  };
+
+  const drawSmoothLine = (x1: number, y1: number, x2: number, y2: number) => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.globalCompositeOperation = blendModes.find(m => m.id === selectedBlendMode)?.operation || 'source-over';
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = brushOpacity / 100;
+    
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    
+    redrawCanvas();
+  };
+
+  const drawLine = (x1: number, y1: number, x2: number, y2: number) => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.globalCompositeOperation = blendModes.find(m => m.id === selectedBlendMode)?.operation || 'source-over';
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = brushSize;
+    ctx.globalAlpha = brushOpacity / 100;
+    
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    
+    redrawCanvas();
+  };
+
+  const erase = (x: number, y: number) => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    redrawCanvas();
+  };
+
+  const floodFill = (x: number, y: number) => {
+    // Implementação simplificada do flood fill
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.fillStyle = selectedColor;
+    ctx.fillRect(0, 0, 400, 400);
+    
+    redrawCanvas();
+    saveToHistory();
+  };
+
+  const pickColor = (x: number, y: number) => {
+    if (!canvasRef.current) return;
+    
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+    
+    const imageData = ctx.getImageData(x, y, 1, 1);
+    const [r, g, b] = imageData.data;
+    const hexColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+    
+    setSelectedColor(hexColor);
+    vibrate('medium');
+    
+    toast({
+      title: "Cor Capturada! 🎨",
+      description: `Nova cor selecionada: ${hexColor}`,
+    });
+  };
+
+  const applySymmetry = (x: number, y: number) => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    if (symmetryMode === 'horizontal' || symmetryMode === 'both') {
+      const mirrorX = 400 - x;
+      drawPoint(mirrorX, y);
+    }
+    
+    if (symmetryMode === 'vertical' || symmetryMode === 'both') {
+      const mirrorY = 400 - y;
+      drawPoint(x, mirrorY);
+    }
+    
+    if (symmetryMode === 'both') {
+      const mirrorX = 400 - x;
+      const mirrorY = 400 - y;
+      drawPoint(mirrorX, mirrorY);
+    }
+  };
+
+  // Funções de camadas
+  const addLayer = () => {
+    const newLayer: Layer = {
+      id: `layer-${Date.now()}`,
+      name: `Camada ${layers.length + 1}`,
+      visible: true,
+      opacity: 100,
+      canvas: document.createElement('canvas')
+    };
+    newLayer.canvas.width = 400;
+    newLayer.canvas.height = 400;
+    
+    setLayers([...layers, newLayer]);
+    setActiveLayerIndex(layers.length);
+    
+    toast({
+      title: "Nova Camada Criada! 📄",
+      description: `${newLayer.name} adicionada com sucesso.`,
+    });
+  };
+
+  const deleteLayer = (index: number) => {
+    if (layers.length <= 1) {
+      toast({
+        title: "Não é Possível Eliminar",
+        description: "Deve manter pelo menos uma camada.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newLayers = layers.filter((_, i) => i !== index);
+    setLayers(newLayers);
+    setActiveLayerIndex(Math.max(0, Math.min(activeLayerIndex, newLayers.length - 1)));
+    
+    toast({
+      title: "Camada Eliminada! 🗑️",
+      description: "Camada removida com sucesso.",
+    });
+  };
+
+  const toggleLayerVisibility = (index: number) => {
+    const newLayers = [...layers];
+    newLayers[index].visible = !newLayers[index].visible;
+    setLayers(newLayers);
+    redrawCanvas();
+  };
+
+  const updateLayerOpacity = (index: number, opacity: number) => {
+    const newLayers = [...layers];
+    newLayers[index].opacity = opacity;
+    setLayers(newLayers);
+    redrawCanvas();
+  };
+
+  // Funções de upload e filtros
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "Ficheiro Muito Grande",
         description: "O ficheiro deve ter menos de 5MB.",
@@ -456,117 +701,224 @@ export default function EnhancedPixelPurchaseModal({
       return;
     }
     
-    setUploadedImage(file);
-    
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setImagePreview(result);
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setUploadedImage(result);
       
-      // Draw image on canvas
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
+      // Aplicar imagem ao canvas
       const img = new Image();
       img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        saveToUndoStack();
+        const layer = layers[activeLayerIndex];
+        if (!layer) return;
+        
+        const ctx = layer.canvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.drawImage(img, 0, 0, 400, 400);
+        redrawCanvas();
+        saveToHistory();
       };
       img.src = result;
+      
+      toast({
+        title: "Imagem Carregada! 📸",
+        description: "Imagem aplicada ao pixel com sucesso.",
+      });
     };
     reader.readAsDataURL(file);
+  };
+
+  const applyImageFilters = () => {
+    if (!uploadedImage || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`;
+    redrawCanvas();
     
     toast({
-      title: "Imagem Carregada",
-      description: "Imagem foi adicionada ao canvas.",
+      title: "Filtros Aplicados! ✨",
+      description: "Filtros de imagem aplicados com sucesso.",
     });
   };
 
-  const addTag = () => {
-    if (currentTagInput.trim() && !pixelTags.includes(currentTagInput.trim())) {
-      setPixelTags(prev => [...prev, currentTagInput.trim()]);
-      setCurrentTagInput('');
-      
-      toast({
-        title: "Tag Adicionada",
-        description: `Tag "${currentTagInput.trim()}" foi adicionada.`,
-      });
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setPixelTags(prev => prev.filter(tag => tag !== tagToRemove));
-  };
-
-  const applyEffect = (effectId: string) => {
-    const effect = pixelEffects.find(e => e.id === effectId);
-    if (!effect) return;
+  // Funções de efeitos
+  const toggleEffect = (effectId: string) => {
+    const isSelected = selectedEffects.includes(effectId);
     
-    if (effect.premium && !userCredits) {
-      toast({
-        title: "Efeito Premium",
-        description: "Este efeito requer créditos premium.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (selectedEffects.includes(effectId)) {
+    if (isSelected) {
       setSelectedEffects(prev => prev.filter(id => id !== effectId));
     } else {
       setSelectedEffects(prev => [...prev, effectId]);
     }
     
-    toast({
-      title: selectedEffects.includes(effectId) ? "Efeito Removido" : "Efeito Aplicado",
-      description: `${effect.name} ${selectedEffects.includes(effectId) ? 'removido' : 'aplicado'}.`,
-    });
+    vibrate('medium');
     
-    vibrate('light');
+    toast({
+      title: isSelected ? "Efeito Removido" : "Efeito Adicionado! ✨",
+      description: `Efeito ${effectId} ${isSelected ? 'removido' : 'aplicado'}.`,
+    });
   };
 
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // Funções de IA
+  const applyAIEnhancement = () => {
+    setIsProcessing(true);
     
-    const ctx = canvas.getContext('2d');
+    setTimeout(() => {
+      setIsProcessing(false);
+      setShowConfetti(true);
+      setPlaySuccessSound(true);
+      
+      toast({
+        title: "IA Aplicada! 🤖✨",
+        description: "Pixel melhorado automaticamente pela IA!",
+      });
+      
+      addXp(25);
+    }, 2000);
+  };
+
+  const randomizeColors = () => {
+    const randomColors = Array.from({ length: 6 }, () => 
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+    );
+    
+    // Aplicar cores aleatórias mantendo transparência
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
     if (!ctx) return;
     
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    saveToUndoStack();
+    // Lógica simplificada de randomização
+    ctx.globalCompositeOperation = 'color';
+    ctx.fillStyle = randomColors[Math.floor(Math.random() * randomColors.length)];
+    ctx.fillRect(0, 0, 400, 400);
+    
+    redrawCanvas();
+    saveToHistory();
     
     toast({
-      title: "Canvas Limpo",
-      description: "O canvas foi limpo.",
+      title: "Cores Aleatórias! 🎲",
+      description: "Paleta de cores randomizada aplicada!",
     });
-    vibrate('medium');
   };
 
-  const saveCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const applyPresetFilter = (filterId: string) => {
+    const filter = presetFilters.find(f => f.id === filterId);
+    if (!filter) return;
     
-    const link = document.createElement('a');
-    link.download = `pixel-${pixelData?.x}-${pixelData?.y}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
+    // Aplicar filtro baseado no ID
+    switch (filterId) {
+      case 'vintage':
+        setBrightness(90);
+        setContrast(110);
+        setSaturation(80);
+        break;
+      case 'dramatic':
+        setBrightness(105);
+        setContrast(140);
+        setSaturation(120);
+        break;
+      case 'soft':
+        setBrightness(110);
+        setContrast(85);
+        setSaturation(90);
+        setBlur(1);
+        break;
+      case 'vibrant':
+        setBrightness(110);
+        setContrast(120);
+        setSaturation(150);
+        break;
+      case 'monochrome':
+        setSaturation(0);
+        setContrast(120);
+        break;
+      case 'sepia':
+        setBrightness(110);
+        setContrast(90);
+        setSaturation(60);
+        break;
+    }
+    
+    applyImageFilters();
     
     toast({
-      title: "Canvas Guardado",
-      description: "A sua criação foi guardada.",
+      title: `Filtro ${filter.name} Aplicado! 🎨`,
+      description: filter.description,
     });
-    vibrate('success');
   };
 
+  // Funções de texto e stickers
+  const addText = () => {
+    if (!textContent.trim()) return;
+    
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    ctx.fillStyle = selectedColor;
+    ctx.fillText(textContent, textPosition.x, textPosition.y);
+    
+    redrawCanvas();
+    saveToHistory();
+    setTextContent('');
+    
+    toast({
+      title: "Texto Adicionado! 📝",
+      description: `"${textContent}" adicionado ao pixel.`,
+    });
+  };
+
+  const addSticker = (sticker: Sticker) => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.font = '48px Arial';
+    ctx.fillText(sticker.emoji, 200, 200);
+    
+    redrawCanvas();
+    saveToHistory();
+    
+    toast({
+      title: "Sticker Adicionado! 🎉",
+      description: `${sticker.name} (${sticker.emoji}) adicionado!`,
+    });
+  };
+
+  // Funções de tags
+  const addTag = () => {
+    if (!newTag.trim() || pixelTags.includes(newTag.trim())) return;
+    
+    const tag = newTag.trim().replace('#', '');
+    setPixelTags([...pixelTags, tag]);
+    setNewTag('');
+    
+    toast({
+      title: "Tag Adicionada! 🏷️",
+      description: `#${tag} adicionada às tags do pixel.`,
+    });
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setPixelTags(pixelTags.filter(tag => tag !== tagToRemove));
+  };
+
+  // Função de compra
   const handlePurchase = async () => {
     if (!pixelData) return;
     
-    // Validation
+    // Validar campos obrigatórios
     if (!pixelTitle.trim()) {
       toast({
         title: "Título Obrigatório",
@@ -576,71 +928,37 @@ export default function EnhancedPixelPurchaseModal({
       return;
     }
     
-    // Check affordability
-    const canAffordCredits = userCredits >= finalPrice;
-    const canAffordSpecial = userSpecialCredits >= specialCreditsPrice;
-    
-    if (paymentMethod === 'credits' && !canAffordCredits) {
-      toast({
-        title: "Créditos Insuficientes",
-        description: `Precisa de ${finalPrice} créditos. Tem apenas ${userCredits}.`,
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (paymentMethod === 'special' && !canAffordSpecial) {
-      toast({
-        title: "Créditos Especiais Insuficientes",
-        description: `Precisa de ${specialCreditsPrice} créditos especiais. Tem apenas ${userSpecialCredits}.`,
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setIsProcessing(true);
     
     try {
-      // Get canvas data
+      // Capturar imagem do canvas
       const canvas = canvasRef.current;
-      const canvasDataUrl = canvas?.toDataURL() || null;
+      const imageDataUrl = canvas?.toDataURL('image/png');
       
       const customizations = {
         title: pixelTitle,
         description: pixelDescription,
         tags: pixelTags,
-        link: pixelLink,
+        linkUrl: pixelLink,
         effects: selectedEffects,
-        color: selectedColor,
-        image: canvasDataUrl
+        image: imageDataUrl,
+        color: selectedColor
       };
       
-      const success = await onPurchase(pixelData, paymentMethod, customizations);
+      const success = await onPurchase(pixelData, 'credits', customizations);
       
       if (success) {
-        // Deduct payment
-        if (paymentMethod === 'credits') {
-          removeCredits(finalPrice);
-        } else {
-          removeSpecialCredits(specialCreditsPrice);
-        }
-        
-        // Reward XP
-        addXp(50);
-        
         setShowConfetti(true);
-        setPlayPurchaseSound(true);
+        setPlaySuccessSound(true);
+        
+        addXp(50);
         
         toast({
           title: "Pixel Comprado! 🎉",
           description: `Pixel (${pixelData.x}, ${pixelData.y}) é agora seu!`,
         });
         
-        // Close modal after success
-        setTimeout(() => {
-          onClose();
-          resetForm();
-        }, 2000);
+        onClose();
       }
     } catch (error) {
       toast({
@@ -653,140 +971,155 @@ export default function EnhancedPixelPurchaseModal({
     }
   };
 
-  const resetForm = () => {
-    setPixelTitle('');
-    setPixelDescription('');
-    setPixelTags([]);
-    setPixelLink('');
-    setSelectedEffects([]);
-    setUploadedImage(null);
-    setImagePreview(null);
-    setActiveTab('draw');
-    setSelectedTool('brush');
-    setSelectedColor('#D4A757');
-    setBrushSize(5);
-    setBrushOpacity(100);
-    setLayers([]);
-    setUndoStack([]);
-    setRedoStack([]);
+  const downloadCreation = () => {
+    if (!canvasRef.current) return;
+    
+    const link = document.createElement('a');
+    link.download = `pixel-${pixelData?.x}-${pixelData?.y}.png`;
+    link.href = canvasRef.current.toDataURL();
+    link.click();
+    
+    toast({
+      title: "Criação Guardada! 💾",
+      description: "Sua obra de arte foi descarregada.",
+    });
   };
 
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'Comum': return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
-      case 'Incomum': return 'text-green-500 bg-green-500/10 border-green-500/30';
-      case 'Raro': return 'text-blue-500 bg-blue-500/10 border-blue-500/30';
-      case 'Épico': return 'text-purple-500 bg-purple-500/10 border-purple-500/30';
-      case 'Lendário': return 'text-amber-500 bg-amber-500/10 border-amber-500/30';
-      case 'Marco Histórico': return 'text-red-500 bg-red-500/10 border-red-500/30';
-      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
-    }
+  const clearCanvas = () => {
+    const layer = layers[activeLayerIndex];
+    if (!layer) return;
+    
+    const ctx = layer.canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, 400, 400);
+    redrawCanvas();
+    saveToHistory();
+    
+    toast({
+      title: "Canvas Limpo! 🧹",
+      description: "Camada atual foi limpa.",
+    });
+  };
+
+  // Cálculo de preços
+  const getBasePrice = () => {
+    if (!pixelData) return 1;
+    
+    const rarityMultipliers = {
+      'Comum': 1,
+      'Incomum': 2.5,
+      'Raro': 5,
+      'Épico': 10,
+      'Lendário': 25,
+      'Marco Histórico': 50
+    };
+    
+    return 1 * (rarityMultipliers[pixelData.rarity] || 1);
+  };
+
+  const getEffectsPrice = () => {
+    return selectedEffects.length * 5; // €5 por efeito
+  };
+
+  const getTotalPrice = () => {
+    return getBasePrice() + getEffectsPrice();
+  };
+
+  const canAfford = () => {
+    return userCredits >= getTotalPrice() || userSpecialCredits >= (pixelData?.specialCreditsPrice || 0);
   };
 
   if (!pixelData) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <SoundEffect src={SOUND_EFFECTS.PURCHASE} play={playPurchaseSound} onEnd={() => setPlayPurchaseSound(false)} />
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <DialogContent className="max-w-6xl h-[95vh] p-0 gap-0 bg-background/95 backdrop-blur-sm">
+      <DialogContent className="max-w-6xl h-[95vh] p-0 gap-0 bg-background/98 backdrop-blur-md">
         <DialogHeader className="p-4 border-b bg-gradient-to-r from-primary/10 to-accent/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-2xl font-headline flex items-center">
-                <ShoppingCart className="h-6 w-6 mr-3 text-primary" />
-                Personalizar Pixel ({pixelData.x}, {pixelData.y})
-              </DialogTitle>
-              <DialogDescription className="flex items-center gap-2 mt-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                {pixelData.region}
-                <Badge className={getRarityColor(pixelData.rarity)}>
-                  {pixelData.rarity}
-                </Badge>
-              </DialogDescription>
+          <DialogTitle className="flex items-center justify-between">
+            <span className="flex items-center">
+              <Palette className="h-6 w-6 mr-3 text-primary" />
+              Editor de Pixel ({pixelData.x}, {pixelData.y})
+            </span>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{pixelData.region}</Badge>
+              <Badge className="bg-gradient-to-r from-primary to-accent">
+                {pixelData.rarity}
+              </Badge>
             </div>
-            
-            <div className="text-right">
-              <div className="text-2xl font-bold text-primary">
-                €{finalPrice.toFixed(2)}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                ou {specialCreditsPrice} especiais
-              </div>
-            </div>
-          </div>
+          </DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel - Canvas */}
+          {/* Área do Canvas */}
           <div className="flex-1 flex flex-col">
-            {/* Toolbar */}
+            {/* Toolbar Principal */}
             <div className="p-3 border-b bg-muted/20">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">Editor de Pixel</h3>
-                  <Badge variant="outline" className="text-xs">
-                    400x400px
-                  </Badge>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Ferramentas por Categoria */}
+                  <div className="flex gap-1">
+                    {['basic', 'artistic', 'effects', 'shapes', 'text', 'ai'].map(category => (
+                      <Button
+                        key={category}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAdvancedTools(category === 'ai' ? !showAdvancedTools : false)}
+                        className="capitalize"
+                      >
+                        {category === 'basic' && <Brush className="h-4 w-4 mr-1" />}
+                        {category === 'artistic' && <Sparkles className="h-4 w-4 mr-1" />}
+                        {category === 'effects' && <Wand2 className="h-4 w-4 mr-1" />}
+                        {category === 'shapes' && <Circle className="h-4 w-4 mr-1" />}
+                        {category === 'text' && <Type className="h-4 w-4 mr-1" />}
+                        {category === 'ai' && <Zap className="h-4 w-4 mr-1" />}
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Ferramentas Básicas Sempre Visíveis */}
+                  <Separator orientation="vertical" className="h-8" />
+                  <div className="flex gap-1">
+                    {tools.filter(t => t.category === 'basic').slice(0, 5).map(tool => (
+                      <Button
+                        key={tool.id}
+                        variant={selectedTool === tool.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedTool(tool.id)}
+                        className="relative"
+                      >
+                        {tool.icon}
+                        {tool.premium && (
+                          <Crown className="absolute -top-1 -right-1 h-3 w-3 text-amber-500" />
+                        )}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
                 
-                <div className="flex gap-1">
-                  <Button variant="outline" size="sm" onClick={undo} disabled={undoStack.length === 0}>
+                {/* Controles de Canvas */}
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setCanvasZoom(Math.min(3, canvasZoom + 0.5))}>
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setCanvasZoom(Math.max(0.5, canvasZoom - 0.5))}>
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={undo} disabled={historyIndex <= 0}>
                     <Undo className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={redo} disabled={redoStack.length === 0}>
+                  <Button variant="outline" size="sm" onClick={redo} disabled={historyIndex >= history.length - 1}>
                     <Redo className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={clearCanvas}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={saveCanvas}>
-                    <Download className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
               
-              {/* Tools */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                {drawingTools.map(tool => (
-                  <Button
-                    key={tool.id}
-                    variant={selectedTool === tool.id ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedTool(tool.id)}
-                    className="flex items-center gap-2"
-                  >
-                    {tool.icon}
-                    <span className="hidden sm:inline">{tool.name}</span>
-                  </Button>
-                ))}
-              </div>
-              
-              {/* Color Palette */}
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1">
-                  {colorPalettes[0].colors.map(color => (
-                    <button
-                      key={color}
-                      className={cn(
-                        "w-8 h-8 rounded border-2 transition-transform hover:scale-110",
-                        selectedColor === color ? "border-foreground scale-110" : "border-border"
-                      )}
-                      style={{ backgroundColor: color }}
-                      onClick={() => setSelectedColor(color)}
-                    />
-                  ))}
-                  
-                  <input
-                    ref={colorPickerRef}
-                    type="color"
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    className="w-8 h-8 rounded border-2 border-border cursor-pointer"
-                  />
-                </div>
-                
+              {/* Configurações da Ferramenta Ativa */}
+              <div className="mt-3 flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Label className="text-xs">Tamanho:</Label>
                   <Slider
@@ -807,311 +1140,665 @@ export default function EnhancedPixelPurchaseModal({
                     onValueChange={(value) => setBrushOpacity(value[0])}
                     min={10}
                     max={100}
-                    step={10}
+                    step={5}
                     className="w-20"
                   />
                   <span className="text-xs font-mono w-8">{brushOpacity}%</span>
                 </div>
+                
+                <Select value={selectedBrushType} onValueChange={setSelectedBrushType}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brushTypes.map(brush => (
+                      <SelectItem key={brush.id} value={brush.id}>
+                        {brush.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={selectedBlendMode} onValueChange={setSelectedBlendMode}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {blendModes.map(mode => (
+                      <SelectItem key={mode.id} value={mode.id}>
+                        {mode.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            
-            {/* Canvas Area */}
+
+            {/* Canvas Principal */}
             <div className="flex-1 flex items-center justify-center p-4 bg-muted/10">
               <div className="relative">
                 <canvas
                   ref={canvasRef}
-                  className={cn(
-                    "border-2 border-primary/30 rounded-lg shadow-lg bg-white",
-                    selectedTool === 'brush' && "cursor-crosshair",
-                    selectedTool === 'eraser' && "cursor-grab",
-                    selectedTool === 'bucket' && "cursor-pointer",
-                    selectedTool === 'eyedropper' && "cursor-copy",
-                    selectedTool === 'move' && "cursor-move"
-                  )}
+                  width={400}
+                  height={400}
+                  className="border-2 border-primary/30 rounded-lg bg-white cursor-crosshair shadow-lg"
                   style={{ 
-                    imageRendering: 'pixelated',
-                    transform: `scale(${canvasZoom}) translate(${canvasOffset.x}px, ${canvasOffset.y}px)`
+                    transform: `scale(${canvasZoom})`,
+                    imageRendering: 'pixelated'
                   }}
                   onMouseDown={startDrawing}
-                  onMouseMove={continueDrawing}
+                  onMouseMove={draw}
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
-                  onTouchStart={startDrawing}
-                  onTouchMove={continueDrawing}
-                  onTouchEnd={stopDrawing}
-                  onClick={handleCanvasClick}
                 />
                 
-                {/* Canvas Controls */}
-                <div className="absolute top-2 right-2 flex flex-col gap-1">
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCanvasZoom(prev => Math.min(prev * 1.2, 3))}>
-                    <ZoomIn className="h-4 w-4" />
+                {/* Grid Overlay */}
+                {showGrid && (
+                  <div 
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)`,
+                      backgroundSize: `${gridSize}px ${gridSize}px`,
+                      transform: `scale(${canvasZoom})`
+                    }}
+                  />
+                )}
+                
+                {/* Indicador de Simetria */}
+                {symmetryMode !== 'none' && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    {(symmetryMode === 'horizontal' || symmetryMode === 'both') && (
+                      <div className="absolute top-1/2 left-0 right-0 h-px bg-red-500/50" />
+                    )}
+                    {(symmetryMode === 'vertical' || symmetryMode === 'both') && (
+                      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-red-500/50" />
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Controles Inferiores */}
+            <div className="p-3 border-t bg-muted/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Paleta de Cores */}
+                  <div className="flex gap-1">
+                    {colorPalettes[selectedPalette].colors.map((color, index) => (
+                      <button
+                        key={index}
+                        className={cn(
+                          "w-8 h-8 rounded border-2 transition-transform hover:scale-110",
+                          selectedColor === color ? "border-foreground scale-110 shadow-lg" : "border-border"
+                        )}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setSelectedColor(color)}
+                      />
+                    ))}
+                  </div>
+                  
+                  <Input
+                    type="color"
+                    value={selectedColor}
+                    onChange={(e) => setSelectedColor(e.target.value)}
+                    className="w-12 h-8 p-0 border-2"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={clearCanvas}>
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Limpar
                   </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCanvasZoom(prev => Math.max(prev / 1.2, 0.5))}>
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCanvasZoom(1)}>
-                    <Crosshair className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={downloadCreation}>
+                    <Download className="h-4 w-4 mr-1" />
+                    Guardar
                   </Button>
                 </div>
               </div>
             </div>
           </div>
-          
-          {/* Right Panel - Customization */}
+
+          {/* Painel Lateral */}
           <div className="w-80 border-l flex flex-col">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            <Tabs defaultValue="tools" className="flex-1 flex flex-col">
               <TabsList className="grid w-full grid-cols-4 m-2">
-                <TabsTrigger value="draw" className="text-xs">
-                  <Brush className="h-4 w-4" />
+                <TabsTrigger value="tools" className="text-xs">
+                  <Brush className="h-4 w-4 mr-1" />
+                  Ferramentas
+                </TabsTrigger>
+                <TabsTrigger value="layers" className="text-xs">
+                  <Layers className="h-4 w-4 mr-1" />
+                  Camadas
                 </TabsTrigger>
                 <TabsTrigger value="effects" className="text-xs">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 mr-1" />
+                  Efeitos
                 </TabsTrigger>
                 <TabsTrigger value="details" className="text-xs">
-                  <Type className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="payment" className="text-xs">
-                  <CreditCard className="h-4 w-4" />
+                  <Info className="h-4 w-4 mr-1" />
+                  Detalhes
                 </TabsTrigger>
               </TabsList>
-              
+
               <ScrollArea className="flex-1">
-                <div className="p-4">
-                  {/* Drawing Tab */}
-                  <TabsContent value="draw" className="mt-0 space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Paletas de Cores</Label>
-                      <div className="space-y-2">
-                        {colorPalettes.map(palette => (
-                          <div key={palette.name} className="space-y-1">
-                            <span className="text-xs text-muted-foreground">{palette.name}</span>
-                            <div className="flex gap-1">
-                              {palette.colors.map(color => (
-                                <button
-                                  key={color}
-                                  className={cn(
-                                    "w-6 h-6 rounded border transition-transform hover:scale-110",
-                                    selectedColor === color ? "border-foreground scale-110" : "border-border"
-                                  )}
-                                  style={{ backgroundColor: color }}
-                                  onClick={() => setSelectedColor(color)}
-                                />
-                              ))}
-                            </div>
-                          </div>
+                {/* Tab: Ferramentas */}
+                <TabsContent value="tools" className="p-3 space-y-4">
+                  {/* Paletas de Cores */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Paletas de Cores</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex gap-1 mb-2">
+                        {colorPalettes.map((palette, index) => (
+                          <Button
+                            key={index}
+                            variant={selectedPalette === index ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSelectedPalette(index)}
+                            className="text-xs"
+                          >
+                            {palette.name}
+                          </Button>
                         ))}
                       </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Upload de Imagem</Label>
-                      <div className="space-y-2">
+                      
+                      <div className="grid grid-cols-6 gap-1">
+                        {colorPalettes[selectedPalette].colors.map((color, index) => (
+                          <button
+                            key={index}
+                            className={cn(
+                              "w-8 h-8 rounded border-2 transition-transform hover:scale-110",
+                              selectedColor === color ? "border-foreground scale-110" : "border-border"
+                            )}
+                            style={{ backgroundColor: color }}
+                            onClick={() => setSelectedColor(color)}
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Ferramentas Avançadas */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center justify-between">
+                        Ferramentas Avançadas
                         <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => fileInputRef.current?.click()}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAdvancedTools(!showAdvancedTools)}
                         >
-                          <Upload className="h-4 w-4 mr-2" />
-                          Carregar Imagem
+                          {showAdvancedTools ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         </Button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                        />
-                        {imagePreview && (
-                          <div className="relative">
-                            <img 
-                              src={imagePreview} 
-                              alt="Preview" 
-                              className="w-full h-20 object-cover rounded border"
-                            />
+                      </CardTitle>
+                    </CardHeader>
+                    {showAdvancedTools && (
+                      <CardContent className="space-y-3">
+                        {/* Ferramentas IA */}
+                        <div className="space-y-2">
+                          <Label className="text-xs font-medium">Inteligência Artificial</Label>
+                          <div className="grid grid-cols-2 gap-2">
                             <Button
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-1 right-1 h-6 w-6"
-                              onClick={() => {
-                                setUploadedImage(null);
-                                setImagePreview(null);
-                              }}
+                              variant="outline"
+                              size="sm"
+                              onClick={applyAIEnhancement}
+                              disabled={isProcessing}
+                              className="text-xs"
                             >
-                              <X className="h-3 w-3" />
+                              <Wand2 className="h-3 w-3 mr-1" />
+                              {isProcessing ? 'A processar...' : 'IA Melhorar'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={randomizeColors}
+                              className="text-xs"
+                            >
+                              <Shuffle className="h-3 w-3 mr-1" />
+                              Cores Aleatórias
                             </Button>
                           </div>
+                        </div>
+                        
+                        {/* Filtros Predefinidos */}
+                        <div className="space-y-2">
+                          <Label className="text-xs font-medium">Filtros Predefinidos</Label>
+                          <div className="grid grid-cols-2 gap-1">
+                            {presetFilters.map(filter => (
+                              <Button
+                                key={filter.id}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => applyPresetFilter(filter.id)}
+                                className="text-xs"
+                              >
+                                {filter.name}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Configurações Avançadas */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Grelha</Label>
+                            <Switch checked={showGrid} onCheckedChange={setShowGrid} />
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Simetria</Label>
+                            <Select value={symmetryMode} onValueChange={(value: any) => setSymmetryMode(value)}>
+                              <SelectTrigger className="w-24 h-7">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Nenhuma</SelectItem>
+                                <SelectItem value="horizontal">Horizontal</SelectItem>
+                                <SelectItem value="vertical">Vertical</SelectItem>
+                                <SelectItem value="both">Ambas</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Pressão</Label>
+                            <Switch checked={pressureSensitive} onCheckedChange={setPressureSensitive} />
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Traços Suaves</Label>
+                            <Switch checked={smoothStrokes} onCheckedChange={setSmoothStrokes} />
+                          </div>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+
+                  {/* Upload de Imagem */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Imagem de Base</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full text-xs"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Carregar Imagem
+                      </Button>
+                      
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      
+                      {uploadedImage && (
+                        <div className="space-y-2">
+                          <Label className="text-xs font-medium">Filtros de Imagem</Label>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs w-16">Brilho:</Label>
+                              <Slider
+                                value={[brightness]}
+                                onValueChange={(value) => setBrightness(value[0])}
+                                min={50}
+                                max={150}
+                                className="flex-1"
+                              />
+                              <span className="text-xs w-8">{brightness}%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs w-16">Contraste:</Label>
+                              <Slider
+                                value={[contrast]}
+                                onValueChange={(value) => setContrast(value[0])}
+                                min={50}
+                                max={150}
+                                className="flex-1"
+                              />
+                              <span className="text-xs w-8">{contrast}%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs w-16">Saturação:</Label>
+                              <Slider
+                                value={[saturation]}
+                                onValueChange={(value) => setSaturation(value[0])}
+                                min={0}
+                                max={200}
+                                className="flex-1"
+                              />
+                              <span className="text-xs w-8">{saturation}%</span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={applyImageFilters}
+                              className="w-full text-xs"
+                            >
+                              Aplicar Filtros
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Camadas */}
+                <TabsContent value="layers" className="p-3 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Camadas ({layers.length})</Label>
+                    <Button variant="outline" size="sm" onClick={addLayer}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {layers.map((layer, index) => (
+                      <Card 
+                        key={layer.id}
+                        className={cn(
+                          "p-3 cursor-pointer transition-colors",
+                          activeLayerIndex === index ? "border-primary bg-primary/10" : ""
                         )}
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Camadas</Label>
-                      <div className="space-y-2">
-                        {layers.map((layer, index) => (
-                          <div key={layer.id} className={cn(
-                            "flex items-center gap-2 p-2 rounded border",
-                            activeLayerIndex === index ? "border-primary bg-primary/10" : "border-border"
-                          )}>
+                        onClick={() => setActiveLayerIndex(index)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6"
-                              onClick={() => {
-                                const newLayers = [...layers];
-                                newLayers[index].visible = !newLayers[index].visible;
-                                setLayers(newLayers);
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLayerVisibility(index);
                               }}
+                              className="h-6 w-6"
                             >
-                              {layer.visible ? <Eye className="h-3 w-3" /> : <Eye className="h-3 w-3 opacity-50" />}
+                              {layer.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                             </Button>
-                            <span className="text-xs flex-1">{layer.name}</span>
+                            <span className="text-sm font-medium">{layer.name}</span>
+                          </div>
+                          
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteLayer(index);
+                            }}
+                            className="h-6 w-6 text-red-500"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        
+                        <div className="mt-2">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs">Opacidade:</Label>
                             <Slider
                               value={[layer.opacity]}
-                              onValueChange={(value) => {
-                                const newLayers = [...layers];
-                                newLayers[index].opacity = value[0];
-                                setLayers(newLayers);
-                              }}
+                              onValueChange={(value) => updateLayerOpacity(index, value[0])}
                               min={0}
                               max={100}
-                              className="w-16"
+                              className="flex-1"
                             />
+                            <span className="text-xs w-8">{layer.opacity}%</span>
                           </div>
-                        ))}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                {/* Tab: Efeitos */}
+                <TabsContent value="effects" className="p-3 space-y-4">
+                  {/* Stickers */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Stickers</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="emojis" className="space-y-2">
+                        <TabsList className="grid w-full grid-cols-4 h-8">
+                          <TabsTrigger value="emojis" className="text-xs">😊</TabsTrigger>
+                          <TabsTrigger value="symbols" className="text-xs">⚡</TabsTrigger>
+                          <TabsTrigger value="nature" className="text-xs">🌳</TabsTrigger>
+                          <TabsTrigger value="portugal" className="text-xs">🇵🇹</TabsTrigger>
+                        </TabsList>
                         
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => {
-                            const newLayer: Layer = {
-                              id: `layer-${Date.now()}`,
-                              name: `Camada ${layers.length + 1}`,
-                              visible: true,
-                              opacity: 100,
-                              canvas: document.createElement('canvas')
-                            };
-                            newLayer.canvas.width = 400;
-                            newLayer.canvas.height = 400;
-                            setLayers(prev => [...prev, newLayer]);
-                          }}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Nova Camada
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  {/* Effects Tab */}
-                  <TabsContent value="effects" className="mt-0 space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium mb-3 block">Efeitos Visuais</Label>
+                        {['emojis', 'symbols', 'nature', 'portugal'].map(category => (
+                          <TabsContent key={category} value={category} className="mt-2">
+                            <div className="grid grid-cols-6 gap-1">
+                              {stickers
+                                .filter(s => s.category === category)
+                                .map(sticker => (
+                                  <Button
+                                    key={sticker.id}
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0 text-lg hover:bg-primary/20"
+                                    onClick={() => addSticker(sticker)}
+                                    title={sticker.name}
+                                  >
+                                    {sticker.emoji}
+                                  </Button>
+                                ))}
+                            </div>
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+
+                  {/* Editor de Texto */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Adicionar Texto</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Input
+                        placeholder="Texto a adicionar..."
+                        value={textContent}
+                        onChange={(e) => setTextContent(e.target.value)}
+                        className="text-sm"
+                      />
+                      
                       <div className="grid grid-cols-2 gap-2">
-                        {pixelEffects.map(effect => (
-                          <Card
-                            key={effect.id}
-                            className={cn(
-                              "cursor-pointer transition-all hover:shadow-md",
-                              selectedEffects.includes(effect.id) ? "border-primary bg-primary/10" : "border-border"
-                            )}
-                            onClick={() => applyEffect(effect.id)}
-                          >
-                            <CardContent className="p-3 text-center">
-                              <div className="mb-2">
-                                {effect.icon}
+                        <div>
+                          <Label className="text-xs">Tamanho:</Label>
+                          <Slider
+                            value={[fontSize]}
+                            onValueChange={(value) => setFontSize(value[0])}
+                            min={12}
+                            max={72}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Fonte:</Label>
+                          <Select value={fontFamily} onValueChange={setFontFamily}>
+                            <SelectTrigger className="h-8 mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Arial">Arial</SelectItem>
+                              <SelectItem value="Georgia">Georgia</SelectItem>
+                              <SelectItem value="Times">Times</SelectItem>
+                              <SelectItem value="Courier">Courier</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        onClick={addText}
+                        disabled={!textContent.trim()}
+                        className="w-full text-xs"
+                      >
+                        <Type className="h-4 w-4 mr-2" />
+                        Adicionar Texto
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Camadas */}
+                <TabsContent value="layers" className="p-3">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Gestão de Camadas</Label>
+                      <Button variant="outline" size="sm" onClick={addLayer}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Nova
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {layers.map((layer, index) => (
+                        <Card 
+                          key={layer.id}
+                          className={cn(
+                            "p-3 cursor-pointer transition-all hover:shadow-md",
+                            activeLayerIndex === index ? "border-primary bg-primary/10 shadow-md" : ""
+                          )}
+                          onClick={() => setActiveLayerIndex(index)}
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium">{layer.name}</span>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleLayerVisibility(index);
+                                  }}
+                                  className="h-6 w-6"
+                                >
+                                  {layer.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                                </Button>
+                                {layers.length > 1 && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteLayer(index);
+                                    }}
+                                    className="h-6 w-6 text-red-500"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                )}
                               </div>
-                              <h4 className="text-xs font-medium">{effect.name}</h4>
-                              {effect.premium && (
-                                <Badge className="mt-1 bg-amber-500 text-xs">
-                                  <Crown className="h-3 w-3 mr-1" />
-                                  Premium
-                                </Badge>
-                              )}
-                            </CardContent>
-                          </Card>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-xs">Opacidade:</Label>
+                                <span className="text-xs">{layer.opacity}%</span>
+                              </div>
+                              <Slider
+                                value={[layer.opacity]}
+                                onValueChange={(value) => updateLayerOpacity(index, value[0])}
+                                min={0}
+                                max={100}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Tab: Efeitos */}
+                <TabsContent value="effects" className="p-3 space-y-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Efeitos Visuais</CardTitle>
+                      <CardDescription className="text-xs">
+                        Efeitos premium custam +€5 cada
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'glow', name: 'Brilho', icon: <Sun className="h-4 w-4" />, premium: false },
+                          { id: 'shadow', name: 'Sombra', icon: <Moon className="h-4 w-4" />, premium: false },
+                          { id: 'neon', name: 'Neon', icon: <Zap className="h-4 w-4" />, premium: true },
+                          { id: 'hologram', name: 'Holograma', icon: <Sparkles className="h-4 w-4" />, premium: true },
+                          { id: 'fire', name: 'Fogo', icon: <Flame className="h-4 w-4" />, premium: true },
+                          { id: 'water', name: 'Água', icon: <Droplets className="h-4 w-4" />, premium: true }
+                        ].map(effect => (
+                          <Button
+                            key={effect.id}
+                            variant={selectedEffects.includes(effect.id) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => toggleEffect(effect.id)}
+                            className="text-xs relative"
+                          >
+                            {effect.icon}
+                            <span className="ml-1">{effect.name}</span>
+                            {effect.premium && (
+                              <Crown className="absolute -top-1 -right-1 h-3 w-3 text-amber-500" />
+                            )}
+                          </Button>
                         ))}
                       </div>
-                    </div>
-                    
-                    <Separator />
-                    
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Detalhes */}
+                <TabsContent value="details" className="p-3 space-y-4">
+                  <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-medium mb-3 block">Filtros de Imagem</Label>
-                      <div className="space-y-3">
-                        <div>
-                          <Label className="text-xs">Brilho</Label>
-                          <Slider defaultValue={[100]} min={50} max={150} className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Contraste</Label>
-                          <Slider defaultValue={[100]} min={50} max={150} className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Saturação</Label>
-                          <Slider defaultValue={[100]} min={0} max={200} className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Desfoque</Label>
-                          <Slider defaultValue={[0]} min={0} max={10} className="mt-1" />
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  {/* Details Tab */}
-                  <TabsContent value="details" className="mt-0 space-y-4">
-                    <div>
-                      <Label htmlFor="pixel-title" className="text-sm font-medium">
-                        Título do Pixel *
-                      </Label>
+                      <Label className="text-sm font-medium">Título *</Label>
                       <Input
-                        id="pixel-title"
-                        placeholder="Ex: Minha Obra-Prima"
+                        placeholder="Nome do seu pixel..."
                         value={pixelTitle}
-                        onChange={(e) => setPixelTitle(e.target.value)}
-                        maxLength={50}
+                        onChange={(e) => setPixelTitle(e.target.value.slice(0, 50))}
                         className="mt-1"
                       />
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {pixelTitle.length}/50 caracteres
-                      </div>
+                      </p>
                     </div>
-                    
+
                     <div>
-                      <Label htmlFor="pixel-description" className="text-sm font-medium">
-                        Descrição
-                      </Label>
+                      <Label className="text-sm font-medium">Descrição</Label>
                       <Textarea
-                        id="pixel-description"
-                        placeholder="Descreva a sua criação..."
+                        placeholder="Descreva o seu pixel..."
                         value={pixelDescription}
-                        onChange={(e) => setPixelDescription(e.target.value)}
-                        maxLength={200}
+                        onChange={(e) => setPixelDescription(e.target.value.slice(0, 200))}
                         rows={3}
                         className="mt-1 resize-none"
                       />
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {pixelDescription.length}/200 caracteres
-                      </div>
+                      </p>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Tags</Label>
                       <div className="flex gap-2 mt-1">
                         <Input
                           placeholder="Adicionar tag..."
-                          value={currentTagInput}
-                          onChange={(e) => setCurrentTagInput(e.target.value)}
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && addTag()}
                           className="flex-1"
                         />
-                        <Button size="icon" onClick={addTag} disabled={!currentTagInput.trim()}>
+                        <Button variant="outline" size="icon" onClick={addTag}>
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1120,12 +1807,13 @@ export default function EnhancedPixelPurchaseModal({
                         <div className="flex flex-wrap gap-1 mt-2">
                           {pixelTags.map(tag => (
                             <Badge key={tag} variant="secondary" className="text-xs">
-                              #{tag}
+                              <Hash className="h-3 w-3 mr-1" />
+                              {tag}
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-3 w-3 p-0 ml-1 hover:bg-destructive hover:text-destructive-foreground"
                                 onClick={() => removeTag(tag)}
+                                className="h-4 w-4 ml-1 p-0"
                               >
                                 <X className="h-2 w-2" />
                               </Button>
@@ -1134,208 +1822,74 @@ export default function EnhancedPixelPurchaseModal({
                         </div>
                       )}
                     </div>
-                    
+
                     <div>
-                      <Label htmlFor="pixel-link" className="text-sm font-medium">
-                        Link Personalizado
-                      </Label>
+                      <Label className="text-sm font-medium">Link (opcional)</Label>
                       <Input
-                        id="pixel-link"
-                        placeholder="https://exemplo.com"
+                        placeholder="https://..."
                         value={pixelLink}
                         onChange={(e) => setPixelLink(e.target.value)}
                         className="mt-1"
                       />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Link opcional para o seu pixel
-                      </div>
                     </div>
-                    
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Pré-visualização</Label>
-                      <Card className="bg-muted/20">
-                        <CardContent className="p-3">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-8 h-8 rounded border" style={{ backgroundColor: selectedColor }} />
-                            <div>
-                              <h4 className="font-medium text-sm">{pixelTitle || 'Sem título'}</h4>
-                              <p className="text-xs text-muted-foreground">
-                                ({pixelData.x}, {pixelData.y}) • {pixelData.region}
-                              </p>
-                            </div>
-                          </div>
-                          {pixelDescription && (
-                            <p className="text-xs text-muted-foreground mb-2">{pixelDescription}</p>
-                          )}
-                          {pixelTags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {pixelTags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  #{tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-                  
-                  {/* Payment Tab */}
-                  <TabsContent value="payment" className="mt-0 space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium mb-3 block">Método de Pagamento</Label>
-                      <div className="space-y-2">
-                        <Card 
-                          className={cn(
-                            "cursor-pointer transition-all hover:shadow-md",
-                            paymentMethod === 'credits' ? "border-primary bg-primary/10" : "border-border"
-                          )}
-                          onClick={() => setPaymentMethod('credits')}
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Coins className="h-5 w-5 text-primary" />
-                                <div>
-                                  <h4 className="font-medium text-sm">Créditos Normais</h4>
-                                  <p className="text-xs text-muted-foreground">Saldo: {userCredits.toLocaleString()}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-primary">€{finalPrice.toFixed(2)}</div>
-                                {userCredits < finalPrice && (
-                                  <Badge variant="destructive" className="text-xs">Insuficiente</Badge>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        
-                        <Card 
-                          className={cn(
-                            "cursor-pointer transition-all hover:shadow-md",
-                            paymentMethod === 'special' ? "border-accent bg-accent/10" : "border-border"
-                          )}
-                          onClick={() => setPaymentMethod('special')}
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Gift className="h-5 w-5 text-accent" />
-                                <div>
-                                  <h4 className="font-medium text-sm">Créditos Especiais</h4>
-                                  <p className="text-xs text-muted-foreground">Saldo: {userSpecialCredits.toLocaleString()}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-accent">{specialCreditsPrice}</div>
-                                {userSpecialCredits < specialCreditsPrice && (
-                                  <Badge variant="destructive" className="text-xs">Insuficiente</Badge>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Resumo da Compra</Label>
-                      <Card className="bg-muted/20">
-                        <CardContent className="p-3 space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Pixel Base ({pixelData.rarity})</span>
-                            <span>€{basePrice.toFixed(2)}</span>
-                          </div>
-                          {selectedEffects.filter(effect => 
-                            pixelEffects.find(e => e.id === effect)?.premium
-                          ).length > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span>Efeitos Premium ({selectedEffects.filter(effect => 
-                                pixelEffects.find(e => e.id === effect)?.premium
-                              ).length})</span>
-                              <span>€{(selectedEffects.filter(effect => 
-                                pixelEffects.find(e => e.id === effect)?.premium
-                              ).length * 5).toFixed(2)}</span>
-                            </div>
-                          )}
-                          <Separator />
-                          <div className="flex justify-between font-bold">
-                            <span>Total</span>
-                            <span className="text-primary">€{finalPrice.toFixed(2)}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <div className="bg-blue-500/10 p-3 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                        <div className="text-xs text-blue-300">
-                          <p className="font-medium mb-1">Benefícios da Compra:</p>
-                          <ul className="space-y-1">
-                            <li>• Propriedade permanente do pixel</li>
-                            <li>• Edição ilimitada</li>
-                            <li>• Visibilidade no mapa global</li>
-                            <li>• XP e conquistas</li>
-                            {pixelData.rarity !== 'Comum' && <li>• Pixel raro com valor especial</li>}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </div>
+                  </div>
+                </TabsContent>
               </ScrollArea>
             </Tabs>
           </div>
         </div>
-        
-        {/* Footer */}
-        <DialogFooter className="p-4 border-t bg-gradient-to-r from-card to-primary/5">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={onClose} disabled={isProcessing}>
-                Cancelar
-              </Button>
-              <Button variant="outline" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                Pré-visualizar
-              </Button>
+
+        {/* Footer com Resumo e Compra */}
+        <div className="p-4 border-t bg-gradient-to-r from-card to-primary/5">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="font-medium">
+                  Pixel ({pixelData.x}, {pixelData.y}) • {pixelData.region}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>Base: €{getBasePrice()}</span>
+                {selectedEffects.length > 0 && (
+                  <span>Efeitos: €{getEffectsPrice()}</span>
+                )}
+                <span className="font-bold text-primary">Total: €{getTotalPrice()}</span>
+              </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              <div className="text-right mr-3">
-                <div className="text-sm text-muted-foreground">Total:</div>
-                <div className="text-xl font-bold text-primary">
-                  {paymentMethod === 'credits' ? `€${finalPrice.toFixed(2)}` : `${specialCreditsPrice} especiais`}
+            <div className="flex items-center gap-3">
+              <div className="text-right text-sm">
+                <div className="flex items-center gap-1">
+                  <Coins className="h-4 w-4 text-primary" />
+                  <span>{userCredits.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Gift className="h-4 w-4 text-accent" />
+                  <span>{userSpecialCredits.toLocaleString()}</span>
                 </div>
               </div>
               
               <Button
                 onClick={handlePurchase}
-                disabled={isProcessing || !pixelTitle.trim() || 
-                  (paymentMethod === 'credits' && userCredits < finalPrice) ||
-                  (paymentMethod === 'special' && userSpecialCredits < specialCreditsPrice)}
-                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 min-w-[120px]"
+                disabled={isProcessing || !canAfford() || !pixelTitle.trim()}
+                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 px-8"
               >
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    A comprar...
+                    A processar...
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Comprar Pixel
+                    Comprar €{getTotalPrice()}
                   </>
                 )}
               </Button>
             </div>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
