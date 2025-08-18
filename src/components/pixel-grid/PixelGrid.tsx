@@ -803,7 +803,7 @@ export default function PixelGrid() {
       // Show coordinates every 10 pixels when zoomed in
       for (let x = 0; x < LOGICAL_GRID_COLS_CONFIG; x += 10) {
         for (let y = 0; y < logicalGridRows; y += 10) {
-          if (pixelBitmap[y * LOGICAL_GRID_COLS_CONFIG + x] === 1) {
+          if (pixelBitmap && pixelBitmap[y * LOGICAL_GRID_COLS_CONFIG + x] === 1) {
             ctx.fillText(
               `${x},${y}`,
               x * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2,
@@ -1286,6 +1286,7 @@ export default function PixelGrid() {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
+              onDoubleClick={handleDoubleClick}
           >
               <div
               style={{
