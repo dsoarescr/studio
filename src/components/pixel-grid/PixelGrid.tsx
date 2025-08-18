@@ -54,7 +54,7 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
-import { Search, Eye, Grid3X3, Bookmark, LucideMapPin as MapPinIconLucide, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown } from 'lucide-react'ERED_PIXEL_SIZE_CONFIG = 1;
+import { Search, Eye, Grid3X3, Bookmark, LucideMapPin as MapPinIconLucide, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown } from 'lucide-react\'ERED_PIXEL_SIZE_CONFIG = 1;
 import { Search, Eye, Grid3X3, Bookmark, LucideMapPin as MapPinIconLucide, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown, Plus, X, BarChart3, Activity, User, Clock, Star, Coins } from 'lucide-react';
 
 // Navigation and visualization constants
