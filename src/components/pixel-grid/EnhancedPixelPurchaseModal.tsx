@@ -92,7 +92,7 @@ const tools: Tool[] = [
   // Ferramentas Artísticas
   { id: 'spray', name: 'Spray', icon: <Circle className="h-4 w-4" />, category: 'artistic', description: 'Efeito de spray' },
   { id: 'smudge', name: 'Borrar', icon: <Move className="h-4 w-4" />, category: 'artistic', description: 'Borra e mistura cores' },
-  { id: 'blur', name: 'Desfoque', icon: <Circle className="h-4 w-4" />, category: 'artistic', premium: true, description: 'Aplica desfoque' },
+  { id: 'blur', name: 'Desfoque', icon: <Filter className="h-4 w-4" />, category: 'artistic', premium: true, description: 'Aplica desfoque' },
   { id: 'sharpen', name: 'Nitidez', icon: <Contrast className="h-4 w-4" />, category: 'artistic', premium: true, description: 'Aumenta nitidez' },
   
   // Formas
