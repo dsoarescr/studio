@@ -10,7 +10,7 @@ export default function MainLayout({
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300">
       <UserProfileHeader />
-      <main className="flex-1 overflow-y-auto pt-14 pb-[var(--bottom-nav-height)]">
+      <main className="pt-14 pb-[var(--bottom-nav-height)]">
         <div className="min-h-full">
           {children}
         </div>
