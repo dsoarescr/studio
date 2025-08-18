@@ -259,26 +259,6 @@ const stickerCategories = {
     name: 'Tech',
     icon: <Smartphone className="h-4 w-4" />,
     items: ['💻', '📱', '⌚', '🖥️', '⌨️', '🖱️', '💾', '💿', '📀', '🔌', '🔋', '📡', '🛰️', '🚀', '🤖', '👾']
-  },
-  faces: {
-    name: 'Faces',
-    icon: <Smile className="h-4 w-4" />,
-    items: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩']
-  },
-  hands: {
-    name: 'Mãos',
-    icon: <Hand className="h-4 w-4" />,
-    items: ['👍', '👎', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '👌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙']
-  },
-  objects: {
-    name: 'Objetos',
-    icon: <Palette className="h-4 w-4" />,
-    items: ['🎨', '🖌️', '🖍️', '✏️', '✒️', '🖊️', '🖋️', '📝', '📄', '📃', '📑', '📊', '📈', '📉', '📋', '📌']
-  },
-  weather: {
-    name: 'Tempo',
-    icon: <Sun className="h-4 w-4" />,
-    items: ['☀️', '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️']
   }
 };
 
@@ -378,6 +358,9 @@ export default function EnhancedPixelPurchaseModal({
   const { addCredits, addXp, removeCredits, removeSpecialCredits } = useUserStore();
   const { toast } = useToast();
   const { vibrate } = useHapticFeedback();
+  const colorPickerRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Inicializar canvas
   useEffect(() => {
