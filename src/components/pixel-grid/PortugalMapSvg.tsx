@@ -1,6 +1,26 @@
 // src/components/pixel-grid/PortugalMapSvg.tsx
 'use client';
 
+// =================================================================
+// ==                        AVISO IMPORTANTE                       ==
+// =================================================================
+//
+// ESTE FICHEIRO NÃO DEVE SER MODIFICADO SOB NENHUMA CIRCUNSTÂNCIA.
+//
+// Ele contém os dados vetoriais (SVG) estáticos do mapa de Portugal.
+// A sua única função é gerar a matriz de píxeis inicial para o 
+// componente PixelGrid.
+//
+// Qualquer alteração neste ficheiro irá muito provavelmente quebrar
+// a renderização do mapa e da grelha de píxeis.
+//
+// TODAS as alterações visuais, lógicas ou funcionais da grelha
+// devem ser feitas no ficheiro:
+//
+// src/components/pixel-grid/PixelGrid.tsx
+//
+// =================================================================
+
 import React, { useEffect, useRef } from 'react';
 
 export interface MapData {
