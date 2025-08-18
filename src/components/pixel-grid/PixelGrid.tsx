@@ -1323,9 +1323,19 @@ export default function PixelGrid() {
                 <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
               </div>
             )}
+            {hoveredPixel && (
+              <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+                <span className="text-muted-foreground">Hover:</span>
+                <span className="text-accent font-bold">({hoveredPixel.x}, {hoveredPixel.y})</span>
+              </div>
+            )}
             <div className="flex items-center justify-between border-t border-primary/20 pt-1">
               <span className="text-muted-foreground">Pixels Ativos:</span>
               <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+              <span className="text-muted-foreground">Atividade:</span>
+              <span className="text-blue-500 font-bold">{recentActivity.length}</span>
             </div>
             
             {/* Online status indicator */}
@@ -1337,6 +1347,46 @@ export default function PixelGrid() {
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
+            </div>
+          </div>
+          
+          {/* Living Grid Controls */}
+          <div className="mt-2 p-2 bg-background/90 rounded-md border border-accent/20 space-y-2">
+            <div className="text-xs font-semibold text-accent flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              Efeitos Vivos
+            </div>
+            
+            <div className="space-y-1">
+              <Button
+                variant={showActivityRipples ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowActivityRipples(!showActivityRipples)}
+                className="w-full text-xs h-7"
+              >
+                <Activity className="h-3 w-3 mr-1" />
+                Ondas
+              </Button>
+              
+              <Button
+                variant={showPixelPulse ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowPixelPulse(!showPixelPulse)}
+                className="w-full text-xs h-7"
+              >
+                <Radio className="h-3 w-3 mr-1" />
+                Pulso
+              </Button>
+              
+              <Button
+                variant={showRarityGlow ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowRarityGlow(!showRarityGlow)}
+                className="w-full text-xs h-7"
+              >
+                <Crown className="h-3 w-3 mr-1" />
+                Brilho
+              </Button>
             </div>
           </div>
         </div>
