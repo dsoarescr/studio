@@ -1602,7 +1602,7 @@ export default function PixelGrid() {
           {/* Main Action Button */}
           <EnhancedTooltip
             title="Ações Rápidas"
-            description="Acesso rápido às funcionalidades principais"
+            description="Acesso rápido às funcionalidades do universo vivo"
             actions={[
               { 
                 label: 'Explorar', 
@@ -1610,38 +1610,83 @@ export default function PixelGrid() {
                 icon: <Search className="h-4 w-4" /> 
               },
               { 
-                label: 'Filtros', 
-                onClick: () => {}, 
-                icon: <PaletteIconLucide className="h-4 w-4" /> 
+                label: 'Efeitos Vivos', 
+                onClick: () => {
+                  setShowActivityRipples(!showActivityRipples);
+                  setShowPixelPulse(!showPixelPulse);
+                  setShowRarityGlow(!showRarityGlow);
+                }, 
+                icon: <Sparkles className="h-4 w-4" /> 
               }
             ]}
             interactive={true}
           >
             <Dialog>
               <DialogTrigger asChild>
-                 <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
-                    <Star className="h-7 w-7" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95 animate-pulse-slow">
+                     <Star className="h-7 w-7 animate-glow" />
+                  </Button>
+                </motion.div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
                 <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
-                  <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
+                  <DialogTitle className="font-headline text-shadow-gold-sm">Universo Vivo - Ações Rápidas</DialogTitle>
                   <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
-                    Explore, filtre e interaja com o mapa de pixels.
+                    Explore e interaja com o mapa de pixels vivo em tempo real.
                   </DialogDescriptionElement>
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
+                  <Button 
+                    style={{ pointerEvents: 'auto' }} 
+                    variant="outline" 
+                    className="button-3d-effect-outline"
+                    onClick={() => {
+                      setShowActivityRipples(!showActivityRipples);
+                      setShowPixelPulse(!showPixelPulse);
+                      setShowRarityGlow(!showRarityGlow);
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {showActivityRipples ? 'Desativar' : 'Ativar'} Efeitos Vivos
+                  </Button>
+                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Activity className="mr-2 h-4 w-4" />Feed de Atividade ({recentActivity.length})</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
                   <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
                     <Brain className="mr-2 h-4 w-4" />
                     Assistente IA
                   </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
-                    <Crosshair className="mr-2 h-4 w-4" />
-                    Modo Precisão
+                  <Button 
+                    style={{ pointerEvents: 'auto' }} 
+                    variant="outline" 
+                    className="button-3d-effect-outline"
+                    onClick={() => {
+                      // Simulate finding rare pixels
+                      const rarePixel = rarePixels[Math.floor(Math.random() * rarePixels.length)];
+                      if (rarePixel) {
+                        setHighlightedPixel({ x: rarePixel.x, y: rarePixel.y });
+                        
+                        // Center on rare pixel
+                        const targetZoom = 10;
+                        const containerWidth = containerRef.current?.offsetWidth || 0;
+                        const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
+                        
+                        const targetX = -rarePixel.x * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
+                        const targetY = -rarePixel.y * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
+                        
+                        setPosition({ x: targetX, y: targetY });
+                        setZoom(targetZoom);
+                        
+                        toast({
+                          title: "🌟 Pixel Raro Encontrado!",
+                          description: `Pixel ${rarePixel.rarity} em (${rarePixel.x}, ${rarePixel.y})`,
+                        });
+                      }
+                    }}
+                  >
+                    <Crown className="mr-2 h-4 w-4" />
+                    Encontrar Pixel Raro
                   </Button>
                   <Separator />
                   <Link href="/premium" className="w-full">
@@ -1656,6 +1701,18 @@ export default function PixelGrid() {
             </Dialog>
           </EnhancedTooltip>
         </div>
+        
+        {/* Floating Activity Counter */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="absolute top-4 right-20 z-20 pointer-events-none"
+        >
+          <div className="bg-card/90 backdrop-blur-md p-2 rounded-full shadow-lg border border-primary/30 flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-xs font-medium text-primary">{recentActivity.length} atividades</span>
+          </div>
+        </motion.div>
       </div>
     </MobileOptimizations>
   );
