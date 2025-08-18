@@ -924,7 +924,7 @@ export default function MemberPage() {
                     placeholder="Pesquisar pixels..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="flex-1 h-10"
                   />
                 </div>
                 
