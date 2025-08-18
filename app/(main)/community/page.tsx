@@ -1,24 +1,26 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/lib/auth-context';
-import { useUserStore } from '@/lib/store';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Users, MessageSquare, Heart, Share2, Send, Camera, Image as ImageIcon, MapPin, Trophy, Star, Crown, Gift, Coins, Zap, Eye, ThumbsUp, Plus, Search, Filter, TrendingUp, Clock, Calendar, Globe, UserPlus, Settings, Bell, Bookmark, Flag, MoreHorizontal, Play, Pause, Volume2, VolumeX, X, ChevronLeft, ChevronRight, Smile, Paperclip, Hash, AtSign, Mic, Video, Phone, Edit3, Trash2, Reply, Forward, Download, Upload, Palette, Target, Award, Flame, CloudLightning as Lightning, Sparkles, Compass, Activity, BarChart3 } from 'lucide-react';
+import { 
+  Heart, MessageSquare, Share2, Send, Users, MapPin, Calendar, 
+  Clock, Star, Crown, Gift, Zap, Eye, ThumbsUp, UserPlus, 
+  Play, Pause, X, ChevronLeft, ChevronRight, Camera, Image as ImageIcon,
+  Palette, Trophy, Target, Flame, TrendingUp, BookOpen, Video,
+  Music, Mic, Settings, Filter, Search, Plus, MoreHorizontal,
+  Bookmark, Flag, Volume2, VolumeX, Compass, Globe, Award,
+  Sparkles, Coins, Bell, Phone, MessageCircle, User, Edit,
+  Copy, ExternalLink, Info, CheckCircle, AlertTriangle
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,13 +28,23 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
+import { useUserStore } from "@/lib/store";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { RequireAuth } from "@/components/auth/RequireAuth";
+import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
+import { Confetti } from '@/components/ui/confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -45,55 +57,55 @@ interface Post {
     avatar: string;
     verified: boolean;
     level: number;
-    isPremium: boolean;
+    followers: number;
+    following: number;
+    bio: string;
+    joinDate: string;
+    pixelsOwned: number;
+    achievements: number;
   };
   content: string;
-  type: 'text' | 'pixel' | 'achievement' | 'image';
-  timestamp: Date;
+  type: 'text' | 'pixel' | 'image' | 'achievement';
+  timestamp: string;
   likes: number;
   comments: Comment[];
   shares: number;
   isLiked: boolean;
-  isBookmarked: boolean;
+  isSaved: boolean;
+  tags: string[];
   pixel?: {
     x: number;
     y: number;
     region: string;
-    color: string;
+    imageUrl: string;
     price?: number;
-    imageUrl?: string;
   };
+  imageUrl?: string;
   achievement?: {
     name: string;
     description: string;
     rarity: string;
-    xp: number;
-    credits: number;
+    icon: string;
   };
-  imageUrl?: string;
-  tags: string[];
 }
 
 interface Comment {
   id: string;
   author: {
-    id: string;
     name: string;
     avatar: string;
     verified: boolean;
     level: number;
   };
   content: string;
-  timestamp: Date;
+  timestamp: string;
   likes: number;
   isLiked: boolean;
-  replies: Comment[];
 }
 
 interface Story {
   id: string;
   author: {
-    id: string;
     name: string;
     avatar: string;
     verified: boolean;
@@ -104,7 +116,7 @@ interface Story {
     text?: string;
     duration: number;
   };
-  timestamp: Date;
+  timestamp: string;
   views: number;
   isViewed: boolean;
 }
@@ -113,137 +125,198 @@ interface Group {
   id: string;
   name: string;
   description: string;
-  region: string;
+  category: 'Regional' | 'Interesse' | 'Habilidade';
   members: number;
   avatar: string;
   isJoined: boolean;
-  lastActivity: string;
-  category: 'regional' | 'interest' | 'skill';
   isPrivate: boolean;
+  recentActivity: string;
+  rules: string[];
+  moderators: string[];
+  createdAt: string;
 }
 
 interface ChatConversation {
   id: string;
-  participants: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-    isOnline: boolean;
-  }>;
-  lastMessage: {
-    content: string;
-    timestamp: Date;
-    senderId: string;
-  };
+  type: 'private' | 'group';
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  timestamp: string;
   unreadCount: number;
-  isGroup: boolean;
-  groupName?: string;
+  isOnline: boolean;
+  participants?: string[];
 }
 
 interface ChatMessage {
   id: string;
-  senderId: string;
+  sender: string;
   content: string;
-  timestamp: Date;
-  type: 'text' | 'image' | 'pixel' | 'system';
-  isRead: boolean;
+  timestamp: string;
+  type: 'text' | 'image' | 'pixel';
+}
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  participants: number;
+  maxParticipants?: number;
+  prize: string;
+  requirements: string[];
+  rules: string[];
+  category: string;
+  difficulty: 'Fácil' | 'Médio' | 'Difícil' | 'Extremo';
+  isParticipating: boolean;
+  organizer: string;
+  imageUrl: string;
+}
+
+interface Tutorial {
+  id: string;
+  title: string;
+  description: string;
+  author: string;
+  duration: string;
+  difficulty: 'Iniciante' | 'Intermediário' | 'Avançado';
+  rating: number;
+  views: number;
+  tags: string[];
+  steps: string[];
+  videoUrl: string;
+  isSaved: boolean;
 }
 
 // Mock Data
-const mockStories: Story[] = [
+const mockPosts: Post[] = [
   {
     id: '1',
     author: {
       id: 'user1',
       name: 'PixelArtist',
-      avatar: 'https://placehold.co/60x60.png',
-      verified: true
+      username: '@pixelartist',
+      avatar: 'https://placehold.co/40x40.png',
+      verified: true,
+      level: 15,
+      followers: 1234,
+      following: 567,
+      bio: 'Artista digital especializado em paisagens portuguesas 🎨',
+      joinDate: '2023-05-15',
+      pixelsOwned: 89,
+      achievements: 12
     },
-    content: {
-      type: 'image',
-      url: 'https://placehold.co/400x600/D4A757/FFFFFF?text=Pixel+Story',
-      duration: 5
-    },
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    views: 234,
-    isViewed: false
+    content: 'Acabei de criar esta obra-prima em Lisboa! O que acham? 🎨✨ #LisboaArt #PixelArt',
+    type: 'pixel',
+    timestamp: '2h',
+    likes: 89,
+    comments: [
+      {
+        id: 'c1',
+        author: {
+          name: 'ColorMaster',
+          avatar: 'https://placehold.co/30x30.png',
+          verified: false,
+          level: 12
+        },
+        content: 'Incrível! Que técnica usaste para as sombras?',
+        timestamp: '1h',
+        likes: 5,
+        isLiked: false
+      },
+      {
+        id: 'c2',
+        author: {
+          name: 'ArtLover',
+          avatar: 'https://placehold.co/30x30.png',
+          verified: true,
+          level: 8
+        },
+        content: 'Fantástico trabalho! 👏',
+        timestamp: '45m',
+        likes: 3,
+        isLiked: true
+      }
+    ],
+    shares: 23,
+    isLiked: false,
+    isSaved: false,
+    tags: ['LisboaArt', 'PixelArt'],
+    pixel: {
+      x: 245,
+      y: 156,
+      region: 'Lisboa',
+      imageUrl: 'https://placehold.co/300x300/D4A757/FFFFFF?text=Lisboa+Art',
+      price: 150
+    }
   },
   {
     id: '2',
     author: {
       id: 'user2',
       name: 'ColorMaster',
-      avatar: 'https://placehold.co/60x60.png',
-      verified: false
-    },
-    content: {
-      type: 'text',
-      text: 'Acabei de comprar meu 100º pixel! 🎉',
-      duration: 8
-    },
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    views: 156,
-    isViewed: true
-  }
-];
-
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    author: {
-      id: 'user1',
-      name: 'PixelMaster',
-      username: '@pixelmaster',
-      avatar: 'https://placehold.co/50x50.png',
-      verified: true,
-      level: 15,
-      isPremium: true
-    },
-    content: 'Acabei de criar esta obra-prima em Lisboa! O que acham? 🎨✨',
-    type: 'pixel',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    likes: 89,
-    comments: [],
-    shares: 12,
-    isLiked: false,
-    isBookmarked: false,
-    pixel: {
-      x: 245,
-      y: 156,
-      region: 'Lisboa',
-      color: '#D4A757',
-      price: 150,
-      imageUrl: 'https://placehold.co/300x300/D4A757/FFFFFF?text=Lisboa+Art'
-    },
-    tags: ['arte', 'lisboa', 'masterpiece']
-  },
-  {
-    id: '2',
-    author: {
-      id: 'user2',
-      name: 'AchievementHunter',
-      username: '@achiever',
-      avatar: 'https://placehold.co/50x50.png',
+      username: '@colormaster',
+      avatar: 'https://placehold.co/40x40.png',
       verified: false,
       level: 12,
-      isPremium: false
+      followers: 567,
+      following: 234,
+      bio: 'Especialista em teoria das cores e paletas harmoniosas 🌈',
+      joinDate: '2023-08-20',
+      pixelsOwned: 45,
+      achievements: 8
     },
-    content: 'Nova conquista desbloqueada! 🏆',
+    content: 'Novo recorde pessoal! 50 pixels numa semana! 🚀 #Milestone #PixelCollection',
     type: 'achievement',
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    timestamp: '4h',
     likes: 156,
     comments: [],
     shares: 28,
     isLiked: true,
-    isBookmarked: false,
+    isSaved: false,
+    tags: ['Milestone', 'PixelCollection'],
     achievement: {
-      name: 'Mestre das Cores',
-      description: 'Use 30 cores diferentes',
+      name: 'Colecionador Semanal',
+      description: 'Comprou 50 pixels numa semana',
       rarity: 'Épico',
-      xp: 500,
-      credits: 200
+      icon: '🏆'
+    }
+  }
+];
+
+const mockStories: Story[] = [
+  {
+    id: '1',
+    author: {
+      name: 'PixelArtist',
+      avatar: 'https://placehold.co/40x40.png',
+      verified: true
     },
-    tags: ['conquista', 'cores']
+    content: {
+      type: 'image',
+      url: 'https://placehold.co/400x600/D4A757/FFFFFF?text=Story+1',
+      duration: 5
+    },
+    timestamp: '2h',
+    views: 234,
+    isViewed: false
+  },
+  {
+    id: '2',
+    author: {
+      name: 'ColorMaster',
+      avatar: 'https://placehold.co/40x40.png',
+      verified: false
+    },
+    content: {
+      type: 'text',
+      text: 'Trabalhando num novo projeto incrível! 🎨',
+      duration: 8
+    },
+    timestamp: '4h',
+    views: 156,
+    isViewed: true
   }
 ];
 
@@ -251,171 +324,196 @@ const mockGroups: Group[] = [
   {
     id: '1',
     name: 'Artistas de Lisboa',
-    description: 'Comunidade de criadores da capital',
-    region: 'Lisboa',
+    description: 'Comunidade de criadores da capital portuguesa',
+    category: 'Regional',
     members: 234,
     avatar: 'https://placehold.co/60x60/D4A757/FFFFFF?text=LX',
     isJoined: true,
-    lastActivity: 'Nova obra partilhada há 2h',
-    category: 'regional',
-    isPrivate: false
+    isPrivate: false,
+    recentActivity: 'Nova obra partilhada há 2h',
+    rules: [
+      'Respeitar todos os membros',
+      'Partilhar apenas conteúdo relacionado com Lisboa',
+      'Não spam ou autopromoção excessiva'
+    ],
+    moderators: ['AdminLisboa', 'ModeradorPT'],
+    createdAt: '2023-01-15'
   },
   {
     id: '2',
     name: 'Colecionadores Premium',
-    description: 'Investidores e colecionadores sérios',
-    region: 'Nacional',
+    description: 'Investidores e colecionadores sérios de pixels raros',
+    category: 'Interesse',
     members: 89,
     avatar: 'https://placehold.co/60x60/7DF9FF/000000?text=💎',
     isJoined: false,
-    lastActivity: 'Discussão sobre tendências',
-    category: 'interest',
-    isPrivate: true
-  },
-  {
-    id: '3',
-    name: 'Porto Pixels',
-    description: 'Artistas e colecionadores do Porto',
-    region: 'Porto',
-    members: 167,
-    avatar: 'https://placehold.co/60x60/9C27B0/FFFFFF?text=PO',
-    isJoined: false,
-    lastActivity: 'Tutorial publicado há 1h',
-    category: 'regional',
-    isPrivate: false
+    isPrivate: true,
+    recentActivity: 'Discussão sobre tendências de mercado',
+    rules: [
+      'Apenas membros premium',
+      'Discussões sobre investimentos',
+      'Partilhar análises de mercado'
+    ],
+    moderators: ['InvestorPro'],
+    createdAt: '2023-03-10'
   }
 ];
 
 const mockConversations: ChatConversation[] = [
   {
     id: '1',
-    participants: [
-      {
-        id: 'user1',
-        name: 'PixelArtist',
-        avatar: 'https://placehold.co/40x40.png',
-        isOnline: true
-      }
-    ],
-    lastMessage: {
-      content: 'Olá! Vi o teu pixel em Lisboa, está incrível!',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      senderId: 'user1'
-    },
+    type: 'private',
+    name: 'PixelArtist',
+    avatar: 'https://placehold.co/40x40.png',
+    lastMessage: 'Obrigado pelo feedback!',
+    timestamp: '2h',
     unreadCount: 2,
-    isGroup: false
+    isOnline: true
   },
   {
     id: '2',
-    participants: [
-      {
-        id: 'user2',
-        name: 'ColorMaster',
-        avatar: 'https://placehold.co/40x40.png',
-        isOnline: false
-      },
-      {
-        id: 'user3',
-        name: 'PixelPro',
-        avatar: 'https://placehold.co/40x40.png',
-        isOnline: true
-      }
-    ],
-    lastMessage: {
-      content: 'Vamos colaborar num projeto?',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      senderId: 'user2'
-    },
+    type: 'group',
+    name: 'Artistas de Lisboa',
+    avatar: 'https://placehold.co/40x40.png',
+    lastMessage: 'Alguém quer colaborar num projeto?',
+    timestamp: '1d',
     unreadCount: 0,
-    isGroup: true,
-    groupName: 'Projeto Lisboa'
+    isOnline: false,
+    participants: ['PixelArtist', 'ColorMaster', 'ArtLover']
   }
 ];
 
-const trendingTopics = [
-  { tag: '#LisboaArt', posts: 234, growth: '+15%' },
-  { tag: '#PixelInvestment', posts: 156, growth: '+8%' },
-  { tag: '#PortugalPixels', posts: 89, growth: '+23%' },
-  { tag: '#NewYear2025', posts: 67, growth: '+45%' },
-  { tag: '#CollabArt', posts: 45, growth: '+12%' }
+const mockEvents: Event[] = [
+  {
+    id: '1',
+    title: 'Concurso de Arte Natalícia',
+    description: 'Crie a melhor arte natalícia usando pixels portugueses e ganhe prémios incríveis!',
+    startDate: '2024-12-01',
+    endDate: '2024-12-25',
+    participants: 156,
+    maxParticipants: 500,
+    prize: '2000 créditos especiais + Pixel lendário exclusivo',
+    requirements: [
+      'Nível mínimo: 5',
+      'Pelo menos 10 pixels owned',
+      'Tema natalício obrigatório'
+    ],
+    rules: [
+      'Apenas pixels em território português',
+      'Máximo 5 submissões por participante',
+      'Votação da comunidade + júri especializado'
+    ],
+    category: 'Concurso',
+    difficulty: 'Médio',
+    isParticipating: false,
+    organizer: 'Equipa Pixel Universe',
+    imageUrl: 'https://placehold.co/400x200/D4A757/FFFFFF?text=Concurso+Natal'
+  },
+  {
+    id: '2',
+    title: 'Maratona de Ano Novo',
+    description: 'Evento especial de 24 horas para celebrar o novo ano com desafios únicos!',
+    startDate: '2024-12-31',
+    endDate: '2025-01-01',
+    participants: 89,
+    prize: '5000 créditos + Título exclusivo',
+    requirements: [
+      'Disponibilidade de 24h',
+      'Nível mínimo: 10'
+    ],
+    rules: [
+      'Desafios a cada 2 horas',
+      'Pontuação cumulativa',
+      'Prémios por escalões'
+    ],
+    category: 'Maratona',
+    difficulty: 'Extremo',
+    isParticipating: true,
+    organizer: 'Comunidade',
+    imageUrl: 'https://placehold.co/400x200/7DF9FF/000000?text=Ano+Novo'
+  }
+];
+
+const mockTutorials: Tutorial[] = [
+  {
+    id: '1',
+    title: 'Primeiros Passos no Pixel Art',
+    description: 'Aprenda os fundamentos básicos da arte pixel, desde a escolha de cores até técnicas de sombreamento.',
+    author: 'PixelMaster',
+    duration: '15 min',
+    difficulty: 'Iniciante',
+    rating: 4.8,
+    views: 2341,
+    tags: ['básico', 'cores', 'sombreamento'],
+    steps: [
+      'Escolher a paleta de cores',
+      'Definir a resolução',
+      'Técnicas de sombreamento',
+      'Finalização e exportação'
+    ],
+    videoUrl: 'https://placehold.co/400x300/D4A757/FFFFFF?text=Tutorial+Video',
+    isSaved: false
+  },
+  {
+    id: '2',
+    title: 'Estratégias de Investimento',
+    description: 'Como identificar pixels valiosos e construir um portfólio lucrativo.',
+    author: 'InvestorPro',
+    duration: '25 min',
+    difficulty: 'Avançado',
+    rating: 4.9,
+    views: 1876,
+    tags: ['investimento', 'estratégia', 'mercado'],
+    steps: [
+      'Análise de mercado',
+      'Identificar tendências',
+      'Diversificação de portfólio',
+      'Gestão de risco'
+    ],
+    videoUrl: 'https://placehold.co/400x300/7DF9FF/000000?text=Investimento',
+    isSaved: true
+  }
 ];
 
 export default function CommunityPage() {
   const { user } = useAuth();
-  const { addCredits, addXp, addNotification } = useUserStore();
+  const { addCredits, addXp } = useUserStore();
   const { toast } = useToast();
-
-  // State
-  const [activeTab, setActiveTab] = useState('feed');
+  
+  // States
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [stories, setStories] = useState<Story[]>(mockStories);
   const [groups, setGroups] = useState<Group[]>(mockGroups);
   const [conversations, setConversations] = useState<ChatConversation[]>(mockConversations);
+  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const [tutorials, setTutorials] = useState<Tutorial[]>(mockTutorials);
   
-  // Post creation
+  // UI States
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostType, setNewPostType] = useState<'text' | 'pixel' | 'image'>('text');
-  const [isCreatingPost, setIsCreatingPost] = useState(false);
-  
-  // Stories
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
-  const [isViewingStories, setIsViewingStories] = useState(false);
+  const [showComments, setShowComments] = useState<string | null>(null);
+  const [newComment, setNewComment] = useState('');
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [storyIndex, setStoryIndex] = useState(0);
   const [storyProgress, setStoryProgress] = useState(0);
   const [isStoryPlaying, setIsStoryPlaying] = useState(true);
-  
-  // Comments
-  const [selectedPostForComments, setSelectedPostForComments] = useState<string | null>(null);
-  const [newCommentContent, setNewCommentContent] = useState('');
-  const [showComments, setShowComments] = useState<Record<string, boolean>>({});
-  
-  // Chat
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<ChatConversation | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newChatMessage, setNewChatMessage] = useState('');
+  const [selectedUser, setSelectedUser] = useState<Post['author'] | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
+  const [followingUsers, setFollowingUsers] = useState<string[]>([]);
   
-  // Effects and sounds
+  // Sound and visual effects
+  const [playLikeSound, setPlayLikeSound] = useState(false);
   const [playSuccessSound, setPlaySuccessSound] = useState(false);
-  const [playNotificationSound, setPlayNotificationSound] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   
-  // Search and filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'following' | 'trending'>('all');
-
-  // Story timer
-  const storyTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Auto-scroll for chat
+  // Refs
   const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  // Story viewing logic
-  useEffect(() => {
-    if (isViewingStories && isStoryPlaying) {
-      const currentStory = stories[currentStoryIndex];
-      if (!currentStory) return;
-
-      storyTimerRef.current = setInterval(() => {
-        setStoryProgress(prev => {
-          const newProgress = prev + (100 / (currentStory.content.duration * 10));
-          if (newProgress >= 100) {
-            nextStory();
-            return 0;
-          }
-          return newProgress;
-        });
-      }, 100);
-    } else {
-      if (storyTimerRef.current) {
-        clearInterval(storyTimerRef.current);
-      }
-    }
-
-    return () => {
-      if (storyTimerRef.current) {
-        clearInterval(storyTimerRef.current);
-      }
-    };
-  }, [isViewingStories, isStoryPlaying, currentStoryIndex]);
+  const storyProgressRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -424,100 +522,86 @@ export default function CommunityPage() {
     }
   }, [chatMessages]);
 
-  // Simulate real-time activity
+  // Story progress timer
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate new likes
-      if (Math.random() > 0.7) {
-        setPosts(prev => prev.map(post => ({
-          ...post,
-          likes: post.likes + Math.floor(Math.random() * 3)
-        })));
+    if (selectedStory && isStoryPlaying) {
+      const duration = selectedStory.content.duration * 1000;
+      storyProgressRef.current = setInterval(() => {
+        setStoryProgress(prev => {
+          const newProgress = prev + (100 / (duration / 100));
+          if (newProgress >= 100) {
+            nextStory();
+            return 0;
+          }
+          return newProgress;
+        });
+      }, 100);
+    } else {
+      if (storyProgressRef.current) {
+        clearInterval(storyProgressRef.current);
       }
-      
-      // Simulate new messages
-      if (Math.random() > 0.8 && conversations.length > 0) {
-        setPlayNotificationSound(true);
-        addNotification();
-      }
-    }, 5000);
+    }
 
-    return () => clearInterval(interval);
-  }, [addNotification]);
+    return () => {
+      if (storyProgressRef.current) {
+        clearInterval(storyProgressRef.current);
+      }
+    };
+  }, [selectedStory, isStoryPlaying]);
 
   // Functions
   const createPost = () => {
-    if (!user) {
-      toast({
-        title: "Login Necessário",
-        description: "Faça login para criar publicações.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (!newPostContent.trim()) {
       toast({
-        title: "Conteúdo Vazio",
-        description: "Escreva algo antes de publicar.",
+        title: "Conteúdo Obrigatório",
+        description: "Por favor, escreva algo para publicar.",
         variant: "destructive"
       });
       return;
     }
 
-    setIsCreatingPost(true);
+    const newPost: Post = {
+      id: Date.now().toString(),
+      author: {
+        id: 'currentUser',
+        name: 'Você',
+        username: '@voce',
+        avatar: 'https://placehold.co/40x40.png',
+        verified: true,
+        level: 15,
+        followers: 234,
+        following: 123,
+        bio: 'Explorador do Pixel Universe',
+        joinDate: '2023-06-01',
+        pixelsOwned: 42,
+        achievements: 8
+      },
+      content: newPostContent,
+      type: newPostType,
+      timestamp: 'agora',
+      likes: 0,
+      comments: [],
+      shares: 0,
+      isLiked: false,
+      isSaved: false,
+      tags: newPostContent.match(/#\w+/g)?.map(tag => tag.substring(1)) || []
+    };
 
-    // Simulate API call
-    setTimeout(() => {
-      const newPost: Post = {
-        id: Date.now().toString(),
-        author: {
-          id: 'currentUser',
-          name: user.displayName || 'Utilizador',
-          username: `@${(user.displayName || 'user').toLowerCase()}`,
-          avatar: user.photoURL || 'https://placehold.co/50x50.png',
-          verified: true,
-          level: 15,
-          isPremium: true
-        },
-        content: newPostContent,
-        type: newPostType,
-        timestamp: new Date(),
-        likes: 0,
-        comments: [],
-        shares: 0,
-        isLiked: false,
-        isBookmarked: false,
-        tags: extractHashtags(newPostContent)
-      };
-
-      setPosts(prev => [newPost, ...prev]);
-      setNewPostContent('');
-      setIsCreatingPost(false);
-      setPlaySuccessSound(true);
-      setShowConfetti(true);
-
-      // Reward user
-      addCredits(10);
-      addXp(25);
-
-      toast({
-        title: "Publicação Criada! 🎉",
-        description: "Recebeu 10 créditos + 25 XP por partilhar conteúdo.",
-      });
-    }, 1000);
+    setPosts(prev => [newPost, ...prev]);
+    setNewPostContent('');
+    
+    // Rewards
+    addXp(25);
+    addCredits(10);
+    setPlaySuccessSound(true);
+    
+    toast({
+      title: "Publicação Criada! 🎉",
+      description: "Recebeu 25 XP + 10 créditos por partilhar conteúdo!",
+    });
   };
 
-  const likePost = (postId: string) => {
-    if (!user) {
-      toast({
-        title: "Login Necessário",
-        description: "Faça login para curtir publicações.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const toggleLike = (postId: string) => {
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
         const newIsLiked = !post.isLiked;
@@ -525,221 +609,196 @@ export default function CommunityPage() {
         
         if (newIsLiked) {
           addXp(5);
-          setPlayNotificationSound(true);
+          addCredits(2);
+          setPlayLikeSound(true);
         }
         
-        return {
-          ...post,
-          isLiked: newIsLiked,
-          likes: Math.max(0, newLikes)
-        };
+        return { ...post, isLiked: newIsLiked, likes: newLikes };
       }
       return post;
     }));
   };
 
-  const bookmarkPost = (postId: string) => {
-    if (!user) {
-      toast({
-        title: "Login Necessário",
-        description: "Faça login para guardar publicações.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const toggleSave = (postId: string) => {
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const newIsSaved = !post.isSaved;
+        
+        if (newIsSaved) {
+          addXp(3);
+          toast({
+            title: "Post Guardado! 📌",
+            description: "Adicionado aos seus favoritos. +3 XP",
+          });
+        }
+        
+        return { ...post, isSaved: newIsSaved };
+      }
+      return post;
+    }));
+  };
+
+  const addComment = (postId: string) => {
+    if (!newComment.trim()) return;
+
+    const comment: Comment = {
+      id: Date.now().toString(),
+      author: {
+        name: 'Você',
+        avatar: 'https://placehold.co/30x30.png',
+        verified: true,
+        level: 15
+      },
+      content: newComment,
+      timestamp: 'agora',
+      likes: 0,
+      isLiked: false
+    };
 
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
-        const newIsBookmarked = !post.isBookmarked;
-        
-        toast({
-          title: newIsBookmarked ? "Publicação Guardada" : "Publicação Removida",
-          description: newIsBookmarked ? "Adicionada aos seus favoritos." : "Removida dos favoritos.",
-        });
-        
-        return { ...post, isBookmarked: newIsBookmarked };
+        return { ...post, comments: [...post.comments, comment] };
       }
       return post;
     }));
+
+    setNewComment('');
+    addXp(8);
+    addCredits(3);
+    
+    toast({
+      title: "Comentário Adicionado! 💬",
+      description: "Recebeu 8 XP + 3 créditos por interagir!",
+    });
   };
 
-  const sharePost = (postId: string) => {
-    const post = posts.find(p => p.id === postId);
-    if (!post) return;
-
+  const sharePost = (post: Post) => {
     if (navigator.share) {
       navigator.share({
-        title: `Publicação de ${post.author.name}`,
+        title: `Post de ${post.author.name}`,
         text: post.content,
         url: window.location.href
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast({
-        title: "Link Copiado",
-        description: "Link da publicação copiado para a área de transferência.",
+        title: "Link Copiado! 🔗",
+        description: "Link do post copiado para a área de transferência.",
       });
     }
-
-    setPosts(prev => prev.map(p => 
-      p.id === postId ? { ...p, shares: p.shares + 1 } : p
-    ));
-
-    addXp(10);
+    
+    addXp(5);
+    addCredits(2);
   };
 
-  const addComment = (postId: string) => {
-    if (!user) {
+  const openUserProfile = (author: Post['author']) => {
+    setSelectedUser(author);
+  };
+
+  const followUser = (userId: string) => {
+    const isFollowing = followingUsers.includes(userId);
+    
+    if (isFollowing) {
+      setFollowingUsers(prev => prev.filter(id => id !== userId));
       toast({
-        title: "Login Necessário",
-        description: "Faça login para comentar.",
-        variant: "destructive"
+        title: "Deixou de Seguir",
+        description: "Não receberá mais atualizações deste utilizador.",
       });
-      return;
-    }
-
-    if (!newCommentContent.trim()) {
+    } else {
+      setFollowingUsers(prev => [...prev, userId]);
+      addXp(10);
+      addCredits(5);
+      setPlaySuccessSound(true);
+      
       toast({
-        title: "Comentário Vazio",
-        description: "Escreva algo antes de comentar.",
-        variant: "destructive"
+        title: "A Seguir! 👥",
+        description: "Recebeu 10 XP + 5 créditos por seguir um utilizador!",
       });
-      return;
     }
-
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      author: {
-        id: 'currentUser',
-        name: user.displayName || 'Utilizador',
-        avatar: user.photoURL || 'https://placehold.co/40x40.png',
-        verified: true,
-        level: 15
-      },
-      content: newCommentContent,
-      timestamp: new Date(),
-      likes: 0,
-      isLiked: false,
-      replies: []
-    };
-
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          comments: [...post.comments, newComment]
-        };
-      }
-      return post;
-    }));
-
-    setNewCommentContent('');
-    addCredits(5);
-    addXp(10);
-    setPlaySuccessSound(true);
-
-    toast({
-      title: "Comentário Adicionado! 💬",
-      description: "Recebeu 5 créditos + 10 XP por comentar.",
-    });
   };
 
-  const toggleComments = (postId: string) => {
-    setShowComments(prev => ({
-      ...prev,
-      [postId]: !prev[postId]
-    }));
-  };
-
-  const joinGroup = (groupId: string) => {
-    if (!user) {
-      toast({
-        title: "Login Necessário",
-        description: "Faça login para se juntar a grupos.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setGroups(prev => prev.map(group => {
-      if (group.id === groupId) {
-        const newIsJoined = !group.isJoined;
-        const newMembers = newIsJoined ? group.members + 1 : group.members - 1;
-        
-        toast({
-          title: newIsJoined ? "Juntou-se ao Grupo! 👥" : "Saiu do Grupo",
-          description: `${group.name} - ${newIsJoined ? 'Agora é membro' : 'Deixou de ser membro'}`,
-        });
-        
-        if (newIsJoined) {
-          addXp(20);
-          setPlaySuccessSound(true);
-        }
-        
-        return {
-          ...group,
-          isJoined: newIsJoined,
-          members: Math.max(0, newMembers)
-        };
-      }
-      return group;
-    }));
-  };
-
-  const viewStory = (storyIndex: number) => {
-    setCurrentStoryIndex(storyIndex);
-    setIsViewingStories(true);
+  const openStory = (story: Story, index: number) => {
+    setSelectedStory(story);
+    setStoryIndex(index);
     setStoryProgress(0);
     setIsStoryPlaying(true);
-    
-    // Mark story as viewed
-    setStories(prev => prev.map((story, index) => 
-      index === storyIndex ? { ...story, isViewed: true, views: story.views + 1 } : story
-    ));
   };
 
   const nextStory = () => {
-    if (currentStoryIndex < stories.length - 1) {
-      setCurrentStoryIndex(prev => prev + 1);
+    if (storyIndex < stories.length - 1) {
+      const nextIndex = storyIndex + 1;
+      setStoryIndex(nextIndex);
+      setSelectedStory(stories[nextIndex]);
       setStoryProgress(0);
     } else {
-      setIsViewingStories(false);
-      setCurrentStoryIndex(0);
+      setSelectedStory(null);
+      setStoryIndex(0);
       setStoryProgress(0);
     }
   };
 
   const previousStory = () => {
-    if (currentStoryIndex > 0) {
-      setCurrentStoryIndex(prev => prev - 1);
+    if (storyIndex > 0) {
+      const prevIndex = storyIndex - 1;
+      setStoryIndex(prevIndex);
+      setSelectedStory(stories[prevIndex]);
       setStoryProgress(0);
     }
   };
 
-  const toggleStoryPlayback = () => {
-    setIsStoryPlaying(!isStoryPlaying);
+  const joinGroup = (groupId: string) => {
+    setGroups(prev => prev.map(group => {
+      if (group.id === groupId) {
+        const newIsJoined = !group.isJoined;
+        const newMembers = newIsJoined ? group.members + 1 : group.members - 1;
+        
+        if (newIsJoined) {
+          addXp(15);
+          addCredits(8);
+          setPlaySuccessSound(true);
+          
+          toast({
+            title: "Juntou-se ao Grupo! 👥",
+            description: `Bem-vindo ao ${group.name}! +15 XP + 8 créditos`,
+          });
+        } else {
+          toast({
+            title: "Saiu do Grupo",
+            description: `Deixou o grupo ${group.name}.`,
+          });
+        }
+        
+        return { ...group, isJoined: newIsJoined, members: newMembers };
+      }
+      return group;
+    }));
   };
 
-  const openChat = (conversationId: string) => {
-    setSelectedConversation(conversationId);
+  const openChat = (conversation: ChatConversation) => {
+    setSelectedChat(conversation);
     
-    // Mock chat messages
+    // Mock messages for the conversation
     const mockMessages: ChatMessage[] = [
       {
         id: '1',
-        senderId: 'user1',
-        content: 'Olá! Vi o teu pixel em Lisboa, está incrível!',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-        type: 'text',
-        isRead: true
+        sender: conversation.name,
+        content: 'Olá! Vi o teu pixel em Lisboa, está fantástico!',
+        timestamp: '14:20',
+        type: 'text'
       },
       {
         id: '2',
-        senderId: 'currentUser',
-        content: 'Obrigado! Demorei muito tempo a escolher as cores certas.',
-        timestamp: new Date(Date.now() - 25 * 60 * 1000),
-        type: 'text',
-        isRead: true
+        sender: 'Você',
+        content: 'Obrigado! Demorei muito tempo a fazer.',
+        timestamp: '14:22',
+        type: 'text'
+      },
+      {
+        id: '3',
+        sender: conversation.name,
+        content: 'Obrigado pelo feedback!',
+        timestamp: '14:25',
+        type: 'text'
       }
     ];
     
@@ -747,113 +806,157 @@ export default function CommunityPage() {
   };
 
   const sendChatMessage = () => {
-    if (!newChatMessage.trim() || !selectedConversation) return;
+    if (!newChatMessage.trim() || !selectedChat) return;
 
-    const newMessage: ChatMessage = {
+    const message: ChatMessage = {
       id: Date.now().toString(),
-      senderId: 'currentUser',
+      sender: 'Você',
       content: newChatMessage,
-      timestamp: new Date(),
-      type: 'text',
-      isRead: false
+      timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+      type: 'text'
     };
 
-    setChatMessages(prev => [...prev, newMessage]);
+    setChatMessages(prev => [...prev, message]);
     setNewChatMessage('');
     
-    // Update conversation
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === selectedConversation) {
-        return {
-          ...conv,
-          lastMessage: {
-            content: newMessage.content,
-            timestamp: newMessage.timestamp,
-            senderId: newMessage.senderId
-          }
-        };
+    addXp(3);
+    addCredits(1);
+  };
+
+  const participateInEvent = (eventId: string) => {
+    setEvents(prev => prev.map(event => {
+      if (event.id === eventId) {
+        const newIsParticipating = !event.isParticipating;
+        const newParticipants = newIsParticipating ? event.participants + 1 : event.participants - 1;
+        
+        if (newIsParticipating) {
+          addXp(20);
+          addCredits(15);
+          setShowConfetti(true);
+          setPlaySuccessSound(true);
+          
+          toast({
+            title: "Inscrito no Evento! 🎉",
+            description: `Inscrito em ${event.title}! +20 XP + 15 créditos`,
+          });
+        } else {
+          toast({
+            title: "Saiu do Evento",
+            description: `Cancelou a participação em ${event.title}.`,
+          });
+        }
+        
+        return { ...event, isParticipating: newIsParticipating, participants: newParticipants };
       }
-      return conv;
+      return event;
     }));
-
-    addXp(5);
   };
 
-  const extractHashtags = (text: string): string[] => {
-    const hashtags = text.match(/#\w+/g);
-    return hashtags ? hashtags.map(tag => tag.substring(1)) : [];
-  };
-
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (days > 0) return `${days}d`;
-    if (hours > 0) return `${hours}h`;
-    if (minutes > 0) return `${minutes}m`;
-    return 'agora';
-  };
-
-  const filteredPosts = posts.filter(post => {
-    if (searchQuery) {
-      return post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             post.author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
-    return true;
-  });
-
-  const renderStoryContent = (story: Story) => {
-    switch (story.content.type) {
-      case 'image':
-        return (
-          <img 
-            src={story.content.url} 
-            alt="Story"
-            className="w-full h-full object-cover"
-          />
-        );
-      case 'text':
-        return (
-          <div className="flex items-center justify-center h-full p-8 bg-gradient-to-br from-primary/20 to-accent/20">
-            <p className="text-white text-xl font-medium text-center leading-relaxed">
-              {story.content.text}
-            </p>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center justify-center h-full bg-muted">
-            <Play className="h-16 w-16 text-muted-foreground" />
-          </div>
-        );
+  const startTutorial = (tutorialId: string) => {
+    const tutorial = tutorials.find(t => t.id === tutorialId);
+    if (tutorial) {
+      addXp(5);
+      addCredits(2);
+      
+      toast({
+        title: "Tutorial Iniciado! 📚",
+        description: `Começou "${tutorial.title}". +5 XP + 2 créditos`,
+      });
     }
   };
+
+  const saveTutorial = (tutorialId: string) => {
+    setTutorials(prev => prev.map(tutorial => {
+      if (tutorial.id === tutorialId) {
+        const newIsSaved = !tutorial.isSaved;
+        
+        if (newIsSaved) {
+          toast({
+            title: "Tutorial Guardado! 📌",
+            description: "Adicionado aos seus favoritos.",
+          });
+        }
+        
+        return { ...tutorial, isSaved: newIsSaved };
+      }
+      return tutorial;
+    }));
+  };
+
+  const openUserActions = (author: Post['author']) => {
+    setSelectedUser(author);
+  };
+
+  const sendPrivateMessage = (userId: string, userName: string) => {
+    // Create or open conversation
+    const existingConversation = conversations.find(c => c.name === userName);
+    
+    if (existingConversation) {
+      openChat(existingConversation);
+    } else {
+      const newConversation: ChatConversation = {
+        id: Date.now().toString(),
+        type: 'private',
+        name: userName,
+        avatar: 'https://placehold.co/40x40.png',
+        lastMessage: '',
+        timestamp: 'agora',
+        unreadCount: 0,
+        isOnline: true
+      };
+      
+      setConversations(prev => [newConversation, ...prev]);
+      openChat(newConversation);
+    }
+    
+    setSelectedUser(null);
+  };
+
+  // Simulate real-time activity
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Random likes on posts
+      if (Math.random() > 0.7) {
+        setPosts(prev => prev.map(post => ({
+          ...post,
+          likes: post.likes + Math.floor(Math.random() * 3)
+        })));
+      }
+      
+      // Random new messages in conversations
+      if (Math.random() > 0.8 && conversations.length > 0) {
+        const randomConv = conversations[Math.floor(Math.random() * conversations.length)];
+        setConversations(prev => prev.map(conv => 
+          conv.id === randomConv.id 
+            ? { ...conv, unreadCount: conv.unreadCount + 1 }
+            : conv
+        ));
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [conversations]);
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center">
           <CardContent className="pt-6 pb-4 px-6">
-            <Users className="h-16 w-16 mx-auto mb-4 text-primary opacity-50" />
+            <Users className="h-16 w-16 mx-auto mb-4 text-primary" />
             <h2 className="text-2xl font-bold mb-2">Junte-se à Comunidade</h2>
             <p className="text-muted-foreground mb-6">
-              Faça login para partilhar pixels, descobrir artistas e participar em conversas.
+              Conecte-se com outros criadores, partilhe os seus pixels e descubra arte incrível!
             </p>
-            <div className="flex flex-col gap-3">
-              <AuthModal defaultTab="login">
+            <div className="space-y-3">
+              <AuthModal defaultTab="register">
                 <Button className="w-full">
-                  <Users className="h-4 w-4 mr-2" />
-                  Iniciar Sessão
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Criar Conta Grátis
                 </Button>
               </AuthModal>
-              <AuthModal defaultTab="register">
+              <AuthModal defaultTab="login">
                 <Button variant="outline" className="w-full">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Criar Conta
+                  Já tenho conta
                 </Button>
               </AuthModal>
             </div>
@@ -865,138 +968,96 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
-      <SoundEffect src={SOUND_EFFECTS.NOTIFICATION} play={playNotificationSound} onEnd={() => setPlayNotificationSound(false)} />
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playLikeSound} onEnd={() => setPlayLikeSound(false)} />
+      <SoundEffect src={SOUND_EFFECTS.ACHIEVEMENT} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-4xl">
+      <div className="container mx-auto py-4 px-3 space-y-4 max-w-4xl">
         {/* Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-               style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <CardTitle className="font-headline text-2xl sm:text-3xl text-gradient-gold flex items-center">
-                  <Users className="h-6 w-6 sm:h-8 sm:w-8 mr-3 animate-glow" />
-                  Comunidade Pixel
-                </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2">
-                  Conecte-se, partilhe e descubra com outros criadores de pixels
-                </CardDescription>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Badge className="bg-green-500 animate-pulse">
-                  <div className="w-2 h-2 bg-white rounded-full mr-2" />
-                  {Math.floor(Math.random() * 500) + 200} online
-                </Badge>
-              </div>
-            </div>
+        <Card className="shadow-lg bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-headline text-2xl text-gradient-gold flex items-center">
+              <Users className="h-6 w-6 mr-3" />
+              Comunidade Pixel
+            </CardTitle>
+            <CardDescription>
+              Conecte-se, partilhe e descubra arte incrível com outros criadores
+            </CardDescription>
           </CardHeader>
         </Card>
 
-        {/* Stories */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Play className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">Stories</h3>
-              <Badge variant="outline" className="text-xs">
-                {stories.filter(s => !s.isViewed).length} novas
-              </Badge>
-            </div>
-            
-            <ScrollArea className="w-full">
-              <div className="flex gap-3 pb-2">
-                {/* Add Story Button */}
-                <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                  <div className="w-16 h-16 rounded-full border-2 border-dashed border-primary/50 flex items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
-                    <Plus className="h-6 w-6 text-primary" />
-                  </div>
-                  <span className="text-xs text-center">Adicionar</span>
-                </div>
-                
-                {/* Stories */}
-                {stories.map((story, index) => (
-                  <div 
-                    key={story.id} 
-                    className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer"
-                    onClick={() => viewStory(index)}
-                  >
-                    <div className={cn(
-                      "w-16 h-16 rounded-full p-0.5 transition-transform hover:scale-105",
-                      story.isViewed ? "bg-muted" : "bg-gradient-to-tr from-primary to-accent"
-                    )}>
-                      <Avatar className="w-full h-full border-2 border-background">
-                        <AvatarImage src={story.author.avatar} />
-                        <AvatarFallback>{story.author.name[0]}</AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <span className="text-xs text-center max-w-[64px] truncate">
-                      {story.author.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <TabsList className="grid w-full grid-cols-4 sm:w-auto sm:flex bg-card/50 backdrop-blur-sm">
-              <TabsTrigger value="feed" className="text-xs sm:text-sm">
-                <MessageSquare className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Feed</span>
-              </TabsTrigger>
-              <TabsTrigger value="groups" className="text-xs sm:text-sm">
-                <Users className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Grupos</span>
-              </TabsTrigger>
-              <TabsTrigger value="chat" className="text-xs sm:text-sm">
-                <MessageSquare className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Chat</span>
-              </TabsTrigger>
-              <TabsTrigger value="trending" className="text-xs sm:text-sm">
-                <TrendingUp className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Trending</span>
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Search */}
-            <div className="relative flex-1 w-full sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+        <Tabs defaultValue="feed" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-card/50 backdrop-blur-sm">
+            <TabsTrigger value="feed" className="text-xs">
+              <MessageSquare className="h-4 w-4 mb-1" />
+              Feed
+            </TabsTrigger>
+            <TabsTrigger value="groups" className="text-xs">
+              <Users className="h-4 w-4 mb-1" />
+              Grupos
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="text-xs">
+              <MessageCircle className="h-4 w-4 mb-1" />
+              Chat
+            </TabsTrigger>
+            <TabsTrigger value="events" className="text-xs">
+              <Calendar className="h-4 w-4 mb-1" />
+              Eventos
+            </TabsTrigger>
+            <TabsTrigger value="learn" className="text-xs">
+              <BookOpen className="h-4 w-4 mb-1" />
+              Aprender
+            </TabsTrigger>
+          </TabsList>
 
           {/* Feed Tab */}
           <TabsContent value="feed" className="space-y-4">
+            {/* Stories */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {stories.map((story, index) => (
+                    <div
+                      key={story.id}
+                      className="flex-shrink-0 cursor-pointer"
+                      onClick={() => openStory(story, index)}
+                    >
+                      <div className={cn(
+                        "w-16 h-16 rounded-full p-0.5",
+                        story.isViewed ? "bg-muted" : "bg-gradient-to-tr from-primary to-accent"
+                      )}>
+                        <Avatar className="w-full h-full">
+                          <AvatarImage src={story.author.avatar} />
+                          <AvatarFallback>{story.author.name[0]}</AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <p className="text-xs text-center mt-1 truncate w-16">
+                        {story.author.name}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Create Post */}
             <Card>
               <CardContent className="p-4">
                 <div className="flex gap-3">
-                  <Avatar className="flex-shrink-0">
-                    <AvatarImage src={user.photoURL || 'https://placehold.co/40x40.png'} />
-                    <AvatarFallback>{(user.displayName || 'U')[0]}</AvatarFallback>
+                  <Avatar>
+                    <AvatarImage src="https://placehold.co/40x40.png" />
+                    <AvatarFallback>V</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-3">
                     <Textarea
-                      placeholder="O que está a acontecer no seu universo de pixels?"
+                      placeholder="Partilhe algo com a comunidade..."
                       value={newPostContent}
                       onChange={(e) => setNewPostContent(e.target.value)}
                       className="min-h-[80px] resize-none"
                       maxLength={500}
                     />
                     
-                    <div className="flex flex-col sm:flex-row gap-3 justify-between">
+                    <div className="flex justify-between items-center">
                       <div className="flex gap-2">
                         <Button
                           variant={newPostType === 'text' ? 'default' : 'outline'}
@@ -1011,7 +1072,7 @@ export default function CommunityPage() {
                           size="sm"
                           onClick={() => setNewPostType('pixel')}
                         >
-                          <MapPin className="h-4 w-4 mr-1" />
+                          <Palette className="h-4 w-4 mr-1" />
                           Pixel
                         </Button>
                         <Button
@@ -1024,26 +1085,13 @@ export default function CommunityPage() {
                         </Button>
                       </div>
                       
-                      <div className="flex gap-2">
-                        <span className="text-xs text-muted-foreground self-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
                           {newPostContent.length}/500
                         </span>
-                        <Button 
-                          onClick={createPost}
-                          disabled={!newPostContent.trim() || isCreatingPost}
-                          className="px-6"
-                        >
-                          {isCreatingPost ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                              A publicar...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4 mr-2" />
-                              Publicar
-                            </>
-                          )}
+                        <Button onClick={createPost} disabled={!newPostContent.trim()}>
+                          <Send className="h-4 w-4 mr-2" />
+                          Publicar
                         </Button>
                       </div>
                     </div>
@@ -1052,364 +1100,294 @@ export default function CommunityPage() {
               </CardContent>
             </Card>
 
-            {/* Posts Feed */}
+            {/* Posts */}
             <div className="space-y-4">
-              <AnimatePresence>
-                {filteredPosts.map((post) => (
-                  <motion.div
-                    key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="hover:shadow-lg transition-shadow">
-                      <CardContent className="p-4">
-                        {/* Post Header */}
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={post.author.avatar} />
-                              <AvatarFallback>{post.author.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">{post.author.name}</span>
-                                {post.author.verified && (
-                                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                                )}
-                                {post.author.isPremium && (
-                                  <Crown className="h-4 w-4 text-amber-500" />
-                                )}
-                                <Badge variant="secondary" className="text-xs">
-                                  {post.author.level}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>{post.author.username}</span>
-                                <span>•</span>
-                                <span>{formatTimeAgo(post.timestamp)}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => bookmarkPost(post.id)}>
-                                <Bookmark className="h-4 w-4 mr-2" />
-                                {post.isBookmarked ? 'Remover dos Favoritos' : 'Guardar'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => sharePost(post.id)}>
-                                <Share2 className="h-4 w-4 mr-2" />
-                                Partilhar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Flag className="h-4 w-4 mr-2" />
-                                Reportar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-
-                        {/* Post Content */}
-                        <div className="mb-3">
-                          <p className="text-foreground leading-relaxed">{post.content}</p>
-                          
-                          {/* Pixel Display */}
-                          {post.type === 'pixel' && post.pixel && (
-                            <Card className="mt-3 bg-muted/20 border-primary/20">
-                              <CardContent className="p-3">
-                                <div className="flex items-center gap-3">
-                                  <div 
-                                    className="w-16 h-16 rounded border-2 border-primary/30 flex-shrink-0"
-                                    style={{ backgroundColor: post.pixel.color }}
-                                  >
-                                    {post.pixel.imageUrl && (
-                                      <img 
-                                        src={post.pixel.imageUrl} 
-                                        alt="Pixel"
-                                        className="w-full h-full object-cover rounded"
-                                      />
-                                    )}
-                                  </div>
-                                  <div className="flex-1">
-                                    <h4 className="font-semibold">
-                                      Pixel ({post.pixel.x}, {post.pixel.y})
-                                    </h4>
-                                    <p className="text-sm text-muted-foreground">
-                                      {post.pixel.region}
-                                    </p>
-                                    {post.pixel.price && (
-                                      <Badge variant="outline" className="mt-1">
-                                        €{post.pixel.price}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Ver
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          )}
-
-                          {/* Achievement Display */}
-                          {post.type === 'achievement' && post.achievement && (
-                            <Card className="mt-3 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
-                              <CardContent className="p-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-3 bg-yellow-500/20 rounded-full">
-                                    <Trophy className="h-6 w-6 text-yellow-500" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <h4 className="font-semibold text-yellow-500">
-                                      {post.achievement.name}
-                                    </h4>
-                                    <p className="text-sm text-muted-foreground">
-                                      {post.achievement.description}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <Badge className="bg-yellow-500 text-black text-xs">
-                                        {post.achievement.rarity}
-                                      </Badge>
-                                      <span className="text-xs text-muted-foreground">
-                                        +{post.achievement.xp} XP • +{post.achievement.credits} créditos
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          )}
-
-                          {/* Image Display */}
-                          {post.type === 'image' && post.imageUrl && (
-                            <div className="mt-3">
-                              <img 
-                                src={post.imageUrl} 
-                                alt="Post"
-                                className="w-full rounded-lg border border-border"
-                              />
-                            </div>
-                          )}
-
-                          {/* Tags */}
-                          {post.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-3">
-                              {post.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs cursor-pointer hover:bg-primary/10">
-                                  #{tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Post Actions */}
-                        <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => likePost(post.id)}
-                              className={cn(
-                                "gap-2 transition-colors",
-                                post.isLiked && "text-red-500"
-                              )}
-                            >
-                              <Heart className={cn("h-4 w-4", post.isLiked && "fill-current")} />
-                              <span className="text-sm">{post.likes}</span>
-                            </Button>
-                            
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleComments(post.id)}
-                              className="gap-2"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                              <span className="text-sm">{post.comments.length}</span>
-                            </Button>
-                            
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => sharePost(post.id)}
-                              className="gap-2"
-                            >
-                              <Share2 className="h-4 w-4" />
-                              <span className="text-sm">{post.shares}</span>
-                            </Button>
-                          </div>
-                          
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => bookmarkPost(post.id)}
-                            className={cn(
-                              "transition-colors",
-                              post.isBookmarked && "text-blue-500"
-                            )}
+              {posts.map(post => (
+                <Card key={post.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    {/* Post Header */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar 
+                        className="cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => openUserProfile(post.author)}
+                      >
+                        <AvatarImage src={post.author.avatar} />
+                        <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="font-semibold cursor-pointer hover:text-primary transition-colors"
+                            onClick={() => openUserProfile(post.author)}
                           >
-                            <Bookmark className={cn("h-4 w-4", post.isBookmarked && "fill-current")} />
-                          </Button>
+                            {post.author.name}
+                          </span>
+                          {post.author.verified && (
+                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          )}
+                          <Badge variant="secondary" className="text-xs">
+                            Nível {post.author.level}
+                          </Badge>
                         </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span>{post.timestamp}</span>
+                          {post.type === 'pixel' && post.pixel && (
+                            <>
+                              <span>•</span>
+                              <MapPin className="h-3 w-3" />
+                              <span>{post.pixel.region}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openUserActions(post.author)}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </div>
 
-                        {/* Comments Section */}
-                        <AnimatePresence>
-                          {showComments[post.id] && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="mt-4 pt-4 border-t border-border/50"
-                            >
-                              {/* Existing Comments */}
-                              {post.comments.length > 0 && (
-                                <div className="space-y-3 mb-4">
-                                  {post.comments.map(comment => (
-                                    <div key={comment.id} className="flex gap-3">
-                                      <Avatar className="h-8 w-8 flex-shrink-0">
-                                        <AvatarImage src={comment.author.avatar} />
-                                        <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
-                                      </Avatar>
-                                      <div className="flex-1 bg-muted/30 rounded-lg p-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <span className="font-medium text-sm">{comment.author.name}</span>
-                                          {comment.author.verified && (
-                                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                                          )}
-                                          <Badge variant="outline" className="text-xs">
-                                            {comment.author.level}
-                                          </Badge>
-                                          <span className="text-xs text-muted-foreground">
-                                            {formatTimeAgo(comment.timestamp)}
-                                          </span>
-                                        </div>
-                                        <p className="text-sm">{comment.content}</p>
-                                        <div className="flex items-center gap-2 mt-2">
-                                          <Button variant="ghost" size="sm" className="h-6 text-xs">
-                                            <Heart className="h-3 w-3 mr-1" />
-                                            {comment.likes}
-                                          </Button>
-                                          <Button variant="ghost" size="sm" className="h-6 text-xs">
-                                            <Reply className="h-3 w-3 mr-1" />
-                                            Responder
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                    {/* Post Content */}
+                    <div className="mb-3">
+                      <p className="leading-relaxed">{post.content}</p>
+                      
+                      {post.type === 'pixel' && post.pixel && (
+                        <Card className="mt-3 bg-muted/20">
+                          <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                              <img 
+                                src={post.pixel.imageUrl} 
+                                alt="Pixel"
+                                className="w-20 h-20 rounded border object-cover"
+                              />
+                              <div className="flex-1">
+                                <h4 className="font-medium">
+                                  Pixel ({post.pixel.x}, {post.pixel.y})
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {post.pixel.region}
+                                </p>
+                                {post.pixel.price && (
+                                  <Badge className="mt-1">€{post.pixel.price}</Badge>
+                                )}
+                              </div>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      {post.type === 'achievement' && post.achievement && (
+                        <Card className="mt-3 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
+                          <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                              <div className="text-3xl">{post.achievement.icon}</div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-yellow-500">
+                                  {post.achievement.name}
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {post.achievement.description}
+                                </p>
+                                <Badge className="mt-1 bg-yellow-500">
+                                  {post.achievement.rarity}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      {post.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {post.tags.map(tag => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Post Actions */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleLike(post.id)}
+                          className={cn(
+                            "gap-2 transition-colors",
+                            post.isLiked && "text-red-500"
+                          )}
+                        >
+                          <Heart className={cn("h-4 w-4", post.isLiked && "fill-current")} />
+                          {post.likes}
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowComments(showComments === post.id ? null : post.id)}
+                          className="gap-2"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          {post.comments.length}
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => sharePost(post)}
+                          className="gap-2"
+                        >
+                          <Share2 className="h-4 w-4" />
+                          {post.shares}
+                        </Button>
+                      </div>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleSave(post.id)}
+                        className={cn(
+                          "transition-colors",
+                          post.isSaved && "text-blue-500"
+                        )}
+                      >
+                        <Bookmark className={cn("h-4 w-4", post.isSaved && "fill-current")} />
+                      </Button>
+                    </div>
+
+                    {/* Comments Section */}
+                    <AnimatePresence>
+                      {showComments === post.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-4 pt-4 border-t space-y-3"
+                        >
+                          {post.comments.map(comment => (
+                            <div key={comment.id} className="flex gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={comment.author.avatar} />
+                                <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="bg-muted/50 rounded-lg p-3">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-sm">{comment.author.name}</span>
+                                    {comment.author.verified && (
+                                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                    )}
+                                    <Badge variant="outline" className="text-xs">
+                                      {comment.author.level}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm">{comment.content}</p>
                                 </div>
-                              )}
-                              
-                              {/* Add Comment */}
-                              <div className="flex gap-3">
-                                <Avatar className="h-8 w-8 flex-shrink-0">
-                                  <AvatarImage src={user.photoURL || 'https://placehold.co/40x40.png'} />
-                                  <AvatarFallback>{(user.displayName || 'U')[0]}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 flex gap-2">
-                                  <Input
-                                    placeholder="Escrever comentário..."
-                                    value={newCommentContent}
-                                    onChange={(e) => setNewCommentContent(e.target.value)}
-                                    onKeyPress={(e) => {
-                                      if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        addComment(post.id);
-                                      }
-                                    }}
-                                    className="flex-1"
-                                  />
-                                  <Button 
-                                    size="icon"
-                                    onClick={() => addComment(post.id)}
-                                    disabled={!newCommentContent.trim()}
-                                  >
-                                    <Send className="h-4 w-4" />
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                                  <Button variant="ghost" size="sm" className="h-6 text-xs">
+                                    <Heart className="h-3 w-3 mr-1" />
+                                    {comment.likes}
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-6 text-xs">
+                                    Responder
                                   </Button>
                                 </div>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                            </div>
+                          ))}
+                          
+                          {/* Add Comment */}
+                          <div className="flex gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src="https://placehold.co/40x40.png" />
+                              <AvatarFallback>V</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 flex gap-2">
+                              <Input
+                                placeholder="Escrever comentário..."
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                                className="text-sm"
+                              />
+                              <Button 
+                                size="sm" 
+                                onClick={() => addComment(post.id)}
+                                disabled={!newComment.trim()}
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
           {/* Groups Tab */}
           <TabsContent value="groups" className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {groups.map(group => (
-                <Card key={group.id} className="hover:shadow-lg transition-shadow">
+                <Card key={group.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center gap-4">
                       <img 
                         src={group.avatar} 
                         alt={group.name}
-                        className="w-12 h-12 rounded-full border-2 border-primary/30"
+                        className="w-16 h-16 rounded-full object-cover"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{group.name}</h3>
-                          {group.isPrivate && (
-                            <Badge variant="outline" className="text-xs">
-                              <Lock className="h-3 w-3 mr-1" />
-                              Privado
-                            </Badge>
-                          )}
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 
+                            className="font-semibold cursor-pointer hover:text-primary transition-colors"
+                            onClick={() => setSelectedGroup(group)}
+                          >
+                            {group.name}
+                          </h3>
+                          <Badge variant="outline">{group.category}</Badge>
+                          {group.isPrivate && <Lock className="h-4 w-4 text-muted-foreground" />}
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {group.category === 'regional' ? 'Regional' : 
-                           group.category === 'interest' ? 'Interesse' : 'Habilidade'}
-                        </Badge>
+                        <p className="text-sm text-muted-foreground mb-2">{group.description}</p>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {group.members} membros
+                          </span>
+                          <span>{group.recentActivity}</span>
+                        </div>
                       </div>
+                      <Button
+                        onClick={() => joinGroup(group.id)}
+                        variant={group.isJoined ? 'outline' : 'default'}
+                        className="min-w-[100px]"
+                      >
+                        {group.isJoined ? (
+                          <>
+                            <Users className="h-4 w-4 mr-2" />
+                            Membro
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Juntar-se
+                          </>
+                        )}
+                      </Button>
                     </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {group.description}
-                    </p>
-                    
-                    <div className="flex justify-between items-center mb-3 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {group.members} membros
-                      </span>
-                      <span className="text-muted-foreground">{group.region}</span>
-                    </div>
-                    
-                    <p className="text-xs text-muted-foreground mb-3">
-                      {group.lastActivity}
-                    </p>
-                    
-                    <Button 
-                      onClick={() => joinGroup(group.id)}
-                      variant={group.isJoined ? 'outline' : 'default'}
-                      className="w-full"
-                    >
-                      {group.isJoined ? (
-                        <>
-                          <Users className="h-4 w-4 mr-2" />
-                          Membro
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Juntar-se
-                        </>
-                      )}
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1418,298 +1396,226 @@ export default function CommunityPage() {
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="space-y-4">
-            {!selectedConversation ? (
-              <div className="space-y-4">
-                {/* New Chat Button */}
-                <Button className="w-full" onClick={() => {
-                  toast({
-                    title: "Nova Conversa",
-                    description: "Funcionalidade em desenvolvimento.",
-                  });
-                }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Conversa
-                </Button>
-                
-                {/* Conversations List */}
-                <div className="space-y-2">
-                  {conversations.map(conv => (
-                    <Card 
-                      key={conv.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => openChat(conv.id)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative">
-                            {conv.isGroup ? (
-                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                                <Users className="h-6 w-6 text-primary" />
-                              </div>
-                            ) : (
-                              <Avatar className="h-12 w-12">
-                                <AvatarImage src={conv.participants[0]?.avatar} />
-                                <AvatarFallback>{conv.participants[0]?.name[0]}</AvatarFallback>
-                              </Avatar>
-                            )}
-                            {!conv.isGroup && conv.participants[0]?.isOnline && (
-                              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold truncate">
-                                {conv.isGroup ? conv.groupName : conv.participants[0]?.name}
-                              </h4>
-                              <span className="text-xs text-muted-foreground">
-                                {formatTimeAgo(conv.lastMessage.timestamp)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground truncate">
-                              {conv.lastMessage.content}
-                            </p>
-                          </div>
-                          
-                          {conv.unreadCount > 0 && (
-                            <Badge className="bg-red-500 text-white">
-                              {conv.unreadCount}
-                            </Badge>
+            <div className="space-y-3">
+              {conversations.map(conversation => (
+                <Card 
+                  key={conversation.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => openChat(conversation)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Avatar>
+                          <AvatarImage src={conversation.avatar} />
+                          <AvatarFallback>{conversation.name[0]}</AvatarFallback>
+                        </Avatar>
+                        {conversation.isOnline && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
+                        )}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{conversation.name}</span>
+                          {conversation.type === 'group' && (
+                            <Badge variant="outline" className="text-xs">Grupo</Badge>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              /* Chat View */
-              <Card className="h-[60vh] flex flex-col">
-                {/* Chat Header */}
-                <CardHeader className="pb-3 border-b">
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setSelectedConversation(null)}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    
-                    <Avatar>
-                      <AvatarImage src={conversations.find(c => c.id === selectedConversation)?.participants[0]?.avatar} />
-                      <AvatarFallback>
-                        {conversations.find(c => c.id === selectedConversation)?.participants[0]?.name[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-semibold">
-                        {conversations.find(c => c.id === selectedConversation)?.participants[0]?.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {conversations.find(c => c.id === selectedConversation)?.participants[0]?.isOnline ? 'Online' : 'Offline'}
-                      </p>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="icon">
-                        <Phone className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Video className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                {/* Messages */}
-                <ScrollArea className="flex-1 p-4" ref={chatScrollRef}>
-                  <div className="space-y-3">
-                    {chatMessages.map(message => (
-                      <div 
-                        key={message.id}
-                        className={cn(
-                          "flex",
-                          message.senderId === 'currentUser' ? 'justify-end' : 'justify-start'
-                        )}
-                      >
-                        <div className={cn(
-                          "max-w-[70%] p-3 rounded-lg",
-                          message.senderId === 'currentUser' 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted'
-                        )}>
-                          <p className="text-sm">{message.content}</p>
-                          <p className={cn(
-                            "text-xs mt-1",
-                            message.senderId === 'currentUser' 
-                              ? 'text-primary-foreground/70' 
-                              : 'text-muted-foreground'
-                          )}>
-                            {formatTimeAgo(message.timestamp)}
-                          </p>
-                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {conversation.lastMessage}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-                
-                {/* Message Input */}
-                <div className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Input
-                      placeholder="Escrever mensagem..."
-                      value={newChatMessage}
-                      onChange={(e) => setNewChatMessage(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          sendChatMessage();
-                        }
-                      }}
-                      className="flex-1"
-                    />
-                    <Button variant="ghost" size="icon">
-                      <Smile className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="icon"
-                      onClick={sendChatMessage}
-                      disabled={!newChatMessage.trim()}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            )}
+                      
+                      <div className="text-right">
+                        <span className="text-xs text-muted-foreground">{conversation.timestamp}</span>
+                        {conversation.unreadCount > 0 && (
+                          <Badge className="bg-red-500 text-white mt-1">
+                            {conversation.unreadCount}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
 
-          {/* Trending Tab */}
-          <TabsContent value="trending" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Trending Topics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-                    Tópicos em Alta
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {trendingTopics.map((topic, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer">
-                      <div>
-                        <h4 className="font-semibold text-primary">{topic.tag}</h4>
-                        <p className="text-sm text-muted-foreground">{topic.posts} publicações</p>
+          {/* Events Tab */}
+          <TabsContent value="events" className="space-y-4">
+            <div className="space-y-4">
+              {events.map(event => (
+                <Card 
+                  key={event.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => setSelectedEvent(event)}
+                >
+                  <div className="relative">
+                    <img 
+                      src={event.imageUrl} 
+                      alt={event.title}
+                      className="w-full h-32 object-cover rounded-t-lg"
+                    />
+                    <Badge className="absolute top-2 left-2 bg-primary">
+                      {event.category}
+                    </Badge>
+                    <Badge 
+                      className={cn(
+                        "absolute top-2 right-2",
+                        event.difficulty === 'Fácil' && "bg-green-500",
+                        event.difficulty === 'Médio' && "bg-yellow-500",
+                        event.difficulty === 'Difícil' && "bg-orange-500",
+                        event.difficulty === 'Extremo' && "bg-red-500"
+                      )}
+                    >
+                      {event.difficulty}
+                    </Badge>
+                  </div>
+                  
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2">{event.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{event.description}</p>
+                    
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {event.startDate}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          {event.participants} participantes
+                        </span>
                       </div>
-                      <Badge className="bg-green-500 text-white">
-                        {topic.growth}
-                      </Badge>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Featured Creators */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                    Criadores em Destaque
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    { name: 'PixelLegend', followers: '2.3K', avatar: 'https://placehold.co/40x40.png', verified: true },
-                    { name: 'ArtMaster', followers: '1.8K', avatar: 'https://placehold.co/40x40.png', verified: true },
-                    { name: 'ColorGuru', followers: '1.2K', avatar: 'https://placehold.co/40x40.png', verified: false }
-                  ].map((creator, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={creator.avatar} />
-                          <AvatarFallback>{creator.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">{creator.name}</span>
-                            {creator.verified && (
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">{creator.followers} seguidores</p>
-                        </div>
-                      </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          participateInEvent(event.id);
+                        }}
+                        variant={event.isParticipating ? 'outline' : 'default'}
+                        className="flex-1"
+                      >
+                        {event.isParticipating ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Participando
+                          </>
+                        ) : (
+                          <>
+                            <Trophy className="h-4 w-4 mr-2" />
+                            Participar
+                          </>
+                        )}
+                      </Button>
                       <Button variant="outline" size="sm">
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Seguir
+                        <Share2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          </TabsContent>
 
-            {/* Live Events */}
-            <Card className="bg-gradient-to-r from-red-500/10 to-pink-500/10 border-red-500/30">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="h-5 w-5 mr-2 text-red-500" />
-                  Eventos ao Vivo
-                  <Badge className="ml-2 bg-red-500 animate-pulse">
-                    AO VIVO
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  {
-                    title: 'Concurso de Arte Natalícia',
-                    participants: 156,
-                    prize: '1000 créditos especiais',
-                    timeLeft: '2h 34m'
-                  },
-                  {
-                    title: 'Stream: Criando Pixel Art',
-                    participants: 89,
-                    prize: 'Aprendizagem',
-                    timeLeft: '45m'
-                  }
-                ].map((event, index) => (
-                  <Card key={index} className="bg-background/50">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="font-medium">{event.title}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {event.participants} participantes • {event.timeLeft} restantes
-                          </p>
+          {/* Learn Tab */}
+          <TabsContent value="learn" className="space-y-4">
+            <div className="space-y-4">
+              {tutorials.map(tutorial => (
+                <Card 
+                  key={tutorial.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => setSelectedTutorial(tutorial)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <img 
+                        src={tutorial.videoUrl} 
+                        alt={tutorial.title}
+                        className="w-24 h-16 rounded object-cover bg-muted"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{tutorial.title}</h3>
+                          <Badge 
+                            variant={
+                              tutorial.difficulty === 'Iniciante' ? 'secondary' :
+                              tutorial.difficulty === 'Intermediário' ? 'default' : 'destructive'
+                            }
+                            className="text-xs"
+                          >
+                            {tutorial.difficulty}
+                          </Badge>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-primary">{event.prize}</p>
-                          <Button size="sm" className="mt-1">
-                            <Play className="h-4 w-4 mr-2" />
-                            Participar
-                          </Button>
+                        
+                        <p className="text-sm text-muted-foreground mb-2">{tutorial.description}</p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {tutorial.duration}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-current text-yellow-500" />
+                            {tutorial.rating}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {tutorial.views}
+                          </span>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {tutorial.tags.map(tag => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            </Card>
+                      
+                      <div className="flex flex-col gap-2">
+                        <Button 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startTutorial(tutorial.id);
+                          }}
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          Começar
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveTutorial(tutorial.id);
+                          }}
+                        >
+                          <Bookmark className={cn(
+                            "h-4 w-4",
+                            tutorial.isSaved && "fill-current text-blue-500"
+                          )} />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
+      </div>
 
-        {/* Stories Viewer Modal */}
-        <Dialog open={isViewingStories} onOpenChange={setIsViewingStories}>
-          <DialogContent className="max-w-md h-[90vh] p-0 bg-black border-none">
-            <div className="relative h-full overflow-hidden">
+      {/* Stories Viewer */}
+      <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
+        <DialogContent className="max-w-md h-[90vh] p-0 bg-black">
+          {selectedStory && (
+            <div className="relative h-full">
               {/* Progress bars */}
               <div className="absolute top-2 left-2 right-2 z-50 flex gap-1">
                 {stories.map((_, index) => (
@@ -1717,70 +1623,54 @@ export default function CommunityPage() {
                     <div 
                       className="h-full bg-white transition-all duration-100"
                       style={{ 
-                        width: index < currentStoryIndex ? '100%' : 
-                               index === currentStoryIndex ? `${storyProgress}%` : '0%'
+                        width: index < storyIndex ? '100%' : 
+                               index === storyIndex ? `${storyProgress}%` : '0%'
                       }}
                     />
                   </div>
                 ))}
               </div>
 
-              {/* Story Header */}
+              {/* Header */}
               <div className="absolute top-6 left-4 right-4 z-40 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border-2 border-white">
-                    <AvatarImage src={stories[currentStoryIndex]?.author.avatar} />
-                    <AvatarFallback>{stories[currentStoryIndex]?.author.name[0]}</AvatarFallback>
+                    <AvatarImage src={selectedStory.author.avatar} />
+                    <AvatarFallback>{selectedStory.author.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">{stories[currentStoryIndex]?.author.name}</span>
-                      {stories[currentStoryIndex]?.author.verified && (
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      )}
-                    </div>
-                    <span className="text-white/80 text-sm">
-                      {stories[currentStoryIndex] && formatTimeAgo(stories[currentStoryIndex].timestamp)}
-                    </span>
+                    <span className="text-white font-medium">{selectedStory.author.name}</span>
+                    <p className="text-white/80 text-sm">{selectedStory.timestamp}</p>
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleStoryPlayback}
-                    className="text-white hover:bg-white/20"
-                  >
-                    {isStoryPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsViewingStories(false)}
-                    className="text-white hover:bg-white/20"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedStory(null)}
+                  className="text-white hover:bg-white/20"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
 
               {/* Story Content */}
               <div className="h-full">
-                <AnimatePresence mode="wait">
-                  {stories[currentStoryIndex] && (
-                    <motion.div
-                      key={currentStoryIndex}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      transition={{ duration: 0.3 }}
-                      className="h-full"
-                    >
-                      {renderStoryContent(stories[currentStoryIndex])}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {selectedStory.content.type === 'image' && selectedStory.content.url && (
+                  <img 
+                    src={selectedStory.content.url} 
+                    alt="Story"
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                
+                {selectedStory.content.type === 'text' && (
+                  <div className="h-full flex items-center justify-center p-8 bg-gradient-to-br from-primary/20 to-accent/20">
+                    <p className="text-white text-xl font-medium text-center leading-relaxed">
+                      {selectedStory.content.text}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Navigation areas */}
@@ -1791,7 +1681,7 @@ export default function CommunityPage() {
                 />
                 <div 
                   className="flex-1 cursor-pointer"
-                  onClick={toggleStoryPlayback}
+                  onClick={() => setIsStoryPlaying(!isStoryPlaying)}
                 />
                 <div 
                   className="flex-1 cursor-pointer"
@@ -1799,14 +1689,459 @@ export default function CommunityPage() {
                 />
               </div>
 
-              {/* Story stats */}
-              <div className="absolute bottom-4 right-4 z-40 text-right text-white/80 text-xs">
-                <p>{stories[currentStoryIndex]?.views} visualizações</p>
+              {/* Controls */}
+              <div className="absolute bottom-4 left-4 right-4 z-40 flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsStoryPlaying(!isStoryPlaying)}
+                  className="text-white hover:bg-white/20"
+                >
+                  {isStoryPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/20"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/20"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* User Profile Sheet */}
+      <Sheet open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <SheetContent className="w-full max-w-md p-0">
+          {selectedUser && (
+            <>
+              <SheetHeader className="p-6 border-b bg-gradient-to-br from-primary/10 to-accent/10">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20 border-4 border-primary">
+                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarFallback className="text-2xl">{selectedUser.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <SheetTitle className="text-xl">{selectedUser.name}</SheetTitle>
+                    <p className="text-muted-foreground">{selectedUser.username}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="secondary">Nível {selectedUser.level}</Badge>
+                      {selectedUser.verified && (
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-sm text-muted-foreground mt-4">{selectedUser.bio}</p>
+                
+                <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+                  <div>
+                    <div className="text-xl font-bold text-primary">{selectedUser.pixelsOwned}</div>
+                    <div className="text-xs text-muted-foreground">Pixels</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-accent">{selectedUser.followers}</div>
+                    <div className="text-xs text-muted-foreground">Seguidores</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-green-500">{selectedUser.achievements}</div>
+                    <div className="text-xs text-muted-foreground">Conquistas</div>
+                  </div>
+                </div>
+              </SheetHeader>
+              
+              <div className="p-6 space-y-4">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => followUser(selectedUser.id)}
+                    variant={followingUsers.includes(selectedUser.id) ? 'outline' : 'default'}
+                    className="flex-1"
+                  >
+                    {followingUsers.includes(selectedUser.id) ? (
+                      <>
+                        <Users className="h-4 w-4 mr-2" />
+                        A Seguir
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Seguir
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => sendPrivateMessage(selectedUser.id, selectedUser.name)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Mensagem
+                  </Button>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold">Informações</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Membro desde:</span>
+                      <span>{selectedUser.joinDate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">A seguir:</span>
+                      <span>{selectedUser.following}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Group Details Sheet */}
+      <Sheet open={!!selectedGroup} onOpenChange={() => setSelectedGroup(null)}>
+        <SheetContent className="w-full max-w-md p-0">
+          {selectedGroup && (
+            <>
+              <SheetHeader className="p-6 border-b">
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={selectedGroup.avatar} 
+                    alt={selectedGroup.name}
+                    className="w-16 h-16 rounded-full"
+                  />
+                  <div>
+                    <SheetTitle>{selectedGroup.name}</SheetTitle>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline">{selectedGroup.category}</Badge>
+                      {selectedGroup.isPrivate && (
+                        <Badge variant="secondary">Privado</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-sm text-muted-foreground mt-4">{selectedGroup.description}</p>
+              </SheetHeader>
+              
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-primary">{selectedGroup.members}</div>
+                    <div className="text-sm text-muted-foreground">Membros</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-accent">{selectedGroup.moderators.length}</div>
+                    <div className="text-sm text-muted-foreground">Moderadores</div>
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={() => joinGroup(selectedGroup.id)}
+                  variant={selectedGroup.isJoined ? 'outline' : 'default'}
+                  className="w-full"
+                >
+                  {selectedGroup.isJoined ? (
+                    <>
+                      <Users className="h-4 w-4 mr-2" />
+                      Sair do Grupo
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Juntar-se ao Grupo
+                    </>
+                  )}
+                </Button>
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold">Atividade Recente</h3>
+                  <div className="space-y-2">
+                    <div className="p-3 bg-muted/20 rounded-lg">
+                      <p className="text-sm">{selectedGroup.recentActivity}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold">Regras do Grupo</h3>
+                  <div className="space-y-2">
+                    {selectedGroup.rules.map((rule, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-primary font-bold text-sm">{index + 1}.</span>
+                        <span className="text-sm">{rule}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Chat Dialog */}
+      <Dialog open={!!selectedChat} onOpenChange={() => setSelectedChat(null)}>
+        <DialogContent className="max-w-md h-[80vh] p-0">
+          {selectedChat && (
+            <>
+              <DialogHeader className="p-4 border-b">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar>
+                      <AvatarImage src={selectedChat.avatar} />
+                      <AvatarFallback>{selectedChat.name[0]}</AvatarFallback>
+                    </Avatar>
+                    {selectedChat.isOnline && (
+                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                    )}
+                  </div>
+                  <div>
+                    <DialogTitle>{selectedChat.name}</DialogTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedChat.isOnline ? 'Online' : `Visto ${selectedChat.timestamp}`}
+                    </p>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <ScrollArea className="flex-1 p-4" ref={chatScrollRef}>
+                <div className="space-y-3">
+                  {chatMessages.map(message => (
+                    <div 
+                      key={message.id} 
+                      className={cn(
+                        "flex",
+                        message.sender === 'Você' ? 'justify-end' : 'justify-start'
+                      )}
+                    >
+                      <div className={cn(
+                        "max-w-[80%] p-3 rounded-lg",
+                        message.sender === 'Você' 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted'
+                      )}>
+                        <p className="text-sm">{message.content}</p>
+                        <p className={cn(
+                          "text-xs mt-1",
+                          message.sender === 'Você' 
+                            ? 'text-primary-foreground/70' 
+                            : 'text-muted-foreground'
+                        )}>
+                          {message.timestamp}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              
+              <div className="p-4 border-t">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Escrever mensagem..."
+                    value={newChatMessage}
+                    onChange={(e) => setNewChatMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                    className="flex-1"
+                  />
+                  <Button onClick={sendChatMessage} disabled={!newChatMessage.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Event Details Dialog */}
+      <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh]">
+          {selectedEvent && (
+            <>
+              <DialogHeader>
+                <img 
+                  src={selectedEvent.imageUrl} 
+                  alt={selectedEvent.title}
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <DialogTitle className="text-2xl">{selectedEvent.title}</DialogTitle>
+                <DialogDescription>{selectedEvent.description}</DialogDescription>
+              </DialogHeader>
+              
+              <ScrollArea className="max-h-[50vh]">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-2xl font-bold text-primary">{selectedEvent.participants}</div>
+                      <div className="text-sm text-muted-foreground">Participantes</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-2xl font-bold text-accent">{selectedEvent.prize.split(' ')[0]}</div>
+                      <div className="text-sm text-muted-foreground">Prémio</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold mb-2">Requisitos</h3>
+                    <ul className="space-y-1">
+                      {selectedEvent.requirements.map((req, index) => (
+                        <li key={index} className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          {req}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold mb-2">Regras</h3>
+                    <ul className="space-y-1">
+                      {selectedEvent.rules.map((rule, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <span className="text-primary font-bold">{index + 1}.</span>
+                          {rule}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
+                    <div>
+                      <p className="font-medium">Organizado por</p>
+                      <p className="text-sm text-muted-foreground">{selectedEvent.organizer}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Termina em</p>
+                      <p className="font-medium">{selectedEvent.endDate}</p>
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+              
+              <div className="flex gap-3 pt-4 border-t">
+                <Button 
+                  onClick={() => participateInEvent(selectedEvent.id)}
+                  variant={selectedEvent.isParticipating ? 'outline' : 'default'}
+                  className="flex-1"
+                >
+                  {selectedEvent.isParticipating ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Participando
+                    </>
+                  ) : (
+                    <>
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Participar
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Partilhar
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Tutorial Dialog */}
+      <Dialog open={!!selectedTutorial} onOpenChange={() => setSelectedTutorial(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh]">
+          {selectedTutorial && (
+            <>
+              <DialogHeader>
+                <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
+                  <Play className="h-16 w-16 text-muted-foreground" />
+                </div>
+                <DialogTitle className="text-xl">{selectedTutorial.title}</DialogTitle>
+                <DialogDescription>{selectedTutorial.description}</DialogDescription>
+              </DialogHeader>
+              
+              <ScrollArea className="max-h-[40vh]">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {selectedTutorial.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-current text-yellow-500" />
+                      {selectedTutorial.rating}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-4 w-4" />
+                      {selectedTutorial.views}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold mb-2">O que vai aprender:</h3>
+                    <ul className="space-y-1">
+                      {selectedTutorial.steps.map((step, index) => (
+                        <li key={index} className="flex items-center gap-2 text-sm">
+                          <span className="w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </span>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTutorial.tags.map(tag => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </ScrollArea>
+              
+              <div className="flex gap-3 pt-4 border-t">
+                <Button 
+                  onClick={() => startTutorial(selectedTutorial.id)}
+                  className="flex-1"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Começar Tutorial
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => saveTutorial(selectedTutorial.id)}
+                >
+                  <Bookmark className={cn(
+                    "h-4 w-4",
+                    selectedTutorial.isSaved && "fill-current text-blue-500"
+                  )} />
+                </Button>
+                <Button variant="outline">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
