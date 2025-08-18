@@ -32,19 +32,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Palette, Brush, Eraser, PaintBucket, Pipette, Type, Image as ImageIcon,
-  Sparkles, Wand2, Grid3X3, ZoomIn, ZoomOut, RotateCcw, RotateCw,
-  Download, Upload, Save, X, Check, Crown, Coins, Gift, Star,
-  Layers, Eye, EyeOff, Plus, Minus, Copy, Scissors, Move,
-  Circle, Square, Triangle, Heart, Smile, Music, Camera,
-  Zap, Target, Droplets, Flame, Snowflake, Sun, Moon,
-  Pen, Pencil, Spray, Blur, Focus, Clone, Bandage, Shuffle,
-  RefreshCw, Undo, Redo, Settings, Info, ChevronDown, ChevronUp,
-  Hash, Link as LinkIcon, MapPin, CreditCard, ShoppingCart,
-  Maximize2, Minimize2, MoreHorizontal, Filter, Contrast,
-  Brightness, Saturation, Hue, Volume2, VolumeX, Play, Pause
-} from 'lucide-react';
+import { Palette, Brush, Eraser, PaintBucket, Pipette, Type, Image as ImageIcon, Sparkles, Wand2, Grid3X3, ZoomIn, ZoomOut, RotateCcw, RotateCw, Download, Upload, Save, X, Check, Crown, Coins, Gift, Star, Layers, Eye, EyeOff, Plus, Minus, Copy, Scissors, Move, Circle, Square, Triangle, Heart, Smile, Music, Camera, Zap, Target, Droplets, Flame, Snowflake, Sun, Moon, Pen, Pencil, SprayCan as Spray, Bluetooth as Blur, Focus, Bone as Clone, Bandage, Shuffle, RefreshCw, Undo, Redo, Settings, Info, ChevronDown, ChevronUp, Hash, Link as LinkIcon, MapPin, CreditCard, ShoppingCart, Maximize2, Minimize2, MoreHorizontal, Filter, Contrast, Copyright as Brightness, IterationCw as Saturation, Fuel as Hue, Volume2, VolumeX, Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Tipos e interfaces
