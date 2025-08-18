@@ -20,7 +20,7 @@ import {
   Music, Mic, Settings, Filter, Search, Plus, MoreHorizontal,
   Bookmark, Flag, Volume2, VolumeX, Compass, Globe, Award,
   Sparkles, Coins, Bell, Phone, MessageCircle, User, Edit,
-  Copy, ExternalLink, Info, CheckCircle, AlertTriangle
+  Copy, ExternalLink, Info, CheckCircle, AlertTriangle, Lock
 } from "lucide-react";
 import {
   Dialog,
@@ -475,6 +475,11 @@ const mockTutorials: Tutorial[] = [
     isSaved: true
   }
 ];
+
+const GroupIcon = ({ isPrivate }: { isPrivate: boolean }) => {
+    if (!isPrivate) return null;
+    return <Lock className="h-4 w-4 text-muted-foreground" />;
+};
 
 export default function CommunityPage() {
   const { user } = useAuth();
@@ -1360,7 +1365,7 @@ export default function CommunityPage() {
                             {group.name}
                           </h3>
                           <Badge variant="outline">{group.category}</Badge>
-                          {group.isPrivate && <Lock className="h-4 w-4 text-muted-foreground" />}
+                          <GroupIcon isPrivate={group.isPrivate} />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{group.description}</p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -1615,9 +1620,9 @@ export default function CommunityPage() {
       {/* Stories Viewer */}
       <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
         <DialogContent className="max-w-md h-[90vh] p-0 bg-black">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Visualizador de Histórias</DialogTitle>
-            <DialogDescription>A visualizar a história de um utilizador.</DialogDescription>
+          <DialogHeader>
+            <DialogTitle className="sr-only">Visualizador de Histórias</DialogTitle>
+            <DialogDescription className="sr-only">A visualizar a história de um utilizador.</DialogDescription>
           </DialogHeader>
           {selectedStory && (
             <div className="relative h-full">
