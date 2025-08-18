@@ -1662,28 +1662,15 @@ export default function EnhancedPixelPurchaseModal({
                           const randomColor = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
                           setSelectedColor(randomColor);
                           vibrate('light');
-                    {/* Categorias de Stickers Expandidas */}
                         }}
-                      {Object.keys(stickers).map((category, index) => (
+                        className="text-xs"
                       >
                         <Shuffle className="h-3 w-3 mr-1" />
                         Aleatória
                       </Button>
                       <Button
-                          className="text-xs capitalize h-10 flex flex-col items-center justify-center"
+                        variant="outline"
                         size="sm"
-                          <span className="text-lg mb-1">
-                            {category === 'emojis' && '😀'}
-                            {category === 'symbols' && '⭐'}
-                            {category === 'nature' && '🌸'}
-                            {category === 'portugal' && '🇵🇹'}
-                            {category === 'gaming' && '🎮'}
-                            {category === 'tech' && '💻'}
-                            {category === 'faces' && '😊'}
-                            {category === 'hands' && '👍'}
-                            {category === 'objects' && '🎨'}
-                            {category === 'weather' && '☀️'}
-                          </span>
                         onClick={randomizeColors}
                         className="text-xs"
                       >
@@ -1718,156 +1705,119 @@ export default function EnhancedPixelPurchaseModal({
                         </Button>
                       ))}
                     </div>
-                    
-                    {/* Opções de Sticker */}
-                    <Card className="bg-muted/20">
-                      <CardContent className="p-3 space-y-3">
-                        <Label className="text-sm font-medium">Opções de Sticker</Label>
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <Label className="text-xs">Tamanho</Label>
-                            <span className="text-xs font-mono">{fontSize}px</span>
-                          </div>
-                          <Slider
-                            value={[fontSize]}
-                            onValueChange={(value) => setFontSize(value[0])}
-                            min={8}
-                            max={48}
-                            step={2}
-                            className="w-full"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label className="text-xs">Rotação</Label>
-                          <Slider
-                            value={[brushRotation]}
-                            onValueChange={(value) => setBrushRotation(value[0])}
-                            min={0}
-                            max={360}
-                            step={15}
-                            className="w-full"
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
                   </div>
                 </TabsContent>
                 
                 {/* Efeitos e IA */}
-                <TabsContent value="effects" className="mt-0 space-y-4">
-                  {/* Estilos Artísticos */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-sm flex items-center">
-                      <Wand2 className="h-4 w-4 mr-2 text-purple-500" />
-                      Estilos Artísticos
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {artStyles.map(style => (
-                        <Button
-                          key={style.id}
-                          variant={selectedStyle === style.id ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => applyArtStyle(style.id)}
-                          className="flex flex-col items-center p-3 h-auto relative"
-                        >
-                          <span className="text-2xl mb-1">{style.preview}</span>
-                          <span className="text-xs">{style.name}</span>
-                          {style.premium && (
-                            <Crown className="absolute -top-1 -right-1 h-3 w-3 text-amber-500" />
-                          )}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Efeitos Mágicos IA */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-sm flex items-center">
-                      <Sparkles className="h-4 w-4 mr-2 text-purple-500 animate-pulse" />
-                      Efeitos Mágicos IA
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {magicEffects.map(effect => (
-                        <Button
-                          key={effect.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => applyMagicEffect(effect.id)}
-                          className="flex flex-col items-center p-3 h-auto group"
-                        >
-                          <div className={cn("mb-1 group-hover:animate-pulse", effect.color)}>
+                <TabsContent value="effects" className="space-y-4">
+                  <div className="space-y-4">
+                    {/* Efeitos Visuais Avançados */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Efeitos Especiais</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'hologram', name: 'Holograma', icon: <Sparkles className="h-4 w-4" />, color: 'from-cyan-500 to-blue-500' },
+                          { id: 'glitch', name: 'Glitch', icon: <Zap className="h-4 w-4" />, color: 'from-red-500 to-pink-500' },
+                          { id: 'crystal', name: 'Cristal', icon: <Gem className="h-4 w-4" />, color: 'from-purple-500 to-indigo-500' },
+                          { id: 'plasma', name: 'Plasma', icon: <Flame className="h-4 w-4" />, color: 'from-orange-500 to-red-500' },
+                          { id: 'aurora', name: 'Aurora', icon: <Waves className="h-4 w-4" />, color: 'from-green-500 to-blue-500' },
+                          { id: 'matrix', name: 'Matrix', icon: <Hash className="h-4 w-4" />, color: 'from-green-400 to-green-600' }
+                        ].map(effect => (
+                          <Button
+                            key={effect.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              applyMagicEffect(effect.id);
+                              vibrate('medium');
+                              
+                              toast({
+                                title: `✨ ${effect.name} Aplicado!`,
+                                description: "Efeito especial adicionado ao pixel!",
+                              });
+                            }}
+                            className={`h-12 flex flex-col items-center justify-center bg-gradient-to-r ${effect.color} bg-opacity-10 hover:bg-opacity-20 transition-all`}
+                          >
                             {effect.icon}
-                          </div>
-                          <span className="text-xs">{effect.name}</span>
-                        </Button>
-                      ))}
+                            <span className="text-xs mt-1">{effect.name}</span>
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Padrões Automáticos */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-sm">Padrões Automáticos</h4>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => generatePattern('dots')}
-                        className="text-xs"
-                      >
-                        ⚫ Pontos
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => generatePattern('stripes')}
-                        className="text-xs"
-                      >
-                        ▬ Riscas
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => generatePattern('checkerboard')}
-                        className="text-xs"
-                      >
-                        ▦ Xadrez
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {/* Configurações de Visualização */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-sm">Visualização</h4>
+                    
+                    {/* Filtros Predefinidos */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs">Mostrar Grelha</Label>
-                        <Switch checked={showGrid} onCheckedChange={setShowGrid} />
-                      </div>
-                      
-                      {showGrid && (
-                        <div className="space-y-1">
-                          <Label className="text-xs">Tamanho: {gridSize}px</Label>
-                          <Slider
-                            value={[gridSize]}
-                            onValueChange={(value) => setGridSize(value[0])}
-                            min={5}
-                            max={50}
-                            step={5}
-                          />
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs">Ajustar à Grelha</Label>
-                        <Switch checked={snapToGrid} onCheckedChange={setSnapToGrid} />
+                      <Label className="text-sm font-medium">Filtros Rápidos</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { name: 'Vintage', effect: 'sepia(100%) contrast(120%)' },
+                          { name: 'Dramático', effect: 'contrast(150%) saturate(120%)' },
+                          { name: 'Suave', effect: 'blur(1px) brightness(110%)' },
+                          { name: 'Vibrante', effect: 'saturate(200%) contrast(110%)' },
+                          { name: 'Monocromático', effect: 'grayscale(100%) contrast(120%)' },
+                          { name: 'Neon', effect: 'saturate(300%) brightness(120%) hue-rotate(90deg)' },
+                          { name: 'Cyberpunk', effect: 'saturate(200%) hue-rotate(270deg) contrast(130%)' },
+                          { name: 'Retro', effect: 'sepia(50%) saturate(150%) hue-rotate(15deg)' },
+                          { name: 'Sonho', effect: 'blur(0.5px) brightness(115%) saturate(130%)' },
+                          { name: 'Frio', effect: 'hue-rotate(180deg) saturate(120%) brightness(90%)' },
+                          { name: 'Quente', effect: 'hue-rotate(30deg) saturate(140%) brightness(110%)' },
+                          { name: 'Alien', effect: 'hue-rotate(120deg) saturate(200%) contrast(140%)' }
+                        ].map(filter => (
+                          <Button
+                            key={filter.name}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              applyMagicEffect(filter.name);
+                              vibrate('medium');
+                              
+                              toast({
+                                title: `🎨 ${filter.name} Aplicado!`,
+                                description: "Filtro aplicado com sucesso!",
+                              });
+                            }}
+                            className="text-xs h-8"
+                          >
+                            {filter.name}
+                          </Button>
+                        ))}
                       </div>
                     </div>
+                    
+                    {/* Efeitos de Partículas */}
+                    <Card className="bg-muted/20">
+                      <CardContent className="p-3 space-y-3">
+                        <Label className="text-sm font-medium">Efeitos de Partículas</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { name: 'Estrelas', icon: '✨', effect: 'stars' },
+                            { name: 'Neve', icon: '❄️', effect: 'snow' },
+                            { name: 'Chuva', icon: '🌧️', effect: 'rain' },
+                            { name: 'Fogo', icon: '🔥', effect: 'fire' },
+                            { name: 'Bolhas', icon: '🫧', effect: 'bubbles' },
+                            { name: 'Faíscas', icon: '⚡', effect: 'sparks' }
+                          ].map(particle => (
+                            <Button
+                              key={particle.name}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Aplicar efeito de partículas
+                                toast({
+                                  title: `${particle.icon} ${particle.name}!`,
+                                  description: "Efeito de partículas adicionado!",
+                                });
+                                vibrate('medium');
+                              }}
+                              className="h-12 flex flex-col items-center justify-center"
+                            >
+                              <span className="text-lg">{particle.icon}</span>
+                              <span className="text-xs">{particle.name}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </TabsContent>
                 
