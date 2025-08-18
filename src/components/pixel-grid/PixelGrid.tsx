@@ -1213,6 +1213,12 @@ export default function PixelGrid() {
           {/* Enhanced info panel */}
           <div className="mt-2 p-3 bg-background/90 rounded-md text-xs font-code border border-primary/20 space-y-1">
             <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Modo:</span>
+              <span className={`font-bold ${getVisualizationModeColor(visualizationMode)}`}>
+                {getVisualizationModeIcon(visualizationMode)} {visualizationMode}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Zoom:</span>
               <span className="text-primary font-bold">{zoom.toFixed(2)}x</span>
             </div>
@@ -1221,10 +1227,23 @@ export default function PixelGrid() {
               <span className="text-accent">({Math.round(position.x)}, {Math.round(position.y)})</span>
             </div>
             {highlightedPixel && (
-              <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-                <span className="text-muted-foreground">Pixel:</span>
-                <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
-              </div>
+              <>
+                <div className="flex items-center justify-between border-t border-primary/20 pt-1">
+                  <span className="text-muted-foreground">Pixel:</span>
+                  <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
+                </div>
+                {highlightedPixel && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">GPS:</span>
+                    <span className="text-green-500 font-bold text-xs">
+                      {(() => {
+                        const gps = mapPixelToApproxGps(highlightedPixel.x, highlightedPixel.y, LOGICAL_GRID_COLS_CONFIG, logicalGridRows);
+                        return gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}` : 'N/A';
+                      })()}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
             <div className="flex items-center justify-between border-t border-primary/20 pt-1">
               <span className="text-muted-foreground">Pixels Ativos:</span>
