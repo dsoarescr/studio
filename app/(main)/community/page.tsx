@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -1614,6 +1615,10 @@ export default function CommunityPage() {
       {/* Stories Viewer */}
       <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
         <DialogContent className="max-w-md h-[90vh] p-0 bg-black">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Visualizador de Histórias</DialogTitle>
+            <DialogDescription>A visualizar a história de um utilizador.</DialogDescription>
+          </DialogHeader>
           {selectedStory && (
             <div className="relative h-full">
               {/* Progress bars */}
@@ -1901,6 +1906,7 @@ export default function CommunityPage() {
           {selectedChat && (
             <>
               <DialogHeader className="p-4 border-b">
+                <DialogTitle>Conversa com {selectedChat.name}</DialogTitle>
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Avatar>
@@ -1912,7 +1918,6 @@ export default function CommunityPage() {
                     )}
                   </div>
                   <div>
-                    <DialogTitle>{selectedChat.name}</DialogTitle>
                     <p className="text-sm text-muted-foreground">
                       {selectedChat.isOnline ? 'Online' : `Visto ${selectedChat.timestamp}`}
                     </p>
@@ -2069,11 +2074,11 @@ export default function CommunityPage() {
           {selectedTutorial && (
             <>
               <DialogHeader>
+                <DialogTitle>{selectedTutorial.title}</DialogTitle>
+                <DialogDescription>{selectedTutorial.description}</DialogDescription>
                 <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
                   <Play className="h-16 w-16 text-muted-foreground" />
                 </div>
-                <DialogTitle className="text-xl">{selectedTutorial.title}</DialogTitle>
-                <DialogDescription>{selectedTutorial.description}</DialogDescription>
               </DialogHeader>
               
               <ScrollArea className="max-h-[40vh]">
