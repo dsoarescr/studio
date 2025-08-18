@@ -139,14 +139,28 @@ Seguir uma estrutura consistente é crucial para a manutenção do projeto.
 - **Passo 3**: Importe e chame a sua nova função de IA no componente React onde ela será utilizada.
 
 ---
-## 💡 Outros Ficheiros Importantes
+## 💡 Guia Técnico de Manutenção
+
+Esta secção cobre aspetos técnicos importantes para manter a aplicação a funcionar corretamente.
 
 | Para alterar...                                    | Modifique este ficheiro:              | Descrição                                                    |
 | -------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| **Adicionar/Remover Dependências** (pacotes NPM)   | `package.json`                        | Adicione a dependência à secção `dependencies` ou `devDependencies`. O sistema instalará automaticamente. **NUNCA** execute `npm install` diretamente. |
 | O **estado global do utilizador** (créditos, XP)   | `src/lib/store.ts`                    | Contém a lógica de estado global (Zustand).                    |
-| As **cores e o tema** da aplicação                 | `app/globals.css`                     | Contém as variáveis de cor para os temas claro e escuro.       |
+| As **cores e o tema** da aplicação                 | `src/app/globals.css`                 | Contém as variáveis de cor para os temas claro e escuro.       |
 | As **fontes** ou estender o tema Tailwind          | `tailwind.config.ts`                  | Ficheiro de configuração do Tailwind CSS.                      |
-| As **configurações do Firebase** no cliente        | `src/lib/firebase.ts`                 | Configuração e inicialização do Firebase para o lado do cliente. |
+| As **configurações do Firebase** no cliente        | `src/lib/firebase-config.ts`          | Contém as chaves de API do Firebase. **NÃO ALTERAR** a menos que o objetivo seja mudar de projeto Firebase. |
 | Os **dados estáticos das conquistas**              | `src/data/achievements-data.tsx`      | Contém a lista e os detalhes de todas as conquistas.           |
 | As **traduções de texto** (i18n)                   | `src/lib/i18n.ts`                     | Contém todas as strings de texto para diferentes idiomas.      |
 | O **layout raiz** de toda a aplicação (`<html>`, `<body>`) | `src/app/layout.tsx`                | O ficheiro de layout mais fundamental.                         |
+| **Variáveis de Ambiente** (chaves secretas)         | Não aplicável diretamente. **NÃO** adicione chaves secretas diretamente no código. O sistema gere-as de forma segura. |
+
+### Convenções de Importação de Módulos
+
+Para manter o código organizado, use sempre os "aliases" de caminho configurados no `tsconfig.json`:
+-   `@/components/...` para componentes em `src/components/`.
+-   `@/lib/...` para utilitários e lógica em `src/lib/`.
+-   `@/hooks/...` para React Hooks personalizados em `src/hooks/`.
+-   `@/ai/...` para funcionalidades de IA em `src/ai/`.
+
+Evite importações relativas longas como `import Botao from '../../../components/Botao'`. Use antes `import Botao from '@/components/ui/button'`.
