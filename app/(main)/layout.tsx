@@ -8,12 +8,13 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300">
+    <div className="h-full bg-gradient-to-br from-background via-background/98 to-primary/5 transition-colors duration-300">
       <UserProfileHeader />
-      <main className="flex-1 overflow-y-auto pt-14 pb-[var(--bottom-nav-height)]">
+      <main className="h-full overflow-y-auto pt-14 pb-[var(--bottom-nav-height)]">
         {children}
       </main>
       <BottomNavBar />
     </div>
   );
 }
+

@@ -15,7 +15,7 @@ export default function HomePage() {
     <SidebarProvider>
       <div className="relative h-full w-full flex">
         <MapSidebar />
-        <div className="flex-1 h-full">
+        <div className="h-full">
           <PixelGrid />
         </div>
         <PerformanceMonitor />
@@ -23,3 +23,4 @@ export default function HomePage() {
     </SidebarProvider>
   );
 }
+
