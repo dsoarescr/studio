@@ -54,7 +54,7 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
-import { 
+import { Search as SearchIcon, Eye, Grid3X3, Bookmark, MapPin as MapPinIcon, ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown } from 'lucide-react';
   Search, Eye, Grid3X3, Bookmark, MapPinIconLucide, 
   ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown
 } from 'lucide-react';
@@ -1409,7 +1409,7 @@ export default function PixelGrid() {
                 <div className="space-y-4">
                   {/* Search Input */}
                   <div className="space-y-2">
-                    <Label>Pesquisar Localização</Label>
+                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Ex: Torre de Belém, 1000, Lisboa..."
                       value={searchQuery}
