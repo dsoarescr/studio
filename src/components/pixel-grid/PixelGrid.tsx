@@ -901,7 +901,7 @@ export default function PixelGrid() {
           onSwipeDown={() => {
             vibrate('medium');
             if (selectedPixelDetails) {
-              setShowPixelModal(true);
+             setShowPixelInfoModal(true);
             }
           }}
           className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center"
