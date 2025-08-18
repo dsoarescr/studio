@@ -40,7 +40,8 @@ import {
   Settings, X, Crown, Gem, Zap, Gift, Coins, TreePine, Sun, Moon,
   Cloud, Droplets, Wind, Rainbow, Smile, Cat, Feather, Flag, Gamepad2,
   Laptop, MessageSquare, Type, Filter, Copy, Edit3, Trash2, Shuffle,
-  Activity, ArrowUp, ArrowLeft, Hand, Pen, PenTool, Pipette, Paintbrush
+  Activity, ArrowUp, ArrowLeft, Hand, Pen, PenTool, Pipette, Paintbrush,
+  Flame
 } from 'lucide-react';
 
 interface SelectedPixelDetails {
