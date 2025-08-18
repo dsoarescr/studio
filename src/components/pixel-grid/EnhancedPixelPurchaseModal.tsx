@@ -68,14 +68,6 @@ interface EnhancedPixelPurchaseModalProps {
   onPurchase: (pixelData: SelectedPixelDetails, paymentMethod: string, customizations: any) => Promise<boolean>;
 }
 
-interface Layer {
-  id: string;
-  name: string;
-  visible: boolean;
-  opacity: number;
-  canvas: HTMLCanvasElement;
-}
-
 interface TimelapseFrame {
   timestamp: number;
   imageData: ImageData;
@@ -151,8 +143,6 @@ export default function EnhancedPixelPurchaseModal({
   const [selectedTool, setSelectedTool] = useState('brush');
   const [selectedColor, setSelectedColor] = useState('#D4A757');
   const [brushSize, setBrushSize] = useState(4);
-  const [layers, setLayers] = useState<Layer[]>([]);
-  const [activeLayerIndex, setActiveLayerIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [timelapseFrames, setTimelapseFrames] = useState<TimelapseFrame[]>([]);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -180,28 +170,23 @@ export default function EnhancedPixelPurchaseModal({
   const { toast } = useToast();
   const { vibrate } = useHapticFeedback();
 
-  // Inicializar canvas e primeira camada
+  // Inicializar canvas
   useEffect(() => {
-    if (isOpen && canvasRef.current && layers.length === 0) {
+    if (isOpen && canvasRef.current) {
       const canvas = canvasRef.current;
       canvas.width = CANVAS_SIZE;
       canvas.height = CANVAS_SIZE;
       
-      // Criar primeira camada
-      const firstLayer: Layer = {
-        id: '1',
-        name: 'Camada 1',
-        visible: true,
-        opacity: 100,
-        canvas: document.createElement('canvas')
-      };
-      firstLayer.canvas.width = CANVAS_SIZE;
-      firstLayer.canvas.height = CANVAS_SIZE;
-      
-      setLayers([firstLayer]);
+      // Inicializar canvas com cor base
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = pixelData?.color || '#F0F0F0';
+        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      }
       drawCanvas();
     }
-  }, [isOpen]);
+  }, [isOpen, pixelData]);
 
   // Timer de gravação
   useEffect(() => {
@@ -223,21 +208,6 @@ export default function EnhancedPixelPurchaseModal({
     if (!ctx) return;
     
     ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    
-    // Desenhar fundo base
-    ctx.fillStyle = pixelData?.color || '#F0F0F0';
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    
-    // Desenhar camadas
-    layers.forEach(layer => {
-      if (layer.visible) {
-        ctx.globalAlpha = layer.opacity / 100;
-        ctx.drawImage(layer.canvas, 0, 0);
-      }
-    });
-    
-    ctx.globalAlpha = 1;
     
     // Desenhar grelha se ativa
     if (showGrid) {
@@ -253,9 +223,9 @@ export default function EnhancedPixelPurchaseModal({
         ctx.stroke();
       }
     }
-  }, [layers, showGrid, pixelData, activeLayerIndex]);
+  }, [showGrid]);
 
-  // Redesenhar canvas quando camadas mudam
+  // Redesenhar canvas quando necessário
   useEffect(() => {
     drawCanvas();
   }, [drawCanvas]);
@@ -275,12 +245,10 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   const drawPixel = (x: number, y: number) => {
-    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     
-    const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer || !activeLayer.canvas) return;
-    
-    const ctx = activeLayer.canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
     ctx.imageSmoothingEnabled = false;
@@ -319,8 +287,20 @@ export default function EnhancedPixelPurchaseModal({
       }
     }
     
-    // Redesenhar o canvas principal
-    drawCanvas();
+    // Redesenhar grelha se necessário
+    if (showGrid) {
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= GRID_SIZE; i++) {
+        const pos = i * PIXEL_SIZE;
+        ctx.beginPath();
+        ctx.moveTo(pos, 0);
+        ctx.lineTo(pos, CANVAS_SIZE);
+        ctx.moveTo(0, pos);
+        ctx.lineTo(CANVAS_SIZE, pos);
+        ctx.stroke();
+      }
+    }
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -385,12 +365,10 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   const saveToUndoStack = () => {
-    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     
-    const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer || !activeLayer.canvas) return;
-    
-    const ctx = activeLayer.canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
     const imageData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -401,12 +379,10 @@ export default function EnhancedPixelPurchaseModal({
   const undo = () => {
     if (undoStack.length === 0) return;
     
-    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     
-    const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer || !activeLayer.canvas) return;
-    
-    const ctx = activeLayer.canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
     const currentState = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -416,19 +392,16 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(previousState, 0, 0);
     setUndoStack(prev => prev.slice(0, -1));
     
-    drawCanvas();
     vibrate('medium');
   };
 
   const redo = () => {
     if (redoStack.length === 0) return;
     
-    if (layers.length === 0 || activeLayerIndex >= layers.length) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     
-    const activeLayer = layers[activeLayerIndex];
-    if (!activeLayer || !activeLayer.canvas) return;
-    
-    const ctx = activeLayer.canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
     const currentState = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -438,35 +411,7 @@ export default function EnhancedPixelPurchaseModal({
     ctx.putImageData(nextState, 0, 0);
     setRedoStack(prev => prev.slice(0, -1));
     
-    drawCanvas();
     vibrate('medium');
-  };
-
-  const addLayer = () => {
-    const newLayer: Layer = {
-      id: Date.now().toString(),
-      name: `Camada ${layers.length + 1}`,
-      visible: true,
-      opacity: 100,
-      canvas: document.createElement('canvas')
-    };
-    newLayer.canvas.width = CANVAS_SIZE;
-    newLayer.canvas.height = CANVAS_SIZE;
-    
-    // Inicializar o contexto da nova camada
-    const ctx = newLayer.canvas.getContext('2d');
-    if (ctx) {
-      ctx.imageSmoothingEnabled = false;
-    }
-    
-    setLayers(prev => [...prev, newLayer]);
-    setActiveLayerIndex(layers.length);
-    
-    vibrate('success');
-    toast({
-      title: "Nova Camada Criada! 🎨",
-      description: `${newLayer.name} adicionada com sucesso.`,
-    });
   };
 
   const captureFrame = () => {
@@ -551,11 +496,6 @@ export default function EnhancedPixelPurchaseModal({
 
   const calculateTotalPrice = () => {
     let total = pixelData?.price || 0;
-    
-    // Custo por camadas extras
-    if (layers.length > 1) {
-      total += (layers.length - 1) * 10;
-    }
     
     // Custo por animação
     if (timelapseFrames.length > 0) {
@@ -661,11 +601,6 @@ export default function EnhancedPixelPurchaseModal({
               onPointerCancel={handlePointerUp}
             />
             
-            {/* Indicador de Camada Ativa */}
-            <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-              Camada {activeLayerIndex + 1}
-            </div>
-            
             {/* Indicador de Simetria */}
             {symmetryMode !== 'none' && (
               <div className="absolute -bottom-2 -left-2 bg-accent text-accent-foreground text-xs px-2 py-1 rounded-full">
@@ -678,7 +613,7 @@ export default function EnhancedPixelPurchaseModal({
         {/* Tabs de Ferramentas - Otimizado para Mobile */}
         <div className="border-t bg-background">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50">
+            <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/50">
               <TabsTrigger value="draw" className="text-xs">
                 <Brush className="h-4 w-4 mb-1" />
                 Desenhar
@@ -694,10 +629,6 @@ export default function EnhancedPixelPurchaseModal({
               <TabsTrigger value="stickers" className="text-xs">
                 <Smile className="h-4 w-4 mb-1" />
                 Stickers
-              </TabsTrigger>
-              <TabsTrigger value="layers" className="text-xs">
-                <Layers className="h-4 w-4 mb-1" />
-                Camadas
               </TabsTrigger>
             </TabsList>
 
@@ -953,66 +884,6 @@ export default function EnhancedPixelPurchaseModal({
               </ScrollArea>
             </TabsContent>
 
-            {/* Tab: Camadas */}
-            <TabsContent value="layers" className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Camadas ({layers.length})</Label>
-                <Button size="sm" onClick={addLayer}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Nova
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {layers.map((layer, index) => (
-                  <Card 
-                    key={layer.id}
-                    className={cn(
-                      "p-3 cursor-pointer transition-all",
-                      activeLayerIndex === index && "border-primary bg-primary/10"
-                    )}
-                    onClick={() => setActiveLayerIndex(index)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setLayers(prev => prev.map((l, i) => 
-                              i === index ? { ...l, visible: !l.visible } : l
-                            ));
-                          }}
-                        >
-                          {layer.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                        </Button>
-                        <span className="text-sm font-medium">{layer.name}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {layer.opacity}%
-                      </div>
-                    </div>
-                    
-                    <div className="mt-2">
-                      <Slider
-                        value={[layer.opacity]}
-                        onValueChange={(value) => {
-                          setLayers(prev => prev.map((l, i) => 
-                            i === index ? { ...l, opacity: value[0] } : l
-                          ));
-                          drawCanvas();
-                        }}
-                        min={0}
-                        max={100}
-                        step={5}
-                        className="w-full"
-                      />
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
 
@@ -1046,12 +917,6 @@ export default function EnhancedPixelPurchaseModal({
                     <span>Pixel base:</span>
                     <span>€{pixelData.price}</span>
                   </div>
-                  {layers.length > 1 && (
-                    <div className="flex justify-between">
-                      <span>Camadas extras ({layers.length - 1}):</span>
-                      <span>€{(layers.length - 1) * 10}</span>
-                    </div>
-                  )}
                   {timelapseFrames.length > 0 && (
                     <div className="flex justify-between">
                       <span>Timelapse ({timelapseFrames.length} frames):</span>
