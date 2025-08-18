@@ -1,4 +1,3 @@
-
 // src/app/(main)/page.tsx
 'use client';
 
@@ -13,9 +12,9 @@ export default function HomePage() {
   const { t } = useTranslation();
   return (
     <SidebarProvider>
-      <div className="relative w-full flex h-full">
+      <div className="relative w-full flex">
         <MapSidebar />
-        <div className="flex-1 h-full">
+        <div className="flex-1">
           <PixelGrid />
         </div>
         <PerformanceMonitor />
