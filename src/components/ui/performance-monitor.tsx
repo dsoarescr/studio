@@ -15,22 +15,15 @@ interface PerformanceMonitorProps {
 export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
   const [fps, setFps] = useState(60);
   const [memoryUsage, setMemoryUsage] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLowPerformance, setIsLowPerformance] = useState(false);
+  const [isVisible, setIsVisible] = useState(() => isLowPerformanceDevice());
+  const [isLowPerformance, setIsLowPerformance] = useState(() => isLowPerformanceDevice());
   const { toast } = useToast();
+  const initialCheckDone = useRef(false);
   
   useEffect(() => {
     let frameCount = 0;
     let lastTime = performance.now();
     let frameId: number;
-    
-    const checkPerformance = () => {
-      // Check if device is low performance
-      setIsLowPerformance(isLowPerformanceDevice());
-      
-      // Only show for low performance devices
-      setIsVisible(isLowPerformanceDevice());
-    };
     
     const measureFps = () => {
       frameCount++;
@@ -50,15 +43,19 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
         }
         
         // Show warning if FPS is consistently low
-        if (fps < 30 && !isVisible) {
-          setIsVisible(true);
+        if (fps < 30 && !isVisible && initialCheckDone.current) {
+          setTimeout(() => setIsVisible(true), 0);
         }
       }
       
       frameId = requestAnimationFrame(measureFps);
     };
     
-    checkPerformance();
+    // Mark initial check as done after first render
+    if (!initialCheckDone.current) {
+      initialCheckDone.current = true;
+    }
+    
     frameId = requestAnimationFrame(measureFps);
     
     return () => {
