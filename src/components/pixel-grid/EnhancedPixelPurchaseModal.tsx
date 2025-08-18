@@ -22,14 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
-import {
-  ShoppingCart, Palette, Brush, Eraser, PaintBucket, Undo, Redo,
-  Save, X, Zap, Sparkles, Crown, Star, Gift, Coins, Eye, Heart,
-  Share2, Download, Upload, Settings, Grid3X3, Layers, Type,
-  Image as ImageIcon, Wand2, Target, Droplets, Blur, Copy,
-  RotateCcw, Smile, MapPin, Flag, TreePine, Gem, Plus, Minus,
-  Check, AlertTriangle, Info, Camera, Mic, Video, Music
-} from 'lucide-react';
+import { ShoppingCart, Palette, Brush, Eraser, PaintBucket, Undo, Redo, Save, X, Zap, Sparkles, Crown, Star, Gift, Coins, Eye, Heart, Share2, Download, Upload, Settings, Grid3X3, Layers, Type, Image as ImageIcon, Wand2, Target, Droplets, Bluetooth as Blur, Copy, RotateCcw, Smile, MapPin, Flag, TreePine, Gem, Plus, Minus, Check, AlertTriangle, Info, Camera, Mic, Video, Music } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PixelData {
