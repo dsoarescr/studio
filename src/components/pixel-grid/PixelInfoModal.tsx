@@ -32,12 +32,12 @@ import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import {
-  MapPin, Eye, Heart, MessageSquare, Share2, User, Calendar, Clock,
-  Star, Crown, Gem, Sparkles, Edit3, ShoppingCart, Copy, ExternalLink,
-  Flag, Bookmark, Download, Upload, Camera, Palette, Zap, Gift,
-  Globe, Navigation, Compass, Target, Award, Trophy, Coins, Info,
-  ChevronRight, ChevronLeft, X, Send, ThumbsUp, UserPlus, Settings,
-  BarChart3, TrendingUp, Activity, Hash, Link as LinkIcon, Image as ImageIcon
+  MapPin, Eye, Heart, MessageSquare, Share2, User, Calendar, Clock, Star, Crown, 
+  Gem, Sparkles, Edit3, ShoppingCart, Copy, ExternalLink, Flag, Bookmark, 
+  Download, Upload, Camera, Palette, Zap, Gift, Globe, Navigation, Compass, 
+  Target, Award, Trophy, Coins, Info, ChevronRight, ChevronLeft, X, Send, 
+  ThumbsUp, UserPlus, Settings, BarChart3, TrendingUp, Activity, Hash, 
+  Link as LinkIcon, Image as ImageIcon, Plus, Minus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDate, timeAgo } from '@/lib/utils';
@@ -167,7 +167,6 @@ export default function PixelInfoModal({
   const [views, setViews] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showComments, setShowComments] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -425,13 +424,28 @@ export default function PixelInfoModal({
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSound} onEnd={() => setPlaySound(false)} />
       <Confetti active={showConfetti} duration={2000} onComplete={() => setShowConfetti(false)} />
       
-      <DialogContent className="max-w-md h-[95vh] p-0 gap-0 bg-background/95 backdrop-blur-sm">
-        <DialogHeader className="p-4 border-b bg-gradient-to-r from-primary/10 to-accent/10">
+      <DialogContent className="max-w-md h-[90vh] p-0 gap-0 bg-background/98 backdrop-blur-md border-primary/20">
+        <DialogHeader className="p-6 border-b bg-gradient-to-br from-primary/5 to-accent/5">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center text-xl">
+            <DialogTitle className="flex items-center text-2xl font-headline">
               <MapPin className="h-5 w-5 mr-2 text-primary" />
               Pixel ({pixelData.x}, {pixelData.y})
             </DialogTitle>
+          </div>
+          
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Globe className="h-4 w-4" />
+              <span>{pixelData.region}</span>
+              {pixelData.gpsCoords && (
+                <>
+                  <span>•</span>
+                  <span className="font-mono text-xs">
+                    {pixelData.gpsCoords.lat.toFixed(4)}, {pixelData.gpsCoords.lon.toFixed(4)}
+                  </span>
+                </>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <Badge className={getRarityColor(pixelData.rarity)}>
                 {pixelData.rarity}
@@ -441,64 +455,41 @@ export default function PixelInfoModal({
               </Badge>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Globe className="h-4 w-4" />
-            <span>{pixelData.region}</span>
-            {pixelData.gpsCoords && (
-              <>
-                <span>•</span>
-                <span className="font-mono">
-                  {pixelData.gpsCoords.lat.toFixed(4)}, {pixelData.gpsCoords.lon.toFixed(4)}
-                </span>
-              </>
-            )}
-          </div>
         </DialogHeader>
 
         <ScrollArea className="flex-1">
-          <div className="p-4 space-y-6">
-            {/* Pixel Preview */}
-            <Card className="overflow-hidden">
+          <div className="p-6 space-y-6">
+            {/* Pixel Preview - Mais Limpo */}
+            <Card className="overflow-hidden shadow-lg">
               <div className="relative">
                 <div 
-                  className="w-full h-48 flex items-center justify-center text-6xl font-bold border-2 border-primary/30 rounded-t-lg"
+                  className="w-full h-40 flex items-center justify-center text-5xl font-bold border-b-2 border-primary/20"
                   style={{ backgroundColor: pixelData.color || '#D4A757' }}
                 >
                   🎨
                 </div>
                 
                 {pixelData.isProtected && (
-                  <Badge className="absolute top-2 left-2 bg-red-500">
+                  <Badge className="absolute top-3 left-3 bg-red-500/90 backdrop-blur-sm">
                     <Flag className="h-3 w-3 mr-1" />
                     Protegido
                   </Badge>
                 )}
-                
-                {pixelData.features && pixelData.features.length > 0 && (
-                  <div className="absolute top-2 right-2 flex flex-wrap gap-1">
-                    {pixelData.features.slice(0, 2).map(feature => (
-                      <Badge key={feature} variant="outline" className="text-xs bg-background/80">
-                        {feature}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
               
-              <CardContent className="p-4">
+              <CardContent className="p-4 space-y-3">
                 {pixelData.title && (
-                  <h3 className="font-semibold text-lg mb-2">{pixelData.title}</h3>
+                  <h3 className="font-semibold text-lg text-center">{pixelData.title}</h3>
                 )}
                 
                 {pixelData.description && (
-                  <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                  <p className="text-sm text-muted-foreground text-center leading-relaxed">
                     {pixelData.description}
                   </p>
                 )}
                 
                 {pixelData.tags && pixelData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className="flex flex-wrap gap-1 justify-center">
                     {pixelData.tags.map(tag => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         <Hash className="h-3 w-3 mr-1" />
@@ -512,7 +503,7 @@ export default function PixelInfoModal({
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="w-full mb-3"
+                    className="w-full"
                     onClick={() => window.open(pixelData.linkUrl, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
@@ -522,157 +513,119 @@ export default function PixelInfoModal({
               </CardContent>
             </Card>
 
-            {/* Owner Info */}
+            {/* Stats - Mais Visual */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="text-center p-4 hover:shadow-md transition-shadow">
+                <Eye className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                <p className="text-2xl font-bold">{views.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Visualizações</p>
+              </Card>
+              
+              <Card className="text-center p-4 hover:shadow-md transition-shadow">
+                <Heart className={`h-6 w-6 mx-auto mb-2 ${isLiked ? 'text-red-500 fill-current' : 'text-muted-foreground'}`} />
+                <p className="text-2xl font-bold">{likes.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Curtidas</p>
+              </Card>
+              
+              <Card className="text-center p-4 hover:shadow-md transition-shadow">
+                <MessageSquare className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                <p className="text-2xl font-bold">{comments.length}</p>
+                <p className="text-xs text-muted-foreground">Comentários</p>
+              </Card>
+            </div>
+
+            {/* Action Buttons - Mais Organizados */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={handleLike}
+                  className={cn(
+                    "transition-all duration-200",
+                    isLiked && "bg-red-500/10 border-red-500/50 text-red-500"
+                  )}
+                >
+                  <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                  {isLiked ? 'Curtido' : 'Curtir'}
+                </Button>
+                
+                <Button variant="outline" onClick={handleShare}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Partilhar
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" onClick={handleBookmark}>
+                  <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? 'fill-current text-yellow-500' : ''}`} />
+                  {isBookmarked ? 'Guardado' : 'Guardar'}
+                </Button>
+                
+                {pixelData.gpsCoords && (
+                  <Button variant="outline" onClick={handleViewOnMap}>
+                    <Navigation className="h-4 w-4 mr-2" />
+                    Ver Mapa
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Owner Info - Mais Limpo */}
             {pixelData.owner && pixelData.owner !== 'Sistema' && (
-              <Card>
+              <Card className="bg-gradient-to-r from-primary/5 to-accent/5">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div 
-                      className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                      onClick={() => handleUserClick(pixelData.owner!)}
-                    >
-                      <Avatar className="h-10 w-10 border-2 border-primary">
-                        <AvatarImage src="https://placehold.co/40x40.png" />
-                        <AvatarFallback>{pixelData.owner![0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{pixelData.owner}</span>
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                          <Badge variant="outline" className="text-xs">Nível 15</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Proprietário</p>
+                  <div 
+                    className="flex items-center gap-3 cursor-pointer hover:bg-background/50 p-3 rounded-lg transition-all duration-200 hover:scale-[1.02]"
+                    onClick={() => handleUserClick(pixelData.owner!)}
+                  >
+                    <Avatar className="h-12 w-12 border-2 border-primary shadow-md">
+                      <AvatarImage src="https://placehold.co/40x40.png" />
+                      <AvatarFallback>{pixelData.owner![0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-lg">{pixelData.owner}</span>
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">Nível 15</Badge>
+                        <span className="text-sm text-muted-foreground">Proprietário</span>
                       </div>
                     </div>
-                    
-                    {!pixelData.isOwnedByCurrentUser && (
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleUserClick(pixelData.owner!)}
-                        >
-                          <User className="h-4 w-4 mr-2" />
-                          Perfil
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={handleFollowUser}
-                        >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Seguir
-                        </Button>
-                      </div>
-                    )}
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
                   
                   {pixelData.acquisitionDate && (
-                    <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
+                    <div className="mt-4 pt-3 border-t border-border/30 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         <span>Adquirido em {pixelData.acquisitionDate}</span>
                       </div>
-                      {pixelData.lastModifiedDate && (
-                        <div className="flex items-center gap-2 mt-1">
-                          <Clock className="h-4 w-4" />
-                          <span>Última edição: {pixelData.lastModifiedDate}</span>
-                        </div>
-                      )}
                     </div>
                   )}
                 </CardContent>
               </Card>
             )}
 
-            {/* Stats */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-center">
-                      <Eye className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <p className="text-lg font-bold">{views.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Visualizações</p>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-center">
-                      <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : 'text-muted-foreground'}`} />
-                    </div>
-                    <p className="text-lg font-bold">{likes.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Curtidas</p>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-center">
-                      <MessageSquare className="h-5 w-5 text-green-500" />
-                    </div>
-                    <p className="text-lg font-bold">{comments.length}</p>
-                    <p className="text-xs text-muted-foreground">Comentários</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="outline" 
-                onClick={handleLike}
-                className={cn(
-                  "flex-1 transition-all duration-200",
-                  isLiked && "bg-red-500/10 border-red-500/50 text-red-500"
-                )}
-              >
-                <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-                {isLiked ? 'Curtido' : 'Curtir'}
-              </Button>
-              
-              <Button variant="outline" onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Partilhar
-              </Button>
-              
-              <Button variant="outline" onClick={handleBookmark}>
-                <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? 'fill-current text-yellow-500' : ''}`} />
-                {isBookmarked ? 'Guardado' : 'Guardar'}
-              </Button>
-              
-              {pixelData.gpsCoords && (
-                <Button variant="outline" onClick={handleViewOnMap}>
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Ver no Mapa
-                </Button>
-              )}
-            </div>
-
-            {/* Comments Section */}
-            <Card>
+            {/* Comments Section - Mais Limpo */}
+            <Card className="shadow-md">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-xl flex items-center">
                     <MessageSquare className="h-5 w-5 mr-2 text-green-500" />
                     Comentários ({comments.length})
                   </CardTitle>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowComments(!showComments)}
-                  >
-                    {showComments ? 'Ocultar' : 'Ver Todos'}
-                  </Button>
                 </div>
               </CardHeader>
               
-              <CardContent className="p-4 pt-0 space-y-4">
-                {/* Add Comment */}
+              <CardContent className="p-4 pt-0 space-y-6">
+                {/* Add Comment - Melhorado */}
                 <div className="space-y-3">
                   <Textarea
-                    placeholder="Adicione um comentário sobre este pixel..."
+                    placeholder="O que achas deste pixel? Partilha a tua opinião..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    rows={3}
+                    rows={2}
                     className="resize-none"
                   />
                   <div className="flex justify-between items-center">
@@ -682,7 +635,6 @@ export default function PixelInfoModal({
                     <Button 
                       onClick={handleComment}
                       disabled={!newComment.trim() || newComment.length > 200}
-                      size="sm"
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Comentar
@@ -692,189 +644,157 @@ export default function PixelInfoModal({
 
                 <Separator />
 
-                {/* Comments List */}
-                <AnimatePresence>
-                  {(showComments ? comments : comments.slice(0, 2)).map((comment) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="space-y-3"
+                {/* Comments List - Mais Organizados */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Comentários Recentes</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowComments(!showComments)}
                     >
-                      <div className="flex gap-3">
-                        <Avatar 
-                          className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-                          onClick={() => handleUserClick(comment.author.name)}
-                        >
-                          <AvatarImage src={comment.author.avatar} />
-                          <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1 space-y-2">
-                          <div className="bg-muted/50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span 
-                                className="font-medium text-sm cursor-pointer hover:text-primary transition-colors"
+                      {showComments ? 'Ver Menos' : `Ver Todos (${comments.length})`}
+                    </Button>
+                  </div>
+                  
+                  <AnimatePresence>
+                    {(showComments ? comments : comments.slice(0, 2)).map((comment) => (
+                      <motion.div
+                        key={comment.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="space-y-3"
+                      >
+                        <Card className="bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <CardContent className="p-4">
+                            <div className="flex gap-3">
+                              <Avatar 
+                                className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                                 onClick={() => handleUserClick(comment.author.name)}
                               >
-                                {comment.author.name}
-                              </span>
-                              {comment.author.verified && (
-                                <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                              )}
-                              <Badge variant="outline" className="text-xs">
-                                Nível {comment.author.level}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground ml-auto">
-                                {timeAgo(comment.timestamp)}
-                              </span>
-                            </div>
-                            <p className="text-sm leading-relaxed">{comment.content}</p>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-xs">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-6 px-2"
-                              onClick={() => {
-                                // Toggle like on comment
-                                setComments(prev => prev.map(c => 
-                                  c.id === comment.id 
-                                    ? { ...c, isLiked: !c.isLiked, likes: c.isLiked ? c.likes - 1 : c.likes + 1 }
-                                    : c
-                                ));
-                                
-                                if (!comment.isLiked) {
-                                  addXp(3);
-                                  addCredits(1);
-                                  toast({
-                                    title: "👍 Comentário Curtido!",
-                                    description: "Recebeu 3 XP + 1 crédito!",
-                                  });
-                                }
-                              }}
-                            >
-                              <ThumbsUp className={`h-3 w-3 mr-1 ${comment.isLiked ? 'fill-current text-blue-500' : ''}`} />
-                              {comment.likes}
-                            </Button>
-                            
-                            <Button variant="ghost" size="sm" className="h-6 px-2">
-                              <MessageSquare className="h-3 w-3 mr-1" />
-                              Responder
-                            </Button>
-                          </div>
-                          
-                          {/* Replies */}
-                          {comment.replies && comment.replies.length > 0 && (
-                            <div className="ml-4 space-y-2 border-l-2 border-muted pl-3">
-                              {comment.replies.map(reply => (
-                                <div key={reply.id} className="flex gap-2">
-                                  <Avatar 
-                                    className="h-6 w-6 cursor-pointer"
-                                    onClick={() => handleUserClick(reply.author.name)}
+                                <AvatarImage src={comment.author.avatar} />
+                                <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
+                              </Avatar>
+                              
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span 
+                                    className="font-medium text-sm cursor-pointer hover:text-primary transition-colors"
+                                    onClick={() => handleUserClick(comment.author.name)}
                                   >
-                                    <AvatarImage src={reply.author.avatar} />
-                                    <AvatarFallback className="text-xs">{reply.author.name[0]}</AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 bg-muted/30 p-2 rounded">
-                                    <div className="flex items-center gap-1 mb-1">
-                                      <span 
-                                        className="font-medium text-xs cursor-pointer hover:text-primary"
-                                        onClick={() => handleUserClick(reply.author.name)}
-                                      >
-                                        {reply.author.name}
-                                      </span>
-                                      <span className="text-xs text-muted-foreground">
-                                        {timeAgo(reply.timestamp)}
-                                      </span>
-                                    </div>
-                                    <p className="text-xs">{reply.content}</p>
-                                  </div>
+                                    {comment.author.name}
+                                  </span>
+                                  {comment.author.verified && (
+                                    <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                  )}
+                                  <Badge variant="outline" className="text-xs">
+                                    Nível {comment.author.level}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground ml-auto">
+                                    {timeAgo(comment.timestamp)}
+                                  </span>
                                 </div>
-                              ))}
+                                
+                                <p className="text-sm leading-relaxed mb-3">{comment.content}</p>
+                                
+                                <div className="flex items-center gap-4">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 px-3"
+                                    onClick={() => {
+                                      setComments(prev => prev.map(c => 
+                                        c.id === comment.id 
+                                          ? { ...c, isLiked: !c.isLiked, likes: c.isLiked ? c.likes - 1 : c.likes + 1 }
+                                          : c
+                                      ));
+                                      
+                                      if (!comment.isLiked) {
+                                        addXp(3);
+                                        addCredits(1);
+                                        setPlaySound(true);
+                                        toast({
+                                          title: "👍 Comentário Curtido!",
+                                          description: "Recebeu 3 XP + 1 crédito!",
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    <ThumbsUp className={`h-3 w-3 mr-1 ${comment.isLiked ? 'fill-current text-blue-500' : ''}`} />
+                                    {comment.likes}
+                                  </Button>
+                                  
+                                  <Button variant="ghost" size="sm" className="h-8 px-3">
+                                    <MessageSquare className="h-3 w-3 mr-1" />
+                                    Responder
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                
-                {comments.length > 2 && !showComments && (
-                  <Button 
-                    variant="ghost" 
-                    className="w-full"
-                    onClick={() => setShowComments(true)}
-                  >
-                    Ver mais {comments.length - 2} comentários
-                  </Button>
-                )}
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Replies - Mais Organizadas */}
+                        {comment.replies && comment.replies.length > 0 && (
+                          <div className="ml-6 space-y-2 border-l-2 border-primary/20 pl-4">
+                            {comment.replies.map(reply => (
+                              <Card key={reply.id} className="bg-background/50">
+                                <CardContent className="p-3">
+                                  <div className="flex gap-2">
+                                    <Avatar 
+                                      className="h-6 w-6 cursor-pointer"
+                                      onClick={() => handleUserClick(reply.author.name)}
+                                    >
+                                      <AvatarImage src={reply.author.avatar} />
+                                      <AvatarFallback className="text-xs">{reply.author.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span 
+                                          className="font-medium text-xs cursor-pointer hover:text-primary"
+                                          onClick={() => handleUserClick(reply.author.name)}
+                                        >
+                                          {reply.author.name}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {timeAgo(reply.timestamp)}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs">{reply.content}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Pixel History */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center">
-                    <Activity className="h-5 w-5 mr-2 text-purple-500" />
-                    Histórico
-                  </CardTitle>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowHistory(!showHistory)}
-                  >
-                    {showHistory ? 'Ocultar' : 'Ver Histórico'}
-                  </Button>
-                </div>
-              </CardHeader>
-              
-              {showHistory && (
-                <CardContent className="p-4 pt-0">
-                  <div className="space-y-3">
-                    {mockPixelHistory.map((event, index) => (
-                      <div key={index} className="flex items-center gap-3 p-2 bg-muted/30 rounded">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{event.action}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>por {event.user}</span>
-                            <span>•</span>
-                            <span>{event.date}</span>
-                            {event.price && (
-                              <>
-                                <span>•</span>
-                                <span className="text-primary font-medium">€{event.price}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Price and Actions */}
-            <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30">
-              <CardContent className="p-4">
+            {/* Main Action Button - Mais Destacado */}
+            <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 shadow-lg">
+              <CardContent className="p-6">
                 <div className="text-center space-y-4">
                   {pixelData.isOwnedByCurrentUser ? (
                     <>
                       <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-green-500">Este é o Seu Pixel!</h3>
+                        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                          <Crown className="h-8 w-8 text-green-500" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-green-500">Este é o Seu Pixel!</h3>
                         <p className="text-sm text-muted-foreground">
-                          Pode editar, personalizar e configurar este pixel.
+                          Pode editar, personalizar e configurar este pixel como desejar.
                         </p>
                       </div>
                       
                       <Button 
                         onClick={onEdit}
-                        className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                        className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-lg font-semibold"
                         size="lg"
                       >
                         <Edit3 className="h-5 w-5 mr-2" />
@@ -884,63 +804,66 @@ export default function PixelInfoModal({
                   ) : pixelData.owner && pixelData.owner !== 'Sistema' ? (
                     <>
                       <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-blue-500">Pixel Privado</h3>
+                        <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto">
+                          <User className="h-8 w-8 text-blue-500" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-blue-500">Pixel Privado</h3>
                         <p className="text-sm text-muted-foreground">
-                          Este pixel pertence a {pixelData.owner}. Pode curtir e comentar.
+                          Este pixel pertence a {pixelData.owner}. Pode curtir, comentar e interagir.
                         </p>
                       </div>
                       
-                      <div className="flex gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         <Button 
                           variant="outline" 
-                          className="flex-1"
+                          className="h-12"
                           onClick={() => handleUserClick(pixelData.owner!)}
                         >
                           <User className="h-4 w-4 mr-2" />
                           Ver Proprietário
                         </Button>
                         <Button 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => {
-                            toast({
-                              title: "💬 Mensagem Enviada!",
-                              description: `Mensagem enviada para ${pixelData.owner}.`,
-                            });
-                          }}
+                          className="h-12"
+                          onClick={handleFollowUser}
                         >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Contactar
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Seguir
                         </Button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center gap-2">
-                          <Coins className="h-6 w-6 text-primary" />
-                          <span className="text-3xl font-bold text-primary">
-                            €{pixelData.price}
-                          </span>
+                      <div className="space-y-3">
+                        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
+                          <ShoppingCart className="h-8 w-8 text-primary" />
                         </div>
                         
-                        {pixelData.specialCreditsPrice && (
+                        <div className="space-y-2">
                           <div className="flex items-center justify-center gap-2">
-                            <Gift className="h-5 w-5 text-accent" />
-                            <span className="text-lg font-medium text-accent">
-                              ou {pixelData.specialCreditsPrice} créditos especiais
+                            <Coins className="h-6 w-6 text-primary" />
+                            <span className="text-3xl font-bold text-primary">
+                              €{pixelData.price}
                             </span>
                           </div>
-                        )}
-                        
-                        <p className="text-sm text-muted-foreground">
-                          Pixel disponível para compra
-                        </p>
+                          
+                          {pixelData.specialCreditsPrice && (
+                            <div className="flex items-center justify-center gap-2">
+                              <Gift className="h-5 w-5 text-accent" />
+                              <span className="text-lg font-medium text-accent">
+                                ou {pixelData.specialCreditsPrice} créditos especiais
+                              </span>
+                            </div>
+                          )}
+                          
+                          <p className="text-sm text-muted-foreground">
+                            Pixel disponível para compra e personalização
+                          </p>
+                        </div>
                       </div>
                       
                       <Button 
                         onClick={onPurchase}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                        className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-lg font-semibold shadow-lg"
                         size="lg"
                       >
                         <ShoppingCart className="h-5 w-5 mr-2" />
@@ -965,7 +888,7 @@ export default function PixelInfoModal({
             </SheetHeader>
             
             {selectedUser && (
-              <ScrollArea className="flex-1 h-[calc(100vh-100px)]">
+              <ScrollArea className="flex-1 h-[calc(100vh-120px)]">
                 <div className="p-4 space-y-6">
                   {/* User Header */}
                   <div className="text-center space-y-4">
