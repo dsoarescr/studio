@@ -902,7 +902,7 @@ export default function EnhancedPixelPurchaseModal({
       <SoundEffect src={SOUND_EFFECTS.CLICK} play={playDrawSound} onEnd={() => setPlayDrawSound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <DialogContent className="w-full h-full max-w-none max-h-none m-0 p-0 rounded-none border-0 bg-background">
+      <DialogContent className="w-[95vw] h-[92vh] max-w-none max-h-none m-0 p-0 rounded-2xl border-2 border-primary/30 bg-background/98 backdrop-blur-md shadow-2xl">
         <div className="flex flex-col h-full">
           {/* Header Mobile */}
           <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/10 to-accent/10">
