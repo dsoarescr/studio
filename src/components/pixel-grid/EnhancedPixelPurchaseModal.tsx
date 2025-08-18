@@ -293,8 +293,6 @@ export default function EnhancedPixelPurchaseModal({
   // Canvas e desenho
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
   
@@ -308,7 +306,6 @@ export default function EnhancedPixelPurchaseModal({
   const [selectedColor, setSelectedColor] = useState('#D4A757');
   const [selectedPalette, setSelectedPalette] = useState('Clássico');
   const [blendMode, setBlendMode] = useState('normal');
-  const [customColors, setCustomColors] = useState<string[]>([]);
   
   // Funcionalidades avançadas
   const [showGrid, setShowGrid] = useState(true);
@@ -320,17 +317,15 @@ export default function EnhancedPixelPurchaseModal({
   
   // Camadas e animação
   const [layers, setLayers] = useState([
-    { id: 0, name: 'Fundo', visible: true, opacity: 100 }
+    { id: '1', name: 'Fundo', visible: true, opacity: 100, blendMode: 'normal' }
   ]);
-  const [selectedLayer, setSelectedLayer] = useState(0);
+  const [activeLayer, setActiveLayer] = useState('1');
   const [animationFrames, setAnimationFrames] = useState<AnimationFrame[]>([
     { id: '1', name: 'Frame 1', imageData: null, duration: 500 }
   ]);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(500);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingFrames, setRecordingFrames] = useState<ImageData[]>([]);
   
   // Estados da interface
   const [activeTab, setActiveTab] = useState('tools');
@@ -363,157 +358,6 @@ export default function EnhancedPixelPurchaseModal({
   const { addCredits, addXp, removeCredits, removeSpecialCredits } = useUserStore();
   const { toast } = useToast();
   const { vibrate } = useHapticFeedback();
-
-  const addCustomColor = (color: string) => {
-    if (!customColors.includes(color)) {
-      setCustomColors(prev => [...prev, color].slice(-8)); // Máximo 8 cores personalizadas
-    }
-  };
-
-  const startRecording = () => {
-    setIsRecording(true);
-    setRecordingFrames([]);
-    
-    recordingIntervalRef.current = setInterval(() => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          setRecordingFrames(prev => [...prev, imageData]);
-        }
-      }
-    }, 100); // Captura a cada 100ms
-    
-    toast({
-      title: "🎬 Gravação Iniciada!",
-      description: "A gravar o processo de criação...",
-    });
-  };
-
-  const stopRecording = () => {
-    setIsRecording(false);
-    if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current);
-    }
-    
-    toast({
-      title: "🎬 Gravação Concluída!",
-      description: `Timelapse com ${recordingFrames.length} frames criado!`,
-    });
-  };
-
-  const addLayer = () => {
-    const newLayer = {
-      id: layers.length,
-      name: `Camada ${layers.length + 1}`,
-      visible: true,
-      opacity: 100
-    };
-    setLayers(prev => [...prev, newLayer]);
-    setSelectedLayer(newLayer.id);
-    
-    toast({
-      title: "📄 Nova Camada!",
-      description: `${newLayer.name} adicionada com sucesso.`,
-    });
-  };
-
-  const deleteLayer = (layerId: number) => {
-    if (layers.length <= 1) {
-      toast({
-        title: "❌ Erro",
-        description: "Deve manter pelo menos uma camada.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setLayers(prev => prev.filter(layer => layer.id !== layerId));
-    if (selectedLayer === layerId) {
-      setSelectedLayer(0);
-    }
-    
-    toast({
-      title: "🗑️ Camada Removida",
-      description: "Camada eliminada com sucesso.",
-    });
-  };
-
-  const toggleLayerVisibility = (layerId: number) => {
-    setLayers(prev => prev.map(layer => 
-      layer.id === layerId 
-        ? { ...layer, visible: !layer.visible }
-        : layer
-    ));
-  };
-
-  const duplicateLayer = (layerId: number) => {
-    const layerToDuplicate = layers.find(l => l.id === layerId);
-    if (layerToDuplicate) {
-      const newLayer = {
-        id: layers.length,
-        name: `${layerToDuplicate.name} Cópia`,
-        visible: true,
-        opacity: layerToDuplicate.opacity
-      };
-      setLayers(prev => [...prev, newLayer]);
-      
-      toast({
-        title: "📋 Camada Duplicada!",
-        description: `${newLayer.name} criada com sucesso.`,
-      });
-    }
-  };
-
-  const exportAsGIF = () => {
-    if (animationFrames.length === 0) {
-      toast({
-        title: "❌ Sem Animação",
-        description: "Crie frames de animação primeiro.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Simular export
-    toast({
-      title: "🎞️ GIF Exportado!",
-      description: `Animação com ${animationFrames.length} frames exportada!`,
-    });
-  };
-
-  const importImage = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = canvasRef.current;
-          if (canvas) {
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              // Redimensionar e desenhar a imagem
-              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-              saveToUndoStack();
-              
-              toast({
-                title: "📸 Imagem Importada!",
-                description: "Imagem adicionada ao canvas com sucesso.",
-              });
-            }
-          }
-        };
-        img.src = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   // Inicializar canvas
   useEffect(() => {
@@ -558,10 +402,6 @@ export default function EnhancedPixelPurchaseModal({
     setUndoStack(prev => [...prev.slice(-49), imageData]);
     setRedoStack([]);
   }, []);
-
-  const saveToHistory = () => {
-    saveToUndoStack();
-  };
 
   const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -1955,11 +1795,72 @@ export default function EnhancedPixelPurchaseModal({
                   </div>
                   
                   {/* Configurações de Visualização */}
+                    {/* Seletor de Paleta */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Paletas Temáticas</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {colorPalettes.map((palette, index) => (
+                          <Button
+                            key={index}
+                            variant={selectedPalette === index ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSelectedPalette(index)}
+                            className="h-8 text-xs"
+                          >
+                            {palette.name}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      {/* Cores Personalizadas */}
+                      {customColors.length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Cores Recentes</Label>
+                          <div className="grid grid-cols-8 gap-1">
+                            {customColors.map((color, index) => (
+                              <button
+                                key={index}
+                                className={cn(
+                                  "w-6 h-6 rounded border transition-all duration-200 hover:scale-110",
+                                  selectedColor === color ? "border-foreground scale-110" : "border-border"
+                                )}
+                                style={{ backgroundColor: color }}
+                                onClick={() => setSelectedColor(color)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Seletor de Cor Personalizado */}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowColorPicker(!showColorPicker)}
+                          className="flex-1"
+                        >
+                          <Palette className="h-4 w-4 mr-2" />
+                          Cor Personalizada
+                        </Button>
+                        <input
+                          ref={colorPickerRef}
+                          type="color"
+                          value={selectedColor}
+                          onChange={(e) => {
+                            setSelectedColor(e.target.value);
+                            addCustomColor(e.target.value);
+                          }}
+                          className="w-12 h-8 rounded border border-input cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                    
                   <div className="space-y-3">
                     <h4 className="font-semibold text-sm">Visualização</h4>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label className="text-xs">Mostrar Grelha</Label>
+                        {colorPalettes[selectedPalette].colors.map(color => (
                         <Switch checked={showGrid} onCheckedChange={setShowGrid} />
                       </div>
                       
@@ -1969,6 +1870,7 @@ export default function EnhancedPixelPurchaseModal({
                           <Slider
                             value={[gridSize]}
                             onValueChange={(value) => setGridSize(value[0])}
+                              addCustomColor(color);
                             min={5}
                             max={50}
                             step={5}
@@ -2258,15 +2160,6 @@ export default function EnhancedPixelPurchaseModal({
             </div>
           </div>
         </div>
-        
-        {/* Hidden file input for image import */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileImport}
-          className="hidden"
-        />
       </DialogContent>
     </Dialog>
   );
