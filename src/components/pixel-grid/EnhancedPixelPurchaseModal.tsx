@@ -208,21 +208,6 @@ export default function EnhancedPixelPurchaseModal({
     if (!ctx) return;
     
     ctx.imageSmoothingEnabled = false;
-    
-    // Desenhar grelha se ativa
-    if (showGrid) {
-      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i <= GRID_SIZE; i++) {
-        const pos = i * PIXEL_SIZE;
-        ctx.beginPath();
-        ctx.moveTo(pos, 0);
-        ctx.lineTo(pos, CANVAS_SIZE);
-        ctx.moveTo(0, pos);
-        ctx.lineTo(CANVAS_SIZE, pos);
-        ctx.stroke();
-      }
-    }
   }, [showGrid]);
 
   // Redesenhar canvas quando necessário
@@ -261,6 +246,9 @@ export default function EnhancedPixelPurchaseModal({
     
     if (selectedTool === 'eraser') {
       ctx.clearRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
+      // Redesenhar fundo branco onde foi apagado
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
     } else {
       ctx.fillStyle = selectedColor;
       ctx.fillRect(pixelX, pixelY, PIXEL_SIZE, PIXEL_SIZE);
@@ -286,33 +274,41 @@ export default function EnhancedPixelPurchaseModal({
         }
       }
     }
-    
-    // Redesenhar grelha se necessário
+
+    // Desenhar grelha por cima se ativa
     if (showGrid) {
-      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i <= GRID_SIZE; i++) {
-        const pos = i * PIXEL_SIZE;
-        ctx.beginPath();
-        ctx.moveTo(pos, 0);
-        ctx.lineTo(pos, CANVAS_SIZE);
-        ctx.moveTo(0, pos);
-        ctx.lineTo(CANVAS_SIZE, pos);
-        ctx.stroke();
-      }
+      drawGrid(ctx);
     }
   };
 
+  const drawGrid = (ctx: CanvasRenderingContext2D) => {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    
+    for (let i = 0; i <= GRID_SIZE; i++) {
+      const pos = i * PIXEL_SIZE;
+      ctx.beginPath();
+      ctx.moveTo(pos, 0);
+      ctx.lineTo(pos, CANVAS_SIZE);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(0, pos);
+      ctx.lineTo(CANVAS_SIZE, pos);
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
   const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e.button !== 0) return; // Apenas botão esquerdo do mouse
     
     const coords = getCanvasCoordinates(e);
     if (!coords) return;
     
-    // Capturar o ponteiro APÓS verificar coordenadas
-    const target = e.currentTarget as HTMLCanvasElement;
-    target.setPointerCapture(e.pointerId);
+    e.preventDefault();
+    e.stopPropagation();
     
     // Salvar estado para undo ANTES de desenhar
     saveToUndoStack();
@@ -324,10 +320,10 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDrawing) return;
+    
     e.preventDefault();
     e.stopPropagation();
-    
-    if (!isDrawing) return;
     
     const coords = getCanvasCoordinates(e);
     if (!coords || !lastPoint) return;
@@ -336,7 +332,7 @@ export default function EnhancedPixelPurchaseModal({
     const dx = coords.x - lastPoint.x;
     const dy = coords.y - lastPoint.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const steps = Math.max(1, Math.floor(distance / PIXEL_SIZE));
+    const steps = Math.max(1, Math.floor(distance / (PIXEL_SIZE / 2)));
     
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
@@ -349,16 +345,10 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDrawing) return;
+    
     e.preventDefault();
     e.stopPropagation();
-    
-    if (isDrawing) {
-      // Liberar a captura do ponteiro
-      const target = e.currentTarget as HTMLCanvasElement;
-      if (target.hasPointerCapture(e.pointerId)) {
-        target.releasePointerCapture(e.pointerId);
-      }
-    }
     
     setIsDrawing(false);
     setLastPoint(null);
@@ -588,7 +578,7 @@ export default function EnhancedPixelPurchaseModal({
           <div className="relative">
             <canvas
               ref={canvasRef}
-              className="border-2 border-primary/30 rounded-lg bg-white touch-none"
+              className="border-2 border-primary/30 rounded-lg bg-white cursor-crosshair"
               style={{ 
                 width: '280px', 
                 height: '280px',
@@ -599,6 +589,7 @@ export default function EnhancedPixelPurchaseModal({
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
+              onContextMenu={(e) => e.preventDefault()}
             />
             
             {/* Indicador de Simetria */}
