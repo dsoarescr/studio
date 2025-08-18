@@ -13,9 +13,9 @@ export default function HomePage() {
   const { t } = useTranslation();
   return (
     <SidebarProvider>
-      <div className="relative h-full w-full flex">
+      <div className="relative w-full flex">
         <MapSidebar />
-        <div className="h-full">
+        <div className="flex-1">
           <PixelGrid />
         </div>
         <PerformanceMonitor />
@@ -23,4 +23,3 @@ export default function HomePage() {
     </SidebarProvider>
   );
 }
-
