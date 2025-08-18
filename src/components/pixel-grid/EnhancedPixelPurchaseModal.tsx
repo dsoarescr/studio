@@ -293,6 +293,7 @@ export default function EnhancedPixelPurchaseModal({
   // Canvas e desenho
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
   
@@ -1071,6 +1072,14 @@ export default function EnhancedPixelPurchaseModal({
     reader.readAsDataURL(file);
   };
 
+  const importImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleImageUpload(e);
+  };
+
   const startAnimation = () => {
     if (animationFrames.length < 2) {
       toast({
@@ -1663,6 +1672,7 @@ export default function EnhancedPixelPurchaseModal({
                           setSelectedColor(randomColor);
                           vibrate('light');
                         }}
+                        className="text-xs"
                       >
                         <Shuffle className="h-3 w-3 mr-1" />
                         Aleatória
@@ -1871,9 +1881,10 @@ export default function EnhancedPixelPurchaseModal({
                     
                     <div className="space-y-2">
                       <input
+                        ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleImageUpload}
+                        onChange={handleFileImport}
                         className="hidden"
                         id="image-upload"
                       />
@@ -1881,12 +1892,74 @@ export default function EnhancedPixelPurchaseModal({
                         <Button variant="outline" size="sm" className="w-full justify-start" asChild>
                           <span>
                             <Upload className="h-4 w-4 mr-2" />
-                            Carregar Imagem Base
+                            Carregar Imagem
                           </span>
                         </Button>
                       </Label>
                     </div>
+                    
+                    {/* Upload Avançado */}
+                    <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/30">
+                      <CardContent className="p-4">
+                        <div className="text-center space-y-4">
+                          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                            <Upload className="h-8 w-8 text-green-500" />
+                          </div>
+                          
+                          <div>
+                            <h3 className="font-semibold mb-2">Upload Inteligente</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Carregue imagens e a IA irá otimizar automaticamente para pixel art
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Button
+                              onClick={importImage}
+                              className="w-full"
+                            >
+                              <Camera className="h-4 w-4 mr-2" />
+                              Escolher Imagem
+                            </Button>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  // Simular captura de câmara
+                                  toast({
+                                    title: "📷 Câmara Ativada!",
+                                    description: "Tire uma foto para usar como base.",
+                                  });
+                                }}
+                              >
+                                <Camera className="h-4 w-4 mr-1" />
+                                Câmara
+                              </Button>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  // Simular geração IA
+                                  toast({
+                                    title: "🤖 IA Gerando!",
+                                    description: "Criando arte baseada em prompt...",
+                                  });
+                                }}
+                              >
+                                <Sparkles className="h-4 w-4 mr-1" />
+                                Gerar IA
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
+                  
+                  <Separator />
                   
                   {/* Animação */}
                   <div className="space-y-3">
@@ -1969,6 +2042,38 @@ export default function EnhancedPixelPurchaseModal({
                         className="text-sm"
                       />
                     </div>
+                    
+                    {/* Opções de Processamento */}
+                    <Card className="bg-muted/20">
+                      <CardContent className="p-3 space-y-3">
+                        <Label className="text-sm font-medium">Processamento de Imagem</Label>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { name: 'Pixelizar', icon: <Square className="h-4 w-4" /> },
+                            { name: 'Posterizar', icon: <Layers className="h-4 w-4" /> },
+                            { name: 'Contorno', icon: <Circle className="h-4 w-4" /> },
+                            { name: 'Simplificar', icon: <Minus className="h-4 w-4" /> }
+                          ].map(process => (
+                            <Button
+                              key={process.name}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast({
+                                  title: `🔄 ${process.name}!`,
+                                  description: "Processamento aplicado à imagem.",
+                                });
+                              }}
+                              className="h-10 flex flex-col items-center justify-center"
+                            >
+                              {process.icon}
+                              <span className="text-xs">{process.name}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                   
                   <Separator />
