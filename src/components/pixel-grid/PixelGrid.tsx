@@ -8,7 +8,7 @@ import {
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
   Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users, Eye, Grid3X3, Bookmark
+  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
 } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -54,6 +54,14 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
+import { 
+  Search, Eye, Grid3X3, Bookmark, MapPinIconLucide, 
+  ZoomIn, ZoomOut, Expand, Sparkles, Brain, Crosshair, Crown
+} from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 
 
 // Configuration constants
