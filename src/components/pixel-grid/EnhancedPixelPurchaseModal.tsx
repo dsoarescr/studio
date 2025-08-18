@@ -348,6 +348,7 @@ export default function EnhancedPixelPurchaseModal({
   };
 
   // Timer de gravação
+  useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRecording) {
       interval = setInterval(() => {
@@ -521,7 +522,7 @@ export default function EnhancedPixelPurchaseModal({
       title: pixelTitle,
       description: pixelDescription,
       color: selectedColor,
-      layers: layers.length,
+      layers: 1,
       hasAnimation: timelapseFrames.length > 0,
       canvas: canvasRef.current?.toDataURL()
     };
