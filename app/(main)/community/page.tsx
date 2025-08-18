@@ -18,16 +18,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Users, MessageSquare, Heart, Share2, Send, Camera, Image as ImageIcon,
-  MapPin, Trophy, Star, Crown, Gift, Coins, Zap, Eye, ThumbsUp,
-  Plus, Search, Filter, TrendingUp, Clock, Calendar, Globe,
-  UserPlus, Settings, Bell, Bookmark, Flag, MoreHorizontal,
-  Play, Pause, Volume2, VolumeX, X, ChevronLeft, ChevronRight,
-  Smile, Paperclip, Hash, AtSign, Mic, Video, Phone, Edit3,
-  Trash2, Reply, Forward, Download, Upload, Palette, Target,
-  Award, Flame, Lightning, Sparkles, Compass, Activity, BarChart3
-} from 'lucide-react';
+import { Users, MessageSquare, Heart, Share2, Send, Camera, Image as ImageIcon, MapPin, Trophy, Star, Crown, Gift, Coins, Zap, Eye, ThumbsUp, Plus, Search, Filter, TrendingUp, Clock, Calendar, Globe, UserPlus, Settings, Bell, Bookmark, Flag, MoreHorizontal, Play, Pause, Volume2, VolumeX, X, ChevronLeft, ChevronRight, Smile, Paperclip, Hash, AtSign, Mic, Video, Phone, Edit3, Trash2, Reply, Forward, Download, Upload, Palette, Target, Award, Flame, CloudLightning as Lightning, Sparkles, Compass, Activity, BarChart3 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
