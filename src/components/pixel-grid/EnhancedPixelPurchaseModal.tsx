@@ -263,14 +263,54 @@ const stickerCategories = {
 };
 
 const colorPalettes = [
-  { name: 'Clássico', colors: ['#D4A757', '#7DF9FF', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'] },
-  { name: 'Neon', colors: ['#FF00FF', '#00FFFF', '#FFFF00', '#FF0080', '#8000FF', '#00FF80', '#FF8000', '#0080FF'] },
-  { name: 'Pastel', colors: ['#FFB6C1', '#87CEEB', '#98FB98', '#F0E68C', '#DDA0DD', '#F5DEB3', '#FFA07A', '#20B2AA'] },
-  { name: 'Terra', colors: ['#8B4513', '#CD853F', '#D2691E', '#A0522D', '#F4A460', '#DEB887', '#BC8F8F', '#D2B48C'] },
-  { name: 'Oceano', colors: ['#006994', '#0085C3', '#00A6FB', '#7209B7', '#A663CC', '#4CC9F0', '#4361EE', '#3F37C9'] },
-  { name: 'Floresta', colors: ['#2D5016', '#3E6B1F', '#4F7942', '#608B3A', '#6B8E23', '#8FBC8F', '#9ACD32', '#ADFF2F'] },
-  { name: 'Pôr do Sol', colors: ['#FF6B35', '#F7931E', '#FFD23F', '#EE4B2B', '#C21807', '#8B0000', '#FF4500', '#FF8C00'] },
-  { name: 'Portugal', colors: ['#D4A757', '#228B22', '#4169E1', '#FF6347', '#32CD32', '#1E90FF', '#FFD700', '#DC143C'] }
+  { 
+    name: 'Clássico', 
+    colors: ['#D4A757', '#7DF9FF', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'] 
+  },
+  { 
+    name: 'Neon', 
+    colors: ['#FF073A', '#39FF14', '#00FFFF', '#FF1493', '#FFFF00', '#FF4500', '#9400D3', '#00FF7F'] 
+  },
+  { 
+    name: 'Pastel', 
+    colors: ['#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E6BAFF', '#FFBAE6', '#C9BAFF'] 
+  },
+  { 
+    name: 'Terra', 
+    colors: ['#8B4513', '#A0522D', '#CD853F', '#DEB887', '#F4A460', '#D2691E', '#BC8F8F', '#F5DEB3'] 
+  },
+  { 
+    name: 'Oceano', 
+    colors: ['#006994', '#0085C3', '#00A8CC', '#7FCDCD', '#87CEEB', '#4682B4', '#5F9EA0', '#B0E0E6'] 
+  },
+  { 
+    name: 'Floresta', 
+    colors: ['#228B22', '#32CD32', '#90EE90', '#98FB98', '#00FF7F', '#00FA9A', '#ADFF2F', '#7CFC00'] 
+  },
+  { 
+    name: 'Pôr do Sol', 
+    colors: ['#FF4500', '#FF6347', '#FF7F50', '#FFA500', '#FFD700', '#FFFF00', '#FF69B4', '#FF1493'] 
+  },
+  { 
+    name: 'Portugal', 
+    colors: ['#FF0000', '#00FF00', '#FFD700', '#0000FF', '#800080', '#FFA500', '#008000', '#000080'] 
+  },
+  { 
+    name: 'Cyberpunk', 
+    colors: ['#FF0080', '#00FFFF', '#FFFF00', '#FF4000', '#8000FF', '#00FF40', '#FF8000', '#4000FF'] 
+  },
+  { 
+    name: 'Vintage', 
+    colors: ['#8B4513', '#CD853F', '#DEB887', '#F4A460', '#D2691E', '#BC8F8F', '#F5DEB3', '#DDBEA9'] 
+  },
+  { 
+    name: 'Monocromático', 
+    colors: ['#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF', '#E0E0E0', '#B0B0B0'] 
+  },
+  { 
+    name: 'Arco-íris', 
+    colors: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF69B4'] 
+  }
 ];
 
 const animationPresets = [
