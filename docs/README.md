@@ -66,12 +66,27 @@ Os componentes reutilizáveis estão na pasta `src/components`.
 | O **Cabeçalho Principal** (com perfil, créditos)   | `src/components/layout/UserProfileHeader.tsx`                 | O cabeçalho no topo da aplicação.                            |
 | A **Barra de Navegação Inferior**                  | `src/components/layout/BottomNavBar.tsx`                      | O rodapé de navegação, visível em dispositivos móveis.         |
 | A **Barra Lateral do Mapa**                        | `src/components/layout/MapSidebar.tsx`                        | O painel lateral com estatísticas e feed de atividade do mapa. |
-| O **Modal de Autenticação** (Login/Registo)        | `src/components/auth/AuthModal.tsx`                           | A janela de popup para login e criação de conta.             |
+| O **Modal de Autenticação** (Login/Registo)        | `src/components/auth/AuthModal.tsx`                           | A janela de popup para login e criação de conta.         |
 | O **Menu do Utilizador** (no cabeçalho)            | `src/components/auth/UserMenu.tsx`                            | O menu dropdown que aparece ao clicar no avatar do utilizador. |
-| A **Grelha de Píxeis Interativa**                  | `src/components/pixel-grid/PixelGrid.tsx`                     | O componente central que renderiza o mapa e os píxeis.       |
 | O **Modal de Compra de Píxeis**                    | `src/components/pixel-grid/EnhancedPixelPurchaseModal.tsx`    | A janela de popup para comprar e personalizar um pixel.        |
 | O **Centro de Notificações**                       | `src/components/layout/NotificationCenter.tsx`                | O painel que mostra as notificações do utilizador.             |
 | O **Sistema de Pesquisa Global**                   | `src/components/layout/SearchSystem.tsx`                      | O componente de pesquisa que aparece no cabeçalho.           |
+
+---
+
+## ⚠️ Regra Crítica: Como Modificar a Grelha de Píxeis
+
+Esta é a regra mais importante para garantir a estabilidade da aplicação:
+
+| Se quiser alterar...                                                                   | Modifique este ficheiro:                               | **NÃO MODIFIQUE ESTE FICHEIRO**                           |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| **Toda a lógica visual e interativa da grelha**:<br>- Cor dos píxeis<br>- Destaques (hover/seleção)<br>- Animações<br>- Interações de clique<br>- Preços, donos, etc. | `src/components/pixel-grid/PixelGrid.tsx`              | `src/components/pixel-grid/PortugalMapSvg.tsx`            |
+
+### Explicação
+
+-   **`PortugalMapSvg.tsx` (O MOLDE):** Este ficheiro contém apenas os dados vetoriais do mapa. Ele é usado **uma única vez** para criar a "forma" da grelha. **Qualquer alteração neste ficheiro irá corromper o mapa.** Ele deve ser tratado como um recurso estático e imutável.
+
+-   **`PixelGrid.tsx` (O DECORADOR):** Este ficheiro pega na forma do mapa e aplica toda a lógica por cima. É aqui que se desenham os píxeis no `<canvas>`, se decide a cor de cada um, se adicionam efeitos de brilho, e se gere o que acontece quando um utilizador interage com a grelha.
 
 ---
 
