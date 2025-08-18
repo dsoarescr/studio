@@ -78,9 +78,9 @@ Os componentes reutilizáveis estão na pasta `src/components`.
 
 Existem duas regras fundamentais que **devem** ser seguidas para evitar quebrar a aplicação.
 
-### 1. Como Modificar a Grelha de Píxeis
+### 1. A Regra de Ouro da Grelha de Píxeis
 
-| Se quiser alterar...                                                                   | Modifique este ficheiro:                               | **NÃO MODIFIQUE ESTE FICHEIRO**                           |
+| Se quiser alterar...                                                                   | ✅ **MODIFIQUE ESTE FICHEIRO**                           | ❌ **NÃO MODIFIQUE ESTE FICHEIRO**                         |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- |
 | **Toda a lógica visual e interativa da grelha**:<br>- Cor dos píxeis<br>- Destaques (hover/seleção)<br>- Animações<br>- Interações de clique<br>- Preços, donos, etc. | `src/components/pixel-grid/PixelGrid.tsx`              | `src/components/pixel-grid/PortugalMapSvg.tsx`            |
 
@@ -90,9 +90,16 @@ Existem duas regras fundamentais que **devem** ser seguidas para evitar quebrar 
 
 -   **`PixelGrid.tsx` (O DECORADOR):** Este ficheiro pega na forma do mapa e aplica toda a lógica por cima. É aqui que se desenham os píxeis no `<canvas>`, se decide a cor de cada um, se adicionam efeitos de brilho, e se gere o que acontece quando um utilizador interage com a grelha.
 
-### 2. Como Preservar o Layout (Cabeçalho e Rodapé)
+**Exemplos de alterações em `PixelGrid.tsx`:**
+- Adicionar um novo efeito visual quando um pixel é selecionado.
+- Mudar a cor padrão dos píxeis não vendidos.
+- Implementar uma animação para píxeis raros.
+- Alterar as informações que aparecem no tooltip do pixel.
+- Mudar a forma como o zoom ou a navegação (pan) funcionam.
 
-| Se quiser alterar...                                                | Modifique este ficheiro:                               | **NÃO FAÇA ISTO**                                                                 |
+### 2. A Regra de Ouro dos Layouts
+
+| Se quiser alterar...                                                | ✅ **MODIFIQUE ESTE FICHEIRO**                           | ❌ **NÃO FAÇA ISTO**                                                                 |
 | ------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- |
 | **O conteúdo de uma página** (ex: marketplace, comunidade, perfil). | `src/app/(main)/marketplace/page.tsx`                  | Não crie um novo `layout.tsx` dentro de `/marketplace` (ou qualquer outra pasta). |
 | **O cabeçalho ou rodapé** para todas as páginas principais.         | `src/app/(main)/layout.tsx`                            | Não edite os layouts de páginas individuais para adicionar o cabeçalho.           |
@@ -106,7 +113,29 @@ A aplicação usa um sistema de "layouts aninhados":
 
 ---
 
-## 🤖 Como Modificar Funcionalidades de IA
+## ✨ Como Adicionar Novas Funcionalidades
+
+Seguir uma estrutura consistente é crucial para a manutenção do projeto.
+
+### 1. Adicionar uma Nova Página
+- **Passo 1**: Crie uma nova pasta dentro de `src/app/(main)/`. O nome da pasta será o URL (ex: `src/app/(main)/nova-pagina`).
+- **Passo 2**: Dentro dessa nova pasta, crie um ficheiro `page.tsx`.
+- **Passo 3**: Construa o seu componente React para a página dentro de `page.tsx`. Ele herdará automaticamente o cabeçalho e o rodapé.
+- **Passo 4**: Adicione um novo link para a sua página no componente da barra de navegação, em `src/components/layout/BottomNavBar.tsx`.
+
+### 2. Adicionar um Novo Componente Reutilizável
+- **Passo 1**: Crie um novo ficheiro `.tsx` na pasta `src/components/`. Se for um componente complexo, crie uma subpasta para ele (ex: `src/components/novo-componente/index.tsx`).
+- **Passo 2**: Desenvolva o seu componente.
+- **Passo 3**: Importe e utilize o seu novo componente onde for necessário (numa página ou noutro componente).
+
+### 3. Adicionar uma Nova Funcionalidade de IA
+- **Passo 1**: Crie um novo ficheiro `[nome-da-funcionalidade]-flow.ts` dentro de `src/ai/flows/`.
+- **Passo 2**: Siga a estrutura de um flow Genkit existente, definindo os schemas de input/output com Zod e a lógica do prompt.
+- **Passo 3**: Importe e chame a sua nova função de IA no componente React onde ela será utilizada.
+
+---
+
+## 🤖 Como Modificar Funcionalidades de IA Existentes
 
 A lógica de Inteligência Artificial está na pasta `src/ai`.
 
