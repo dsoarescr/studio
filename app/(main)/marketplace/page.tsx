@@ -789,6 +789,10 @@ export default function MarketplacePage() {
               <Heart className="h-4 w-4 mr-2"/>
               Curtidos ({likedPixels.length})
             </TabsTrigger>
+            <TabsTrigger value="my-sales" className="font-headline text-xs sm:text-sm">
+              <TrendingUp className="h-4 w-4 mr-1 sm:mr-2"/>
+              Minhas Vendas
+            </TabsTrigger>
           </TabsList>
 
           {/* Marketplace Principal */}
@@ -1089,6 +1093,120 @@ export default function MarketplacePage() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+          
+          {/* Minhas Vendas Tab */}
+          <TabsContent value="my-sales" className="space-y-6">
+            <Card className="bg-gradient-to-br from-green-500/10 to-blue-500/10 border-green-500/30">
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-500">
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  Gestão das Suas Vendas
+                  <Badge className="ml-2 bg-green-500">
+                    {mockPixelsForSale.filter(p => p.seller.name === 'Você').length} ativos
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Acompanhe o desempenho dos seus pixels no marketplace
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-background/50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-500">€1,247</div>
+                    <div className="text-sm text-muted-foreground">Total Vendido</div>
+                  </div>
+                  <div className="text-center p-4 bg-background/50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-500">€89</div>
+                    <div className="text-sm text-muted-foreground">Comissões Pagas</div>
+                  </div>
+                  <div className="text-center p-4 bg-background/50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-500">23</div>
+                    <div className="text-sm text-muted-foreground">Pixels Vendidos</div>
+                  </div>
+                  <div className="text-center p-4 bg-background/50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-500">4.8⭐</div>
+                    <div className="text-sm text-muted-foreground">Rating Vendedor</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {mockPixelsForSale
+                    .filter(pixel => pixel.seller.name === 'Você')
+                    .map(pixel => (
+                      <Card key={pixel.id} className="hover:shadow-lg transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            <div 
+                              className="w-16 h-16 rounded-lg border-2 border-primary/30 flex items-center justify-center text-2xl font-bold shadow-md"
+                              style={{ backgroundColor: pixel.color }}
+                            >
+                              🎨
+                            </div>
+                            
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold">{pixel.title}</h3>
+                                <Badge className={getRarityColor(pixel.rarity)}>
+                                  {pixel.rarity}
+                                </Badge>
+                                {pixel.isFeatured && (
+                                  <Badge className="bg-yellow-500">
+                                    <Star className="h-3 w-3 mr-1" />
+                                    Destaque
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                                <span>({pixel.coordinates.x}, {pixel.coordinates.y})</span>
+                                <span>{pixel.region}</span>
+                                <span>Listado há {pixel.listedDaysAgo} dias</span>
+                              </div>
+                              
+                              <div className="grid grid-cols-4 gap-4 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <Eye className="h-3 w-3 text-blue-500" />
+                                  <span>{pixel.views}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Heart className="h-3 w-3 text-red-500" />
+                                  <span>{pixel.likes}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-3 w-3 text-green-500" />
+                                  <span>{pixel.followers}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MessageSquare className="h-3 w-3 text-purple-500" />
+                                  <span>{pixel.comments}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-primary mb-2">
+                                €{pixel.price}
+                              </div>
+                              
+                              <div className="flex flex-col gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-4 w-4 mr-2" />
+                                  Editar
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Promover
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Pixels que está a seguir */}
@@ -1473,6 +1591,23 @@ export default function MarketplacePage() {
                             </Button>
                           </div>
                         )}
+                    <div className="space-y-1">
+                      <div className="text-2xl font-bold text-green-500">{selectedPixel.followers}</div>
+                      <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <Users className="h-3 w-3" />
+                        Seguidores
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="space-y-1">
+                      <div className="text-2xl font-bold text-purple-500">{selectedPixel.comments}</div>
+                      <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        Comentários
+                      </div>
+                    </div>
                         
                         <Button variant="outline" className="w-full">
                           <Share2 className="h-4 w-4 mr-2" />
@@ -1533,6 +1668,24 @@ export default function MarketplacePage() {
                           Saldo: {credits}
                         </span>
                       </Button>
+                      
+                      {pixel.isAuction ? (
+                        <Button 
+                          onClick={() => handleBidOnPixel(pixel)}
+                          className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                        >
+                          <Gavel className="h-4 w-4 mr-1" />
+                          Licitar
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => handleBuyPixel(pixel)}
+                          className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                          Comprar
+                        </Button>
+                      )}
                       
                       {selectedPixel.specialCreditsPrice && (
                         <Button
@@ -1601,6 +1754,207 @@ export default function MarketplacePage() {
           </DialogContent>
         </Dialog>
 
+        {/* Purchase Confirmation Modal */}
+        <Dialog open={showPurchaseModal} onOpenChange={setShowPurchaseModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <ShoppingCart className="h-5 w-5 mr-2 text-primary" />
+                Confirmar Compra
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedPixelForPurchase && (
+              <div className="space-y-4">
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-lg border-2 border-primary/30 flex items-center justify-center text-lg font-bold"
+                        style={{ backgroundColor: selectedPixelForPurchase.color }}
+                      >
+                        🎨
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{selectedPixelForPurchase.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          ({selectedPixelForPurchase.coordinates.x}, {selectedPixelForPurchase.coordinates.y}) • {selectedPixelForPurchase.region}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Preço do Pixel:</span>
+                    <span className="font-bold">€{selectedPixelForPurchase.price}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Taxa de Marketplace ({selectedPixelForPurchase.seller.isPremium ? '5%' : '7%'}):</span>
+                    <span>€{(selectedPixelForPurchase.price * (selectedPixelForPurchase.seller.isPremium ? 0.05 : 0.07)).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Para o Vendedor:</span>
+                    <span>€{(selectedPixelForPurchase.price * (selectedPixelForPurchase.seller.isPremium ? 0.95 : 0.93)).toFixed(2)}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Total a Pagar:</span>
+                    <span className="text-primary">€{selectedPixelForPurchase.price}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Método de Pagamento:</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={paymentMethod === 'credits' ? 'default' : 'outline'}
+                      onClick={() => setPaymentMethod('credits')}
+                      className="flex-1"
+                    >
+                      <Coins className="h-4 w-4 mr-2" />
+                      Créditos
+                    </Button>
+                    <Button
+                      variant={paymentMethod === 'special' ? 'default' : 'outline'}
+                      onClick={() => setPaymentMethod('special')}
+                      className="flex-1"
+                    >
+                      <Gift className="h-4 w-4 mr-2" />
+                      Especiais
+                    </Button>
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground">
+                    {paymentMethod === 'credits' ? (
+                      <p>Saldo atual: {credits.toLocaleString()} créditos</p>
+                    ) : (
+                      <p>Saldo atual: {specialCredits.toLocaleString()} créditos especiais</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowPurchaseModal(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={confirmPurchase}
+                    disabled={isProcessing}
+                    className="flex-1"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Confirmar Compra
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+        
+        {/* Bid Modal */}
+        <Dialog open={showBidModal} onOpenChange={setShowBidModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Gavel className="h-5 w-5 mr-2 text-orange-500" />
+                Fazer Licitação
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedPixelForBid && (
+              <div className="space-y-4">
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-lg border-2 border-primary/30 flex items-center justify-center text-lg font-bold"
+                        style={{ backgroundColor: selectedPixelForBid.color }}
+                      >
+                        🎨
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{selectedPixelForBid.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          ({selectedPixelForBid.coordinates.x}, {selectedPixelForBid.coordinates.y}) • {selectedPixelForBid.region}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Lance Atual:</span>
+                    <span className="font-bold text-orange-500">€{selectedPixelForBid.currentBid || selectedPixelForBid.price}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Lance Mínimo:</span>
+                    <span className="font-bold">€{(selectedPixelForBid.currentBid || selectedPixelForBid.price) + 10}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Tempo Restante:</span>
+                    <span>2h 34m</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="bid-amount">Seu Lance (€):</Label>
+                  <Input
+                    id="bid-amount"
+                    type="number"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    min={(selectedPixelForBid.currentBid || selectedPixelForBid.price) + 10}
+                    placeholder={`Mínimo: €${(selectedPixelForBid.currentBid || selectedPixelForBid.price) + 10}`}
+                  />
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowBidModal(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={confirmBid}
+                    disabled={isProcessing || !bidAmount || parseFloat(bidAmount) < (selectedPixelForBid.currentBid || selectedPixelForBid.price) + 10}
+                    className="flex-1"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      <>
+                        <Gavel className="h-4 w-4 mr-2" />
+                        Confirmar Lance
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+        
         {/* Modal de Oferta/Lance */}
         <Dialog open={showOfferModal} onOpenChange={setShowOfferModal}>
           <DialogContent className="max-w-md">
@@ -1703,6 +2057,24 @@ export default function MarketplacePage() {
                         <>
                           <Gavel className="h-4 w-4 mr-2" />
                           Licitar
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        const mapUrl = `/?pixel=${selectedPixel.coordinates.x},${selectedPixel.coordinates.y}&zoom=5`;
+                        window.open(mapUrl, '_blank');
+                        toast({
+                          title: "🗺️ Abrindo Mapa",
+                          description: `Navegando para pixel (${selectedPixel.coordinates.x}, ${selectedPixel.coordinates.y})`,
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Ver no Mapa
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
                         </>
                       ) : (
                         <>
@@ -1711,8 +2083,40 @@ export default function MarketplacePage() {
                         </>
                       )}
                     </Button>
+                    
+                    <Button 
+                      variant="outline"
+                      onClick={() => setShowOfferModal(true)}
+                      className="flex-1"
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Fazer Oferta
+                    </Button>
                   </div>
                 </div>
+                  {/* Main Action Button */}
+                  <div className="pt-4 border-t border-border/50">
+                    {selectedPixel.isAuction ? (
+                      <Button 
+                        onClick={() => handleBidOnPixel(selectedPixel)}
+                        className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-lg font-semibold"
+                        size="lg"
+                      >
+                        <Gavel className="h-5 w-5 mr-2" />
+                        Licitar €{selectedPixel.currentBid ? selectedPixel.currentBid + 10 : selectedPixel.price + 10}
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={() => handleBuyPixel(selectedPixel)}
+                        className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-lg font-semibold"
+                        size="lg"
+                      >
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Comprar por €{selectedPixel.price}
+                      </Button>
+                    )}
+                  </div>
+                  
               </>
             )}
           </DialogContent>
