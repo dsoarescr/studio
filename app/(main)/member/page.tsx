@@ -56,6 +56,7 @@ export default function MemberPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showPixelModal, setShowPixelModal] = useState(false);
+  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -679,18 +680,17 @@ export default function MemberPage() {
                                   <Button
                                     variant={connection.isFollowing ? "outline" : "default"}
                                     size="sm"
-                                    onClick={() => handleFollowUser(person.name)}
+                                    onClick={() => handleFollowUser(connection.id)}
                                     className="flex-1 min-h-[32px] cursor-pointer"
                                   >
                                     <UserPlus className="h-3 w-3 mr-1" />
                                     {connection.isFollowing ? 'A Seguir' : 'Seguir'}
                                   </Button>
-                                    {followedUsers.includes(person.name) ? 'A Seguir' : 'Seguir'}
+                                  
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleSendMessage(connection.id)}
-                                    onClick={() => handleSendMessage(person.name)}
                                     className="flex-1 min-h-[32px] cursor-pointer"
                                   >
                                     <MessageSquare className="h-3 w-3 mr-1" />
@@ -700,7 +700,6 @@ export default function MemberPage() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleViewProfile(person.name)}
                                     onClick={() => handleViewProfile(connection.id)}
                                     className="min-h-[32px] cursor-pointer"
                                   >
