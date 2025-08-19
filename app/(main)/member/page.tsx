@@ -679,17 +679,18 @@ export default function MemberPage() {
                                   <Button
                                     variant={connection.isFollowing ? "outline" : "default"}
                                     size="sm"
-                                    onClick={() => handleFollowUser(connection.id)}
+                                    onClick={() => handleFollowUser(person.name)}
                                     className="flex-1 min-h-[32px] cursor-pointer"
                                   >
                                     <UserPlus className="h-3 w-3 mr-1" />
                                     {connection.isFollowing ? 'A Seguir' : 'Seguir'}
                                   </Button>
-                                  
+                                    {followedUsers.includes(person.name) ? 'A Seguir' : 'Seguir'}
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleSendMessage(connection.id)}
+                                    onClick={() => handleSendMessage(person.name)}
                                     className="flex-1 min-h-[32px] cursor-pointer"
                                   >
                                     <MessageSquare className="h-3 w-3 mr-1" />
@@ -699,6 +700,7 @@ export default function MemberPage() {
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    onClick={() => handleViewProfile(person.name)}
                                     onClick={() => handleViewProfile(connection.id)}
                                     className="min-h-[32px] cursor-pointer"
                                   >
@@ -958,17 +960,17 @@ export default function MemberPage() {
                         <p className="font-mono font-bold">({selectedPixel.x}, {selectedPixel.y})</p>
                       </div>
                       <div>
-                      <Switch checked={showAchievements} onCheckedChange={handleToggleShowAchievements} />
+                        <span className="text-muted-foreground">Região:</span>
                         <p className="font-semibold">{selectedPixel.region}</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Valor:</span>
-                      <Switch checked={allowMessages} onCheckedChange={handleToggleAllowMessages} />
+                        <p className="font-bold text-primary">€{selectedPixel.value}</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Raridade:</span>
                         <Badge variant="outline">{selectedPixel.rarity}</Badge>
-                      <Switch checked={enableNotifications} onCheckedChange={handleToggleNotifications} />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
