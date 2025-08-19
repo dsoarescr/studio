@@ -201,12 +201,18 @@ export default function MemberPage() {
   const [selectedPixel, setSelectedPixel] = useState<any>(null);
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [messageText, setMessageText] = useState('');
+  const [inviteLink, setInviteLink] = useState('');
   const [pixelFilter, setPixelFilter] = useState('all');
   const [pixelSearch, setPixelSearch] = useState('');
   const [pixelSort, setPixelSort] = useState('recent');
   const [pixelViewMode, setPixelViewMode] = useState<'grid' | 'list'>('grid');
   const [socialTab, setSocialTab] = useState('friends');
+  const [following, setFollowing] = useState<any[]>([]);
   
   // Profile edit states
   const [editName, setEditName] = useState('PixelMasterPT');
@@ -258,6 +264,101 @@ export default function MemberPage() {
     });
   };
 
+  const handleInviteFriend = () => {
+    if (!inviteEmail.trim()) {
+      toast({
+        title: "Email Obrigatório",
+        description: "Por favor, insira um email válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Generate unique invite link
+    const inviteCode = Math.random().toString(36).substring(2, 15);
+    const link = `${window.location.origin}/invite/${inviteCode}`;
+    setInviteLink(link);
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(link);
+    
+    // Reward user for inviting
+    addCredits(25);
+    addXp(15);
+    setShowConfetti(true);
+    setPlaySuccessSound(true);
+    
+    toast({
+      title: "Convite Enviado! 📧",
+      description: `Link copiado! Receberá 100 créditos quando ${inviteEmail} se registar.`,
+    });
+    
+    setInviteEmail('');
+    setShowInviteModal(false);
+  };
+
+  const handleFollowUser = (user: any) => {
+    // Add to following list if not already following
+    if (!following.some(f => f.id === user.id)) {
+      setFollowing(prev => [...prev, user]);
+      
+      // Reward for social interaction
+      addCredits(5);
+      addXp(10);
+      setPlaySuccessSound(true);
+      
+      toast({
+        title: "A Seguir Utilizador! 👥",
+        description: `Agora segue ${user.name}. Recebeu 5 créditos + 10 XP!`,
+      });
+    } else {
+      // Unfollow
+      setFollowing(prev => prev.filter(f => f.id !== user.id));
+      
+      toast({
+        title: "Deixou de Seguir",
+        description: `Deixou de seguir ${user.name}.`,
+      });
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (!messageText.trim()) {
+      toast({
+        title: "Mensagem Vazia",
+        description: "Por favor, escreva uma mensagem.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Reward for social interaction
+    addCredits(3);
+    addXp(5);
+    setPlaySuccessSound(true);
+    
+    toast({
+      title: "Mensagem Enviada! 💬",
+      description: `Mensagem enviada para ${selectedUser?.name}. Recebeu 3 créditos + 5 XP!`,
+    });
+    
+    setMessageText('');
+    setShowMessageModal(false);
+  };
+
+  const handleViewProfile = (user: any) => {
+    setSelectedUser(user);
+    setShowUserProfileModal(true);
+    
+    // Small reward for viewing profiles
+    addXp(2);
+    
+    toast({
+      title: "Perfil Visualizado",
+      description: `A ver perfil de ${user.name}. +2 XP!`,
+    });
+  };
+
   // Função para clicar em pixel
   const handlePixelClick = (pixel: any) => {
     setSelectedPixel(pixel);
@@ -270,35 +371,8 @@ export default function MemberPage() {
     setHapticTrigger(true);
   };
 
-  // Função para convidar amigos
-  const handleInviteFriend = () => {
-    if (!inviteEmail.trim()) {
-      toast({
-        title: "Email Obrigatório",
-        description: "Por favor, insira um email válido.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setShowConfetti(true);
-    setPlaySuccessSound(true);
-    setHapticTrigger(true);
-    
-    addCredits(25);
-    addXp(15);
-    
-    toast({
-      title: "🎉 Convite Enviado!",
-      description: `Convite enviado para ${inviteEmail}. Recebeu 25 créditos + 15 XP!`,
-    });
-    
-    setInviteEmail('');
-    setShowInviteModal(false);
-  };
-
   // Função para seguir utilizador
-  const handleFollowUser = (userId: string, userName: string) => {
+  const handleFollowUserOld = (userId: string, userName: string) => {
     setHapticTrigger(true);
     setPlaySuccessSound(true);
     
@@ -312,7 +386,7 @@ export default function MemberPage() {
   };
 
   // Função para enviar mensagem
-  const handleSendMessage = (userId: string, userName: string) => {
+  const handleSendMessageOld = (userId: string, userName: string) => {
     setHapticTrigger(true);
     
     toast({
@@ -322,7 +396,7 @@ export default function MemberPage() {
   };
 
   // Função para ver perfil
-  const handleViewProfile = (userId: string, userName: string) => {
+  const handleViewProfileOld = (userId: string, userName: string) => {
     setHapticTrigger(true);
     
     toast({
@@ -943,16 +1017,19 @@ export default function MemberPage() {
                                 <Button 
                                   size="sm" 
                                   className="min-h-[32px] px-3"
-                                  onClick={() => handleFollowUser(connection.id, connection.name)}
+                                  onClick={() => handleFollowUser(connection)}
                                 >
                                   <UserPlus className="h-3 w-3 mr-1" />
-                                  Seguir
+                                  {following.some(f => f.id === connection.id) ? 'A Seguir' : 'Seguir'}
                                 </Button>
                                 <Button 
                                   variant="outline" 
                                   size="sm"
                                   className="min-h-[32px] px-3"
-                                  onClick={() => handleSendMessage(connection.id, connection.name)}
+                                  onClick={() => {
+                                    setSelectedUser(connection);
+                                    setShowMessageModal(true);
+                                  }}
                                 >
                                   <MessageSquare className="h-3 w-3 mr-1" />
                                   Mensagem
@@ -961,7 +1038,7 @@ export default function MemberPage() {
                                   variant="ghost" 
                                   size="sm"
                                   className="min-h-[32px] px-3"
-                                  onClick={() => handleViewProfile(connection.id, connection.name)}
+                                  onClick={() => handleViewProfile(connection)}
                                 >
                                   <Eye className="h-3 w-3 mr-1" />
                                   Ver
@@ -1119,63 +1196,257 @@ export default function MemberPage() {
             </DialogHeader>
             
             <div className="space-y-4">
-              <div className="text-center">
-                <Gift className="h-12 w-12 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">Ganhe Recompensas!</h3>
-                <p className="text-sm text-muted-foreground">
-                  Receba 25 créditos + 15 XP por cada amigo que se juntar ao Pixel Universe
-                </p>
+              <div className="bg-primary/10 p-4 rounded-lg">
+                <h3 className="font-semibold text-primary mb-2">Recompensas por Convite</h3>
+                <div className="space-y-1 text-sm">
+                  <p>• <strong>25 créditos</strong> por enviar convite</p>
+                  <p>• <strong>100 créditos</strong> quando o amigo se registar</p>
+                  <p>• <strong>50 XP</strong> por cada amigo ativo</p>
+                </div>
               </div>
               
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="invite-email">Email do Amigo</Label>
-                  <Input
-                    id="invite-email"
-                    type="email"
-                    placeholder="amigo@exemplo.com"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    className="min-h-[44px]"
-                  />
+              <div className="space-y-2">
+                <Label htmlFor="invite-email">Email do Amigo</Label>
+                <Input
+                  id="invite-email"
+                  type="email"
+                  placeholder="amigo@exemplo.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="min-h-[44px]"
+                />
+              </div>
+              
+              {inviteLink && (
+                <div className="space-y-2">
+                  <Label>Link de Convite Gerado</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={inviteLink}
+                      readOnly
+                      className="font-mono text-xs"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        navigator.clipboard.writeText(inviteLink);
+                        toast({
+                          title: "Link Copiado",
+                          description: "Link de convite copiado!",
+                        });
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                
+              )}
+              
+              <div className="flex gap-2 pt-4">
                 <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowInviteModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  className="flex-1"
                   onClick={handleInviteFriend}
-                  className="w-full min-h-[44px]"
-                  disabled={!inviteEmail.trim()}
                 >
                   <Send className="h-4 w-4 mr-2" />
                   Enviar Convite
                 </Button>
               </div>
-              
-              <Separator />
-              
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Ou partilhe o seu link:</h4>
-                <div className="flex gap-2">
-                  <Input 
-                    value="https://pixeluniverse.pt/invite/abc123"
-                    readOnly
-                    className="min-h-[44px]"
-                  />
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText('https://pixeluniverse.pt/invite/abc123');
-                      toast({
-                        title: "Link Copiado!",
-                        description: "Link de convite copiado para a área de transferência.",
-                      });
-                    }}
-                    className="min-h-[44px] px-3"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Mensagem */}
+        <Dialog open={showMessageModal} onOpenChange={setShowMessageModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <MessageSquare className="h-5 w-5 mr-2 text-primary" />
+                Enviar Mensagem
+                {selectedUser && (
+                  <span className="ml-2 text-base font-normal">para {selectedUser.name}</span>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {selectedUser && (
+                <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{selectedUser.name}</p>
+                    <p className="text-sm text-muted-foreground">Nível {selectedUser.level}</p>
+                  </div>
                 </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="message-text">Mensagem</Label>
+                <Textarea
+                  id="message-text"
+                  placeholder="Escreva a sua mensagem..."
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowMessageModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  className="flex-1"
+                  onClick={handleSendMessage}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Enviar
+                </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Perfil Público */}
+        <Dialog open={showUserProfileModal} onOpenChange={setShowUserProfileModal}>
+          <DialogContent className="max-w-md max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <User className="h-5 w-5 mr-2 text-primary" />
+                Perfil Público
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedUser && (
+              <ScrollArea className="max-h-[70vh]">
+                <div className="space-y-4">
+                  {/* Header do Utilizador */}
+                  <div className="text-center space-y-3">
+                    <Avatar className="h-20 w-20 mx-auto border-4 border-primary">
+                      <AvatarImage src={selectedUser.avatar} />
+                      <AvatarFallback className="text-2xl">{selectedUser.name[0]}</AvatarFallback>
+                    </Avatar>
+                    
+                    <div>
+                      <div className="flex items-center justify-center gap-2">
+                        <h2 className="text-xl font-bold">{selectedUser.name}</h2>
+                        {selectedUser.verified && (
+                          <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">@{selectedUser.name.toLowerCase()}</p>
+                      <Badge variant="secondary" className="mt-2">
+                        Nível {selectedUser.level}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Stats do Utilizador */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="space-y-1">
+                      <p className="text-lg font-bold text-primary">{selectedUser.pixelCount}</p>
+                      <p className="text-xs text-muted-foreground">Pixels</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-lg font-bold text-blue-500">{selectedUser.followers || 0}</p>
+                      <p className="text-xs text-muted-foreground">Seguidores</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-lg font-bold text-green-500">{selectedUser.following || 0}</p>
+                      <p className="text-xs text-muted-foreground">A Seguir</p>
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground italic">
+                        "{selectedUser.bio || 'Este utilizador ainda não tem uma bio.'}"
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Ações */}
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => handleFollowUser(selectedUser)}
+                      className="w-full min-h-[44px]"
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      {following.some(f => f.id === selectedUser.id) ? 'A Seguir' : 'Seguir'}
+                    </Button>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          setShowUserProfileModal(false);
+                          setShowMessageModal(true);
+                        }}
+                        className="min-h-[44px]"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Mensagem
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/user/${selectedUser.name}`);
+                          toast({
+                            title: "Link Copiado",
+                            description: "Link do perfil copiado!",
+                          });
+                        }}
+                        className="min-h-[44px]"
+                      >
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Partilhar
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Atividade Recente */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm flex items-center">
+                        <Activity className="h-4 w-4 mr-2" />
+                        Atividade Recente
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                      <div className="space-y-2">
+                        {[
+                          { action: 'Comprou pixel em Lisboa', time: '2h atrás' },
+                          { action: 'Desbloqueou conquista "Artista"', time: '1d atrás' },
+                          { action: 'Criou álbum "Paisagens"', time: '3d atrás' }
+                        ].map((activity, index) => (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span>{activity.action}</span>
+                            <span className="text-muted-foreground">{activity.time}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </ScrollArea>
+            )}
           </DialogContent>
         </Dialog>
 
