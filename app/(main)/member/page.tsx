@@ -413,6 +413,12 @@ export default function MemberPage() {
   const [playSound, setPlaySound] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
+  const [selectedPixel, setSelectedPixel] = useState<any>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
+  const [showPixelModal, setShowPixelModal] = useState(false);
+  const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
   
   // Computed values
   const xpPercentage = (xp / xpMax) * 100;
@@ -550,6 +556,65 @@ export default function MemberPage() {
     toast({
       title: "🎁 Bónus Diário Reclamado!",
       description: `+${bonusCredits} créditos, +${bonusXp} XP (Sequência: ${streak} dias)`,
+    });
+  };
+
+  const handlePixelClick = (pixel: any) => {
+    setSelectedPixel(pixel);
+    setShowPixelModal(true);
+  };
+
+  const handleAchievementClick = (achievement: any) => {
+    setSelectedAchievement(achievement);
+    setShowAchievementModal(true);
+  };
+
+  const handleInviteFriend = () => {
+    if (!inviteEmail.trim()) {
+      toast({
+        title: "Email Obrigatório",
+        description: "Por favor, insira um email válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate sending invitation
+    setPlaySound(true);
+    addCredits(25);
+    addXp(15);
+    
+    toast({
+      title: "Convite Enviado! 📧",
+      description: `Convite enviado para ${inviteEmail}. Recebeu 25 créditos + 15 XP!`,
+    });
+    
+    setInviteEmail('');
+    setShowInviteModal(false);
+  };
+
+  const handleFollowUser = (userName: string) => {
+    setPlaySound(true);
+    addXp(10);
+    addCredits(5);
+    
+    toast({
+      title: "👥 A Seguir Utilizador!",
+      description: `Agora segue ${userName}. Recebeu 10 XP + 5 créditos!`,
+    });
+  };
+
+  const handleSendMessage = (userName: string) => {
+    toast({
+      title: "💬 Mensagem Enviada!",
+      description: `Mensagem enviada para ${userName}.`,
+    });
+  };
+
+  const handleViewProfile = (userName: string) => {
+    toast({
+      title: "👤 Ver Perfil",
+      description: `Abrindo perfil de ${userName}...`,
     });
   };
 
@@ -1000,7 +1065,8 @@ export default function MemberPage() {
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ delay: index * 0.1 }}
                         >
-                          <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                          <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer"
+                                onClick={() => handlePixelClick(pixel)}>
                             <div className="relative">
                               <div 
                                 className="aspect-square w-full flex items-center justify-center text-4xl font-bold"
@@ -1185,7 +1251,7 @@ export default function MemberPage() {
                           <Users className="h-5 w-5 mr-2 text-blue-500" />
                           Conexões Sociais
                         </CardTitle>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => setShowInviteModal(true)}>
                           <UserPlus className="h-4 w-4 mr-2" />
                           Convidar
                         </Button>
@@ -1243,7 +1309,7 @@ export default function MemberPage() {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          onClick={() => handleFriendAction('message', friend.id)}
+                                          onClick={() => handleSendMessage(friend.name)}
                                           className="h-7 px-2"
                                         >
                                           <MessageSquare className="h-3 w-3" />
@@ -1251,7 +1317,7 @@ export default function MemberPage() {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          onClick={() => handleFriendAction('follow', friend.id)}
+                                          onClick={() => handleFollowUser(friend.name)}
                                           className="h-7 px-2"
                                         >
                                           <UserPlus className="h-3 w-3" />
@@ -1285,7 +1351,7 @@ export default function MemberPage() {
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleFriendAction('follow', follower.id)}
+                                        onClick={() => handleFollowUser(follower.name)}
                                         className="h-7 text-xs"
                                       >
                                         Seguir de Volta
