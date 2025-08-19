@@ -302,61 +302,6 @@ export default function MemberPage() {
       });
       return;
     }
-    const isFollowing = followedUsers.includes(userName);
-    
-    if (isFollowing) {
-      setFollowedUsers(prev => prev.filter(name => name !== userName));
-      toast({
-        title: "Deixou de Seguir",
-        description: `Deixou de seguir ${userName}.`,
-      });
-    } else {
-      setFollowedUsers(prev => [...prev, userName]);
-      addXp(15);
-      addCredits(8);
-      setShowConfetti(true);
-      setPlaySuccessSound(true);
-      toast({
-        title: "👥 A Seguir Utilizador!",
-        description: `Agora segue ${userName}. Recebeu 15 XP + 8 créditos!`,
-      });
-    }
-  };
-
-  const handleSendMessage = (userName: string) => {
-    setSelectedUser({ name: userName, avatar: 'https://placehold.co/40x40.png' });
-    setShowMessageModal(true);
-  };
-
-  const handleSendMessageSubmit = () => {
-    if (!messageText.trim() || !selectedUser) return;
-    
-    const newMessage = {
-      id: Date.now().toString(),
-      text: messageText,
-      timestamp: new Date(),
-      sent: true
-    };
-    
-    setMessageCenter(prev => {
-      const existingConversation = prev.find(conv => conv.user === selectedUser.name);
-      if (existingConversation) {
-        return prev.map(conv => 
-          conv.user === selectedUser.name 
-            ? { ...conv, messages: [...conv.messages, newMessage] }
-            : conv
-        );
-      } else {
-        return [...prev, {
-          id: Date.now().toString(),
-          user: selectedUser.name,
-          messages: [newMessage]
-        }];
-      }
-    });
-    
-    setMessageText('');
-    setShowMessageModal(false);
 
     addCredits(5);
     addXp(3);
@@ -364,7 +309,7 @@ export default function MemberPage() {
     
     toast({
       title: "💬 Mensagem Enviada!",
-      description: `Mensagem enviada para ${selectedUser.name}. Recebeu 10 XP + 5 créditos!`,
+      description: `Mensagem enviada para ${selectedUser?.name}. Recebeu 5 créditos + 3 XP!`,
     });
     
     setMessageText('');
@@ -1013,17 +958,17 @@ export default function MemberPage() {
                         <p className="font-mono font-bold">({selectedPixel.x}, {selectedPixel.y})</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Região:</span>
+                      <Switch checked={showAchievements} onCheckedChange={handleToggleShowAchievements} />
                         <p className="font-semibold">{selectedPixel.region}</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Valor:</span>
-                        <p className="font-bold text-primary">€{selectedPixel.value}</p>
+                      <Switch checked={allowMessages} onCheckedChange={handleToggleAllowMessages} />
                       </div>
                       <div>
                         <span className="text-muted-foreground">Raridade:</span>
                         <Badge variant="outline">{selectedPixel.rarity}</Badge>
-                      </div>
+                      <Switch checked={enableNotifications} onCheckedChange={handleToggleNotifications} />
                     </div>
                   </CardContent>
                 </Card>
