@@ -19,7 +19,7 @@ import {
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
   ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, 
   Lightbulb, MoreVertical, PlayCircle, Pause, Volume2, VolumeX, Shuffle,
-  RotateCcw, MousePointer2, Gamepad2, Layers, Grid3X3, FlashZap
+  RotateCcw, MousePointer2, Gamepad2, Layers, Grid3X3, Zap as FlashZap
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
