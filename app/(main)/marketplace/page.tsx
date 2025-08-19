@@ -650,27 +650,27 @@ export default function MarketplacePage() {
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-7xl">
+      <div className="container mx-auto py-3 px-2 sm:px-4 space-y-4 max-w-7xl">
         {/* Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
+        <Card className="shadow-lg bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <CardHeader className="relative p-4 sm:p-6">
+            <div className="flex flex-col gap-3">
               <div>
-                <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center">
+                <CardTitle className="font-headline text-xl sm:text-2xl lg:text-3xl text-gradient-gold flex items-center">
                   <ShoppingCart className="h-8 w-8 mr-3 animate-glow" />
                   Marketplace de Pixels
                 </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2">
+                <CardDescription className="text-muted-foreground text-sm">
                   Compre e venda pixels únicos com outros utilizadores da comunidade
                 </CardDescription>
               </div>
               
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm">
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-muted-foreground font-code">
+                  <span className="text-muted-foreground font-code text-xs">
                     {pixels.length} pixels disponíveis
                   </span>
                 </div>
@@ -694,25 +694,25 @@ export default function MarketplacePage() {
         </Card>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-12 bg-card/50 backdrop-blur-sm shadow-md">
-            <TabsTrigger value="all" className="font-headline">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-10 sm:h-12 bg-card/50 backdrop-blur-sm shadow-md text-xs sm:text-sm">
+            <TabsTrigger value="all" className="font-headline px-2 sm:px-3">
               <ShoppingCart className="h-4 w-4 mr-2"/>
               Todos ({getTabCount('all')})
             </TabsTrigger>
-            <TabsTrigger value="following" className="font-headline">
+            <TabsTrigger value="following" className="font-headline px-2 sm:px-3">
               <Bell className="h-4 w-4 mr-2"/>
               A Seguir ({getTabCount('following')})
             </TabsTrigger>
-            <TabsTrigger value="liked" className="font-headline">
+            <TabsTrigger value="liked" className="font-headline px-2 sm:px-3">
               <Heart className="h-4 w-4 mr-2"/>
               Curtidos ({getTabCount('liked')})
             </TabsTrigger>
-            <TabsTrigger value="auctions" className="font-headline">
+            <TabsTrigger value="auctions" className="font-headline px-2 sm:px-3">
               <Gavel className="h-4 w-4 mr-2"/>
               Leilões ({getTabCount('auctions')})
             </TabsTrigger>
-            <TabsTrigger value="sales" className="font-headline">
+            <TabsTrigger value="sales" className="font-headline px-2 sm:px-3">
               <BarChart3 className="h-4 w-4 mr-2"/>
               Minhas Vendas ({getTabCount('sales')})
             </TabsTrigger>
@@ -720,8 +720,8 @@ export default function MarketplacePage() {
 
           {/* Filtros e Pesquisa */}
           <Card className="card-hover-glow">
-            <CardContent className="p-4">
-              <div className="space-y-4">
+            <CardContent className="p-3 sm:p-4">
+              <div className="space-y-3">
                 {/* Pesquisa */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -729,12 +729,12 @@ export default function MarketplacePage() {
                     placeholder="Pesquisar pixels, regiões, tags..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 bg-background/70 focus:border-primary text-sm h-9 sm:h-10"
                   />
                 </div>
 
                 {/* Filtros */}
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-1 sm:gap-2">
                   <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Região" />
@@ -983,7 +983,7 @@ export default function MarketplacePage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                 {filteredPixels.map((pixel, index) => (
                   <motion.div
                     key={pixel.id}
@@ -992,84 +992,43 @@ export default function MarketplacePage() {
                     transition={{ duration: 0.3, delay: index * 0.02 }}
                   >
                     <Card 
-                      className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 card-hover-glow"
+                      className="aspect-square cursor-pointer hover:shadow-md transition-all hover:scale-105 border border-primary/30"
                       onClick={() => handlePixelClick(pixel)}
                     >
-                      <div className="relative">
-                        <div 
-                          className="aspect-square w-full flex items-center justify-center text-xl font-bold border-b-2 border-primary/20"
-                          style={{ backgroundColor: pixel.color }}
-                        >
-                          🎨
+                      <CardContent className="p-1.5 sm:p-2 h-full flex flex-col">
+                        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20 rounded mb-1">
+                          <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                         </div>
                         
-                        {pixel.isFeatured && (
-                          <Badge className="absolute top-2 left-2 bg-yellow-500 text-xs">
-                            <Star className="h-3 w-3" />
-                          </Badge>
-                        )}
-                        
-                        {pixel.isAuction && (
-                          <Badge className="absolute top-2 right-2 bg-red-500 animate-pulse text-xs">
-                            <Gavel className="h-3 w-3" />
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <CardContent className="p-3 space-y-2">
-                        <div className="text-center">
-                          <h4 className="font-medium text-sm truncate">{pixel.title}</h4>
-                          <p className="text-xs text-muted-foreground">
-                            ({pixel.x}, {pixel.y})
-                          </p>
-                        </div>
-                        
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-primary">
-                            €{pixel.isAuction ? pixel.currentBid : pixel.price}
-                          </div>
-                          <Badge className={cn("text-xs", getRarityColor(pixel.rarity))}>
-                            {pixel.rarity}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {pixel.views}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Heart className="h-3 w-3" />
-                            {pixel.likes}
-                          </span>
-                        </div>
-                        
-                        <div className="flex gap-1">
-                          {pixel.isAuction ? (
-                            <Button
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBidOnPixel(pixel);
-                              }}
-                              className="flex-1 text-xs h-8 bg-red-500 hover:bg-red-600"
-                            >
-                              <Gavel className="h-3 w-3 mr-1" />
-                              Licitar
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
+                        <div className="space-y-0.5">
+                          <p className="text-xs font-mono text-center">({pixel.x}, {pixel.y})</p>
+                          <p className="text-xs sm:text-sm font-bold text-primary text-center">€{pixel.price}</p>
+                          
+                          <div className="grid grid-cols-2 gap-0.5">
+                            <Button 
+                              size="sm" 
+                              className="text-xs h-7 min-h-[28px] px-1"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleBuyPixel(pixel);
                               }}
-                              className="flex-1 text-xs h-8"
                             >
-                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <ShoppingCart className="h-2.5 w-2.5 mr-0.5" />
                               Comprar
                             </Button>
-                          )}
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-xs h-7 min-h-[28px] px-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPixel(pixel);
+                              }}
+                            >
+                              <Info className="h-2.5 w-2.5 mr-0.5" />
+                              Info
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
