@@ -15,7 +15,7 @@ import { useUserStore, usePixelStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, SortAsc, Eye, Heart, MessageSquare, Share2, Star, Crown, Gem, Sparkles, Trophy, Award, Target, Zap, Gift, Coins, Calendar, Clock, TrendingUp, BarChart3, Users, MapPin, Palette, Bookmark, Download, Upload, Settings, Edit, Trash2, Plus, Minus, Check, X, Info, AlertTriangle, House as Museum, Megaphone, Flame, CloudLightning as Lightning, Rocket, Shield, Globe, Camera, Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, ExternalLink, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Tag, Hash, Link as LinkIcon, Image as ImageIcon, Video, Music, PaintBucket, Brush, Eraser, Move, ZoomIn, ZoomOut, Grid3X3, Layers, Contrast, Copyright as Brightness, IterationCw as Saturation, Bluetooth as Blur, Focus, Crop, Copy, Cast as Paste, Save, FileText, Folder, Archive, Database, Server, Wifi, WifiOff, Signal, Battery, Smartphone, Monitor, Tablet, Headphones, Speaker, Mic, MicOff, Camera as CameraIcon, Video as VideoIcon } from "lucide-react";
+import { Search, Filter, SortAsc, Eye, Heart, MessageSquare, Share2, Star, Crown, Gem, Sparkles, Trophy, Award, Target, Zap, Gift, Coins, Calendar, Clock, TrendingUp, BarChart3, Users, MapPin, Palette, Bookmark, Download, Upload, Settings, Edit, Trash2, Plus, Minus, Check, X, Info, AlertTriangle, House as Museum, Megaphone, Flame, CloudLightning as Lightning, Rocket, Shield, Globe, Camera, Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, ExternalLink, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Tag, Hash, Link as LinkIcon, Image as ImageIcon, Video, Music, PaintBucket, Brush, Eraser, Move, ZoomIn, ZoomOut, Grid3X3, Layers, Contrast, Copyright as Brightness, IterationCw as Saturation, Bluetooth as Blur, Focus, Crop, Copy, Cast as Paste, Save, FileText, Folder, Archive, Database, Server, Wifi, WifiOff, Signal, Battery, Smartphone, Monitor, Tablet, Headphones, Speaker, Mic, MicOff, Camera as CameraIcon, Video as VideoIcon, RefreshCw } from "lucide-react";
 import { cn } from '@/lib/utils';
 
 // Types
@@ -392,6 +392,7 @@ export default function PixelsGalleryPage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [playSuccessSound, setPlaySuccessSound] = useState(false);
   const [managementFilter, setManagementFilter] = useState<'all' | 'promoted' | 'pending' | 'expired'>('all');
+  const [manageFilter, setManageFilter] = useState<'todos' | 'ativos' | 'pendentes' | 'expirados'>('todos');
   
   const { toast } = useToast();
   const { addCredits, removeCredits, removeSpecialCredits, addXp, credits, specialCredits } = useUserStore();
@@ -638,6 +639,10 @@ export default function PixelsGalleryPage() {
     });
   };
 
+  const handlePixelClick = (pixel: SoldPixel) => {
+    setSelectedPixel(pixel);
+  };
+
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'Comum': return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
@@ -775,7 +780,7 @@ export default function PixelsGalleryPage() {
         )}
 
         <Tabs defaultValue="gallery" className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-10 sm:h-12 bg-card/50 backdrop-blur-sm shadow-md">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-10 sm:h-12 bg-card/50 backdrop-blur-sm shadow-md">
             <TabsTrigger value="gallery" className="font-headline text-xs sm:text-sm">
               <Museum className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
               Galeria
@@ -787,6 +792,10 @@ export default function PixelsGalleryPage() {
             <TabsTrigger value="promote" className="font-headline text-xs sm:text-sm">
               <Megaphone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
               Promover
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="font-headline text-xs sm:text-sm">
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              Gerir
             </TabsTrigger>
             <TabsTrigger value="analytics" className="font-headline text-xs sm:text-sm">
               <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
@@ -916,129 +925,145 @@ export default function PixelsGalleryPage() {
                     )}
                     onClick={() => setSelectedPixel(pixel)}
                   >
-                    <div className="relative">
-                      <img 
-                        src={pixel.imageUrl} 
-                        alt={pixel.title}
-                        className="w-full h-24 sm:h-32 lg:h-40 object-cover"
-                      />
-                      
-                      {/* Raridade - Canto Superior Esquerdo */}
-                      <Badge className={cn("absolute top-1 sm:top-2 left-1 sm:left-2 text-xs", getRarityColor(pixel.rarity))}>
-                        {pixel.rarity}
-                      </Badge>
-                      
-                      {/* Promoção - Canto Superior Direito */}
-                      {pixel.isPromoted && (
-                        <div className="absolute top-1 sm:top-2 right-1 sm:right-2">
-                          {getPromotionBadge(pixel.promotionType)}
-                        </div>
-                      )}
-                      
-                      {/* Ranking - Canto Inferior Esquerdo */}
-                      {index < 3 && (
-                        <Badge className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 bg-gradient-to-r from-yellow-500 to-amber-500">
-                          <Trophy className="h-3 w-3 mr-1" />
-                          #{index + 1}
-                        </Badge>
-                      )}
-                      
-                      {/* Price - Canto Inferior Direito */}
-                      <Badge className="absolute bottom-1 sm:bottom-2 right-1 sm:right-2 bg-primary text-primary-foreground">
-                        €{pixel.price}
-                      </Badge>
-                    </div>
-                    
-                    <CardContent className="p-2 sm:p-3 lg:p-4">
-                      <div className="space-y-2 sm:space-y-3">
-                        {/* Title and Owner */}
-                        <div>
-                          <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{pixel.title}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Avatar className="h-4 w-4 sm:h-5 sm:w-5">
-                              <AvatarImage src={pixel.owner.avatar} />
-                              <AvatarFallback className="text-xs">{pixel.owner.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground truncate">{pixel.owner.name}</span>
-                            {pixel.owner.verified && (
-                              <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                            )}
-                          </div>
+                    <div className="relative group cursor-pointer" onClick={() => handlePixelClick(pixel)}>
+                      <div 
+                        className="aspect-square rounded-lg border-2 border-border hover:border-primary/50 transition-all duration-300 hover:scale-105 overflow-hidden relative bg-gradient-to-br from-background/50 to-muted/30"
+                        style={{ backgroundColor: pixel.color }}
+                      >
+                        {/* Badges Reorganizados */}
+                        <div className="absolute top-1 left-1 z-10">
+                          <Badge className={cn("text-xs px-1.5 py-0.5", getRarityColor(pixel.rarity))}>
+                            {pixel.rarity}
+                          </Badge>
                         </div>
                         
-                        {/* Stats */}
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {formatNumber(pixel.views)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Heart className={cn("h-3 w-3", pixel.isLiked ? "text-red-500 fill-current" : "")} />
-                              {formatNumber(pixel.likes)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MessageSquare className="h-3 w-3" />
-                              {pixel.comments}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                            <span>{pixel.rating}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-1">
-                          {pixel.tags.slice(0, 2).map(tag => (
-                            <Badge key={tag} variant="outline" className="text-xs px-1 py-0">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {pixel.tags.length > 2 && (
-                            <Badge variant="outline" className="text-xs px-1 py-0">
-                              +{pixel.tags.length - 2}
+                        <div className="absolute top-1 right-1 z-10">
+                          {pixel.isPromoted && (
+                            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 animate-pulse text-xs px-1.5 py-0.5">
+                              <Crown className="h-2.5 w-2.5 mr-0.5" />
+                              {pixel.promotionType === 'vip' ? 'VIP' : 
+                               pixel.promotionType === 'spotlight' ? 'HOT' :
+                               pixel.promotionType === 'trending' ? 'TOP' : 'PRO'}
                             </Badge>
                           )}
                         </div>
                         
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-3 gap-1 sm:gap-2">
-                          <Button
-                            variant="ghost"
+                        {/* Ranking Badge - Canto inferior esquerdo */}
+                        {index < 3 && (
+                          <div className="absolute bottom-1 left-1 z-10">
+                            <Badge className={cn(
+                              "text-xs px-1.5 py-0.5",
+                              index === 0 ? 'bg-yellow-500' :
+                              index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+                            )}>
+                              <Trophy className="h-2.5 w-2.5 mr-0.5" />
+                              {index + 1}
+                            </Badge>
+                          </div>
+                        )}
+                        
+                        {/* Conteúdo Central - Mais Limpo */}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                          <div className="text-3xl opacity-70">🎨</div>
+                        </div>
+                        
+                        {/* Overlay com Info - Melhor Organizado */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute bottom-0 left-0 right-0 p-2 text-white">
+                            <h3 className="font-semibold text-xs mb-1 truncate leading-tight">{pixel.title}</h3>
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="font-mono">({pixel.x}, {pixel.y})</span>
+                              <span className="text-white/80">{pixel.region}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-1.5">
+                                <span className="flex items-center gap-0.5">
+                                  <Eye className="h-2.5 w-2.5" />
+                                  {formatNumber(pixel.views)}
+                                </span>
+                                <span className="flex items-center gap-0.5">
+                                  <Heart className="h-2.5 w-2.5" />
+                                  {pixel.likes}
+                                </span>
+                              </div>
+                              <span className="font-bold text-primary">€{pixel.price}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Info Compacta */}
+                      <div className="p-3 space-y-2">
+                        <div className="space-y-1">
+                          <h3 className="font-semibold text-sm truncate leading-tight">{pixel.title}</h3>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground font-mono">({pixel.x}, {pixel.y})</span>
+                            <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                              {pixel.region}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <span className="flex items-center gap-0.5">
+                              <Eye className="h-2.5 w-2.5 text-blue-500" />
+                              {formatNumber(pixel.views)}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <Heart className="h-2.5 w-2.5 text-red-500" />
+                              {pixel.likes}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-0.5 text-xs">
+                              <Star className="h-2.5 w-2.5 text-yellow-500 fill-current" />
+                              <span>{pixel.rating}</span>
+                            </div>
+                            <span className="font-bold text-primary text-sm">€{pixel.price}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Botões de Ação - Mais Compactos */}
+                        <div className="grid grid-cols-2 gap-1.5 pt-2">
+                          <Button 
+                            variant="outline" 
                             size="sm"
-                            onClick={(e) => handleLike(pixel.id, e)}
-                            className={cn(
-                              "min-h-[32px] text-xs p-1",
-                              pixel.isLiked && "text-red-500"
-                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLike(pixel.id, e);
+                              setPlaySuccessSound(true);
+                              toast({
+                                title: pixel.isLiked ? "💔 Descurtido" : "❤️ Curtido!",
+                                description: `"${pixel.title}" ${pixel.isLiked ? 'removido dos' : 'adicionado aos'} favoritos.`,
+                              });
+                            }}
+                            className="text-xs min-h-[28px] px-2"
                           >
-                            <Heart className={cn("h-3 w-3", pixel.isLiked && "fill-current")} />
+                            <Heart className={`h-2.5 w-2.5 mr-1 ${pixel.isLiked ? 'fill-current text-red-500' : ''}`} />
+                            {pixel.isLiked ? 'Curtido' : 'Curtir'}
                           </Button>
                           
-                          <Button
-                            variant="ghost"
+                          <Button 
+                            variant="outline" 
                             size="sm"
-                            onClick={(e) => handleBookmark(pixel.id, e)}
-                            className={cn(
-                              "min-h-[32px] text-xs p-1",
-                              pixel.isBookmarked && "text-yellow-500"
-                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBookmark(pixel.id, e);
+                              setPlaySuccessSound(true);
+                              toast({
+                                title: pixel.isBookmarked ? "🔖 Removido" : "⭐ Salvo!",
+                                description: `"${pixel.title}" ${pixel.isBookmarked ? 'removido dos' : 'adicionado aos'} favoritos.`,
+                              });
+                            }}
+                            className="text-xs min-h-[28px] px-2"
                           >
-                            <Bookmark className={cn("h-3 w-3", pixel.isBookmarked && "fill-current")} />
-                          </Button>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => handleShare(pixel, e)}
-                            className="min-h-[32px] text-xs p-1"
-                          >
-                            <Share2 className="h-3 w-3" />
+                            <Bookmark className={`h-2.5 w-2.5 mr-1 ${pixel.isBookmarked ? 'fill-current text-yellow-500' : ''}`} />
+                            {pixel.isBookmarked ? 'Salvo' : 'Salvar'}
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
+                    </div>
                   </Card>
                 </motion.div>
               ))}
@@ -1313,6 +1338,244 @@ export default function PixelsGalleryPage() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          {/* Gestão de Destaques Tab */}
+          <TabsContent value="manage" className="space-y-6">
+            <div className="space-y-6">
+              {/* Header com Stats */}
+              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">12</div>
+                      <div className="text-xs text-muted-foreground">Pixels Promovidos</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-500">€2,450</div>
+                      <div className="text-xs text-muted-foreground">Receita Total</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-500">156K</div>
+                      <div className="text-xs text-muted-foreground">Views Geradas</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-500">4.8</div>
+                      <div className="text-xs text-muted-foreground">ROI Médio</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Filtros e Ações */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {['Todos', 'Ativos', 'Pendentes', 'Expirados'].map(status => (
+                        <Button
+                          key={status}
+                          variant={manageFilter === status.toLowerCase() ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setManageFilter(status.toLowerCase() as any)}
+                          className="text-xs"
+                        >
+                          {status}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        Exportar
+                      </Button>
+                      <Button size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova Promoção
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lista de Pixels Promovidos */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Star className="h-5 w-5 mr-2 text-primary" />
+                    Pixels em Destaque
+                  </CardTitle>
+                  <CardDescription>
+                    Gerencie as promoções ativas e o desempenho dos seus pixels destacados
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        id: '1',
+                        pixel: { x: 245, y: 156, title: 'Torre de Belém Digital', region: 'Lisboa' },
+                        promotion: { type: 'VIP Premium', price: 1000, duration: '7 dias' },
+                        stats: { views: 15420, likes: 892, comments: 156, roi: 5.2 },
+                        status: 'Ativo',
+                        expiresIn: '3 dias',
+                        color: '#D4A757'
+                      },
+                      {
+                        id: '2',
+                        pixel: { x: 123, y: 89, title: 'Ponte Dom Luís', region: 'Porto' },
+                        promotion: { type: 'Holofote', price: 500, duration: '3 dias' },
+                        stats: { views: 8930, likes: 445, comments: 89, roi: 3.8 },
+                        status: 'Ativo',
+                        expiresIn: '1 dia',
+                        color: '#7DF9FF'
+                      },
+                      {
+                        id: '3',
+                        pixel: { x: 300, y: 200, title: 'Universidade de Coimbra', region: 'Coimbra' },
+                        promotion: { type: 'Tendência', price: 200, duration: '2 dias' },
+                        stats: { views: 4560, likes: 234, comments: 45, roi: 2.1 },
+                        status: 'Pendente',
+                        expiresIn: '5 dias',
+                        color: '#9C27B0'
+                      }
+                    ].filter(item => {
+                      if (manageFilter === 'todos') return true;
+                      return item.status.toLowerCase() === manageFilter;
+                    }).map((item) => (
+                      <Card key={item.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            {/* Pixel Preview */}
+                            <div className="relative flex-shrink-0">
+                              <div 
+                                className="w-16 h-16 rounded-lg border-2 border-border flex items-center justify-center text-2xl"
+                                style={{ backgroundColor: item.color }}
+                              >
+                                🎨
+                              </div>
+                              <Badge 
+                                className={cn(
+                                  "absolute -top-1 -right-1 text-xs",
+                                  item.status === 'Ativo' ? 'bg-green-500' :
+                                  item.status === 'Pendente' ? 'bg-yellow-500' : 'bg-gray-500'
+                                )}
+                              >
+                                {item.status}
+                              </Badge>
+                            </div>
+                            
+                            {/* Info Principal */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-sm truncate">{item.pixel.title}</h3>
+                                <Badge variant="outline" className="text-xs">
+                                  ({item.pixel.x}, {item.pixel.y})
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                                <span>{item.pixel.region}</span>
+                                <span>•</span>
+                                <span className="text-primary font-medium">{item.promotion.type}</span>
+                                <span>•</span>
+                                <span>Expira em {item.expiresIn}</span>
+                              </div>
+                              
+                              {/* Stats Compactas */}
+                              <div className="grid grid-cols-4 gap-3 text-xs">
+                                <div className="text-center">
+                                  <div className="font-bold text-blue-500">{formatNumber(item.stats.views)}</div>
+                                  <div className="text-muted-foreground">Views</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-bold text-red-500">{item.stats.likes}</div>
+                                  <div className="text-muted-foreground">Likes</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-bold text-green-500">{item.stats.comments}</div>
+                                  <div className="text-muted-foreground">Comentários</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-bold text-purple-500">{item.stats.roi}x</div>
+                                  <div className="text-muted-foreground">ROI</div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Ações */}
+                            <div className="flex flex-col gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toast({
+                                    title: "Analytics Detalhados",
+                                    description: `ROI: ${item.stats.roi}x • Views: ${item.stats.views.toLocaleString()}`,
+                                  });
+                                }}
+                                className="text-xs min-h-[32px]"
+                              >
+                                <BarChart3 className="h-3 w-3 mr-1" />
+                                Analytics
+                              </Button>
+                              
+                              {item.status === 'Ativo' && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPlaySuccessSound(true);
+                                    toast({
+                                      title: "Promoção Pausada",
+                                      description: "A promoção foi pausada temporariamente.",
+                                    });
+                                  }}
+                                  className="text-xs min-h-[32px]"
+                                >
+                                  <Pause className="h-3 w-3 mr-1" />
+                                  Pausar
+                                </Button>
+                              )}
+                              
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPlaySuccessSound(true);
+                                  addCredits(Math.floor(item.promotion.price * 0.1));
+                                  toast({
+                                    title: "Promoção Renovada",
+                                    description: `Renovada por mais ${item.promotion.duration}. Recebeu ${Math.floor(item.promotion.price * 0.1)} créditos de desconto!`,
+                                  });
+                                }}
+                                className="text-xs min-h-[32px]"
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Renovar
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Progress Bar da Promoção */}
+                          <div className="mt-3 pt-3 border-t border-border/30">
+                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                              <span>Progresso da Campanha</span>
+                              <span>{Math.floor(Math.random() * 40 + 60)}% concluído</span>
+                            </div>
+                            <Progress value={Math.floor(Math.random() * 40 + 60)} className="h-1.5" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
