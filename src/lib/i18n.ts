@@ -3,6 +3,21 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+// Configuração básica do i18next
+i18n.use(initReactI18next).init({
+  fallbackLng: 'en',
+  resources: {
+    en: {
+      translation: {
+        // Suas traduções aqui
+      }
+    },
+  },
+});
+
+export default i18n;
+import { initReactI18next } from 'react-i18next';
+
 // Import translations
 const resources = {
   'pt-PT': {

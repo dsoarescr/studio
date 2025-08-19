@@ -25,13 +25,13 @@ export function SoundEffect({
     if (!audioRef.current) {
       audioRef.current = new Audio(src);
       audioRef.current.preload = 'auto';
-      
+
       // Add error handling for missing audio files
       audioRef.current.addEventListener('error', (e) => {
         console.warn(`Audio file not found or cannot be loaded: ${src}`);
       });
     }
-    
+
     // Update properties on every render where they might change
     audioRef.current.volume = volume;
     audioRef.current.loop = loop;
@@ -40,7 +40,7 @@ export function SoundEffect({
     }
 
     const currentAudio = audioRef.current; // Capture for cleanup
-    
+
     if (onEnd) {
       currentAudio.addEventListener('ended', onEnd);
     } 
@@ -54,11 +54,11 @@ export function SoundEffect({
 
   useEffect(() => {
     if (!audioRef.current) return;
-    
+
     if (play && soundEffects) {
       audioRef.current.currentTime = 0;
       const playPromise = audioRef.current.play(); 
-      
+
       if (playPromise !== undefined) {
         playPromise.catch(err => {
           // Silently handle audio play errors (common in browsers with autoplay restrictions)

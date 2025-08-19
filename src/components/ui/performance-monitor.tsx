@@ -18,29 +18,29 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLowPerformance, setIsLowPerformance] = useState(false);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     let frameCount = 0;
     let lastTime = performance.now();
     let frameId: number;
-    
+
     const checkPerformance = () => {
       // Check if device is low performance
       setIsLowPerformance(isLowPerformanceDevice());
-      
+
       // Only show for low performance devices
       setIsVisible(isLowPerformanceDevice());
     };
-    
+
     const measureFps = () => {
       frameCount++;
       const now = performance.now();
-      
+
       if (now - lastTime >= 1000) {
         setFps(Math.round(frameCount * 1000 / (now - lastTime)));
         frameCount = 0;
         lastTime = now;
-        
+
         // Check memory usage if available
         if ((performance as any).memory) {
           const memoryInfo = (performance as any).memory;
@@ -48,39 +48,43 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
           const totalMemoryMB = Math.round(memoryInfo.jsHeapSizeLimit / (1024 * 1024));
           setMemoryUsage(usedMemoryMB / totalMemoryMB * 100);
         }
-        
+
         // Show warning if FPS is consistently low
         if (fps < 30 && !isVisible) {
           setIsVisible(true);
         }
       }
-      
+
       frameId = requestAnimationFrame(measureFps);
     };
-    
-    checkPerformance();
-    frameId = requestAnimationFrame(measureFps);
-    
+
+    if (typeof window !== 'undefined') {
+      checkPerformance();
+      frameId = requestAnimationFrame(measureFps);
+    }
+
     return () => {
-      cancelAnimationFrame(frameId);
+      if (typeof window !== 'undefined') {
+        cancelAnimationFrame(frameId);
+      }
     };
   }, [fps, isVisible]);
-  
+
   const handleOptimize = () => {
     if (onOptimize) {
       onOptimize();
     }
-    
+
     toast({
       title: "Modo de Desempenho Ativado",
       description: "Otimizações aplicadas para melhorar a performance.",
     });
-    
+
     setIsVisible(false);
   };
-  
+
   if (!isVisible) return null;
-  
+
   return (
     <Card className="fixed bottom-20 right-4 z-40 w-64 bg-card/90 backdrop-blur-sm border-yellow-500/50 shadow-lg animate-pulse">
       <CardContent className="p-3 space-y-2">
@@ -95,13 +99,13 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
           </div>
           <span className="text-xs font-code">{fps} FPS</span>
         </div>
-        
+
         <Progress value={fps / 60 * 100} className="h-1.5" />
-        
+
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Dispositivo {isLowPerformance ? 'de baixo desempenho' : 'normal'}</span>
         </div>
-        
+
         <Button 
           size="sm" 
           className="w-full text-xs h-8 bg-gradient-to-r from-yellow-500 to-amber-500"
