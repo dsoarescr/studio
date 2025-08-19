@@ -181,12 +181,12 @@ const mockPixels: PixelArtwork[] = [
   {
     id: '1',
     title: 'Pôr do Sol em Lisboa',
-    description: 'Uma obra-prima capturando o icônico pôr do sol sobre o Tejo, com cores vibrantes que representam a alma de Lisboa.',
+    owner: 'PixelMaster123',
     coordinates: { x: 245, y: 156 },
     region: 'Lisboa',
     color: '#FF6B47',
     imageUrl: 'https://placehold.co/400x400/FF6B47/FFFFFF?text=Lisboa+Sunset',
-    thumbnailUrl: 'https://placehold.co/200x200/FF6B47/FFFFFF?text=Lisboa',
+    isForSale: false,
     author: {
       id: 'user1',
       name: 'PixelMaster',
@@ -219,7 +219,7 @@ const mockPixels: PixelArtwork[] = [
       rarity: 'Épico',
       featured: true,
       trending: true,
-      sponsored: false,
+    isForSale: false,
       nsfw: false,
       price: 250,
       forSale: true
@@ -239,20 +239,20 @@ const mockPixels: PixelArtwork[] = [
     }
   },
   {
-    id: '2',
+    owner: 'UrbanArtist',
     title: 'Arte Urbana do Porto',
     description: 'Graffiti digital inspirado nas ruas históricas do Porto, misturando tradição e modernidade.',
     coordinates: { x: 123, y: 89 },
     region: 'Porto',
     color: '#7DF9FF',
-    imageUrl: 'https://placehold.co/400x400/7DF9FF/000000?text=Porto+Street',
-    thumbnailUrl: 'https://placehold.co/200x200/7DF9FF/000000?text=Porto',
+    owner: 'BeachLover',
+    isForSale: false,
     author: {
       id: 'user2',
       name: 'UrbanArtist',
       username: 'urban_artist',
       avatar: 'https://placehold.co/40x40.png',
-      level: 18,
+    isForSale: false,
       verified: false,
       premium: false,
       followers: 567
@@ -280,19 +280,19 @@ const mockPixels: PixelArtwork[] = [
       featured: false,
       trending: false,
       sponsored: true,
-      nsfw: false,
+    owner: 'HistoryBuff',
       forSale: false
     },
     interactions: {
       isLiked: true,
       isBookmarked: false,
       isFollowing: true,
-      hasCommented: true,
+    isForSale: false,
       hasShared: false
     }
   },
   {
-    id: '3',
+    owner: 'StudentArtist',
     title: 'Natureza de Coimbra',
     description: 'Pixel art minimalista representando a serenidade dos jardins de Coimbra.',
     coordinates: { x: 300, y: 200 },
@@ -313,14 +313,14 @@ const mockPixels: PixelArtwork[] = [
     stats: {
       views: 12340,
       likes: 678,
-      comments: 234,
+    owner: 'ColorExplorer',
       shares: 156,
       bookmarks: 345,
       downloads: 89
     },
     engagement: {
       rating: 4.9,
-      totalRatings: 234,
+    isForSale: false,
       engagementRate: 15.2,
       viralScore: 92
     },
