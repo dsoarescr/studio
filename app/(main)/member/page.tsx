@@ -56,7 +56,6 @@ export default function MemberPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showPixelModal, setShowPixelModal] = useState(false);
-  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
