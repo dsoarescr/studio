@@ -20,23 +20,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import { 
-  User, Edit3, Settings, Share2, Crown, Star, Trophy, MapPin, 
-  Heart, Eye, MessageSquare, Calendar, Clock, Coins, Gift, 
-  Zap, Target, Award, Gem, Sparkles, Users, UserPlus, UserMinus,
-  BookImage, Palette, Camera, Link as LinkIcon, Globe, Mail,
-  Phone, Instagram, Twitter, Github, Facebook, Youtube, Twitch,
-  Plus, Minus, Check, X, Copy, Download, Upload, Bookmark,
-  BarChart3, TrendingUp, Activity, Flame, Shield, Lock, Bell,
-  ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Filter,
-  Search, SortAsc, Grid, List, Image as ImageIcon, Play, Pause,
-  Volume2, VolumeX, Maximize, Minimize, RotateCcw, Save, Trash2,
-  ExternalLink, Info, AlertTriangle, CheckCircle, RefreshCw,
-  PieChart, LineChart, Calendar as CalendarIcon, Map, Compass,
-  Navigation, Layers, Brush, PaintBucket, Eraser, Type, Shapes,
-  MousePointer, Hand, ZoomIn, ZoomOut, Move, MoreHorizontal,
-  ThumbsUp, ThumbsDown, Flag, Report, Block, Mute, Archive
-} from "lucide-react";
+import { User, Edit3, Settings, Share2, Crown, Star, Trophy, MapPin, Heart, Eye, MessageSquare, Calendar, Clock, Coins, Gift, Zap, Target, Award, Gem, Sparkles, Users, UserPlus, UserMinus, BookImage, Palette, Camera, Link as LinkIcon, Globe, Mail, Phone, Instagram, Twitter, Github, Facebook, Youtube, Twitch, Plus, Minus, Check, X, Copy, Download, Upload, Bookmark, BarChart3, TrendingUp, Activity, Flame, Shield, Lock, Bell, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Filter, Search, SortAsc, Grid, List, Image as ImageIcon, Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, Save, Trash2, ExternalLink, Info, AlertTriangle, CheckCircle, RefreshCw, PieChart, LineChart, Calendar as CalendarIcon, Map, Compass, Navigation, Layers, Brush, PaintBucket, Eraser, Type, Shapes, MousePointer, Hand, ZoomIn, ZoomOut, Move, MoreHorizontal, ThumbsUp, ThumbsDown, Flag, Import as Report, Blocks as Block, Route as Mute, Archive } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { formatDate, timeAgo } from '@/lib/utils';
 import Image from 'next/image';
