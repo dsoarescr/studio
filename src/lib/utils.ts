@@ -49,8 +49,7 @@ export function timeAgo(date: Date | string, locale?: 'pt-PT' | 'en-US' | 'es-ES
  * @param num The number to format
  * @returns The formatted number string
  */
-export function formatNumber(num: number | null | undefined): string {
-  if (num == null) return '0';
+export function formatNumber(num: number): string {
   if (num >= 1000000000) return `${(num / 1000000000).toFixed(1)}B`;
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
