@@ -15,21 +15,7 @@ import { useUserStore, usePixelStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Search, Filter, SortAsc, Eye, Heart, MessageSquare, Share2, Star, Crown, 
-  Gem, Sparkles, Trophy, Award, Target, Zap, Gift, Coins, Calendar, Clock,
-  TrendingUp, BarChart3, Users, MapPin, Palette, Bookmark, Download, Upload,
-  Settings, Edit, Trash2, Plus, Minus, Check, X, Info, AlertTriangle,
-  Museum, Megaphone, Flame, Lightning, Rocket, Shield, Globe, Camera,
-  Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, ExternalLink,
-  ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal,
-  Tag, Hash, Link as LinkIcon, Image as ImageIcon, Video, Music,
-  PaintBucket, Brush, Eraser, Move, ZoomIn, ZoomOut, Grid3X3,
-  Layers, Contrast, Brightness, Saturation, Blur, Focus, Crop,
-  Copy, Paste, Save, FileText, Folder, Archive, Database, Server,
-  Wifi, WifiOff, Signal, Battery, Smartphone, Monitor, Tablet,
-  Headphones, Speaker, Mic, MicOff, Camera as CameraIcon, Video as VideoIcon
-} from "lucide-react";
+import { Search, Filter, SortAsc, Eye, Heart, MessageSquare, Share2, Star, Crown, Gem, Sparkles, Trophy, Award, Target, Zap, Gift, Coins, Calendar, Clock, TrendingUp, BarChart3, Users, MapPin, Palette, Bookmark, Download, Upload, Settings, Edit, Trash2, Plus, Minus, Check, X, Info, AlertTriangle, House as Museum, Megaphone, Flame, CloudLightning as Lightning, Rocket, Shield, Globe, Camera, Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, ExternalLink, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Tag, Hash, Link as LinkIcon, Image as ImageIcon, Video, Music, PaintBucket, Brush, Eraser, Move, ZoomIn, ZoomOut, Grid3X3, Layers, Contrast, Copyright as Brightness, IterationCw as Saturation, Bluetooth as Blur, Focus, Crop, Copy, Cast as Paste, Save, FileText, Folder, Archive, Database, Server, Wifi, WifiOff, Signal, Battery, Smartphone, Monitor, Tablet, Headphones, Speaker, Mic, MicOff, Camera as CameraIcon, Video as VideoIcon } from "lucide-react";
 import { cn } from '@/lib/utils';
 
 // Types
