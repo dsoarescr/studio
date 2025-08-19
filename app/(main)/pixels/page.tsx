@@ -21,7 +21,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Palette, Star, Eye, Heart, MessageSquare, Share2, Crown, Gem, Sparkles, TrendingUp, Siren as Fire, Zap, Target, Award, Gift, Coins, Calendar, Clock, Filter, Search, SortAsc, Grid3X3, List, Play, Pause, Volume2, VolumeX, Download, Upload, Edit3, Trash2, Copy, ExternalLink, MapPin, Globe, Users, ThumbsUp, Bookmark, Flag, Settings, Info, AlertTriangle, CheckCircle, X, Plus, Minus, ArrowUp, ArrowDown, BarChart3, PieChart, Megaphone, Rocket, Shield, CloudLightning as Lightning, Flame, Lightbulb, Camera, Video, Music, Image as ImageIcon, Type, Brush, Eraser, PaintBucket, Layers, RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Maximize, Minimize, RefreshCw, Save, FolderPlus, Tag, Hash, Link as LinkIcon, Send, Reply, Forward, Archive, Archive as Unarchive, Pin, PinOff, Lock, Unlock, ShoppingCart } from "lucide-react";
+import { Palette, Star, Eye, Heart, MessageSquare, Share2, Crown, Gem, Sparkles, TrendingUp, Siren as Fire, Zap, Target, Award, Gift, Coins, Calendar, Clock, Filter, Search, SortAsc, Grid3X3, List, Play, Pause, Volume2, VolumeX, Download, Upload, Edit3, Trash2, Copy, ExternalLink, MapPin, Globe, Users, ThumbsUp, Bookmark, Flag, Settings, Info, AlertTriangle, CheckCircle, X, Plus, Minus, ArrowUp, ArrowDown, BarChart3, PieChart, Megaphone, Rocket, Shield, CloudLightning as Lightning, Flame, Lightbulb, Camera, Video, Music, Image as ImageIcon, Type, Brush, Eraser, PaintBucket, Layers, RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Maximize, Minimize, RefreshCw, Save, FolderPlus, Tag, Hash, Link as LinkIcon, Send, Reply, Forward, Archive, Archive as Unarchive, Pin, PinOff, Lock, Unlock } from "lucide-react";
 
 interface PixelArtwork {
   id: string;
@@ -181,12 +181,12 @@ const mockPixels: PixelArtwork[] = [
   {
     id: '1',
     title: 'Pôr do Sol em Lisboa',
-    owner: 'PixelMaster123',
+    description: 'Uma obra-prima capturando o icônico pôr do sol sobre o Tejo, com cores vibrantes que representam a alma de Lisboa.',
     coordinates: { x: 245, y: 156 },
     region: 'Lisboa',
     color: '#FF6B47',
     imageUrl: 'https://placehold.co/400x400/FF6B47/FFFFFF?text=Lisboa+Sunset',
-    isForSale: false,
+    thumbnailUrl: 'https://placehold.co/200x200/FF6B47/FFFFFF?text=Lisboa',
     author: {
       id: 'user1',
       name: 'PixelMaster',
@@ -219,7 +219,7 @@ const mockPixels: PixelArtwork[] = [
       rarity: 'Épico',
       featured: true,
       trending: true,
-    isForSale: false,
+      sponsored: false,
       nsfw: false,
       price: 250,
       forSale: true
@@ -239,20 +239,20 @@ const mockPixels: PixelArtwork[] = [
     }
   },
   {
-    owner: 'UrbanArtist',
+    id: '2',
     title: 'Arte Urbana do Porto',
     description: 'Graffiti digital inspirado nas ruas históricas do Porto, misturando tradição e modernidade.',
     coordinates: { x: 123, y: 89 },
     region: 'Porto',
     color: '#7DF9FF',
-    owner: 'BeachLover',
-    isForSale: false,
+    imageUrl: 'https://placehold.co/400x400/7DF9FF/000000?text=Porto+Street',
+    thumbnailUrl: 'https://placehold.co/200x200/7DF9FF/000000?text=Porto',
     author: {
       id: 'user2',
       name: 'UrbanArtist',
       username: 'urban_artist',
       avatar: 'https://placehold.co/40x40.png',
-    isForSale: false,
+      level: 18,
       verified: false,
       premium: false,
       followers: 567
@@ -280,19 +280,19 @@ const mockPixels: PixelArtwork[] = [
       featured: false,
       trending: false,
       sponsored: true,
-    owner: 'HistoryBuff',
+      nsfw: false,
       forSale: false
     },
     interactions: {
       isLiked: true,
       isBookmarked: false,
       isFollowing: true,
-    isForSale: false,
+      hasCommented: true,
       hasShared: false
     }
   },
   {
-    owner: 'StudentArtist',
+    id: '3',
     title: 'Natureza de Coimbra',
     description: 'Pixel art minimalista representando a serenidade dos jardins de Coimbra.',
     coordinates: { x: 300, y: 200 },
@@ -313,14 +313,14 @@ const mockPixels: PixelArtwork[] = [
     stats: {
       views: 12340,
       likes: 678,
-    owner: 'ColorExplorer',
+      comments: 234,
       shares: 156,
       bookmarks: 345,
       downloads: 89
     },
     engagement: {
       rating: 4.9,
-    isForSale: false,
+      totalRatings: 234,
       engagementRate: 15.2,
       viralScore: 92
     },
