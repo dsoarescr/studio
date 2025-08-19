@@ -211,6 +211,7 @@ export default function MemberPage() {
   const [filterTag, setFilterTag] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [activeFilter, setActiveFilter] = useState('all');
   // Profile data
   const [profileData, setProfileData] = useState({
     displayName: 'PixelMasterPT',
