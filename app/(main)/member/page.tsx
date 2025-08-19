@@ -209,6 +209,7 @@ export default function MemberPage() {
   const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'price'>('recent');
   const [filterTag, setFilterTag] = useState<string>('all');
+  const [filter, setFilter] = useState<'all' | 'recent' | 'popular' | 'expensive'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [activeFilter, setActiveFilter] = useState('all');
