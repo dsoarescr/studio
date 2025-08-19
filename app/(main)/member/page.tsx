@@ -1,246 +1,363 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useUserStore, usePixelStore } from "@/lib/store";
+import { useUserStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/hooks/use-toast';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { 
-  User, Edit3, Camera, MapPin, Trophy, Star, Crown, Gem, Sparkles, 
-  Calendar, Clock, Eye, Heart, MessageSquare, Share2, Settings, 
-  Coins, Gift, Zap, Target, Award, Palette, Users, Globe, Link as LinkIcon,
-  Download, Upload, Save, RefreshCw, Plus, Minus, X, Check, 
-  BarChart3, TrendingUp, Activity, Flame, Shield, Lock, Unlock,
-  BookImage, FolderPlus, Image as ImageIcon, Video, Music, Headphones,
-  Instagram, Twitter, Github, Linkedin, Facebook, Youtube, Twitch,
-  Mail, Phone, MapPinIcon, Home, Briefcase, GraduationCap, Coffee,
-  Gamepad2, Brush, Code, Mountain, Waves, Sun, Moon, Snowflake,
-  ChevronRight, ChevronLeft, MoreHorizontal, Filter, Search, SortAsc,
-  Bell, BellOff, Volume2, VolumeX, Smartphone, Monitor, Tablet,
-  Wifi, Signal, Battery, Bluetooth, Usb, HardDrive, Cpu, MemoryStick
+  User, Edit3, Settings, Share2, Crown, Star, Trophy, MapPin, 
+  Heart, Eye, MessageSquare, Calendar, Clock, Coins, Gift, 
+  Zap, Target, Award, Gem, Sparkles, Users, UserPlus, UserMinus,
+  BookImage, Palette, Camera, Link as LinkIcon, Globe, Mail,
+  Phone, Instagram, Twitter, Github, Facebook, Youtube, Twitch,
+  Plus, Minus, Check, X, Copy, Download, Upload, Bookmark,
+  BarChart3, TrendingUp, Activity, Flame, Shield, Lock, Bell,
+  ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Filter,
+  Search, SortAsc, Grid, List, Image as ImageIcon, Play, Pause,
+  Volume2, VolumeX, Maximize, Minimize, RotateCcw, Save, Trash2,
+  ExternalLink, Info, AlertTriangle, CheckCircle, RefreshCw,
+  PieChart, LineChart, Calendar as CalendarIcon, Map, Compass,
+  Navigation, Layers, Brush, PaintBucket, Eraser, Type, Shapes,
+  MousePointer, Hand, ZoomIn, ZoomOut, Move, MoreHorizontal,
+  ThumbsUp, ThumbsDown, Flag, Report, Block, Mute, Archive
 } from "lucide-react";
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/lib/auth-context';
-import { achievementsData } from '@/data/achievements-data';
+import { formatDate, timeAgo } from '@/lib/utils';
+import Image from 'next/image';
 
-interface UserStats {
-  totalPixels: number;
-  totalSpent: number;
-  totalEarned: number;
-  averagePixelValue: number;
-  mostExpensivePixel: number;
-  favoriteRegion: string;
-  favoriteColor: string;
-  creationStreak: number;
-  lastActive: string;
-  joinDate: string;
-  totalViews: number;
-  totalLikes: number;
-  totalComments: number;
-  totalShares: number;
-  rankPosition: number;
-  rankChange: number;
-}
-
-interface PixelArt {
+// Types
+interface UserPixel {
   id: string;
-  title: string;
-  description: string;
-  coordinates: { x: number; y: number };
+  x: number;
+  y: number;
   region: string;
   color: string;
-  imageUrl: string;
-  createdAt: string;
+  title: string;
+  description: string;
+  price: number;
   views: number;
   likes: number;
   comments: number;
   isPublic: boolean;
+  isFavorite: boolean;
+  createdAt: string;
+  lastModified: string;
   tags: string[];
-  rarity: string;
-  price: number;
+  rarity: 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário';
+  imageUrl: string;
 }
 
-interface Album {
+interface UserAlbum {
   id: string;
   name: string;
   description: string;
-  coverImageUrl: string;
+  coverUrl: string;
   pixelCount: number;
-  isPublic: boolean;
-  createdAt: string;
   views: number;
   likes: number;
+  isPublic: boolean;
+  createdAt: string;
   tags: string[];
+  collaborators?: string[];
 }
 
-interface SocialLink {
-  platform: string;
-  handle: string;
-  url: string;
-  icon: React.ReactNode;
-  verified: boolean;
-}
-
-interface Activity {
+interface UserFriend {
   id: string;
-  type: 'purchase' | 'edit' | 'achievement' | 'social' | 'system';
+  name: string;
+  username: string;
+  avatar: string;
+  level: number;
+  isOnline: boolean;
+  lastSeen: string;
+  mutualFriends: number;
+  pixelsOwned: number;
+  isVerified: boolean;
+  isPremium: boolean;
+  status: 'friend' | 'following' | 'follower' | 'pending' | 'blocked';
+}
+
+interface RecentActivity {
+  id: string;
+  type: 'pixel_purchase' | 'pixel_edit' | 'achievement' | 'album_create' | 'social_interaction' | 'level_up';
   title: string;
   description: string;
   timestamp: string;
+  metadata?: any;
   icon: React.ReactNode;
   color: string;
-  metadata?: any;
 }
 
-const mockUserStats: UserStats = {
-  totalPixels: 42,
-  totalSpent: 1250,
-  totalEarned: 890,
-  averagePixelValue: 29.76,
-  mostExpensivePixel: 150,
-  favoriteRegion: 'Lisboa',
-  favoriteColor: '#D4A757',
-  creationStreak: 15,
-  lastActive: '2 minutos atrás',
-  joinDate: '2024-01-15',
-  totalViews: 12450,
-  totalLikes: 2340,
-  totalComments: 456,
-  totalShares: 123,
-  rankPosition: 47,
-  rankChange: 3
-};
+interface UserAchievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  rarity: 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário';
+  unlockedAt: string;
+  progress: number;
+  maxProgress: number;
+  xpReward: number;
+  creditsReward: number;
+  category: string;
+}
 
-const mockPixelArts: PixelArt[] = [
+// Mock Data
+const mockPixels: UserPixel[] = [
   {
     id: '1',
-    title: 'Pôr do Sol em Lisboa',
-    description: 'Uma vista deslumbrante do Tejo ao entardecer',
-    coordinates: { x: 245, y: 156 },
+    x: 245,
+    y: 156,
     region: 'Lisboa',
-    color: '#FF6B47',
-    imageUrl: 'https://placehold.co/200x200/FF6B47/FFFFFF?text=Lisboa+Sunset',
-    createdAt: '2024-03-15',
+    color: '#D4A757',
+    title: 'Pixel Dourado de Lisboa',
+    description: 'Minha primeira obra-prima no coração da capital',
+    price: 150,
     views: 1234,
     likes: 89,
     comments: 23,
     isPublic: true,
-    tags: ['lisboa', 'pôr-do-sol', 'tejo'],
+    isFavorite: true,
+    createdAt: '2024-03-15T10:30:00Z',
+    lastModified: '2024-03-16T14:20:00Z',
+    tags: ['lisboa', 'dourado', 'capital'],
     rarity: 'Épico',
-    price: 150
+    imageUrl: 'https://placehold.co/200x200/D4A757/FFFFFF?text=Lisboa'
   },
   {
     id: '2',
-    title: 'Arte Urbana do Porto',
-    description: 'Inspirado na street art da Rua Miguel Bombarda',
-    coordinates: { x: 123, y: 89 },
+    x: 123,
+    y: 89,
     region: 'Porto',
     color: '#7DF9FF',
-    imageUrl: 'https://placehold.co/200x200/7DF9FF/000000?text=Porto+Street',
-    createdAt: '2024-03-10',
+    title: 'Arte Azul do Porto',
+    description: 'Inspirado nas águas do Douro',
+    price: 120,
     views: 567,
     likes: 45,
     comments: 12,
     isPublic: true,
-    tags: ['porto', 'street-art', 'urbano'],
+    isFavorite: false,
+    createdAt: '2024-03-10T09:15:00Z',
+    lastModified: '2024-03-10T09:15:00Z',
+    tags: ['porto', 'azul', 'douro'],
     rarity: 'Raro',
-    price: 75
+    imageUrl: 'https://placehold.co/200x200/7DF9FF/000000?text=Porto'
+  },
+  {
+    id: '3',
+    x: 300,
+    y: 200,
+    region: 'Coimbra',
+    color: '#9C27B0',
+    title: 'Pixel Universitário',
+    description: 'Homenagem à cidade dos estudantes',
+    price: 80,
+    views: 234,
+    likes: 18,
+    comments: 5,
+    isPublic: false,
+    isFavorite: true,
+    createdAt: '2024-03-05T16:45:00Z',
+    lastModified: '2024-03-05T16:45:00Z',
+    tags: ['coimbra', 'universidade', 'estudantes'],
+    rarity: 'Incomum',
+    imageUrl: 'https://placehold.co/200x200/9C27B0/FFFFFF?text=Coimbra'
   }
 ];
 
-const mockAlbums: Album[] = [
+const mockAlbums: UserAlbum[] = [
   {
     id: '1',
     name: 'Paisagens de Portugal',
-    description: 'Uma coleção das mais belas paisagens portuguesas em pixel art',
-    coverImageUrl: 'https://placehold.co/300x200/D4A757/FFFFFF?text=Paisagens+PT',
+    description: 'Coleção das mais belas paisagens portuguesas em pixel art',
+    coverUrl: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Paisagens',
     pixelCount: 15,
-    isPublic: true,
-    createdAt: '2024-03-01',
     views: 2340,
     likes: 156,
-    tags: ['paisagem', 'portugal', 'natureza']
+    isPublic: true,
+    createdAt: '2024-03-01T12:00:00Z',
+    tags: ['paisagem', 'portugal', 'natureza'],
+    collaborators: ['ArtistaPro', 'ColorMaster']
   },
   {
     id: '2',
-    name: 'Cidades Históricas',
-    description: 'Centros históricos das principais cidades portuguesas',
-    coverImageUrl: 'https://placehold.co/300x200/9C27B0/FFFFFF?text=Cidades+Históricas',
+    name: 'Arte Urbana',
+    description: 'Pixels inspirados na vida urbana portuguesa',
+    coverUrl: 'https://placehold.co/300x200/FF5722/FFFFFF?text=Urbano',
     pixelCount: 8,
-    isPublic: false,
-    createdAt: '2024-02-20',
     views: 890,
     likes: 67,
-    tags: ['história', 'cidades', 'património']
+    isPublic: true,
+    createdAt: '2024-02-15T18:30:00Z',
+    tags: ['urbano', 'cidade', 'street-art']
+  },
+  {
+    id: '3',
+    name: 'Coleção Privada',
+    description: 'Meus pixels mais especiais e pessoais',
+    coverUrl: 'https://placehold.co/300x200/673AB7/FFFFFF?text=Privado',
+    pixelCount: 5,
+    views: 0,
+    likes: 0,
+    isPublic: false,
+    createdAt: '2024-01-20T10:15:00Z',
+    tags: ['pessoal', 'especial', 'privado']
   }
 ];
 
-const mockSocialLinks: SocialLink[] = [
-  {
-    platform: 'Instagram',
-    handle: '@pixelmaster_pt',
-    url: 'https://instagram.com/pixelmaster_pt',
-    icon: <Instagram className="h-4 w-4" />,
-    verified: true
-  },
-  {
-    platform: 'Twitter',
-    handle: '@pixelmaster',
-    url: 'https://twitter.com/pixelmaster',
-    icon: <Twitter className="h-4 w-4" />,
-    verified: false
-  },
-  {
-    platform: 'GitHub',
-    handle: 'pixelmaster',
-    url: 'https://github.com/pixelmaster',
-    icon: <Github className="h-4 w-4" />,
-    verified: true
-  }
-];
-
-const mockActivities: Activity[] = [
+const mockFriends: UserFriend[] = [
   {
     id: '1',
-    type: 'purchase',
-    title: 'Pixel Comprado',
-    description: 'Adquiriu pixel em Lisboa (245, 156) por €150',
-    timestamp: '2 horas atrás',
+    name: 'PixelArtist',
+    username: 'pixelartist123',
+    avatar: 'https://placehold.co/40x40.png',
+    level: 18,
+    isOnline: true,
+    lastSeen: 'Online',
+    mutualFriends: 12,
+    pixelsOwned: 234,
+    isVerified: true,
+    isPremium: true,
+    status: 'friend'
+  },
+  {
+    id: '2',
+    name: 'ColorMaster',
+    username: 'colormaster',
+    avatar: 'https://placehold.co/40x40.png',
+    level: 15,
+    isOnline: false,
+    lastSeen: '2h atrás',
+    mutualFriends: 8,
+    pixelsOwned: 156,
+    isVerified: false,
+    isPremium: false,
+    status: 'following'
+  },
+  {
+    id: '3',
+    name: 'ArtCollector',
+    username: 'artcollector',
+    avatar: 'https://placehold.co/40x40.png',
+    level: 22,
+    isOnline: true,
+    lastSeen: 'Online',
+    mutualFriends: 5,
+    pixelsOwned: 567,
+    isVerified: true,
+    isPremium: true,
+    status: 'follower'
+  }
+];
+
+const mockActivities: RecentActivity[] = [
+  {
+    id: '1',
+    type: 'pixel_purchase',
+    title: 'Novo Pixel Adquirido',
+    description: 'Comprou pixel em Lisboa (245, 156) por 150 créditos',
+    timestamp: '2024-03-16T14:20:00Z',
     icon: <MapPin className="h-4 w-4" />,
     color: 'text-green-500',
-    metadata: { coordinates: { x: 245, y: 156 }, price: 150 }
+    metadata: { x: 245, y: 156, region: 'Lisboa', price: 150 }
   },
   {
     id: '2',
     type: 'achievement',
     title: 'Conquista Desbloqueada',
     description: 'Desbloqueou "Mestre das Cores" - Nível 2',
-    timestamp: '1 dia atrás',
+    timestamp: '2024-03-15T16:45:00Z',
     icon: <Trophy className="h-4 w-4" />,
     color: 'text-yellow-500',
-    metadata: { achievement: 'color_master', level: 2 }
+    metadata: { achievementId: 'color_master', level: 2 }
   },
   {
     id: '3',
-    type: 'social',
-    title: 'Novo Seguidor',
-    description: 'PixelArtist123 começou a seguir-te',
-    timestamp: '2 dias atrás',
-    icon: <Users className="h-4 w-4" />,
+    type: 'album_create',
+    title: 'Novo Álbum Criado',
+    description: 'Criou o álbum "Paisagens de Portugal" com 15 pixels',
+    timestamp: '2024-03-14T11:30:00Z',
+    icon: <BookImage className="h-4 w-4" />,
+    color: 'text-purple-500',
+    metadata: { albumId: '1', pixelCount: 15 }
+  },
+  {
+    id: '4',
+    type: 'level_up',
+    title: 'Subiu de Nível',
+    description: 'Alcançou o nível 15 e recebeu 500 créditos de bónus',
+    timestamp: '2024-03-12T20:15:00Z',
+    icon: <Zap className="h-4 w-4" />,
     color: 'text-blue-500',
-    metadata: { follower: 'PixelArtist123' }
+    metadata: { newLevel: 15, bonusCredits: 500 }
+  },
+  {
+    id: '5',
+    type: 'social_interaction',
+    title: 'Novo Seguidor',
+    description: 'ArtCollector começou a seguir você',
+    timestamp: '2024-03-11T09:20:00Z',
+    icon: <UserPlus className="h-4 w-4" />,
+    color: 'text-pink-500',
+    metadata: { userId: '3', userName: 'ArtCollector' }
+  }
+];
+
+const mockAchievements: UserAchievement[] = [
+  {
+    id: '1',
+    name: 'Primeiro Pixel',
+    description: 'Comprou o seu primeiro pixel',
+    icon: <MapPin className="h-5 w-5" />,
+    rarity: 'Comum',
+    unlockedAt: '2024-01-15T10:00:00Z',
+    progress: 1,
+    maxProgress: 1,
+    xpReward: 50,
+    creditsReward: 10,
+    category: 'Iniciante'
+  },
+  {
+    id: '2',
+    name: 'Mestre das Cores',
+    description: 'Usou 30 cores diferentes',
+    icon: <Palette className="h-5 w-5" />,
+    rarity: 'Épico',
+    unlockedAt: '2024-03-15T16:45:00Z',
+    progress: 30,
+    maxProgress: 30,
+    xpReward: 300,
+    creditsReward: 100,
+    category: 'Criatividade'
+  },
+  {
+    id: '3',
+    name: 'Colecionador',
+    description: 'Possui 50 pixels diferentes',
+    icon: <Gem className="h-5 w-5" />,
+    rarity: 'Raro',
+    unlockedAt: '2024-03-10T12:30:00Z',
+    progress: 42,
+    maxProgress: 50,
+    xpReward: 200,
+    creditsReward: 75,
+    category: 'Coleção'
   }
 ];
 
@@ -253,142 +370,191 @@ export default function MemberPage() {
     xpMax, 
     pixels, 
     achievements, 
-    isPremium, 
-    isVerified,
+    streak,
+    totalSpent,
+    totalEarned,
+    favoriteColor,
+    joinDate,
     addCredits,
     addXp,
-    addPixel
+    unlockAchievement
   } = useUserStore();
   
-  const { soldPixels } = usePixelStore();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { vibrate } = useHapticFeedback();
   
+  // State
+  const [activeTab, setActiveTab] = useState('overview');
+  const [userPixels, setUserPixels] = useState<UserPixel[]>(mockPixels);
+  const [userAlbums, setUserAlbums] = useState<UserAlbum[]>(mockAlbums);
+  const [userFriends, setUserFriends] = useState<UserFriend[]>(mockFriends);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>(mockActivities);
+  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>(mockAchievements);
+  
+  // Profile editing
   const [isEditing, setIsEditing] = useState(false);
-  const [userStats] = useState<UserStats>(mockUserStats);
-  const [pixelArts] = useState<PixelArt[]>(mockPixelArts);
-  const [albums, setAlbums] = useState<Album[]>(mockAlbums);
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(mockSocialLinks);
-  const [activities] = useState<Activity[]>(mockActivities);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [playSound, setPlaySound] = useState(false);
-  const [selectedTab, setSelectedTab] = useState('overview');
-  const [profileData, setProfileData] = useState({
-    displayName: 'PixelMasterPT',
-    bio: 'Artista digital apaixonado por pixel art e pela beleza de Portugal. Criando arte única pixel a pixel! 🎨🇵🇹',
+  const [editedProfile, setEditedProfile] = useState({
+    displayName: user?.displayName || 'PixelMasterPT',
+    bio: 'Artista digital apaixonado por pixel art e pela cultura portuguesa. Criando arte única no Pixel Universe! 🎨🇵🇹',
     location: 'Lisboa, Portugal',
     website: 'https://pixelmaster.pt',
-    birthDate: '1995-06-15',
-    occupation: 'Designer Digital',
-    interests: ['Pixel Art', 'Fotografia', 'Viagens', 'História']
+    socialLinks: {
+      instagram: '@pixelmaster_pt',
+      twitter: '@pixelmaster',
+      github: 'pixelmaster',
+      youtube: 'PixelMasterPT'
+    }
   });
+  
+  // Filters and search
+  const [pixelFilter, setPixelFilter] = useState<'all' | 'public' | 'private' | 'favorites'>('all');
+  const [pixelSort, setPixelSort] = useState<'recent' | 'popular' | 'price' | 'alphabetical'>('recent');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Privacy settings
   const [privacySettings, setPrivacySettings] = useState({
-    showEmail: false,
-    showLocation: true,
-    showStats: true,
-    showActivity: true,
+    profilePublic: true,
+    showPixelCount: true,
+    showAchievements: true,
+    showActivity: false,
     allowMessages: true,
     showOnlineStatus: true
   });
-  const [notificationSettings, setNotificationSettings] = useState({
-    newFollowers: true,
-    pixelLikes: true,
-    comments: true,
-    achievements: true,
-    systemUpdates: false
+  
+  // Effects
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [playSound, setPlaySound] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Computed values
+  const xpPercentage = (xp / xpMax) * 100;
+  const nextLevelXp = xpMax - xp;
+  const totalPixelViews = userPixels.reduce((sum, pixel) => sum + pixel.views, 0);
+  const totalPixelLikes = userPixels.reduce((sum, pixel) => sum + pixel.likes, 0);
+  const averagePixelPrice = userPixels.length > 0 ? userPixels.reduce((sum, pixel) => sum + pixel.price, 0) / userPixels.length : 0;
+  const mostExpensivePixel = userPixels.reduce((max, pixel) => pixel.price > max.price ? pixel : max, userPixels[0] || { price: 0 });
+  
+  const friends = userFriends.filter(f => f.status === 'friend');
+  const followers = userFriends.filter(f => f.status === 'follower');
+  const following = userFriends.filter(f => f.status === 'following');
+  
+  // Filter pixels
+  const filteredPixels = userPixels.filter(pixel => {
+    const matchesFilter = 
+      pixelFilter === 'all' || 
+      (pixelFilter === 'public' && pixel.isPublic) ||
+      (pixelFilter === 'private' && !pixel.isPublic) ||
+      (pixelFilter === 'favorites' && pixel.isFavorite);
+    
+    const matchesSearch = !searchQuery || 
+      pixel.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      pixel.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      pixel.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    return matchesFilter && matchesSearch;
+  }).sort((a, b) => {
+    switch (pixelSort) {
+      case 'popular':
+        return (b.views + b.likes) - (a.views + a.likes);
+      case 'price':
+        return b.price - a.price;
+      case 'alphabetical':
+        return a.title.localeCompare(b.title);
+      default:
+        return new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime();
+    }
   });
 
-  const xpPercentage = (xp / xpMax) * 100;
-  const unlockedAchievements = achievementsData.filter(ach => 
-    ach.tiers.some(tier => tier.isUnlocked)
-  );
-
+  // Handlers
   const handleSaveProfile = () => {
-    setIsEditing(false);
-    setShowConfetti(true);
-    setPlaySound(true);
-    addXp(25);
-    addCredits(10);
+    setIsLoading(true);
+    vibrate('medium');
     
-    toast({
-      title: "Perfil Atualizado! ✨",
-      description: "As suas alterações foram guardadas. Recebeu 25 XP + 10 créditos!",
-    });
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsEditing(false);
+      setShowConfetti(true);
+      setPlaySound(true);
+      
+      addXp(25);
+      addCredits(10);
+      
+      toast({
+        title: "Perfil Atualizado! ✨",
+        description: "Suas informações foram salvas. +25 XP, +10 créditos!",
+      });
+    }, 1500);
   };
 
-  const handleShareProfile = async () => {
-    const shareData = {
-      title: `Perfil de ${profileData.displayName} - Pixel Universe`,
-      text: `Confira o perfil incrível de ${profileData.displayName} no Pixel Universe!`,
-      url: `${window.location.origin}/member/${profileData.displayName.toLowerCase()}`
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        addXp(15);
-        addCredits(5);
-        toast({
-          title: "📤 Perfil Partilhado!",
-          description: "Recebeu 15 XP + 5 créditos por partilhar!",
-        });
-      } catch (error) {
-        // User cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(shareData.url);
-      toast({
-        title: "🔗 Link Copiado!",
-        description: "Link do perfil copiado para a área de transferência.",
-      });
+  const handlePixelAction = (action: string, pixelId: string) => {
+    vibrate('light');
+    setPlaySound(true);
+    
+    switch (action) {
+      case 'favorite':
+        setUserPixels(prev => prev.map(p => 
+          p.id === pixelId ? { ...p, isFavorite: !p.isFavorite } : p
+        ));
+        addXp(5);
+        break;
+      case 'share':
+        navigator.clipboard.writeText(`${window.location.origin}/pixel/${pixelId}`);
+        toast({ title: "🔗 Link Copiado!", description: "Link do pixel copiado." });
+        addXp(8);
+        break;
+      case 'edit':
+        toast({ title: "🎨 Abrindo Editor", description: "Carregando editor avançado..." });
+        break;
     }
   };
 
-  const handleCreateAlbum = () => {
-    const newAlbum: Album = {
-      id: Date.now().toString(),
-      name: 'Novo Álbum',
-      description: 'Descrição do álbum...',
-      coverImageUrl: 'https://placehold.co/300x200/D4A757/FFFFFF?text=Novo+Álbum',
-      pixelCount: 0,
-      isPublic: true,
-      createdAt: new Date().toISOString().split('T')[0],
-      views: 0,
-      likes: 0,
-      tags: []
-    };
+  const handleFriendAction = (action: string, friendId: string) => {
+    vibrate('medium');
+    setPlaySound(true);
     
-    setAlbums(prev => [newAlbum, ...prev]);
-    addXp(20);
-    addCredits(8);
+    const friend = userFriends.find(f => f.id === friendId);
+    if (!friend) return;
     
-    toast({
-      title: "📚 Álbum Criado!",
-      description: "Novo álbum criado com sucesso. Recebeu 20 XP + 8 créditos!",
-    });
+    switch (action) {
+      case 'follow':
+        setUserFriends(prev => prev.map(f => 
+          f.id === friendId ? { ...f, status: 'following' } : f
+        ));
+        addXp(15);
+        addCredits(5);
+        toast({ 
+          title: "👥 A Seguir!", 
+          description: `Agora segue ${friend.name}. +15 XP, +5 créditos!` 
+        });
+        break;
+      case 'unfollow':
+        setUserFriends(prev => prev.map(f => 
+          f.id === friendId ? { ...f, status: 'follower' } : f
+        ));
+        toast({ title: "Deixou de Seguir", description: `Não segue mais ${friend.name}.` });
+        break;
+      case 'message':
+        toast({ title: "💬 Mensagem", description: `Abrindo chat com ${friend.name}...` });
+        break;
+    }
   };
 
-  const handleFollowUser = () => {
+  const handleClaimDailyBonus = () => {
+    vibrate('heavy');
     setShowConfetti(true);
     setPlaySound(true);
-    addXp(30);
-    addCredits(15);
+    
+    const bonusCredits = streak * 10;
+    const bonusXp = streak * 5;
+    
+    addCredits(bonusCredits);
+    addXp(bonusXp);
     
     toast({
-      title: "👥 Novo Seguidor!",
-      description: "Alguém começou a seguir-te. Recebeu 30 XP + 15 créditos!",
-    });
-  };
-
-  const handleClaimDailyReward = () => {
-    setShowConfetti(true);
-    setPlaySound(true);
-    addCredits(userStats.creationStreak * 10);
-    addXp(userStats.creationStreak * 5);
-    
-    toast({
-      title: "🎁 Recompensa Diária!",
-      description: `Sequência de ${userStats.creationStreak} dias! Recebeu ${userStats.creationStreak * 10} créditos + ${userStats.creationStreak * 5} XP!`,
+      title: "🎁 Bónus Diário Reclamado!",
+      description: `+${bonusCredits} créditos, +${bonusXp} XP (Sequência: ${streak} dias)`,
     });
   };
 
@@ -403,948 +569,940 @@ export default function MemberPage() {
     }
   };
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'purchase': return <MapPin className="h-4 w-4" />;
-      case 'edit': return <Edit3 className="h-4 w-4" />;
-      case 'achievement': return <Trophy className="h-4 w-4" />;
-      case 'social': return <Users className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4" />;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'friend': return 'text-green-500';
+      case 'following': return 'text-blue-500';
+      case 'follower': return 'text-purple-500';
+      case 'pending': return 'text-yellow-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'friend': return 'Amigo';
+      case 'following': return 'A Seguir';
+      case 'follower': return 'Seguidor';
+      case 'pending': return 'Pendente';
+      default: return 'Desconhecido';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 pb-20">
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSound} onEnd={() => setPlaySound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl mb-16">
-        {/* Enhanced Profile Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
+      <div className="container mx-auto px-3 py-4 space-y-4 max-w-md">
+        {/* Profile Header */}
+        <Card className="shadow-xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
           
-          <CardContent className="relative p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Avatar and Basic Info */}
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="relative group">
-                  <Avatar className="h-32 w-32 border-4 border-primary shadow-2xl group-hover:scale-105 transition-transform duration-300">
-                    <AvatarImage 
-                      src={user?.photoURL || 'https://placehold.co/128x128.png'} 
-                      alt={profileData.displayName}
-                      data-ai-hint="profile avatar"
-                    />
-                    <AvatarFallback className="text-4xl font-headline bg-gradient-to-br from-primary to-accent text-primary-foreground">
-                      {profileData.displayName.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <Button 
-                    size="icon" 
-                    className="absolute -bottom-2 -right-2 rounded-full shadow-lg bg-primary hover:bg-primary/90"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
-                  
-                  {/* Status Indicators */}
-                  <div className="absolute -top-2 -left-2 flex flex-col gap-1">
-                    {isPremium && (
-                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 animate-pulse">
-                        <Crown className="h-3 w-3 mr-1" />
-                        Premium
-                      </Badge>
-                    )}
-                    {isVerified && (
-                      <Badge className="bg-blue-500">
-                        <Shield className="h-3 w-3 mr-1" />
-                        Verificado
-                      </Badge>
-                    )}
-                    {userStats.rankPosition <= 10 && (
-                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500">
-                        <Star className="h-3 w-3 mr-1" />
-                        Top {userStats.rankPosition}
-                      </Badge>
-                    )}
-                  </div>
+          <CardContent className="p-6 relative">
+            {/* Avatar and Basic Info */}
+            <div className="text-center space-y-4">
+              <div className="relative inline-block">
+                <Avatar className="h-24 w-24 border-4 border-primary shadow-2xl hover:scale-105 transition-transform duration-300">
+                  <AvatarImage 
+                    src={user?.photoURL || 'https://placehold.co/96x96.png'} 
+                    alt={editedProfile.displayName}
+                  />
+                  <AvatarFallback className="text-2xl font-headline bg-gradient-to-br from-primary to-accent text-white">
+                    {editedProfile.displayName.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                
+                {/* Status Indicators */}
+                <div className="absolute -top-1 -right-1 flex flex-col gap-1">
+                  <Badge className="bg-green-500 text-white text-xs px-1 py-0.5">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-1" />
+                    Online
+                  </Badge>
+                  {level >= 10 && (
+                    <Badge className="bg-purple-500 text-white text-xs px-1 py-0.5">
+                      <Crown className="h-3 w-3" />
+                    </Badge>
+                  )}
                 </div>
                 
-                <div className="text-center lg:text-left mt-4">
-                  <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <h1 className="text-3xl font-headline font-bold text-gradient-gold">
-                      {profileData.displayName}
-                    </h1>
-                    {userStats.rankChange > 0 && (
-                      <Badge className="bg-green-500 animate-bounce">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        +{userStats.rankChange}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 justify-center lg:justify-start mt-2">
-                    <Badge variant="secondary" className="font-code">
-                      Nível {level}
-                    </Badge>
-                    <Badge variant="outline" className="font-code">
-                      #{userStats.rankPosition} Global
-                    </Badge>
-                    {userStats.creationStreak > 0 && (
-                      <Badge className="bg-orange-500">
-                        <Flame className="h-3 w-3 mr-1" />
-                        {userStats.creationStreak} dias
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 justify-center lg:justify-start">
-                    <MapPinIcon className="h-4 w-4" />
-                    <span>{profileData.location}</span>
-                    <span>•</span>
-                    <Calendar className="h-4 w-4" />
-                    <span>Desde {userStats.joinDate}</span>
-                  </div>
-                </div>
+                {/* Level Badge */}
+                <Badge className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1">
+                  Nível {level}
+                </Badge>
               </div>
               
-              {/* Stats Grid */}
-              <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="text-center p-4 bg-primary/10 border-primary/30 hover:shadow-lg transition-shadow">
-                  <MapPin className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-primary">{pixels}</p>
-                  <p className="text-xs text-muted-foreground">Pixels Possuídos</p>
-                </Card>
+              {/* Name and Title */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <h1 className="text-2xl font-headline font-bold text-gradient-gold">
+                    {editedProfile.displayName}
+                  </h1>
+                  <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                  <Crown className="h-5 w-5 text-amber-500" />
+                </div>
                 
-                <Card className="text-center p-4 bg-accent/10 border-accent/30 hover:shadow-lg transition-shadow">
-                  <Trophy className="h-8 w-8 text-accent mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-accent">{achievements}</p>
-                  <p className="text-xs text-muted-foreground">Conquistas</p>
-                </Card>
-                
-                <Card className="text-center p-4 bg-green-500/10 border-green-500/30 hover:shadow-lg transition-shadow">
-                  <Eye className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-green-500">{userStats.totalViews.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">Visualizações</p>
-                </Card>
-                
-                <Card className="text-center p-4 bg-red-500/10 border-red-500/30 hover:shadow-lg transition-shadow">
-                  <Heart className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-red-500">{userStats.totalLikes.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">Curtidas</p>
-                </Card>
-              </div>
-            </div>
-            
-            {/* Bio and Actions */}
-            <div className="mt-6 space-y-4">
-              <div className="bg-background/50 p-4 rounded-lg">
-                <p className="text-foreground italic text-center lg:text-left leading-relaxed">
-                  "{profileData.bio}"
+                <p className="text-sm text-muted-foreground font-code">
+                  @{editedProfile.displayName.toLowerCase().replace(/\s+/g, '')}
                 </p>
+                
+                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {editedProfile.location}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    Desde {formatDate(new Date(joinDate), 'MMM yyyy')}
+                  </span>
+                </div>
               </div>
               
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                <Button onClick={handleShareProfile} className="bg-gradient-to-r from-blue-500 to-cyan-500">
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Partilhar Perfil
-                </Button>
-                
-                <Button variant="outline" onClick={() => setIsEditing(true)}>
+              {/* Bio */}
+              <Card className="bg-background/50 p-3 text-center">
+                <p className="text-sm text-foreground italic leading-relaxed">
+                  "{editedProfile.bio}"
+                </p>
+              </Card>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setIsEditing(true)}
+                >
                   <Edit3 className="h-4 w-4 mr-2" />
-                  Editar Perfil
+                  Editar
                 </Button>
-                
-                <Button variant="outline" onClick={handleClaimDailyReward}>
-                  <Gift className="h-4 w-4 mr-2" />
-                  Recompensa Diária
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/user/${user?.uid}`);
+                    toast({ title: "🔗 Perfil Partilhado!", description: "Link copiado!" });
+                  }}
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Partilhar
                 </Button>
-                
-                {socialLinks.length > 0 && (
-                  <div className="flex gap-2">
-                    {socialLinks.slice(0, 3).map(social => (
-                      <Button 
-                        key={social.platform}
-                        variant="outline" 
-                        size="icon"
-                        asChild
-                        className="hover:scale-110 transition-transform"
-                      >
-                        <a href={social.url} target="_blank" rel="noopener noreferrer">
-                          {social.icon}
-                        </a>
-                      </Button>
-                    ))}
-                  </div>
-                )}
               </div>
-            </div>
-            
-            {/* XP Progress */}
-            <div className="mt-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium">Progresso para Nível {level + 1}</span>
-                <span className="font-code text-primary">{xp.toLocaleString()} / {xpMax.toLocaleString()} XP</span>
-              </div>
-              <div className="relative">
-                <Progress value={xpPercentage} className="h-4 shadow-inner" />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full animate-shimmer" 
-                     style={{ backgroundSize: '200% 100%' }} />
-              </div>
-              <p className="text-xs text-muted-foreground text-right">
-                Faltam {(xpMax - xp).toLocaleString()} XP para o próximo nível
-              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Enhanced Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-12 bg-card/50 backdrop-blur-sm shadow-md">
-            <TabsTrigger value="overview" className="font-headline">
-              <User className="h-4 w-4 mr-2"/>
-              Visão Geral
-            </TabsTrigger>
-            <TabsTrigger value="gallery" className="font-headline">
-              <Palette className="h-4 w-4 mr-2"/>
-              Galeria
-            </TabsTrigger>
-            <TabsTrigger value="albums" className="font-headline">
-              <BookImage className="h-4 w-4 mr-2"/>
-              Álbuns
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="font-headline">
-              <Trophy className="h-4 w-4 mr-2"/>
-              Conquistas
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="font-headline">
-              <BarChart3 className="h-4 w-4 mr-2"/>
-              Estatísticas
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="font-headline">
-              <Settings className="h-4 w-4 mr-2"/>
-              Definições
-            </TabsTrigger>
-          </TabsList>
+        {/* XP Progress */}
+        <Card className="shadow-lg">
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-medium">Progresso de Nível</span>
+                <span className="text-sm text-muted-foreground font-code">
+                  {xp.toLocaleString()} / {xpMax.toLocaleString()} XP
+                </span>
+              </div>
+              
+              <div className="relative">
+                <Progress value={xpPercentage} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-accent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+              </div>
+              
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Faltam {nextLevelXp.toLocaleString()} XP</span>
+                <span>{Math.round(xpPercentage)}% completo</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-primary/10 to-accent/5">
+            <CardContent className="p-4 text-center">
+              <Coins className="h-8 w-8 text-primary mx-auto mb-2 animate-pulse" />
+              <p className="text-2xl font-bold text-primary">{credits.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Créditos</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-accent/10 to-purple-500/5">
+            <CardContent className="p-4 text-center">
+              <Gift className="h-8 w-8 text-accent mx-auto mb-2 animate-pulse" />
+              <p className="text-2xl font-bold text-accent">{specialCredits.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Especiais</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+            <CardContent className="p-4 text-center">
+              <MapPin className="h-8 w-8 text-green-500 mx-auto mb-2 animate-pulse" />
+              <p className="text-2xl font-bold text-green-500">{pixels}</p>
+              <p className="text-xs text-muted-foreground">Pixels</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-yellow-500/10 to-orange-500/5">
+            <CardContent className="p-4 text-center">
+              <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2 animate-pulse" />
+              <p className="text-2xl font-bold text-yellow-500">{achievements}</p>
+              <p className="text-xs text-muted-foreground">Conquistas</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Daily Bonus */}
+        <Card className="shadow-lg bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-500/20 rounded-full">
+                  <Gift className="h-6 w-6 text-green-500 animate-bounce" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Bónus Diário</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Sequência: {streak} dias 🔥
+                  </p>
+                </div>
+              </div>
+              
+              <Button onClick={handleClaimDailyBonus} className="bg-green-500 hover:bg-green-600">
+                <Gift className="h-4 w-4 mr-2" />
+                +{streak * 10}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Main Content Tabs */}
+        <Card className="shadow-xl">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50">
+              <TabsTrigger value="overview" className="text-xs">
+                <BarChart3 className="h-4 w-4 mr-1" />
+                Visão Geral
+              </TabsTrigger>
+              <TabsTrigger value="pixels" className="text-xs">
+                <Palette className="h-4 w-4 mr-1" />
+                Pixels ({userPixels.length})
+              </TabsTrigger>
+              <TabsTrigger value="social" className="text-xs">
+                <Users className="h-4 w-4 mr-1" />
+                Social
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-4 p-4">
+              {/* Performance Stats */}
+              <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
+                    Estatísticas de Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="space-y-1">
+                      <p className="text-2xl font-bold text-blue-500">{totalPixelViews.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Total de Views</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-bold text-red-500">{totalPixelLikes.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Total de Likes</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-bold text-green-500">€{averagePixelPrice.toFixed(0)}</p>
+                      <p className="text-xs text-muted-foreground">Preço Médio</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-bold text-purple-500">€{mostExpensivePixel?.price || 0}</p>
+                      <p className="text-xs text-muted-foreground">Mais Caro</p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-sm">Distribuição por Região</h4>
+                    {['Lisboa', 'Porto', 'Coimbra'].map(region => {
+                      const regionPixels = userPixels.filter(p => p.region === region).length;
+                      const percentage = userPixels.length > 0 ? (regionPixels / userPixels.length) * 100 : 0;
+                      
+                      return (
+                        <div key={region} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>{region}</span>
+                            <span className="font-mono">{regionPixels} pixels</span>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Recent Activity */}
-              <Card className="lg:col-span-2 card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Activity className="h-5 w-5 mr-2" />
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <Activity className="h-5 w-5 mr-2 text-green-500" />
                     Atividade Recente
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-80">
-                    <div className="space-y-4">
-                      {activities.map(activity => (
-                        <motion.div
-                          key={activity.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-start gap-4 p-4 bg-muted/20 rounded-lg hover:bg-muted/40 transition-colors"
-                        >
-                          <div className={`p-2 rounded-full bg-background/50 ${activity.color}`}>
+                  <ScrollArea className="h-64">
+                    <div className="space-y-3">
+                      {recentActivities.map(activity => (
+                        <div key={activity.id} className="flex items-start gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
+                          <div className={`p-2 rounded-full bg-background ${activity.color}`}>
                             {activity.icon}
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-sm">{activity.title}</h4>
-                            <p className="text-sm text-muted-foreground">{activity.description}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm">{activity.title}</h4>
+                            <p className="text-xs text-muted-foreground">{activity.description}</p>
+                            <span className="text-xs text-muted-foreground">
+                              {timeAgo(new Date(activity.timestamp))}
+                            </span>
                           </div>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </ScrollArea>
                 </CardContent>
               </Card>
 
-              {/* Quick Stats */}
-              <div className="space-y-4">
-                <Card className="card-hover-glow">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center text-primary">
-                      <Coins className="h-5 w-5 mr-2" />
-                      Carteira Digital
+              {/* Achievements Preview */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center">
+                      <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
+                      Conquistas ({userAchievements.length})
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-primary/10 rounded-lg">
-                        <Coins className="h-6 w-6 text-primary mx-auto mb-2" />
-                        <p className="text-xl font-bold text-primary">{credits.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Créditos</p>
-                      </div>
-                      <div className="text-center p-3 bg-accent/10 rounded-lg">
-                        <Gift className="h-6 w-6 text-accent mx-auto mb-2" />
-                        <p className="text-xl font-bold text-accent">{specialCredits.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Especiais</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Total Gasto:</span>
-                        <span className="font-bold text-red-500">€{userStats.totalSpent.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Total Ganho:</span>
-                        <span className="font-bold text-green-500">€{userStats.totalEarned.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Lucro Líquido:</span>
-                        <span className={`font-bold ${userStats.totalEarned - userStats.totalSpent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          €{(userStats.totalEarned - userStats.totalSpent).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="card-hover-glow">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center text-primary">
-                      <Flame className="h-5 w-5 mr-2" />
-                      Sequência Ativa
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <div className="text-4xl font-bold text-orange-500 mb-2">
-                      {userStats.creationStreak}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">Dias consecutivos</p>
-                    <Button 
-                      onClick={handleClaimDailyReward}
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500"
-                    >
-                      <Gift className="h-4 w-4 mr-2" />
-                      Reclamar Bónus
+                    <Button variant="ghost" size="sm" onClick={() => setActiveTab('achievements')}>
+                      Ver Todas
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
-                  </CardContent>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-2">
+                    {userAchievements.slice(0, 6).map(achievement => (
+                      <div 
+                        key={achievement.id}
+                        className={`p-3 rounded-lg text-center ${getRarityColor(achievement.rarity)} hover:scale-105 transition-transform cursor-pointer`}
+                        onClick={() => {
+                          toast({
+                            title: achievement.name,
+                            description: achievement.description,
+                          });
+                        }}
+                      >
+                        <div className="text-2xl mb-1">{achievement.icon}</div>
+                        <p className="text-xs font-medium truncate">{achievement.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Pixels Tab */}
+            <TabsContent value="pixels" className="space-y-4 p-4">
+              {/* Filters and Search */}
+              <Card className="bg-muted/30">
+                <CardContent className="p-3 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Pesquisar pixels..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 h-9"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {[
+                      { key: 'all', label: 'Todos', count: userPixels.length },
+                      { key: 'public', label: 'Públicos', count: userPixels.filter(p => p.isPublic).length },
+                      { key: 'private', label: 'Privados', count: userPixels.filter(p => !p.isPublic).length },
+                      { key: 'favorites', label: 'Favoritos', count: userPixels.filter(p => p.isFavorite).length }
+                    ].map(filter => (
+                      <Button
+                        key={filter.key}
+                        variant={pixelFilter === filter.key ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setPixelFilter(filter.key as any)}
+                        className="flex-shrink-0 text-xs"
+                      >
+                        {filter.label}
+                        <Badge variant="secondary" className="ml-1 text-xs h-4 px-1">
+                          {filter.count}
+                        </Badge>
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-1">
+                      <Button
+                        variant={pixelSort === 'recent' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPixelSort('recent')}
+                        className="text-xs"
+                      >
+                        <Clock className="h-3 w-3 mr-1" />
+                        Recentes
+                      </Button>
+                      <Button
+                        variant={pixelSort === 'popular' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPixelSort('popular')}
+                        className="text-xs"
+                      >
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        Populares
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-1">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('grid')}
+                      >
+                        <Grid className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Pixels Grid/List */}
+              <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                <AnimatePresence>
+                  {filteredPixels.map((pixel, index) => (
+                    <motion.div
+                      key={pixel.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                        <div className="relative">
+                          <div 
+                            className="aspect-square w-full flex items-center justify-center text-4xl font-bold"
+                            style={{ backgroundColor: pixel.color }}
+                          >
+                            🎨
+                          </div>
+                          
+                          <div className="absolute top-2 left-2 flex gap-1">
+                            <Badge className={getRarityColor(pixel.rarity)}>
+                              {pixel.rarity}
+                            </Badge>
+                            {pixel.isFavorite && (
+                              <Badge className="bg-red-500">
+                                <Heart className="h-3 w-3 fill-current" />
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="absolute top-2 right-2">
+                            <Badge variant={pixel.isPublic ? 'default' : 'secondary'} className="text-xs">
+                              {pixel.isPublic ? 'Público' : 'Privado'}
+                            </Badge>
+                          </div>
+                          
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                            €{pixel.price}
+                          </div>
+                        </div>
+                        
+                        <CardContent className="p-3">
+                          <h3 className="font-semibold text-sm mb-1 truncate">{pixel.title}</h3>
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                            {pixel.description}
+                          </p>
+                          
+                          <div className="flex items-center justify-between text-xs mb-2">
+                            <span className="font-mono">({pixel.x}, {pixel.y})</span>
+                            <span className="text-muted-foreground">{pixel.region}</span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                {pixel.views}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Heart className="h-3 w-3" />
+                                {pixel.likes}
+                              </span>
+                            </div>
+                            <span>{timeAgo(new Date(pixel.lastModified))}</span>
+                          </div>
+                          
+                          <div className="flex gap-1 mt-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePixelAction('favorite', pixel.id)}
+                              className="flex-1 h-8"
+                            >
+                              <Heart className={`h-3 w-3 ${pixel.isFavorite ? 'fill-current text-red-500' : ''}`} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePixelAction('share', pixel.id)}
+                              className="flex-1 h-8"
+                            >
+                              <Share2 className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePixelAction('edit', pixel.id)}
+                              className="flex-1 h-8"
+                            >
+                              <Edit3 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              {filteredPixels.length === 0 && (
+                <Card className="p-8 text-center">
+                  <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">
+                    {searchQuery ? `Nenhum pixel encontrado para "${searchQuery}"` : 'Nenhum pixel nesta categoria'}
+                  </p>
                 </Card>
-              </div>
-            </div>
-          </TabsContent>
+              )}
 
-          {/* Gallery Tab */}
-          <TabsContent value="gallery" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-headline font-bold">Galeria de Pixel Art</h2>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtrar
-                </Button>
-                <Button variant="outline" size="sm">
-                  <SortAsc className="h-4 w-4 mr-2" />
-                  Ordenar
-                </Button>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pixelArts.map(art => (
-                <motion.div
-                  key={art.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.02 }}
-                  className="group"
-                >
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300">
-                    <div className="relative">
-                      <img 
-                        src={art.imageUrl} 
-                        alt={art.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      
-                      <div className="absolute top-2 left-2 flex gap-2">
-                        <Badge className={getRarityColor(art.rarity)}>
-                          {art.rarity}
-                        </Badge>
-                        {art.isPublic ? (
-                          <Badge className="bg-green-500">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Público
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-gray-500">
-                            <Lock className="h-3 w-3 mr-1" />
-                            Privado
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="absolute top-2 right-2">
-                        <Button variant="ghost" size="icon" className="bg-black/50 text-white hover:bg-black/70">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                        <div className="flex items-center justify-between text-white">
+              {/* Albums Section */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center">
+                      <BookImage className="h-5 w-5 mr-2 text-purple-500" />
+                      Álbuns ({userAlbums.length})
+                    </CardTitle>
+                    <Button variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {userAlbums.map(album => (
+                      <Card key={album.id} className="bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer">
+                        <CardContent className="p-3">
                           <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {art.views}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Heart className="h-3 w-3" />
-                              {art.likes}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MessageSquare className="h-3 w-3" />
-                              {art.comments}
-                            </span>
-                          </div>
-                          <Badge variant="outline" className="text-white border-white/50">
-                            €{art.price}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div>
-                          <h3 className="font-semibold text-lg">{art.title}</h3>
-                          <p className="text-sm text-muted-foreground">{art.description}</p>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-primary" />
-                            <span>({art.coordinates.x}, {art.coordinates.y})</span>
-                            <span>•</span>
-                            <span>{art.region}</span>
-                          </div>
-                          <span className="text-muted-foreground">{art.createdAt}</span>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1">
-                          {art.tags.map(tag => (
-                            <Badge key={tag} variant="outline" className="text-xs">
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <Edit3 className="h-4 w-4 mr-2" />
-                            Editar
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <Share2 className="h-4 w-4 mr-2" />
-                            Partilhar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Albums Tab */}
-          <TabsContent value="albums" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-headline font-bold">Álbuns de Pixel Art</h2>
-              <Button onClick={handleCreateAlbum} className="bg-gradient-to-r from-purple-500 to-pink-500">
-                <FolderPlus className="h-4 w-4 mr-2" />
-                Criar Álbum
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {albums.map(album => (
-                <motion.div
-                  key={album.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300">
-                    <div className="relative">
-                      <img 
-                        src={album.coverImageUrl} 
-                        alt={album.name}
-                        className="w-full h-40 object-cover"
-                      />
-                      
-                      <div className="absolute top-2 left-2">
-                        <Badge className={album.isPublic ? 'bg-green-500' : 'bg-gray-500'}>
-                          {album.isPublic ? (
-                            <>
-                              <Eye className="h-3 w-3 mr-1" />
-                              Público
-                            </>
-                          ) : (
-                            <>
-                              <Lock className="h-3 w-3 mr-1" />
-                              Privado
-                            </>
-                          )}
-                        </Badge>
-                      </div>
-                      
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        {album.pixelCount} pixels
-                      </div>
-                    </div>
-                    
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div>
-                          <h3 className="font-semibold">{album.name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{album.description}</p>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {album.views}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Heart className="h-3 w-3" />
-                              {album.likes}
-                            </span>
-                          </div>
-                          <span className="text-muted-foreground">{album.createdAt}</span>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1">
-                          {album.tags.map(tag => (
-                            <Badge key={tag} variant="outline" className="text-xs">
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Abrir
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <Edit3 className="h-4 w-4 mr-2" />
-                            Editar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-headline font-bold">Conquistas Desbloqueadas</h2>
-              <Badge variant="outline" className="font-code">
-                {achievements} / {achievementsData.length}
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {unlockedAchievements.map(achievement => (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-primary/5">
-                    <CardContent className="p-6">
-                      <div className="text-center space-y-4">
-                        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
-                          {React.cloneElement(achievement.icon as React.ReactElement, { 
-                            className: "h-8 w-8 text-primary" 
-                          })}
-                        </div>
-                        
-                        <div>
-                          <h3 className="font-semibold text-lg">{achievement.name}</h3>
-                          <p className="text-sm text-muted-foreground">{achievement.overallDescription}</p>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          {achievement.tiers.filter(tier => tier.isUnlocked).map(tier => (
-                            <div key={tier.level} className="p-3 bg-green-500/10 rounded-lg border border-green-500/30">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium text-sm">Nível {tier.level}</span>
-                                <Badge className="bg-green-500">
-                                  <Check className="h-3 w-3 mr-1" />
-                                  Completo
+                            <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                              <BookImage className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold text-sm truncate">{album.name}</h4>
+                                <Badge variant={album.isPublic ? 'default' : 'secondary'} className="text-xs">
+                                  {album.isPublic ? 'Público' : 'Privado'}
                                 </Badge>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-1">{tier.description}</p>
-                              <div className="flex items-center gap-3 mt-2 text-xs">
+                              <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
+                                {album.description}
+                              </p>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>{album.pixelCount} pixels</span>
                                 <span className="flex items-center gap-1">
-                                  <Zap className="h-3 w-3 text-primary" />
-                                  +{tier.xpReward} XP
+                                  <Eye className="h-3 w-3" />
+                                  {album.views}
                                 </span>
                                 <span className="flex items-center gap-1">
-                                  <Coins className="h-3 w-3 text-accent" />
-                                  +{tier.creditsReward}
+                                  <Heart className="h-3 w-3" />
+                                  {album.likes}
                                 </span>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </TabsContent>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Stats Tab */}
-          <TabsContent value="stats" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Performance Chart */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <BarChart3 className="h-5 w-5 mr-2" />
-                    Performance Mensal
-                  </CardTitle>
+            {/* Social Tab */}
+            <TabsContent value="social" className="space-y-4 p-4">
+              {/* Social Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                <Card className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
+                  <Users className="h-6 w-6 text-blue-500 mx-auto mb-1" />
+                  <p className="text-xl font-bold text-blue-500">{friends.length}</p>
+                  <p className="text-xs text-muted-foreground">Amigos</p>
+                </Card>
+                
+                <Card className="text-center p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+                  <UserPlus className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                  <p className="text-xl font-bold text-green-500">{followers.length}</p>
+                  <p className="text-xs text-muted-foreground">Seguidores</p>
+                </Card>
+                
+                <Card className="text-center p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                  <Heart className="h-6 w-6 text-purple-500 mx-auto mb-1" />
+                  <p className="text-xl font-bold text-purple-500">{following.length}</p>
+                  <p className="text-xs text-muted-foreground">A Seguir</p>
+                </Card>
+              </div>
+
+              {/* Friends List */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center">
+                      <Users className="h-5 w-5 mr-2 text-blue-500" />
+                      Conexões Sociais
+                    </CardTitle>
+                    <Button variant="outline" size="sm">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Convidar
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-muted/20 rounded">
-                    <div className="text-center">
-                      <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-muted-foreground">Gráfico de Performance</p>
-                      <p className="text-xs text-muted-foreground mt-1">Em desenvolvimento</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Detailed Stats */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Target className="h-5 w-5 mr-2" />
-                    Estatísticas Detalhadas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-muted/20 rounded-lg">
-                      <div className="text-lg font-bold text-primary">€{userStats.averagePixelValue.toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">Valor Médio</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/20 rounded-lg">
-                      <div className="text-lg font-bold text-accent">€{userStats.mostExpensivePixel}</div>
-                      <div className="text-xs text-muted-foreground">Mais Caro</div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Região Favorita:</span>
-                      <Badge variant="outline">{userStats.favoriteRegion}</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Cor Favorita:</span>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-6 h-6 rounded border-2 border-border"
-                          style={{ backgroundColor: userStats.favoriteColor }}
-                        />
-                        <span className="font-code text-xs">{userStats.favoriteColor}</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Última Atividade:</span>
-                      <span className="text-sm text-muted-foreground">{userStats.lastActive}</span>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Engagement Social</h4>
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div>
-                        <div className="text-lg font-bold text-blue-500">{userStats.totalViews.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground">Visualizações</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-red-500">{userStats.totalLikes.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground">Curtidas</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-green-500">{userStats.totalComments}</div>
-                        <div className="text-xs text-muted-foreground">Comentários</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Regional Distribution */}
-            <Card className="card-hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Globe className="h-5 w-5 mr-2" />
-                  Distribuição Regional dos Seus Pixels
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { region: 'Lisboa', count: 15, percentage: 35.7, color: 'bg-blue-500' },
-                    { region: 'Porto', count: 12, percentage: 28.6, color: 'bg-green-500' },
-                    { region: 'Coimbra', count: 8, percentage: 19.0, color: 'bg-purple-500' },
-                    { region: 'Braga', count: 4, percentage: 9.5, color: 'bg-orange-500' },
-                    { region: 'Faro', count: 3, percentage: 7.2, color: 'bg-red-500' }
-                  ].map(region => (
-                    <div key={region.region} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{region.region}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">{region.count} pixels</span>
-                          <span className="font-bold text-primary">{region.percentage}%</span>
+                  <Tabs defaultValue="friends" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 h-9">
+                      <TabsTrigger value="friends" className="text-xs">
+                        Amigos ({friends.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="followers" className="text-xs">
+                        Seguidores ({followers.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="following" className="text-xs">
+                        A Seguir ({following.length})
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="friends" className="mt-3">
+                      <ScrollArea className="h-64">
+                        <div className="space-y-2">
+                          {friends.map(friend => (
+                            <Card key={friend.id} className="bg-muted/20 hover:bg-muted/30 transition-colors">
+                              <CardContent className="p-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative">
+                                    <Avatar className="h-10 w-10 border-2 border-border">
+                                      <AvatarImage src={friend.avatar} />
+                                      <AvatarFallback>{friend.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${
+                                      friend.isOnline ? 'bg-green-500' : 'bg-gray-500'
+                                    }`} />
+                                  </div>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-medium text-sm truncate">{friend.name}</span>
+                                      {friend.isVerified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
+                                      {friend.isPremium && <Crown className="h-3 w-3 text-amber-500" />}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <Badge variant="outline" className="text-xs">
+                                        Nível {friend.level}
+                                      </Badge>
+                                      <span>{friend.pixelsOwned} pixels</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                      {friend.isOnline ? 'Online' : friend.lastSeen}
+                                    </p>
+                                  </div>
+                                  
+                                  <div className="flex flex-col gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleFriendAction('message', friend.id)}
+                                      className="h-7 px-2"
+                                    >
+                                      <MessageSquare className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleFriendAction('follow', friend.id)}
+                                      className="h-7 px-2"
+                                    >
+                                      <UserPlus className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
                         </div>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${region.color} transition-all duration-500`}
-                          style={{ width: `${region.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Profile Settings */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <User className="h-5 w-5 mr-2" />
-                    Informações do Perfil
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {isEditing ? (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Nome de Exibição</label>
-                        <Input 
-                          value={profileData.displayName}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Bio</label>
-                        <Textarea 
-                          value={profileData.bio}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                          rows={3}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Localização</label>
-                        <Input 
-                          value={profileData.location}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Website</label>
-                        <Input 
-                          value={profileData.website}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
-                        />
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button onClick={handleSaveProfile} className="flex-1">
-                          <Save className="h-4 w-4 mr-2" />
-                          Guardar
-                        </Button>
-                        <Button variant="outline" onClick={() => setIsEditing(false)} className="flex-1">
-                          <X className="h-4 w-4 mr-2" />
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Nome:</span>
-                        <span className="text-sm">{profileData.displayName}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Email:</span>
-                        <span className="text-sm">{user?.email}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Localização:</span>
-                        <span className="text-sm">{profileData.location}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Website:</span>
-                        <a href={profileData.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
-                          {profileData.website}
-                        </a>
-                      </div>
-                      
-                      <Button onClick={() => setIsEditing(true)} className="w-full">
-                        <Edit3 className="h-4 w-4 mr-2" />
-                        Editar Perfil
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Privacy Settings */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Shield className="h-5 w-5 mr-2" />
-                    Privacidade
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {Object.entries(privacySettings).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between">
-                      <span className="text-sm capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                      </span>
-                      <Button
-                        variant={value ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setPrivacySettings(prev => ({ ...prev, [key]: !value }))}
-                      >
-                        {value ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Notification Settings */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Bell className="h-5 w-5 mr-2" />
-                    Notificações
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {Object.entries(notificationSettings).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between">
-                      <span className="text-sm capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                      </span>
-                      <Button
-                        variant={value ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setNotificationSettings(prev => ({ ...prev, [key]: !value }))}
-                      >
-                        {value ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  ))}
+                      </ScrollArea>
+                    </TabsContent>
+                    
+                    <TabsContent value="followers" className="mt-3">
+                      <ScrollArea className="h-64">
+                        <div className="space-y-2">
+                          {followers.map(follower => (
+                            <Card key={follower.id} className="bg-muted/20">
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src={follower.avatar} />
+                                      <AvatarFallback>{follower.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-medium text-sm">{follower.name}</p>
+                                      <p className="text-xs text-muted-foreground">Nível {follower.level}</p>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleFriendAction('follow', follower.id)}
+                                    className="h-7 text-xs"
+                                  >
+                                    Seguir de Volta
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </TabsContent>
+                    
+                    <TabsContent value="following" className="mt-3">
+                      <ScrollArea className="h-64">
+                        <div className="space-y-2">
+                          {following.map(followingUser => (
+                            <Card key={followingUser.id} className="bg-muted/20">
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src={followingUser.avatar} />
+                                      <AvatarFallback>{followingUser.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-medium text-sm">{followingUser.name}</p>
+                                      <p className="text-xs text-muted-foreground">Nível {followingUser.level}</p>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleFriendAction('unfollow', followingUser.id)}
+                                    className="h-7 text-xs"
+                                  >
+                                    Deixar de Seguir
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
 
               {/* Social Links */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <LinkIcon className="h-5 w-5 mr-2" />
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <LinkIcon className="h-5 w-5 mr-2 text-cyan-500" />
                     Redes Sociais
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {socialLinks.map(social => (
-                    <div key={social.platform} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {social.icon}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm">{social.platform}</span>
-                            {social.verified && (
-                              <Badge className="bg-blue-500 text-xs">
-                                <Check className="h-3 w-3 mr-1" />
-                                Verificado
-                              </Badge>
-                            )}
-                          </div>
-                          <span className="text-xs text-muted-foreground">{social.handle}</span>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={social.url} target="_blank" rel="noopener noreferrer">
-                          <LinkIcon className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    </div>
+                <CardContent className="space-y-2">
+                  {[
+                    { platform: 'Instagram', handle: editedProfile.socialLinks.instagram, icon: <Instagram className="h-4 w-4" />, color: 'text-pink-500' },
+                    { platform: 'Twitter', handle: editedProfile.socialLinks.twitter, icon: <Twitter className="h-4 w-4" />, color: 'text-blue-400' },
+                    { platform: 'GitHub', handle: editedProfile.socialLinks.github, icon: <Github className="h-4 w-4" />, color: 'text-gray-500' },
+                    { platform: 'YouTube', handle: editedProfile.socialLinks.youtube, icon: <Youtube className="h-4 w-4" />, color: 'text-red-500' }
+                  ].map(social => (
+                    <Button
+                      key={social.platform}
+                      variant="outline"
+                      className="w-full justify-start h-10"
+                      onClick={() => window.open(`https://${social.platform.toLowerCase()}.com/${social.handle}`, '_blank')}
+                    >
+                      <span className={social.color}>{social.icon}</span>
+                      <span className="ml-3 font-semibold">{social.platform}:</span>
+                      <span className="ml-2 text-muted-foreground font-code">{social.handle}</span>
+                      <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
+                    </Button>
                   ))}
-                  
-                  <Button variant="outline" className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Rede Social
-                  </Button>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Profile Actions */}
-        <Card className="bg-gradient-to-r from-primary/10 to-accent/5 border-primary/20 shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold">Pronto para Criar Mais?</h3>
-                <p className="text-muted-foreground">Explore o mapa e encontre o seu próximo pixel perfeito!</p>
-              </div>
-              
-              <div className="flex gap-3">
-                <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Explorar Mapa
-                </Button>
-                
-                <Button variant="outline">
-                  <Coins className="h-4 w-4 mr-2" />
-                  Comprar Créditos
-                </Button>
-              </div>
-            </div>
-          </CardContent>
+            </TabsContent>
+          </Tabs>
         </Card>
+
+        {/* Edit Profile Modal */}
+        {isEditing && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md max-h-[90vh] overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Edit3 className="h-5 w-5 mr-2" />
+                    Editar Perfil
+                  </span>
+                  <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              
+              <ScrollArea className="max-h-[60vh]">
+                <CardContent className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Nome de Exibição</Label>
+                    <Input
+                      value={editedProfile.displayName}
+                      onChange={(e) => setEditedProfile(prev => ({ ...prev, displayName: e.target.value }))}
+                      placeholder="Seu nome público"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Bio</Label>
+                    <Textarea
+                      value={editedProfile.bio}
+                      onChange={(e) => setEditedProfile(prev => ({ ...prev, bio: e.target.value }))}
+                      placeholder="Conte sobre você..."
+                      rows={3}
+                      maxLength={200}
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {editedProfile.bio.length}/200
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Localização</Label>
+                    <Input
+                      value={editedProfile.location}
+                      onChange={(e) => setEditedProfile(prev => ({ ...prev, location: e.target.value }))}
+                      placeholder="Sua cidade"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Website</Label>
+                    <Input
+                      value={editedProfile.website}
+                      onChange={(e) => setEditedProfile(prev => ({ ...prev, website: e.target.value }))}
+                      placeholder="https://seusite.com"
+                    />
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-3">
+                    <Label>Redes Sociais</Label>
+                    {Object.entries(editedProfile.socialLinks).map(([platform, handle]) => (
+                      <div key={platform} className="space-y-1">
+                        <Label className="text-xs capitalize">{platform}</Label>
+                        <Input
+                          value={handle}
+                          onChange={(e) => setEditedProfile(prev => ({
+                            ...prev,
+                            socialLinks: { ...prev.socialLinks, [platform]: e.target.value }
+                          }))}
+                          placeholder={`@seu${platform}`}
+                          className="h-9"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-3">
+                    <Label>Configurações de Privacidade</Label>
+                    {Object.entries(privacySettings).map(([key, value]) => (
+                      <div key={key} className="flex items-center justify-between">
+                        <Label className="text-sm">
+                          {key === 'profilePublic' && 'Perfil Público'}
+                          {key === 'showPixelCount' && 'Mostrar Contagem de Pixels'}
+                          {key === 'showAchievements' && 'Mostrar Conquistas'}
+                          {key === 'showActivity' && 'Mostrar Atividade'}
+                          {key === 'allowMessages' && 'Permitir Mensagens'}
+                          {key === 'showOnlineStatus' && 'Mostrar Status Online'}
+                        </Label>
+                        <Switch
+                          checked={value}
+                          onCheckedChange={(checked) => 
+                            setPrivacySettings(prev => ({ ...prev, [key]: checked }))
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </ScrollArea>
+              
+              <CardFooter className="flex gap-2 border-t pt-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  className="flex-1"
+                  onClick={handleSaveProfile}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
