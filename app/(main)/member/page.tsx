@@ -412,13 +412,14 @@ export default function MemberPage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [playSound, setPlaySound] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
   
   // Computed values
   const xpPercentage = (xp / xpMax) * 100;
   const nextLevelXp = xpMax - xp;
   const totalPixelViews = userPixels.reduce((sum, pixel) => sum + pixel.views, 0);
   const totalPixelLikes = userPixels.reduce((sum, pixel) => sum + pixel.likes, 0);
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 pb-20">
+  const averagePixelPrice = userPixels.length > 0 ? userPixels.reduce((sum, pixel) => sum + pixel.price, 0) / userPixels.length : 0;
   const mostExpensivePixel = userPixels.reduce((max, pixel) => pixel.price > max.price ? pixel : max, userPixels[0] || { price: 0 });
   
   const friends = userFriends.filter(f => f.status === 'friend');
@@ -524,6 +525,9 @@ export default function MemberPage() {
         toast({ title: "💬 Mensagem", description: `Abrindo chat com ${friend.name}...` });
         break;
     }
+  };
+
+  const handleClaimDailyBonus = () => {
     if (dailyBonusClaimed) {
       toast({
         title: "Bónus Já Reclamado",
@@ -533,9 +537,6 @@ export default function MemberPage() {
       return;
     }
     
-  };
-
-  const handleClaimDailyBonus = () => {
     vibrate('heavy');
     setShowConfetti(true);
     setPlaySound(true);
@@ -790,603 +791,589 @@ export default function MemberPage() {
             </TabsList>
 
             <div className="mt-4 relative z-10">
-            <TabsContent value="overview" className="space-y-4 p-4">
               <TabsContent value="overview" className="space-y-6 pb-8 focus:outline-none">
                 <div ref={scrollRef} className="space-y-6">
-              <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
-                    Estatísticas de Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="space-y-1">
-                      <p className="text-2xl font-bold text-blue-500">{totalPixelViews.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">Total de Views</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-2xl font-bold text-red-500">{totalPixelLikes.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">Total de Likes</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-2xl font-bold text-green-500">€{averagePixelPrice.toFixed(0)}</p>
-                      <p className="text-xs text-muted-foreground">Preço Médio</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-2xl font-bold text-purple-500">€{mostExpensivePixel?.price || 0}</p>
-                      <p className="text-xs text-muted-foreground">Mais Caro</p>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-sm">Distribuição por Região</h4>
-                    {['Lisboa', 'Porto', 'Coimbra'].map(region => {
-                      const regionPixels = userPixels.filter(p => p.region === region).length;
-                      const percentage = userPixels.length > 0 ? (regionPixels / userPixels.length) * 100 : 0;
-                      
-                      return (
-                        <div key={region} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span>{region}</span>
-                            <span className="font-mono">{regionPixels} pixels</span>
-                          </div>
-                          <Progress value={percentage} className="h-2" />
+                  <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center">
+                        <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
+                        Estatísticas de Performance
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div className="space-y-1">
+                          <p className="text-2xl font-bold text-blue-500">{totalPixelViews.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Total de Views</p>
                         </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <Activity className="h-5 w-5 mr-2 text-green-500" />
-                    Atividade Recente
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-64">
-                    <div className="space-y-3">
-                      {recentActivities.map(activity => (
-                        <div key={activity.id} className="flex items-start gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
-                          <div className={`p-2 rounded-full bg-background ${activity.color}`}>
-                            {activity.icon}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm">{activity.title}</h4>
-                            <p className="text-xs text-muted-foreground">{activity.description}</p>
-                            <span className="text-xs text-muted-foreground">
-                              {timeAgo(new Date(activity.timestamp))}
-                            </span>
-                          </div>
+                        <div className="space-y-1">
+                          <p className="text-2xl font-bold text-red-500">{totalPixelLikes.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Total de Likes</p>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Achievements Preview */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center">
-                      <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
-                      Conquistas ({userAchievements.length})
-                    </CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => setActiveTab('achievements')}>
-                      Ver Todas
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-2">
-                    {userAchievements.slice(0, 6).map(achievement => (
-                      <div 
-                        key={achievement.id}
-                        className={`p-3 rounded-lg text-center ${getRarityColor(achievement.rarity)} hover:scale-105 transition-transform cursor-pointer`}
-                        onClick={() => {
-                          toast({
-                            title: achievement.name,
-                            description: achievement.description,
-                          });
-                        }}
-                      >
-                        <div className="text-2xl mb-1">{achievement.icon}</div>
-                        <p className="text-xs font-medium truncate">{achievement.name}</p>
+                        <div className="space-y-1">
+                          <p className="text-2xl font-bold text-green-500">€{averagePixelPrice.toFixed(0)}</p>
+                          <p className="text-xs text-muted-foreground">Preço Médio</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-2xl font-bold text-purple-500">€{mostExpensivePixel?.price || 0}</p>
+                          <p className="text-xs text-muted-foreground">Mais Caro</p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                      
+                      <Separator />
+                      
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-sm">Distribuição por Região</h4>
+                        {['Lisboa', 'Porto', 'Coimbra'].map(region => {
+                          const regionPixels = userPixels.filter(p => p.region === region).length;
+                          const percentage = userPixels.length > 0 ? (regionPixels / userPixels.length) * 100 : 0;
+                          
+                          return (
+                            <div key={region} className="space-y-1">
+                              <div className="flex justify-between text-sm">
+                                <span>{region}</span>
+                                <span className="font-mono">{regionPixels} pixels</span>
+                              </div>
+                              <Progress value={percentage} className="h-2" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-            {/* Pixels Tab */}
-            <TabsContent value="pixels" className="space-y-4 p-4">
-              {/* Filters and Search */}
-              <Card className="bg-muted/30">
-                <CardContent className="p-3 space-y-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Pesquisar pixels..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-9"
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2 overflow-x-auto pb-1">
-                    {[
-                      { key: 'all', label: 'Todos', count: userPixels.length },
-                      { key: 'public', label: 'Públicos', count: userPixels.filter(p => p.isPublic).length },
-                      { key: 'private', label: 'Privados', count: userPixels.filter(p => !p.isPublic).length },
-                      { key: 'favorites', label: 'Favoritos', count: userPixels.filter(p => p.isFavorite).length }
-                    ].map(filter => (
-                      <Button
-                        key={filter.key}
-                        variant={pixelFilter === filter.key ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setPixelFilter(filter.key as any)}
-                        className="flex-shrink-0 text-xs"
-                      >
-                        {filter.label}
-                        <Badge variant="secondary" className="ml-1 text-xs h-4 px-1">
-                          {filter.count}
-                        </Badge>
-                      </Button>
-                    ))}
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-1">
-                      <Button
-                        variant={pixelSort === 'recent' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setPixelSort('recent')}
-                        className="text-xs"
-                      >
-                        <Clock className="h-3 w-3 mr-1" />
-                        Recentes
-                      </Button>
-                      <Button
-                        variant={pixelSort === 'popular' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setPixelSort('popular')}
-                        className="text-xs"
-                      >
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        Populares
-                      </Button>
-                    </div>
-                    
-                    <div className="flex gap-1">
-                      <Button
-                        variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setViewMode('grid')}
-                      >
-                        <Grid className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={viewMode === 'list' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setViewMode('list')}
-                      >
-                        <List className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  {/* Recent Activity */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center">
+                        <Activity className="h-5 w-5 mr-2 text-green-500" />
+                        Atividade Recente
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-64">
+                        <div className="space-y-3">
+                          {recentActivities.map(activity => (
+                            <div key={activity.id} className="flex items-start gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
+                              <div className={`p-2 rounded-full bg-background ${activity.color}`}>
+                                {activity.icon}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-sm">{activity.title}</h4>
+                                <p className="text-xs text-muted-foreground">{activity.description}</p>
+                                <span className="text-xs text-muted-foreground">
+                                  {timeAgo(new Date(activity.timestamp))}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
 
-              {/* Pixels Grid/List */}
-              <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                <AnimatePresence>
-                  {filteredPixels.map((pixel, index) => (
-                    <motion.div
-                      key={pixel.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
-                        <div className="relative">
+                  {/* Achievements Preview */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg flex items-center">
+                          <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
+                          Conquistas ({userAchievements.length})
+                        </CardTitle>
+                        <Button variant="ghost" size="sm" onClick={() => setActiveTab('achievements')}>
+                          Ver Todas
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-3 gap-2">
+                        {userAchievements.slice(0, 6).map(achievement => (
                           <div 
-                            className="aspect-square w-full flex items-center justify-center text-4xl font-bold"
-                            style={{ backgroundColor: pixel.color }}
+                            key={achievement.id}
+                            className={`p-3 rounded-lg text-center ${getRarityColor(achievement.rarity)} hover:scale-105 transition-transform cursor-pointer`}
+                            onClick={() => {
+                              toast({
+                                title: achievement.name,
+                                description: achievement.description,
+                              });
+                            }}
                           >
-                            🎨
+                            <div className="text-2xl mb-1">{achievement.icon}</div>
+                            <p className="text-xs font-medium truncate">{achievement.name}</p>
                           </div>
-                          
-                          <div className="absolute top-2 left-2 flex gap-1">
-                            <Badge className={getRarityColor(pixel.rarity)}>
-                              {pixel.rarity}
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Pixels Tab */}
+              <TabsContent value="pixels" className="space-y-6 pb-8 focus:outline-none">
+                <div className="space-y-6">
+                  {/* Filters and Search */}
+                  <Card className="bg-muted/30">
+                    <CardContent className="p-3 space-y-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Pesquisar pixels..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10 h-9"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-2 overflow-x-auto pb-1">
+                        {[
+                          { key: 'all', label: 'Todos', count: userPixels.length },
+                          { key: 'public', label: 'Públicos', count: userPixels.filter(p => p.isPublic).length },
+                          { key: 'private', label: 'Privados', count: userPixels.filter(p => !p.isPublic).length },
+                          { key: 'favorites', label: 'Favoritos', count: userPixels.filter(p => p.isFavorite).length }
+                        ].map(filter => (
+                          <Button
+                            key={filter.key}
+                            variant={pixelFilter === filter.key ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setPixelFilter(filter.key as any)}
+                            className="flex-shrink-0 text-xs"
+                          >
+                            {filter.label}
+                            <Badge variant="secondary" className="ml-1 text-xs h-4 px-1">
+                              {filter.count}
                             </Badge>
-                            {pixel.isFavorite && (
-                              <Badge className="bg-red-500">
-                                <Heart className="h-3 w-3 fill-current" />
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <div className="absolute top-2 right-2">
-                            <Badge variant={pixel.isPublic ? 'default' : 'secondary'} className="text-xs">
-                              {pixel.isPublic ? 'Público' : 'Privado'}
-                            </Badge>
-                          </div>
-                          
-                          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                            €{pixel.price}
-                          </div>
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex gap-1">
+                          <Button
+                            variant={pixelSort === 'recent' ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setPixelSort('recent')}
+                            className="text-xs"
+                          >
+                            <Clock className="h-3 w-3 mr-1" />
+                            Recentes
+                          </Button>
+                          <Button
+                            variant={pixelSort === 'popular' ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setPixelSort('popular')}
+                            className="text-xs"
+                          >
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            Populares
+                          </Button>
                         </div>
                         
-                        <CardContent className="p-3">
-                          <h3 className="font-semibold text-sm mb-1 truncate">{pixel.title}</h3>
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                            {pixel.description}
-                          </p>
-                          
-                          <div className="flex items-center justify-between text-xs mb-2">
-                            <span className="font-mono">({pixel.x}, {pixel.y})</span>
-                            <span className="text-muted-foreground">{pixel.region}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                <Eye className="h-3 w-3" />
-                                {pixel.views}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Heart className="h-3 w-3" />
-                                {pixel.likes}
-                              </span>
-                            </div>
-                            <span>{timeAgo(new Date(pixel.lastModified))}</span>
-                          </div>
-                          
-                          <div className="flex gap-1 mt-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePixelAction('favorite', pixel.id)}
-                              className="flex-1 h-8"
-                            >
-                              <Heart className={`h-3 w-3 ${pixel.isFavorite ? 'fill-current text-red-500' : ''}`} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePixelAction('share', pixel.id)}
-                              className="flex-1 h-8"
-                            >
-                              <Share2 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePixelAction('edit', pixel.id)}
-                              className="flex-1 h-8"
-                            >
-                              <Edit3 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setViewMode('grid')}
+                          >
+                            <Grid className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant={viewMode === 'list' ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setViewMode('list')}
+                          >
+                            <List className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              {filteredPixels.length === 0 && (
-                          className="min-h-[32px] px-3"
-                <Card className="p-8 text-center">
-                  <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-muted-foreground">
-                    {searchQuery ? `Nenhum pixel encontrado para "${searchQuery}"` : 'Nenhum pixel nesta categoria'}
-                            className="min-h-[32px] px-3 text-xs"
-                  </p>
-                </Card>
-              )}
-
-              {/* Albums Section */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center">
-                      <BookImage className="h-5 w-5 mr-2 text-purple-500" />
-                      Álbuns ({userAlbums.length})
-                    </CardTitle>
-                    <Button variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Criar
-                            className="min-h-[32px] px-3 text-xs"
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {userAlbums.map(album => (
-                      <Card key={album.id} className="bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer">
-                            className="min-h-[32px] px-3 text-xs"
-                        <CardContent className="p-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                              <BookImage className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-sm truncate">{album.name}</h4>
-                                <Badge variant={album.isPublic ? 'default' : 'secondary'} className="text-xs">
-                                  {album.isPublic ? 'Público' : 'Privado'}
-                            className="min-h-[32px] w-8 p-0"
+                  {/* Pixels Grid/List */}
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                    <AnimatePresence>
+                      {filteredPixels.map((pixel, index) => (
+                        <motion.div
+                          key={pixel.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
+                          <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                            <div className="relative">
+                              <div 
+                                className="aspect-square w-full flex items-center justify-center text-4xl font-bold"
+                                style={{ backgroundColor: pixel.color }}
+                              >
+                                🎨
+                              </div>
+                              
+                              <div className="absolute top-2 left-2 flex gap-1">
+                                <Badge className={getRarityColor(pixel.rarity)}>
+                                  {pixel.rarity}
+                                </Badge>
+                                {pixel.isFavorite && (
+                                  <Badge className="bg-red-500">
+                                    <Heart className="h-3 w-3 fill-current" />
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div className="absolute top-2 right-2">
+                                <Badge variant={pixel.isPublic ? 'default' : 'secondary'} className="text-xs">
+                                  {pixel.isPublic ? 'Público' : 'Privado'}
                                 </Badge>
                               </div>
-                              <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
-                                {album.description}
-                              </p>
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span>{album.pixelCount} pixels</span>
-                            className="min-h-[32px] w-8 p-0"
-                                <span className="flex items-center gap-1">
-                                  <Eye className="h-3 w-3" />
-                                  {album.views}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Heart className="h-3 w-3" />
-                                  {album.likes}
-                                </span>
+                              
+                              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                €{pixel.price}
                               </div>
                             </div>
-                  <ScrollArea className="h-[60vh]">
-                    <div className={cn(
-                      "grid gap-4 pb-4",
-                      pixelView === 'grid' ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
-                    )}>
-                    ))}
+                            
+                            <CardContent className="p-3">
+                              <h3 className="font-semibold text-sm mb-1 truncate">{pixel.title}</h3>
+                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                                {pixel.description}
+                              </p>
+                              
+                              <div className="flex items-center justify-between text-xs mb-2">
+                                <span className="font-mono">({pixel.x}, {pixel.y})</span>
+                                <span className="text-muted-foreground">{pixel.region}</span>
+                              </div>
+                              
+                              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                  <span className="flex items-center gap-1">
+                                    <Eye className="h-3 w-3" />
+                                    {pixel.views}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Heart className="h-3 w-3" />
+                                    {pixel.likes}
+                                  </span>
+                                </div>
+                                <span>{timeAgo(new Date(pixel.lastModified))}</span>
+                              </div>
+                              
+                              <div className="flex gap-1 mt-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handlePixelAction('favorite', pixel.id)}
+                                  className="flex-1 h-8"
+                                >
+                                  <Heart className={`h-3 w-3 ${pixel.isFavorite ? 'fill-current text-red-500' : ''}`} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handlePixelAction('share', pixel.id)}
+                                  className="flex-1 h-8"
+                                >
+                                  <Share2 className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handlePixelAction('edit', pixel.id)}
+                                  className="flex-1 h-8"
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            {/* Social Tab */}
-            <TabsContent value="social" className="space-y-4 p-4">
-              {/* Social Stats */}
-              <div className="grid grid-cols-3 gap-3">
-                <Card className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
-                  <Users className="h-6 w-6 text-blue-500 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-blue-500">{friends.length}</p>
-                  <p className="text-xs text-muted-foreground">Amigos</p>
-                </Card>
-                
-                <Card className="text-center p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5">
-                  <UserPlus className="h-6 w-6 text-green-500 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-green-500">{followers.length}</p>
-                  <p className="text-xs text-muted-foreground">Seguidores</p>
-                </Card>
-                
-                <Card className="text-center p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                  <Heart className="h-6 w-6 text-purple-500 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-purple-500">{following.length}</p>
-                  <p className="text-xs text-muted-foreground">A Seguir</p>
-                </Card>
-              </div>
+                  {filteredPixels.length === 0 && (
+                    <Card className="p-8 text-center">
+                      <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                      <p className="text-muted-foreground">
+                        {searchQuery ? `Nenhum pixel encontrado para "${searchQuery}"` : 'Nenhum pixel nesta categoria'}
+                      </p>
+                    </Card>
+                  )}
 
-              {/* Friends List */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center">
-                      <Users className="h-5 w-5 mr-2 text-blue-500" />
-                      Conexões Sociais
-                    </CardTitle>
-                    <Button variant="outline" size="sm">
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Convidar
-                    </Button>
-                  </div>
-                                className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 text-white"
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="friends" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 h-9">
-                      <TabsTrigger value="friends" className="text-xs">
-                        Amigos ({friends.length})
-                      </TabsTrigger>
-                      <TabsTrigger value="followers" className="text-xs">
-                        Seguidores ({followers.length})
-                      </TabsTrigger>
-                      <TabsTrigger value="following" className="text-xs">
-                        A Seguir ({following.length})
-                      </TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="friends" className="mt-3">
-                      <ScrollArea className="h-64">
-                        <div className="space-y-2">
-                          {friends.map(friend => (
-                            <Card key={friend.id} className="bg-muted/20 hover:bg-muted/30 transition-colors">
-                              <CardContent className="p-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="relative">
-                                    <Avatar className="h-10 w-10 border-2 border-border">
-                                      <AvatarImage src={friend.avatar} />
-                                      <AvatarFallback>{friend.name[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${
-                                      friend.isOnline ? 'bg-green-500' : 'bg-gray-500'
-                                    }`} />
+                  {/* Albums Section */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg flex items-center">
+                          <BookImage className="h-5 w-5 mr-2 text-purple-500" />
+                          Álbuns ({userAlbums.length})
+                        </CardTitle>
+                        <Button variant="outline" size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Criar
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {userAlbums.map(album => (
+                          <Card key={album.id} className="bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                                  <BookImage className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-semibold text-sm truncate">{album.name}</h4>
+                                    <Badge variant={album.isPublic ? 'default' : 'secondary'} className="text-xs">
+                                      {album.isPublic ? 'Público' : 'Privado'}
+                                    </Badge>
                                   </div>
-                                  
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-medium text-sm truncate">{friend.name}</span>
-                                      {friend.isVerified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
-                                      {friend.isPremium && <Crown className="h-3 w-3 text-amber-500" />}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                      <Badge variant="outline" className="text-xs">
-                                        Nível {friend.level}
-                                      </Badge>
-                                      <span>{friend.pixelsOwned} pixels</span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                      {friend.isOnline ? 'Online' : friend.lastSeen}
-                                    </p>
+                                  <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
+                                    {album.description}
+                                  </p>
+                                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                    <span>{album.pixelCount} pixels</span>
+                                    <span className="flex items-center gap-1">
+                                      <Eye className="h-3 w-3" />
+                                      {album.views}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Heart className="h-3 w-3" />
+                                      {album.likes}
+                                    </span>
                                   </div>
-                                  
-                                  <div className="flex flex-col gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleFriendAction('message', friend.id)}
-                                      className="h-7 px-2"
-                                    >
-                                      <MessageSquare className="h-3 w-3" />
-                                    </Button>
-                    </div>
-                  </ScrollArea>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleFriendAction('follow', friend.id)}
+              </TabsContent>
+
+              {/* Social Tab */}
               <TabsContent value="social" className="space-y-6 pb-8 focus:outline-none">
                 <div className="space-y-6">
-                                    >
-                                      <UserPlus className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
+                  {/* Social Stats */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <Card className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
+                      <Users className="h-6 w-6 text-blue-500 mx-auto mb-1" />
+                      <p className="text-xl font-bold text-blue-500">{friends.length}</p>
+                      <p className="text-xs text-muted-foreground">Amigos</p>
+                    </Card>
                     
-                    <TabsContent value="followers" className="mt-3">
-                      <ScrollArea className="h-64">
-                        <div className="space-y-2">
-                          {followers.map(follower => (
-                            <Card key={follower.id} className="bg-muted/20">
-                              <CardContent className="p-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage src={follower.avatar} />
-                                      <AvatarFallback>{follower.name[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <p className="font-medium text-sm">{follower.name}</p>
-                                      <p className="text-xs text-muted-foreground">Nível {follower.level}</p>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                            className="flex-1 min-h-[32px] text-xs"
-                                    onClick={() => handleFriendAction('follow', follower.id)}
-                                    className="h-7 text-xs"
-                                  >
-                                    Seguir de Volta
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                      <ScrollArea className="h-64">
-                        <div className="space-y-3 pr-2">
+                    <Card className="text-center p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+                      <UserPlus className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                      <p className="text-xl font-bold text-green-500">{followers.length}</p>
+                      <p className="text-xs text-muted-foreground">Seguidores</p>
+                    </Card>
                     
-                    <TabsContent value="following" className="mt-3">
-                      <ScrollArea className="h-64">
-                        <div className="space-y-2">
-                          {following.map(followingUser => (
-                            <Card key={followingUser.id} className="bg-muted/20">
-                              <CardContent className="p-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage src={followingUser.avatar} />
-                                      <AvatarFallback>{followingUser.name[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <p className="font-medium text-sm">{followingUser.name}</p>
-                                      <p className="text-xs text-muted-foreground">Nível {followingUser.level}</p>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleFriendAction('unfollow', followingUser.id)}
-                                    className="h-7 text-xs"
-                                  >
-                                    Deixar de Seguir
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
+                    <Card className="text-center p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                      <Heart className="h-6 w-6 text-purple-500 mx-auto mb-1" />
+                      <p className="text-xl font-bold text-purple-500">{following.length}</p>
+                      <p className="text-xs text-muted-foreground">A Seguir</p>
+                    </Card>
+                  </div>
 
-              {/* Social Links */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                                  className="min-h-[32px] px-3 text-xs"
-                    <LinkIcon className="h-5 w-5 mr-2 text-cyan-500" />
-                    Redes Sociais
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {[
-                    { platform: 'Instagram', handle: editedProfile.socialLinks.instagram, icon: <Instagram className="h-4 w-4" />, color: 'text-pink-500' },
-                                  className="min-h-[32px] px-3 text-xs"
-                    { platform: 'Twitter', handle: editedProfile.socialLinks.twitter, icon: <Twitter className="h-4 w-4" />, color: 'text-blue-400' },
-                    { platform: 'GitHub', handle: editedProfile.socialLinks.github, icon: <Github className="h-4 w-4" />, color: 'text-gray-500' },
-                    { platform: 'YouTube', handle: editedProfile.socialLinks.youtube, icon: <Youtube className="h-4 w-4" />, color: 'text-red-500' }
-                  ].map(social => (
-                    <Button
-                      key={social.platform}
-                      variant="outline"
-                        </div>
-                      </ScrollArea>
-                      onClick={() => window.open(`https://${social.platform.toLowerCase()}.com/${social.handle}`, '_blank')}
-                    >
+                  {/* Friends List */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg flex items-center">
+                          <Users className="h-5 w-5 mr-2 text-blue-500" />
+                          Conexões Sociais
+                        </CardTitle>
+                        <Button variant="outline" size="sm">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Convidar
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="friends" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 h-9">
+                          <TabsTrigger value="friends" className="text-xs">
+                            Amigos ({friends.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="followers" className="text-xs">
+                            Seguidores ({followers.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="following" className="text-xs">
+                            A Seguir ({following.length})
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="friends" className="mt-3">
+                          <ScrollArea className="h-64">
+                            <div className="space-y-2">
+                              {friends.map(friend => (
+                                <Card key={friend.id} className="bg-muted/20 hover:bg-muted/30 transition-colors">
+                                  <CardContent className="p-3">
+                                    <div className="flex items-center gap-3">
+                                      <div className="relative">
+                                        <Avatar className="h-10 w-10 border-2 border-border">
+                                          <AvatarImage src={friend.avatar} />
+                                          <AvatarFallback>{friend.name[0]}</AvatarFallback>
+                                        </Avatar>
+                                        <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${
+                                          friend.isOnline ? 'bg-green-500' : 'bg-gray-500'
+                                        }`} />
+                                      </div>
+                                      
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="font-medium text-sm truncate">{friend.name}</span>
+                                          {friend.isVerified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
+                                          {friend.isPremium && <Crown className="h-3 w-3 text-amber-500" />}
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                          <Badge variant="outline" className="text-xs">
+                                            Nível {friend.level}
+                                          </Badge>
+                                          <span>{friend.pixelsOwned} pixels</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                          {friend.isOnline ? 'Online' : friend.lastSeen}
+                                        </p>
+                                      </div>
+                                      
+                                      <div className="flex flex-col gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleFriendAction('message', friend.id)}
+                                          className="h-7 px-2"
+                                        >
+                                          <MessageSquare className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleFriendAction('follow', friend.id)}
+                                          className="h-7 px-2"
+                                        >
+                                          <UserPlus className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </TabsContent>
+                        
+                        <TabsContent value="followers" className="mt-3">
+                          <ScrollArea className="h-64">
+                            <div className="space-y-2">
+                              {followers.map(follower => (
+                                <Card key={follower.id} className="bg-muted/20">
+                                  <CardContent className="p-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <Avatar className="h-8 w-8">
+                                          <AvatarImage src={follower.avatar} />
+                                          <AvatarFallback>{follower.name[0]}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                          <p className="font-medium text-sm">{follower.name}</p>
+                                          <p className="text-xs text-muted-foreground">Nível {follower.level}</p>
+                                        </div>
+                                      </div>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleFriendAction('follow', follower.id)}
+                                        className="h-7 text-xs"
+                                      >
+                                        Seguir de Volta
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </TabsContent>
+                        
+                        <TabsContent value="following" className="mt-3">
+                          <ScrollArea className="h-64">
+                            <div className="space-y-2">
+                              {following.map(followingUser => (
+                                <Card key={followingUser.id} className="bg-muted/20">
+                                  <CardContent className="p-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <Avatar className="h-8 w-8">
+                                          <AvatarImage src={followingUser.avatar} />
+                                          <AvatarFallback>{followingUser.name[0]}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                          <p className="font-medium text-sm">{followingUser.name}</p>
+                                          <p className="text-xs text-muted-foreground">Nível {followingUser.level}</p>
+                                        </div>
+                                      </div>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleFriendAction('unfollow', followingUser.id)}
+                                        className="h-7 text-xs"
+                                      >
+                                        Deixar de Seguir
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+
+                  {/* Social Links */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center">
+                        <LinkIcon className="h-5 w-5 mr-2 text-cyan-500" />
+                        Redes Sociais
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {[
+                        { platform: 'Instagram', handle: editedProfile.socialLinks.instagram, icon: <Instagram className="h-4 w-4" />, color: 'text-pink-500' },
+                        { platform: 'Twitter', handle: editedProfile.socialLinks.twitter, icon: <Twitter className="h-4 w-4" />, color: 'text-blue-400' },
+                        { platform: 'GitHub', handle: editedProfile.socialLinks.github, icon: <Github className="h-4 w-4" />, color: 'text-gray-500' },
+                        { platform: 'YouTube', handle: editedProfile.socialLinks.youtube, icon: <Youtube className="h-4 w-4" />, color: 'text-red-500' }
+                      ].map(social => (
+                        <Button
+                          key={social.platform}
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => window.open(`https://${social.platform.toLowerCase()}.com/${social.handle}`, '_blank')}
+                        >
+                          <span className={social.color}>{social.icon}</span>
+                          <span className="ml-3 font-semibold">{social.platform}:</span>
+                          <span className="ml-2 text-muted-foreground font-code">{social.handle}</span>
+                          <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
+                        </Button>
+                      ))}
+                    </CardContent>
+                  </Card>
                 </div>
-                      <span className={social.color}>{social.icon}</span>
-                      <span className="ml-3 font-semibold">{social.platform}:</span>
-                      <span className="ml-2 text-muted-foreground font-code">{social.handle}</span>
-                      <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
-                    </Button>
-                  ))}
-                </CardContent>
-          <DialogContent className="w-[95vw] h-[92vh] max-w-none max-h-none p-0 gap-0 rounded-2xl border-2 border-primary/30">
-            </TabsContent>
+              </TabsContent>
+            </div>
           </Tabs>
-        </Card>
+        </div>
 
         {/* Edit Profile Modal */}
         {isEditing && (
           <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
             <Card className="w-full max-w-md max-h-[90vh] overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
-                  className="h-8 w-8"
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">
                     <Edit3 className="h-5 w-5 mr-2" />
@@ -1394,8 +1381,7 @@ export default function MemberPage() {
                   </span>
                   <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}>
                     <X className="h-4 w-4" />
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-6">
+                  </Button>
                 </CardTitle>
               </CardHeader>
               
@@ -1409,7 +1395,6 @@ export default function MemberPage() {
                       placeholder="Seu nome público"
                     />
                   </div>
-                          className="min-h-[44px]"
                   
                   <div className="space-y-2">
                     <Label>Bio</Label>
@@ -1420,7 +1405,6 @@ export default function MemberPage() {
                       rows={3}
                       maxLength={200}
                     />
-                          className="min-h-[88px] resize-none"
                     <p className="text-xs text-muted-foreground text-right">
                       {editedProfile.bio.length}/200
                     </p>
@@ -1430,7 +1414,6 @@ export default function MemberPage() {
                     <Label>Localização</Label>
                     <Input
                       value={editedProfile.location}
-                          className="min-h-[44px]"
                       onChange={(e) => setEditedProfile(prev => ({ ...prev, location: e.target.value }))}
                       placeholder="Sua cidade"
                     />
@@ -1440,16 +1423,13 @@ export default function MemberPage() {
                     <Label>Website</Label>
                     <Input
                       value={editedProfile.website}
-                          className="min-h-[44px]"
                       onChange={(e) => setEditedProfile(prev => ({ ...prev, website: e.target.value }))}
                       placeholder="https://seusite.com"
                     />
-                </div>
                   </div>
                   
                   <Separator />
-              <TabsContent value="pixels" className="space-y-6 pb-8 focus:outline-none">
-                <div className="space-y-6">
+                  
                   <div className="space-y-3">
                     <Label>Redes Sociais</Label>
                     {Object.entries(editedProfile.socialLinks).map(([platform, handle]) => (
@@ -1470,7 +1450,6 @@ export default function MemberPage() {
                   
                   <Separator />
                   
-                            className="min-h-[44px]"
                   <div className="space-y-3">
                     <Label>Configurações de Privacidade</Label>
                     {Object.entries(privacySettings).map(([key, value]) => (
@@ -1491,37 +1470,31 @@ export default function MemberPage() {
                         />
                       </div>
                     ))}
-                        <div key={setting.key} className="flex items-center justify-between py-2">
+                  </div>
                 </CardContent>
               </ScrollArea>
               
               <CardFooter className="flex gap-2 border-t pt-4">
-                          <div className="ml-4">
-                            <Switch
+                <Button 
                   variant="outline" 
                   className="flex-1"
-                              className="data-[state=checked]:bg-primary"
                   onClick={() => setIsEditing(false)}
-                          </div>
                 >
                   Cancelar
                 </Button>
                 <Button 
                   className="flex-1"
-              </div>
-            </ScrollArea>
+                  onClick={handleSaveProfile}
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                className="min-h-[44px] px-6"
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                       Salvando...
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                className="min-h-[44px] px-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
                       Salvar
                     </>
                   )}
