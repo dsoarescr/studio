@@ -31,8 +31,7 @@ import {
   BarChart3, PieChart, LineChart, DollarSign, Package, Truck,
   AlertTriangle, Info, Settings, Edit, Trash2, Plus, Minus,
   RefreshCw, Download, Upload, Camera, Palette, Bookmark,
-  Navigation, Compass, Map as MapIcon, Phone, Mail, Link as LinkIcon,
-  Check, Megaphone
+  Navigation, Compass, Map as MapIcon, Phone, Mail, Link as LinkIcon
 } from "lucide-react";
 import { cn } from '@/lib/utils';
 
@@ -83,10 +82,6 @@ interface MarketplacePixel {
     message?: string;
     timestamp: string;
   }>;
-  views?: number;
-  likes?: number;
-  comments?: number;
-  followers?: number;
 }
 
 const mockMarketplacePixels: MarketplacePixel[] = [
@@ -244,10 +239,6 @@ const mockUserPixels: MarketplacePixel[] = [
       { date: '2024-03-01', price: 220 }
     ],
     gpsCoords: { lat: 40.6443, lon: -8.6455 },
-    views: 456,
-    likes: 32,
-    comments: 15,
-    followers: 28,
     offers: [
       {
         id: '1',
@@ -263,32 +254,6 @@ const mockUserPixels: MarketplacePixel[] = [
         timestamp: '2024-03-15T16:45:00Z'
       }
     ]
-  }
-];
-
-const mockOffers = [
-  {
-    id: '1',
-    buyer: {
-      name: 'NatureLover',
-      avatar: 'https://placehold.co/40x40.png'
-    },
-    amount: 200,
-    pixelX: 400,
-    pixelY: 300,
-    message: 'Adoro a vista da Ria! Aceita esta oferta?',
-    timestamp: '2h atrás'
-  },
-  {
-    id: '2',
-    buyer: {
-      name: 'PixelCollector',
-      avatar: 'https://placehold.co/40x40.png'
-    },
-    amount: 210,
-    pixelX: 400,
-    pixelY: 300,
-    timestamp: '4h atrás'
   }
 ];
 
@@ -595,29 +560,6 @@ export default function MarketplacePage() {
     });
   };
 
-  const handleAcceptOffer = (offer: any) => {
-    setShowConfetti(true);
-    setPlaySuccessSound(true);
-    
-    const commission = isPremium ? 0.05 : 0.07;
-    const finalAmount = offer.amount * (1 - commission);
-    
-    addCredits(Math.floor(offer.amount * 0.95));
-    addXp(50);
-    
-    toast({
-      title: "Oferta Aceite! 💰",
-      description: `Vendeu pixel por €${offer.amount}. Recebeu €${Math.floor(finalAmount)} (após comissão de ${Math.round(commission * 100)}%).`,
-    });
-  };
-
-  const handleRejectOffer = (offerId: string) => {
-    toast({
-      title: "Oferta Rejeitada",
-      description: "A oferta foi rejeitada e o comprador foi notificado.",
-    });
-  };
-
   const formatTimeLeft = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -664,31 +606,26 @@ export default function MarketplacePage() {
 
         {/* Tabs - Mobile Optimized */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-card/50 backdrop-blur-sm shadow-md">
-            <TabsTrigger value="all" className="font-headline text-xs sm:text-sm">
-              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
-              <span className="hidden sm:inline">Todos</span>
-              <span className="sm:hidden">All</span>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-10 sm:h-12 bg-card/50 text-xs sm:text-sm">
+            <TabsTrigger value="all" className="px-2 sm:px-4">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              Todos
             </TabsTrigger>
-            <TabsTrigger value="auctions" className="font-headline text-xs sm:text-sm">
+            <TabsTrigger value="auctions" className="px-2 sm:px-4">
               <Gavel className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
-              <span className="hidden sm:inline">Leilões</span>
-              <span className="sm:hidden">Leil</span>
+              Leilões
             </TabsTrigger>
-            <TabsTrigger value="following" className="font-headline text-xs sm:text-sm">
+            <TabsTrigger value="following" className="px-2 sm:px-4">
               <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
-              <span className="hidden sm:inline">A Seguir</span>
-              <span className="sm:hidden">Seg</span>
+              A Seguir
             </TabsTrigger>
-            <TabsTrigger value="liked" className="font-headline text-xs sm:text-sm">
+            <TabsTrigger value="liked" className="px-2 sm:px-4">
               <Heart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
-              <span className="hidden sm:inline">Curtidos</span>
-              <span className="sm:hidden">Fav</span>
+              Curtidos
             </TabsTrigger>
-            <TabsTrigger value="my-sales" className="font-headline text-xs sm:text-sm">
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
-              <span className="hidden sm:inline">Minhas Vendas</span>
-              <span className="sm:hidden">Vend</span>
+            <TabsTrigger value="my-sales" className="px-2 sm:px-4">
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              Vendas
             </TabsTrigger>
           </TabsList>
 
@@ -801,19 +738,15 @@ export default function MarketplacePage() {
                   
                   <CardContent className="p-2 sm:p-4">
                     <div className="space-y-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Badge className={getRarityColor(pixel.rarity)} variant="outline" className="text-xs px-1.5 py-0.5">
-                            {pixel.rarity}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">({pixel.x}, {pixel.y})</span>
-                        </div>
+                      <div>
                         <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{pixel.title}</h3>
+                        <p className="text-xs text-muted-foreground">({pixel.x}, {pixel.y}) • {pixel.region}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">{pixel.region}</p>
                       
                       {viewMode === 'list' && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">{pixel.description}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                          {pixel.description}
+                        </p>
                       )}
                       
                       {/* Stats - Mobile Optimized */}
@@ -862,15 +795,12 @@ export default function MarketplacePage() {
                       </div>
                       
                       {/* Action Buttons - Mobile Optimized */}
-                      <div className="grid grid-cols-2 gap-1.5">
+                      <div className="grid grid-cols-2 gap-1 sm:gap-2">
                         {pixel.isAuction ? (
                           <Button 
                             size="sm" 
-                            className="h-8 text-xs bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleBidOnPixel(pixel);
-                            }}
+                            className="min-h-[36px] text-xs"
+                            onClick={(e) => handleBidOnPixel(pixel, e)}
                           >
                             <Gavel className="h-3 w-3 mr-1" />
                             Licitar
@@ -878,11 +808,8 @@ export default function MarketplacePage() {
                         ) : (
                           <Button 
                             size="sm" 
-                            className="h-8 text-xs bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleBuyPixel(pixel);
-                            }}
+                            className="min-h-[36px] text-xs"
+                            onClick={(e) => handleBuyPixel(pixel, e)}
                           >
                             <ShoppingCart className="h-3 w-3 mr-1" />
                             Comprar
@@ -892,7 +819,7 @@ export default function MarketplacePage() {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="h-8 text-xs"
+                          className="min-h-[36px] text-xs"
                           onClick={(e) => handleMakeOffer(pixel, e)}
                         >
                           <Send className="h-3 w-3 mr-1" />
@@ -1129,176 +1056,6 @@ export default function MarketplacePage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          </TabsContent>
-
-          {/* Minhas Vendas Tab */}
-          <TabsContent value="my-sales" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Stats de Vendas */}
-              <Card className="lg:col-span-3">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2 text-green-500" />
-                    Dashboard de Vendas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="text-center p-3 bg-green-500/10 rounded-lg">
-                      <div className="text-lg sm:text-xl font-bold text-green-500">€2,450</div>
-                      <div className="text-xs text-muted-foreground">Total Vendido</div>
-                    </div>
-                    <div className="text-center p-3 bg-blue-500/10 rounded-lg">
-                      <div className="text-lg sm:text-xl font-bold text-blue-500">12</div>
-                      <div className="text-xs text-muted-foreground">Pixels à Venda</div>
-                    </div>
-                    <div className="text-center p-3 bg-purple-500/10 rounded-lg">
-                      <div className="text-lg sm:text-xl font-bold text-purple-500">4.8</div>
-                      <div className="text-xs text-muted-foreground">Rating Vendedor</div>
-                    </div>
-                    <div className="text-center p-3 bg-orange-500/10 rounded-lg">
-                      <div className="text-lg sm:text-xl font-bold text-orange-500">€123</div>
-                      <div className="text-xs text-muted-foreground">Comissões Pagas</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Pixels à Venda */}
-              <Card className="lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center">
-                    <Package className="h-4 w-4 mr-2" />
-                    Meus Pixels à Venda
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-64">
-                    <div className="space-y-3">
-                      {mockUserPixels.map(pixel => (
-                        <Card key={pixel.id} className="p-3 bg-muted/20">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <Badge className={getRarityColor(pixel.rarity)} variant="outline" className="text-xs">
-                                    {pixel.rarity}
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground">({pixel.x}, {pixel.y})</span>
-                                </div>
-                                <h4 className="font-medium text-sm">{pixel.title}</h4>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-primary">€{pixel.price}</div>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-4 gap-2 text-xs text-center">
-                              <div>
-                                <div className="font-bold text-blue-500">{pixel.views}</div>
-                                <div className="text-muted-foreground">Views</div>
-                              </div>
-                              <div>
-                                <div className="font-bold text-red-500">{pixel.likes}</div>
-                                <div className="text-muted-foreground">Likes</div>
-                              </div>
-                              <div>
-                                <div className="font-bold text-green-500">{pixel.comments}</div>
-                                <div className="text-muted-foreground">Coment</div>
-                              </div>
-                              <div>
-                                <div className="font-bold text-purple-500">{pixel.followers}</div>
-                                <div className="text-muted-foreground">Seguid</div>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button variant="outline" size="sm" className="h-8 text-xs">
-                                <Edit className="h-3 w-3 mr-1" />
-                                Editar
-                              </Button>
-                              <Button variant="outline" size="sm" className="h-8 text-xs">
-                                <Megaphone className="h-3 w-3 mr-1" />
-                                Promover
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Ofertas Recebidas */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center">
-                    <Gift className="h-4 w-4 mr-2 text-accent" />
-                    Ofertas Recebidas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-64">
-                    <div className="space-y-3">
-                      {mockOffers.map(offer => (
-                        <Card key={offer.id} className="p-3 bg-muted/20">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-6 w-6">
-                                  <AvatarImage src={offer.buyer.avatar} />
-                                  <AvatarFallback className="text-xs">{offer.buyer.name[0]}</AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium text-sm">{offer.buyer.name}</span>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-bold text-primary">€{offer.amount}</div>
-                                <div className="text-xs text-muted-foreground">{offer.timestamp}</div>
-                              </div>
-                            </div>
-                            
-                            <div className="text-xs text-muted-foreground">
-                              Pixel ({offer.pixelX}, {offer.pixelY})
-                            </div>
-                            
-                            {offer.message && (
-                              <p className="text-xs text-muted-foreground italic">"{offer.message}"</p>
-                            )}
-                            
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button 
-                                size="sm" 
-                                className="h-8 text-xs bg-green-600 hover:bg-green-700"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAcceptOffer(offer);
-                                }}
-                              >
-                                <Check className="h-3 w-3 mr-1" />
-                                Aceitar
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 text-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRejectOffer(offer.id);
-                                }}
-                              >
-                                <X className="h-3 w-3 mr-1" />
-                                Rejeitar
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
