@@ -384,6 +384,16 @@ export default function MarketplacePage() {
     }
   };
 
+  const handleBuyPixel = (pixel: MarketplacePixel) => {
+    setSelectedPixel(pixel);
+    setShowPurchaseModal(true);
+  };
+
+  const handleBidOnPixel = (pixel: MarketplacePixel) => {
+    setSelectedPixel(pixel);
+    setShowBidModal(true);
+  };
+
   const handlePurchase = () => {
     if (!selectedPixel) return;
     
@@ -584,38 +594,36 @@ export default function MarketplacePage() {
   };
 
   const handleAcceptOffer = (pixelId: string, offerId: string) => {
-    const pixel = userPixelsForSale.find(p => p.id === pixelId);
-    const offer = pixel?.offers.find(o => o.id === offerId);
+    const pixel = mockMarketplacePixels.find(p => p.id === pixelId);
+    const offer = pixel?.offers?.find(o => o.id === offerId);
     
-    if (offer) {
-      const commission = 0.07; // 7% para utilizadores normais
-      const sellerReceives = offer.amount * (1 - commission);
-      
-      addCredits(Math.floor(sellerReceives));
-      addXp(50);
-      setShowConfetti(true);
-      setPlaySuccessSound(true);
-      
-      // Remover pixel das vendas
-      setUserPixelsForSale(prev => prev.filter(p => p.id !== pixelId));
-      
-      toast({
-        title: "🎉 Oferta Aceite!",
-        description: `Vendeu por €${offer.amount}. Recebeu €${sellerReceives.toFixed(2)} (após comissão). +50 XP!`,
-      });
-    }
+    if (!pixel || !offer) return;
+    
+    setShowConfetti(true);
+    setPlaySuccessSound(true);
+    
+    // Calculate commission
+    const commission = isPremium ? 0.05 : 0.07;
+    const finalAmount = offer.amount * (1 - commission);
+    
+    addCredits(Math.floor(finalAmount));
+    addXp(75);
+    
+    toast({
+      title: "Oferta Aceite! 💰",
+      description: `Vendeu o pixel por €${offer.amount}. Recebeu €${finalAmount.toFixed(2)} (após comissão de ${(commission * 100).toFixed(0)}%).`,
+    });
   };
 
   const handleRejectOffer = (pixelId: string, offerId: string) => {
-    setUserPixelsForSale(prev => prev.map(p => 
-      p.id === pixelId 
-        ? { ...p, offers: p.offers.filter(o => o.id !== offerId) }
-        : p
-    ));
+    const pixel = mockMarketplacePixels.find(p => p.id === pixelId);
+    const offer = pixel?.offers?.find(o => o.id === offerId);
+    
+    if (!pixel || !offer) return;
     
     toast({
       title: "Oferta Rejeitada",
-      description: "A oferta foi rejeitada.",
+      description: `Rejeitou a oferta de €${offer.amount} de ${offer.buyer}.`,
     });
   };
 
@@ -1042,8 +1050,7 @@ export default function MarketplacePage() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedPixel(pixel);
-                                setShowBidModal(true);
+                                handleBidOnPixel(pixel);
                               }}
                               className="flex-1 text-xs h-8 bg-red-500 hover:bg-red-600"
                             >
@@ -1055,8 +1062,7 @@ export default function MarketplacePage() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedPixel(pixel);
-                                setShowPurchaseModal(true);
+                                handleBuyPixel(pixel);
                               }}
                               className="flex-1 text-xs h-8"
                             >
@@ -1226,7 +1232,10 @@ export default function MarketplacePage() {
                                   <div className="flex gap-2">
                                     <Button
                                       size="sm"
-                                      onClick={() => handleAcceptOffer(pixel.id, offer.id)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAcceptOffer(pixel.id, offer.id);
+                                      }}
                                       className="text-xs h-8"
                                     >
                                       <CheckCircle className="h-3 w-3 mr-1" />
@@ -1235,7 +1244,10 @@ export default function MarketplacePage() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => handleRejectOffer(pixel.id, offer.id)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRejectOffer(pixel.id, offer.id);
+                                      }}
                                       className="text-xs h-8"
                                     >
                                       <X className="h-3 w-3 mr-1" />
