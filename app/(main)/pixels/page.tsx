@@ -703,10 +703,10 @@ export default function PixelsGalleryPage() {
                   variant="outline" 
                   size="sm"
                   onClick={() => setShowManagementPanel(true)}
-                  className="min-h-[36px] text-xs sm:text-sm"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 animate-pulse min-h-[36px] text-xs sm:text-sm"
                 >
-                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                  Gerir Destaques
+                  <Settings className="h-5 w-5 mr-2 animate-spin" style={{ animationDuration: '3s' }} />
+                  <span className="font-bold">⚡ GERIR DESTAQUES ⚡</span>
                 </Button>
               </div>
             </div>
