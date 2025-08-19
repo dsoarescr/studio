@@ -1190,11 +1190,11 @@ export default function MemberPage() {
                               <Button 
                                 variant="destructive" 
                                 className="w-full justify-start"
-                                onClick={() => handleDeleteAlbum(album.id)}
+                         onClick={() => handleClaimReward(ach.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Eliminar Álbum
-                              </Button>
+                             {React.cloneElement(ach.icon as React.ReactElement, { className: "h-5 w-5 text-primary" })}
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -1271,15 +1271,15 @@ export default function MemberPage() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Coins className="h-3 w-3 text-accent" />
-                              +{achievement.creditsReward}
+                             <h4 className="font-semibold text-sm">{ach.name}</h4>
                             </span>
-                          </div>
-                          
+                               <span className="text-xs text-primary">+{ach.tiers[0]?.xpReward || 0} XP</span>
+                               <span className="text-xs text-accent">+{ach.tiers[0]?.creditsReward || 0}</span>
                           <div className="flex gap-1">
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleClaimAchievement(achievement.id)}
+                             onClick={(e) => handleClaimReward(ach.id, e)}
                             >
                               <Gift className="h-3 w-3 mr-1" />
                               Reclamar
