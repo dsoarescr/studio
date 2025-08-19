@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -367,6 +367,7 @@ export default function MemberPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { vibrate } = useHapticFeedback();
+  const scrollRef = useRef<HTMLDivElement>(null);
   
   // State
   const [activeTab, setActiveTab] = useState('overview');
@@ -417,7 +418,7 @@ export default function MemberPage() {
   const nextLevelXp = xpMax - xp;
   const totalPixelViews = userPixels.reduce((sum, pixel) => sum + pixel.views, 0);
   const totalPixelLikes = userPixels.reduce((sum, pixel) => sum + pixel.likes, 0);
-  const averagePixelPrice = userPixels.length > 0 ? userPixels.reduce((sum, pixel) => sum + pixel.price, 0) / userPixels.length : 0;
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 pb-20">
   const mostExpensivePixel = userPixels.reduce((max, pixel) => pixel.price > max.price ? pixel : max, userPixels[0] || { price: 0 });
   
   const friends = userFriends.filter(f => f.status === 'friend');
@@ -523,6 +524,15 @@ export default function MemberPage() {
         toast({ title: "💬 Mensagem", description: `Abrindo chat com ${friend.name}...` });
         break;
     }
+    if (dailyBonusClaimed) {
+      toast({
+        title: "Bónus Já Reclamado",
+        description: "Volte amanhã para reclamar o próximo bónus diário!",
+        variant: "destructive"
+      });
+      return;
+    }
+    
   };
 
   const handleClaimDailyBonus = () => {
@@ -578,7 +588,7 @@ export default function MemberPage() {
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSound} onEnd={() => setPlaySound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <div className="container mx-auto px-3 py-4 space-y-4 max-w-md">
+      <div className="w-full max-w-md mx-auto px-4 py-6 space-y-6">
         {/* Profile Header */}
         <Card className="shadow-xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
@@ -762,9 +772,9 @@ export default function MemberPage() {
         </Card>
 
         {/* Main Content Tabs */}
-        <Card className="shadow-xl">
+        <div className="relative">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50">
+            <TabsList className="grid w-full grid-cols-3 h-12 bg-card/80 backdrop-blur-sm sticky top-16 z-30 rounded-lg border border-primary/20 shadow-lg">
               <TabsTrigger value="overview" className="text-xs">
                 <BarChart3 className="h-4 w-4 mr-1" />
                 Visão Geral
@@ -779,9 +789,10 @@ export default function MemberPage() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Overview Tab */}
+            <div className="mt-4 relative z-10">
             <TabsContent value="overview" className="space-y-4 p-4">
-              {/* Performance Stats */}
+              <TabsContent value="overview" className="space-y-6 pb-8 focus:outline-none">
+                <div ref={scrollRef} className="space-y-6">
               <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center">
@@ -1077,10 +1088,12 @@ export default function MemberPage() {
               </div>
 
               {filteredPixels.length === 0 && (
+                          className="min-h-[32px] px-3"
                 <Card className="p-8 text-center">
                   <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
                   <p className="text-muted-foreground">
                     {searchQuery ? `Nenhum pixel encontrado para "${searchQuery}"` : 'Nenhum pixel nesta categoria'}
+                            className="min-h-[32px] px-3 text-xs"
                   </p>
                 </Card>
               )}
@@ -1096,6 +1109,7 @@ export default function MemberPage() {
                     <Button variant="outline" size="sm">
                       <Plus className="h-4 w-4 mr-2" />
                       Criar
+                            className="min-h-[32px] px-3 text-xs"
                     </Button>
                   </div>
                 </CardHeader>
@@ -1103,6 +1117,7 @@ export default function MemberPage() {
                   <div className="space-y-3">
                     {userAlbums.map(album => (
                       <Card key={album.id} className="bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer">
+                            className="min-h-[32px] px-3 text-xs"
                         <CardContent className="p-3">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
@@ -1113,6 +1128,7 @@ export default function MemberPage() {
                                 <h4 className="font-semibold text-sm truncate">{album.name}</h4>
                                 <Badge variant={album.isPublic ? 'default' : 'secondary'} className="text-xs">
                                   {album.isPublic ? 'Público' : 'Privado'}
+                            className="min-h-[32px] w-8 p-0"
                                 </Badge>
                               </div>
                               <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
@@ -1120,6 +1136,7 @@ export default function MemberPage() {
                               </p>
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span>{album.pixelCount} pixels</span>
+                            className="min-h-[32px] w-8 p-0"
                                 <span className="flex items-center gap-1">
                                   <Eye className="h-3 w-3" />
                                   {album.views}
@@ -1130,10 +1147,11 @@ export default function MemberPage() {
                                 </span>
                               </div>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        </CardContent>
-                      </Card>
+                  <ScrollArea className="h-[60vh]">
+                    <div className={cn(
+                      "grid gap-4 pb-4",
+                      pixelView === 'grid' ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
+                    )}>
                     ))}
                   </div>
                 </CardContent>
@@ -1176,6 +1194,7 @@ export default function MemberPage() {
                       Convidar
                     </Button>
                   </div>
+                                className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 text-white"
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="friends" className="w-full">
@@ -1234,11 +1253,14 @@ export default function MemberPage() {
                                     >
                                       <MessageSquare className="h-3 w-3" />
                                     </Button>
-                                    <Button
+                    </div>
+                  </ScrollArea>
+                </div>
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => handleFriendAction('follow', friend.id)}
-                                      className="h-7 px-2"
+              <TabsContent value="social" className="space-y-6 pb-8 focus:outline-none">
+                <div className="space-y-6">
                                     >
                                       <UserPlus className="h-3 w-3" />
                                     </Button>
@@ -1271,6 +1293,7 @@ export default function MemberPage() {
                                   <Button
                                     variant="outline"
                                     size="sm"
+                            className="flex-1 min-h-[32px] text-xs"
                                     onClick={() => handleFriendAction('follow', follower.id)}
                                     className="h-7 text-xs"
                                   >
@@ -1282,7 +1305,8 @@ export default function MemberPage() {
                           ))}
                         </div>
                       </ScrollArea>
-                    </TabsContent>
+                      <ScrollArea className="h-64">
+                        <div className="space-y-3 pr-2">
                     
                     <TabsContent value="following" className="mt-3">
                       <ScrollArea className="h-64">
@@ -1324,6 +1348,7 @@ export default function MemberPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center">
+                                  className="min-h-[32px] px-3 text-xs"
                     <LinkIcon className="h-5 w-5 mr-2 text-cyan-500" />
                     Redes Sociais
                   </CardTitle>
@@ -1331,6 +1356,7 @@ export default function MemberPage() {
                 <CardContent className="space-y-2">
                   {[
                     { platform: 'Instagram', handle: editedProfile.socialLinks.instagram, icon: <Instagram className="h-4 w-4" />, color: 'text-pink-500' },
+                                  className="min-h-[32px] px-3 text-xs"
                     { platform: 'Twitter', handle: editedProfile.socialLinks.twitter, icon: <Twitter className="h-4 w-4" />, color: 'text-blue-400' },
                     { platform: 'GitHub', handle: editedProfile.socialLinks.github, icon: <Github className="h-4 w-4" />, color: 'text-gray-500' },
                     { platform: 'YouTube', handle: editedProfile.socialLinks.youtube, icon: <Youtube className="h-4 w-4" />, color: 'text-red-500' }
@@ -1338,9 +1364,11 @@ export default function MemberPage() {
                     <Button
                       key={social.platform}
                       variant="outline"
-                      className="w-full justify-start h-10"
+                        </div>
+                      </ScrollArea>
                       onClick={() => window.open(`https://${social.platform.toLowerCase()}.com/${social.handle}`, '_blank')}
                     >
+                </div>
                       <span className={social.color}>{social.icon}</span>
                       <span className="ml-3 font-semibold">{social.platform}:</span>
                       <span className="ml-2 text-muted-foreground font-code">{social.handle}</span>
@@ -1348,7 +1376,7 @@ export default function MemberPage() {
                     </Button>
                   ))}
                 </CardContent>
-              </Card>
+          <DialogContent className="w-[95vw] h-[92vh] max-w-none max-h-none p-0 gap-0 rounded-2xl border-2 border-primary/30">
             </TabsContent>
           </Tabs>
         </Card>
@@ -1358,6 +1386,7 @@ export default function MemberPage() {
           <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
             <Card className="w-full max-w-md max-h-[90vh] overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
+                  className="h-8 w-8"
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">
                     <Edit3 className="h-5 w-5 mr-2" />
@@ -1365,7 +1394,8 @@ export default function MemberPage() {
                   </span>
                   <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}>
                     <X className="h-4 w-4" />
-                  </Button>
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-6">
                 </CardTitle>
               </CardHeader>
               
@@ -1379,6 +1409,7 @@ export default function MemberPage() {
                       placeholder="Seu nome público"
                     />
                   </div>
+                          className="min-h-[44px]"
                   
                   <div className="space-y-2">
                     <Label>Bio</Label>
@@ -1389,6 +1420,7 @@ export default function MemberPage() {
                       rows={3}
                       maxLength={200}
                     />
+                          className="min-h-[88px] resize-none"
                     <p className="text-xs text-muted-foreground text-right">
                       {editedProfile.bio.length}/200
                     </p>
@@ -1398,6 +1430,7 @@ export default function MemberPage() {
                     <Label>Localização</Label>
                     <Input
                       value={editedProfile.location}
+                          className="min-h-[44px]"
                       onChange={(e) => setEditedProfile(prev => ({ ...prev, location: e.target.value }))}
                       placeholder="Sua cidade"
                     />
@@ -1407,13 +1440,16 @@ export default function MemberPage() {
                     <Label>Website</Label>
                     <Input
                       value={editedProfile.website}
+                          className="min-h-[44px]"
                       onChange={(e) => setEditedProfile(prev => ({ ...prev, website: e.target.value }))}
                       placeholder="https://seusite.com"
                     />
+                </div>
                   </div>
                   
                   <Separator />
-                  
+              <TabsContent value="pixels" className="space-y-6 pb-8 focus:outline-none">
+                <div className="space-y-6">
                   <div className="space-y-3">
                     <Label>Redes Sociais</Label>
                     {Object.entries(editedProfile.socialLinks).map(([platform, handle]) => (
@@ -1434,6 +1470,7 @@ export default function MemberPage() {
                   
                   <Separator />
                   
+                            className="min-h-[44px]"
                   <div className="space-y-3">
                     <Label>Configurações de Privacidade</Label>
                     {Object.entries(privacySettings).map(([key, value]) => (
@@ -1454,31 +1491,37 @@ export default function MemberPage() {
                         />
                       </div>
                     ))}
-                  </div>
+                        <div key={setting.key} className="flex items-center justify-between py-2">
                 </CardContent>
               </ScrollArea>
               
               <CardFooter className="flex gap-2 border-t pt-4">
-                <Button 
+                          <div className="ml-4">
+                            <Switch
                   variant="outline" 
                   className="flex-1"
+                              className="data-[state=checked]:bg-primary"
                   onClick={() => setIsEditing(false)}
+                          </div>
                 >
                   Cancelar
                 </Button>
                 <Button 
                   className="flex-1"
-                  onClick={handleSaveProfile}
+              </div>
+            </ScrollArea>
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
+                className="min-h-[44px] px-6"
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                       Salvando...
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
+                className="min-h-[44px] px-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
                       Salvar
                     </>
                   )}
