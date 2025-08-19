@@ -1036,7 +1036,7 @@ export default function MarketplacePage() {
                           </span>
                         </div>
                         
-                        <div className="flex gap-1">
+                        <div className="flex flex-col gap-2 pt-2">
                           {pixel.isAuction ? (
                             <Button
                               size="sm"
@@ -1046,12 +1046,26 @@ export default function MarketplacePage() {
                                 setShowBidModal(true);
                               }}
                               className="flex-1 text-xs h-8 bg-red-500 hover:bg-red-600"
+                            <Button 
+                              size="sm" 
+                              className="w-full text-xs h-10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBidOnPixel(pixel);
+                              }}
                             >
                               <Gavel className="h-3 w-3 mr-1" />
                               Licitar
                             </Button>
                           ) : (
-                            <Button
+                            <Button 
+                              size="sm" 
+                              className="w-full text-xs h-10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBuyPixel(pixel);
+                              }}
+                            >
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1064,7 +1078,15 @@ export default function MarketplacePage() {
                               Comprar
                             </Button>
                           )}
-                        </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full text-xs h-10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMakeOffer(pixel);
+                            }}
+                          >
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -1254,7 +1276,7 @@ export default function MarketplacePage() {
                             Editar
                           </Button>
                           <Button 
-                            variant="outline" 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             size="sm" 
                             className="flex-1"
                             onClick={() => handlePromotePixel(pixel.id)}
@@ -1335,7 +1357,7 @@ export default function MarketplacePage() {
                     <Card className="bg-gradient-to-r from-primary/10 to-accent/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-4">
-                          <div>
+                          <div className="flex flex-col sm:flex-row items-start gap-4">
                             <div className="text-3xl font-bold text-primary">
                               €{selectedPixel.isAuction ? selectedPixel.currentBid : selectedPixel.price}
                             </div>
@@ -1343,7 +1365,7 @@ export default function MarketplacePage() {
                               <div className="text-sm text-accent">
                                 ou {selectedPixel.specialCreditsPrice} créditos especiais
                               </div>
-                            )}
+                            <div className="flex-1 min-w-0 w-full">
                             {selectedPixel.isAuction && (
                               <div className="text-sm text-red-500 font-medium">
                                 {selectedPixel.bidCount} lances • Termina em {selectedPixel.auctionEndTime ? formatTimeLeft(selectedPixel.auctionEndTime) : ''}
@@ -1355,7 +1377,7 @@ export default function MarketplacePage() {
                         <div className="flex gap-2 mb-4">
                           <Button
                             variant="outline"
-                            onClick={() => handleLike(selectedPixel.id)}
+                              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                             className={selectedPixel.isLiked ? 'text-red-500 border-red-500/50' : ''}
                           >
                             <Heart className={`h-4 w-4 mr-2 ${selectedPixel.isLiked ? 'fill-current' : ''}`} />
@@ -1372,10 +1394,10 @@ export default function MarketplacePage() {
                           </Button>
                           
                           <Button
-                            variant="outline"
+                      <div className="flex flex-col gap-3">
                             onClick={() => handleViewOnMap(selectedPixel)}
                           >
-                            <MapPin className="h-4 w-4 mr-2" />
+                          className="w-full h-12"
                             Ver no Mapa
                           </Button>
                           
@@ -1383,7 +1405,7 @@ export default function MarketplacePage() {
                             <Button
                               variant="outline"
                               onClick={() => handleViewOnGoogleMaps(selectedPixel)}
-                            >
+                          className="w-full h-12"
                               <Globe className="h-4 w-4 mr-2" />
                               Google Maps
                             </Button>
@@ -1395,11 +1417,11 @@ export default function MarketplacePage() {
                             <Button
                               onClick={() => setShowBidModal(true)}
                               className="flex-1 bg-red-500 hover:bg-red-600"
-                            >
-                              <Gavel className="h-4 w-4 mr-2" />
+                                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex flex-col gap-3">
                               Fazer Lance
                             </Button>
-                          ) : (
+                          className="w-full h-12"
                             <>
                               <Button
                                 onClick={() => setShowPurchaseModal(true)}
@@ -1409,24 +1431,33 @@ export default function MarketplacePage() {
                                 Comprar Agora
                               </Button>
                               <Button
-                                variant="outline"
+                            className="w-full h-12"
                                 onClick={() => setShowOfferModal(true)}
                                 className="flex-1"
                               >
                                 <Target className="h-4 w-4 mr-2" />
                                 Fazer Oferta
-                              </Button>
+                                        <div className="flex gap-2 w-full sm:w-auto">
                             </>
                           )}
-                        </div>
-                      </CardContent>
+                                            className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleAcceptOffer(pixel.id, offer.id);
+                                            }}
+                      <div className="flex flex-col gap-3">
                     </Card>
 
-                    {/* Vendedor */}
+                          className="w-full h-12"
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">Vendedor</CardTitle>
-                      </CardHeader>
+                                            className="flex-1 sm:flex-none"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleRejectOffer(pixel.id, offer.id);
+                                            }}
+                          className="w-full h-12"
                       <CardContent>
                         <div className="flex items-center gap-4">
                           <Avatar className="h-12 w-12">
@@ -1435,9 +1466,9 @@ export default function MarketplacePage() {
                           </Avatar>
                           
                           <div className="flex-1">
-                            <div className="flex items-center gap-2">
+                          className="w-full h-12"
                               <span className="font-semibold">{selectedPixel.seller.name}</span>
-                              {selectedPixel.seller.verified && (
+                              <div className="flex flex-col sm:flex-row gap-2">
                                 <Star className="h-4 w-4 text-yellow-500 fill-current" />
                               )}
                               {selectedPixel.seller.isPremium && (
@@ -1458,10 +1489,10 @@ export default function MarketplacePage() {
                     </Card>
 
                     {/* Características */}
-                    {selectedPixel.features.length > 0 && (
+                        <div className="flex flex-col gap-3">
                       <Card>
                         <CardHeader>
-                          <CardTitle className="text-lg">Características</CardTitle>
+                              className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500"
                         </CardHeader>
                         <CardContent>
                           <div className="flex flex-wrap gap-2">
@@ -1469,7 +1500,7 @@ export default function MarketplacePage() {
                               <Badge key={feature} variant="outline">
                                 {feature}
                               </Badge>
-                            ))}
+                              className="w-full h-12 bg-gradient-to-r from-primary to-accent"
                           </div>
                         </CardContent>
                       </Card>
@@ -1479,7 +1510,7 @@ export default function MarketplacePage() {
                     {selectedPixel.tags.length > 0 && (
                       <Card>
                         <CardHeader>
-                          <CardTitle className="text-lg">Tags</CardTitle>
+                            className="w-full h-12"
                         </CardHeader>
                         <CardContent>
                           <div className="flex flex-wrap gap-2">
@@ -1525,7 +1556,7 @@ export default function MarketplacePage() {
                   <DialogTitle>Confirmar Compra</DialogTitle>
                 </DialogHeader>
                 
-                <div className="space-y-4">
+                <div className="p-4 space-y-6">
                   <div className="text-center">
                     <h3 className="text-xl font-semibold">{selectedPixel.title}</h3>
                     <p className="text-muted-foreground">
@@ -1553,7 +1584,7 @@ export default function MarketplacePage() {
                   </Card>
                   
                   <div className="flex justify-between text-sm">
-                    <span>Seus Créditos:</span>
+                  <div className="grid grid-cols-2 gap-4">
                     <span className={credits >= selectedPixel.price ? 'text-green-500' : 'text-red-500'}>
                       €{credits}
                     </span>
