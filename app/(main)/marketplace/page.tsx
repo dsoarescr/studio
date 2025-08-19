@@ -721,24 +721,26 @@ export default function MarketplacePage() {
                       className="w-full h-24 sm:h-32 flex items-center justify-center text-2xl sm:text-4xl font-bold"
                       style={{ backgroundColor: pixel.color }}
                     >
-                      🎨
+                    <div className="absolute top-1 left-1 right-1 flex justify-between items-start">
+                      <Badge className={cn(
+                        "text-xs px-1 py-0",
+                        getRarityColor(pixel.rarity)
+                      )}>
+                        {pixel.rarity}
+                      </Badge>
+                      
+                      {pixel.isAuction && (
+                        <Badge className="bg-red-500 text-xs px-1 py-0 animate-pulse">
+                          Leilão
+                        </Badge>
+                      )}
                     </div>
                     
-                    <Badge className={cn("absolute top-1 left-1 text-xs", getRarityColor(pixel.rarity))}>
-                      {pixel.rarity}
-                    </Badge>
-                    
-                    {pixel.isAuction && (
-                      <Badge className="absolute top-1 right-1 bg-red-500 animate-pulse text-xs">
-                        <Gavel className="h-2 w-2 mr-1" />
-                        Leilão
-                      </Badge>
-                    )}
                   </div>
                   
                   <CardContent className="p-2 sm:p-4">
-                    <div className="space-y-2">
-                      <div>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-xs sm:text-sm line-clamp-1 mb-1">
                         <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{pixel.title}</h3>
                         <p className="text-xs text-muted-foreground">({pixel.x}, {pixel.y}) • {pixel.region}</p>
                       </div>
@@ -831,6 +833,201 @@ export default function MarketplacePage() {
                       <div className="grid grid-cols-2 gap-1 sm:gap-2">
                         <Button 
                           variant="ghost" 
+          {/* Minhas Vendas Tab */}
+          <TabsContent value="my-sales" className="mt-0 space-y-4">
+            {/* Dashboard de Vendas */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <Card className="text-center p-3 sm:p-4">
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 mx-auto mb-2" />
+                <p className="text-lg sm:text-2xl font-bold text-green-500">€2,450</p>
+                <p className="text-xs text-muted-foreground">Total Vendido</p>
+              </Card>
+              
+              <Card className="text-center p-3 sm:p-4">
+                <Coins className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
+                <p className="text-lg sm:text-2xl font-bold text-primary">€122</p>
+                <p className="text-xs text-muted-foreground">Comissões Pagas</p>
+              </Card>
+              
+              <Card className="text-center p-3 sm:p-4">
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500 mx-auto mb-2" />
+                <p className="text-lg sm:text-2xl font-bold text-yellow-500">4.8</p>
+                <p className="text-xs text-muted-foreground">Rating Vendedor</p>
+              </Card>
+              
+              <Card className="text-center p-3 sm:p-4">
+                <Package className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mx-auto mb-2" />
+                <p className="text-lg sm:text-2xl font-bold text-blue-500">12</p>
+                <p className="text-xs text-muted-foreground">Pixels à Venda</p>
+              </Card>
+            </div>
+
+            {/* Pixels à Venda */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg sm:text-xl flex items-center">
+                  <Package className="h-5 w-5 mr-2 text-primary" />
+                  Meus Pixels à Venda
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {myPixelsForSale.map((pixel) => (
+                  <Card key={`${pixel.x}-${pixel.y}`} className="p-3 sm:p-4 bg-muted/30">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div 
+                          className="w-12 h-12 sm:w-16 sm:h-16 rounded border-2 border-white shadow-lg flex-shrink-0"
+                          style={{ backgroundColor: pixel.color }}
+                        />
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                            <h3 className="font-semibold text-sm sm:text-base line-clamp-1">
+                              {pixel.title || `Pixel (${pixel.x}, ${pixel.y})`}
+                            </h3>
+                            <Badge className={cn("text-xs w-fit", getRarityColor(pixel.rarity))}>
+                              {pixel.rarity}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>{pixel.region}</span>
+                            <span>•</span>
+                            <span>({pixel.x}, {pixel.y})</span>
+                          </div>
+                          
+                          <div className="text-lg sm:text-xl font-bold text-primary mt-1">
+                            €{pixel.price}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Estatísticas do Pixel */}
+                      <div className="grid grid-cols-4 gap-2 sm:gap-3 text-center">
+                        <div>
+                          <Eye className="h-4 w-4 text-blue-500 mx-auto mb-1" />
+                          <p className="text-sm font-bold">{pixel.views}</p>
+                          <p className="text-xs text-muted-foreground">Views</p>
+                        </div>
+                        <div>
+                          <Heart className="h-4 w-4 text-red-500 mx-auto mb-1" />
+                          <p className="text-sm font-bold">{pixel.likes}</p>
+                          <p className="text-xs text-muted-foreground">Likes</p>
+                        </div>
+                        <div>
+                          <MessageSquare className="h-4 w-4 text-green-500 mx-auto mb-1" />
+                          <p className="text-sm font-bold">{pixel.comments}</p>
+                          <p className="text-xs text-muted-foreground">Coment.</p>
+                        </div>
+                        <div>
+                          <Users className="h-4 w-4 text-purple-500 mx-auto mb-1" />
+                          <p className="text-sm font-bold">{pixel.followers}</p>
+                          <p className="text-xs text-muted-foreground">Seguid.</p>
+                        </div>
+                      </div>
+                      
+                      {/* Ações */}
+                      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-col sm:gap-2 sm:w-24">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs min-h-[36px]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPixel(pixel);
+                          }}
+                        >
+                          <Edit3 className="h-3 w-3 mr-1" />
+                          Editar
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs min-h-[36px]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePromotePixel(pixel);
+                          }}
+                        >
+                          <Zap className="h-3 w-3 mr-1" />
+                          Promover
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Ofertas Recebidas */}
+                    {pixel.offers && pixel.offers.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-border/50">
+                        <h4 className="font-medium text-sm mb-3 flex items-center">
+                          <Target className="h-4 w-4 mr-2 text-orange-500" />
+                          Ofertas Recebidas ({pixel.offers.length})
+                        </h4>
+                        
+                        <div className="space-y-2">
+                          {pixel.offers.map((offer) => (
+                            <div key={offer.id} className="p-3 bg-background/50 rounded-lg border">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <div className="flex items-center gap-3 flex-1">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage src={offer.buyer.avatar} />
+                                    <AvatarFallback>{offer.buyer.name[0]}</AvatarFallback>
+                                  </Avatar>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-sm">{offer.buyer.name}</span>
+                                      {offer.buyer.verified && (
+                                        <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                      )}
+                                    </div>
+                                    <div className="text-lg font-bold text-green-500">€{offer.amount}</div>
+                                    {offer.message && (
+                                      <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
+                                        "{offer.message}"
+                                      </p>
+                                    )}
+                                    <p className="text-xs text-muted-foreground">{offer.timestamp}</p>
+                                  </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    className="text-xs min-h-[36px] bg-green-600 hover:bg-green-700"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAcceptOffer(pixel, offer);
+                                    }}
+                                  >
+                                    <Check className="h-3 w-3 mr-1" />
+                                    Aceitar
+                                  </Button>
+                                  
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-xs min-h-[36px]"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRejectOffer(pixel, offer);
+                                    }}
+                                  >
+                                    <X className="h-3 w-3 mr-1" />
+                                    Rejeitar
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          </TabsContent>
                           size="sm" 
                           className={cn(
                             "min-h-[36px] text-xs",
