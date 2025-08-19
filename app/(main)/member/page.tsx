@@ -508,7 +508,6 @@ export default function MemberPage() {
               
               <Button
                 variant="outline"
-                variant={activeFilter === filter ? 'default' : 'outline'}
                 className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background border-2 border-primary"
                 onClick={() => {
                   vibrate('light');
@@ -1015,14 +1014,10 @@ export default function MemberPage() {
                         <DialogTrigger asChild>
                           <Button
                             variant="ghost"
-                            className={claimedRewards.includes(achievement.id) 
-                              ? "bg-gray-500 cursor-not-allowed" 
-                              : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                            }
+                            size="icon"
                             className="h-6 w-6 bg-black/50 text-white hover:bg-black/70"
-                            disabled={claimedRewards.includes(achievement.id)}
                           >
-                            {claimedRewards.includes(achievement.id) ? 'Reclamado' : 'Reclamar'}
+                            <MoreHorizontal className="h-3 w-3" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-sm">
@@ -1125,8 +1120,7 @@ export default function MemberPage() {
               <h3 className="font-semibold">Meus Álbuns ({userAlbums.length})</h3>
               <Button 
                 size="sm"
-                onClick={() => setActiveFilter(filter)}
-                className="capitalize hover:scale-105 transition-transform"
+                onClick={handleCreateAlbum}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Criar
@@ -1190,11 +1184,11 @@ export default function MemberPage() {
                               <Button 
                                 variant="destructive" 
                                 className="w-full justify-start"
-                         onClick={() => handleClaimReward(ach.id)}
+                                onClick={() => handleDeleteAlbum(album.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Eliminar Álbum
-                             {React.cloneElement(ach.icon as React.ReactElement, { className: "h-5 w-5 text-primary" })}
+                              </Button>
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -1271,18 +1265,22 @@ export default function MemberPage() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Coins className="h-3 w-3 text-accent" />
-                             <h4 className="font-semibold text-sm">{ach.name}</h4>
+                              +{achievement.creditsReward}
                             </span>
-                               <span className="text-xs text-primary">+{ach.tiers[0]?.xpReward || 0} XP</span>
-                               <span className="text-xs text-accent">+{ach.tiers[0]?.creditsReward || 0}</span>
+                          </div>
+                          
                           <div className="flex gap-1">
                             <Button 
-                              variant="outline" 
+                              variant={claimedRewards.includes(achievement.id) 
+                                ? "outline" 
+                                : "default"
+                              }
                               size="sm"
-                             onClick={(e) => handleClaimReward(ach.id, e)}
+                              onClick={() => handleClaimAchievement(achievement.id)}
+                              disabled={claimedRewards.includes(achievement.id)}
                             >
                               <Gift className="h-3 w-3 mr-1" />
-                              Reclamar
+                              {claimedRewards.includes(achievement.id) ? 'Reclamado' : 'Reclamar'}
                             </Button>
                             <Button 
                               variant="ghost" 
