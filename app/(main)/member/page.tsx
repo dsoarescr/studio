@@ -209,10 +209,8 @@ export default function MemberPage() {
   const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'price'>('recent');
   const [filterTag, setFilterTag] = useState<string>('all');
-  const [filter, setFilter] = useState<'all' | 'recent' | 'popular' | 'expensive'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [activeFilter, setActiveFilter] = useState('all');
   // Profile data
   const [profileData, setProfileData] = useState({
     displayName: 'PixelMasterPT',
@@ -508,6 +506,7 @@ export default function MemberPage() {
               
               <Button
                 variant="outline"
+                variant={activeFilter === filter ? 'default' : 'outline'}
                 className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background border-2 border-primary"
                 onClick={() => {
                   vibrate('light');
@@ -1014,10 +1013,14 @@ export default function MemberPage() {
                         <DialogTrigger asChild>
                           <Button
                             variant="ghost"
-                            size="icon"
+                            className={claimedRewards.includes(achievement.id) 
+                              ? "bg-gray-500 cursor-not-allowed" 
+                              : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                            }
                             className="h-6 w-6 bg-black/50 text-white hover:bg-black/70"
+                            disabled={claimedRewards.includes(achievement.id)}
                           >
-                            <MoreHorizontal className="h-3 w-3" />
+                            {claimedRewards.includes(achievement.id) ? 'Reclamado' : 'Reclamar'}
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-sm">
@@ -1120,7 +1123,8 @@ export default function MemberPage() {
               <h3 className="font-semibold">Meus Álbuns ({userAlbums.length})</h3>
               <Button 
                 size="sm"
-                onClick={handleCreateAlbum}
+                onClick={() => setActiveFilter(filter)}
+                className="capitalize hover:scale-105 transition-transform"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Criar
@@ -1271,16 +1275,12 @@ export default function MemberPage() {
                           
                           <div className="flex gap-1">
                             <Button 
-                              variant={claimedRewards.includes(achievement.id) 
-                                ? "outline" 
-                                : "default"
-                              }
+                              variant="outline" 
                               size="sm"
                               onClick={() => handleClaimAchievement(achievement.id)}
-                              disabled={claimedRewards.includes(achievement.id)}
                             >
                               <Gift className="h-3 w-3 mr-1" />
-                              {claimedRewards.includes(achievement.id) ? 'Reclamado' : 'Reclamar'}
+                              Reclamar
                             </Button>
                             <Button 
                               variant="ghost" 
