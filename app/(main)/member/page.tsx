@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -1353,7 +1353,7 @@ export default function MemberPage() {
                           key={social.platform}
                           variant="outline"
                           className="w-full justify-start"
-                          onClick={() => window.open(`https://${social.platform.toLowerCase()}.com/${social.handle}`, '_blank')}
+                          onClick={() => window.open(`https://www.${social.platform.toLowerCase()}.com/${social.handle}`, '_blank')}
                         >
                           <span className={social.color}>{social.icon}</span>
                           <span className="ml-3 font-semibold">{social.platform}:</span>
