@@ -5,454 +5,706 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Eye, Heart, MessageSquare, Star, TrendingUp, Clock, MapPin, Palette, Crown, Gem, Sparkles, Siren as Fire, Trophy, Users, Share2, Bookmark, Filter, Search, SortAsc, Grid3X3, List, BarChart3, Zap, Gift, Coins, Award, Calendar, Globe, Target, Flame, ThumbsUp, Download, ExternalLink, Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, Settings, ChevronUp, ChevronDown, ArrowUp, ArrowDown, TrendingDown, Plus, RefreshCw, Bell, Flag, Info, HelpCircle, Lightbulb, Megaphone, Brush, Layers, Compass, Tag } from "lucide-react";
-import { useUserStore, useSettingsStore } from '@/lib/store';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-import { UserProfileSheet } from '@/components/user/UserProfileSheet';
-import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import {
+  Palette, Star, Eye, Heart, MessageSquare, Share2, Crown, Gem, Sparkles, 
+  TrendingUp, Fire, Zap, Target, Award, Gift, Coins, Calendar, Clock, 
+  Filter, Search, SortAsc, Grid3X3, List, Play, Pause, Volume2, VolumeX,
+  Download, Upload, Edit3, Trash2, Copy, ExternalLink, MapPin, Globe,
+  Users, ThumbsUp, Bookmark, Flag, Settings, Info, AlertTriangle,
+  CheckCircle, X, Plus, Minus, ArrowUp, ArrowDown, BarChart3, PieChart,
+  Megaphone, Rocket, Shield, Lightning, Flame, Lightbulb, Camera,
+  Video, Music, Image as ImageIcon, Type, Brush, Eraser, PaintBucket,
+  Layers, RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Maximize,
+  Minimize, RefreshCw, Save, FolderPlus, Tag, Hash, Link as LinkIcon,
+  Send, Reply, Forward, Archive, Unarchive, Pin, PinOff, Lock, Unlock
+} from "lucide-react";
 
-type PixelRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'unique' | 'featured';
-type SortOption = 'trending' | 'recent' | 'views' | 'likes' | 'comments' | 'rarity' | 'price' | 'featured';
-type FilterCategory = 'all' | 'featured' | 'trending' | 'new' | 'rare' | 'animated' | 'interactive';
-
-interface PixelShowcase {
+interface PixelArtwork {
   id: string;
-  coordinates: { x: number; y: number };
   title: string;
   description: string;
-  owner: {
+  coordinates: { x: number; y: number };
+  region: string;
+  color: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  author: {
     id: string;
     name: string;
+    username: string;
     avatar: string;
-    dataAiHint?: string;
     level: number;
-    followers?: number;
     verified: boolean;
+    premium: boolean;
+    followers: number;
   };
-  rarity: PixelRarity;
-  price: number;
-  views: number;
-  likes: number;
-  comments: number;
-  shares: number;
-  bookmarks: number;
-  promoted?: boolean;
-  createdAt: Date;
-  lastModified: Date;
-  imageUrl?: string;
-  dataAiHint?: string;
-  tags: string[];
-  region: string;
-  isFeatured: boolean;
-  isSponsored?: boolean;
-  isTrending: boolean;
-  isAnimated: boolean;
-  isInteractive: boolean;
-  hasSound: boolean;
-  effects: string[];
-  boostLevel: number; // 0-5, paid promotion level
+  stats: {
+    views: number;
+    likes: number;
+    comments: number;
+    shares: number;
+    bookmarks: number;
+    downloads: number;
+  };
   engagement: {
-    score?: number;
-    viewsToday: number;
-    likesThisWeek: number;
-    commentsThisMonth: number;
-    shareRate: number;
+    rating: number;
+    totalRatings: number;
+    engagementRate: number;
+    viralScore: number;
   };
-  analytics: {
-    impressions: number;
-    clickRate: number;
-    conversionRate: number;
-    avgViewTime: number;
-    growthRate?: number;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    category: string;
+    tags: string[];
+    rarity: 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário';
+    featured: boolean;
+    trending: boolean;
+    sponsored: boolean;
+    nsfw: boolean;
+    price?: number;
+    forSale: boolean;
   };
-  color?: string;
+  promotion?: {
+    type: 'featured' | 'trending' | 'spotlight' | 'premium';
+    expiresAt: string;
+    cost: number;
+    boost: number;
+  };
+  interactions: {
+    isLiked: boolean;
+    isBookmarked: boolean;
+    isFollowing: boolean;
+    hasCommented: boolean;
+    hasShared: boolean;
+  };
 }
 
-const mockPixels: PixelShowcase[] = [
+interface PromotionPlan {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  duration: string;
+  cost: number;
+  specialCost?: number;
+  benefits: string[];
+  boost: {
+    views: number;
+    engagement: number;
+    visibility: number;
+  };
+  color: string;
+  popular?: boolean;
+}
+
+const promotionPlans: PromotionPlan[] = [
+  {
+    id: 'featured',
+    name: 'Destaque',
+    description: 'Apareça na secção de destaques por 24 horas',
+    icon: <Star className="h-6 w-6" />,
+    duration: '24 horas',
+    cost: 100,
+    specialCost: 20,
+    benefits: [
+      'Aparece na secção "Em Destaque"',
+      '+200% visualizações',
+      'Badge dourado de destaque',
+      'Prioridade nos resultados de pesquisa'
+    ],
+    boost: { views: 200, engagement: 150, visibility: 300 },
+    color: 'from-yellow-500 to-amber-500'
+  },
+  {
+    id: 'trending',
+    name: 'Tendência',
+    description: 'Apareça na secção de tendências por 48 horas',
+    icon: <TrendingUp className="h-6 w-6" />,
+    duration: '48 horas',
+    cost: 200,
+    specialCost: 35,
+    benefits: [
+      'Aparece na secção "Tendências"',
+      '+300% visualizações',
+      'Badge de tendência animado',
+      'Notificação para seguidores'
+    ],
+    boost: { views: 300, engagement: 200, visibility: 400 },
+    color: 'from-green-500 to-emerald-500',
+    popular: true
+  },
+  {
+    id: 'spotlight',
+    name: 'Holofote',
+    description: 'Destaque premium na página principal por 72 horas',
+    icon: <Zap className="h-6 w-6" />,
+    duration: '72 horas',
+    cost: 500,
+    specialCost: 75,
+    benefits: [
+      'Banner na página principal',
+      '+500% visualizações',
+      'Badge premium animado',
+      'Push notification para todos',
+      'Artigo no blog oficial'
+    ],
+    boost: { views: 500, engagement: 300, visibility: 600 },
+    color: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'premium',
+    name: 'Premium VIP',
+    description: 'Máxima visibilidade por 7 dias',
+    icon: <Crown className="h-6 w-6" />,
+    duration: '7 dias',
+    cost: 1000,
+    specialCost: 150,
+    benefits: [
+      'Topo da galeria por 7 dias',
+      '+1000% visualizações',
+      'Badge VIP exclusivo',
+      'Entrevista no podcast oficial',
+      'Colaboração com influencers',
+      'Análise detalhada de performance'
+    ],
+    boost: { views: 1000, engagement: 500, visibility: 1000 },
+    color: 'from-amber-500 to-orange-500'
+  }
+];
+
+const mockPixels: PixelArtwork[] = [
   {
     id: '1',
+    title: 'Pôr do Sol em Lisboa',
+    description: 'Uma obra-prima capturando o icônico pôr do sol sobre o Tejo, com cores vibrantes que representam a alma de Lisboa.',
     coordinates: { x: 245, y: 156 },
-    title: 'Torre de Belém Pixelizada',
-    description: 'Uma representação artística da icónica Torre de Belém em Lisboa, com efeitos de brilho dourado.',
-    owner: {
-      id: 'user1',
-      name: 'ArtistaPT',
-      avatar: 'https://placehold.co/40x40.png',
-      dataAiHint: 'user avatar',
-      level: 25,
-      followers: 342,
-      verified: true
-    },
-    rarity: 'epic',
-    price: 150,
-    views: 15420,
-    likes: 892,
-    comments: 156,
-    shares: 89,
-    bookmarks: 234,
-    promoted: true,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    lastModified: new Date(Date.now() - 1 * 60 * 60 * 1000),
-    imageUrl: 'https://placehold.co/200x200.png',
-    dataAiHint: 'pixel art tower',
-    tags: ['lisboa', 'património', 'dourado', 'histórico'],
     region: 'Lisboa',
-    isFeatured: true,
-    isSponsored: true,
-    isTrending: true,
-    isAnimated: true,
-    isInteractive: false,
-    hasSound: true,
-    color: '#FFD700',
-    effects: ['glow', 'sparkle', 'rotation'],
-    boostLevel: 5,
-    engagement: {
-      viewsToday: 1240,
-      likesThisWeek: 456,
-      commentsThisMonth: 89,
-      shareRate: 5.8
+    color: '#FF6B47',
+    imageUrl: 'https://placehold.co/400x400/FF6B47/FFFFFF?text=Lisboa+Sunset',
+    thumbnailUrl: 'https://placehold.co/200x200/FF6B47/FFFFFF?text=Lisboa',
+    author: {
+      id: 'user1',
+      name: 'PixelMaster',
+      username: 'pixelmaster_pt',
+      avatar: 'https://placehold.co/40x40.png',
+      level: 25,
+      verified: true,
+      premium: true,
+      followers: 1234
     },
-    analytics: {
-      impressions: 25000,
-      clickRate: 12.5,
-      conversionRate: 3.2,
-      avgViewTime: 45
+    stats: {
+      views: 15420,
+      likes: 892,
+      comments: 156,
+      shares: 89,
+      bookmarks: 234,
+      downloads: 67
+    },
+    engagement: {
+      rating: 4.8,
+      totalRatings: 156,
+      engagementRate: 12.5,
+      viralScore: 89
+    },
+    metadata: {
+      createdAt: '2024-03-15T10:30:00Z',
+      updatedAt: '2024-03-15T14:20:00Z',
+      category: 'Paisagem',
+      tags: ['lisboa', 'pôr-do-sol', 'tejo', 'urbano'],
+      rarity: 'Épico',
+      featured: true,
+      trending: true,
+      sponsored: false,
+      nsfw: false,
+      price: 250,
+      forSale: true
+    },
+    promotion: {
+      type: 'trending',
+      expiresAt: '2024-03-17T10:30:00Z',
+      cost: 200,
+      boost: 300
+    },
+    interactions: {
+      isLiked: false,
+      isBookmarked: false,
+      isFollowing: false,
+      hasCommented: false,
+      hasShared: false
     }
   },
   {
     id: '2',
+    title: 'Arte Urbana do Porto',
+    description: 'Graffiti digital inspirado nas ruas históricas do Porto, misturando tradição e modernidade.',
     coordinates: { x: 123, y: 89 },
-    title: 'Galo de Barcelos Animado',
-    description: 'O símbolo nacional português com animação de batimento de asas e cores vibrantes.',
-    owner: {
+    region: 'Porto',
+    color: '#7DF9FF',
+    imageUrl: 'https://placehold.co/400x400/7DF9FF/000000?text=Porto+Street',
+    thumbnailUrl: 'https://placehold.co/200x200/7DF9FF/000000?text=Porto',
+    author: {
       id: 'user2',
-      name: 'PixelMaster',
+      name: 'UrbanArtist',
+      username: 'urban_artist',
       avatar: 'https://placehold.co/40x40.png',
-      dataAiHint: 'user avatar',
       level: 18,
-      followers: 156,
-      verified: false
+      verified: false,
+      premium: false,
+      followers: 567
     },
-    rarity: 'rare',
-    price: 75,
-    views: 8930,
-    likes: 567,
-    comments: 89,
-    shares: 45,
-    bookmarks: 123,
-    promoted: false,
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    lastModified: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    imageUrl: 'https://placehold.co/200x200.png',
-    dataAiHint: 'pixel art rooster',
-    tags: ['galo', 'barcelos', 'tradição', 'animado'],
-    region: 'Braga',
-    isFeatured: false,
-    isSponsored: false,
-    isTrending: true,
-    isAnimated: true,
-    isInteractive: true,
-    hasSound: false,
-    color: '#FF5733',
-    effects: ['animation', 'color-shift'],
-    boostLevel: 2,
+    stats: {
+      views: 8930,
+      likes: 445,
+      comments: 78,
+      shares: 34,
+      bookmarks: 123,
+      downloads: 29
+    },
     engagement: {
-      viewsToday: 890,
-      likesThisWeek: 234,
-      commentsThisMonth: 45,
-      shareRate: 4.2
+      rating: 4.6,
+      totalRatings: 89,
+      engagementRate: 8.7,
+      viralScore: 67
     },
-    analytics: {
-      impressions: 12000,
-      clickRate: 8.9,
-      conversionRate: 2.1,
-      avgViewTime: 32
+    metadata: {
+      createdAt: '2024-03-14T15:45:00Z',
+      updatedAt: '2024-03-14T16:20:00Z',
+      category: 'Arte Urbana',
+      tags: ['porto', 'graffiti', 'urbano', 'street-art'],
+      rarity: 'Raro',
+      featured: false,
+      trending: false,
+      sponsored: true,
+      nsfw: false,
+      forSale: false
+    },
+    interactions: {
+      isLiked: true,
+      isBookmarked: false,
+      isFollowing: true,
+      hasCommented: true,
+      hasShared: false
     }
   },
   {
     id: '3',
-    coordinates: { x: 67, y: 234 },
-    title: 'Pastéis de Nata Deliciosos',
-    description: 'Uma homenagem ao doce mais famoso de Portugal, com efeito de vapor quente.',
-    owner: {
+    title: 'Natureza de Coimbra',
+    description: 'Pixel art minimalista representando a serenidade dos jardins de Coimbra.',
+    coordinates: { x: 300, y: 200 },
+    region: 'Coimbra',
+    color: '#4CAF50',
+    imageUrl: 'https://placehold.co/400x400/4CAF50/FFFFFF?text=Coimbra+Nature',
+    thumbnailUrl: 'https://placehold.co/200x200/4CAF50/FFFFFF?text=Coimbra',
+    author: {
       id: 'user3',
-      name: 'DocePortugal',
+      name: 'NatureLover',
+      username: 'nature_pt',
       avatar: 'https://placehold.co/40x40.png',
-      dataAiHint: 'user avatar',
       level: 12,
-      followers: 78,
-      verified: true
+      verified: true,
+      premium: false,
+      followers: 890
     },
-    rarity: 'uncommon',
-    price: 25,
-    views: 5670,
-    likes: 345,
-    comments: 67,
-    shares: 23,
-    bookmarks: 89,
-    promoted: false,
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    lastModified: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    imageUrl: 'https://placehold.co/200x200.png',
-    dataAiHint: 'pixel art pastries',
-    tags: ['pastéis', 'nata', 'doce', 'tradição'],
-    region: 'Lisboa',
-    isFeatured: false,
-    isSponsored: false,
-    isTrending: false,
-    isAnimated: true,
-    isInteractive: false,
-    hasSound: false,
-    color: '#F5DEB3',
-    effects: ['steam', 'warm-glow'],
-    boostLevel: 1,
+    stats: {
+      views: 12340,
+      likes: 678,
+      comments: 234,
+      shares: 156,
+      bookmarks: 345,
+      downloads: 89
+    },
     engagement: {
-      viewsToday: 456,
-      likesThisWeek: 123,
-      commentsThisMonth: 34,
-      shareRate: 3.1
+      rating: 4.9,
+      totalRatings: 234,
+      engagementRate: 15.2,
+      viralScore: 92
     },
-    analytics: {
-      impressions: 8500,
-      clickRate: 6.7,
-      conversionRate: 1.8,
-      avgViewTime: 28
-    }
-  },
-  {
-    id: '4',
-    coordinates: { x: 345, y: 123 },
-    title: 'Fado Eterno',
-    description: 'Uma guitarra portuguesa que toca melodias quando clicada, representando a alma do fado.',
-    owner: {
-      id: 'user4',
-      name: 'FadoSoul',
-      avatar: 'https://placehold.co/40x40.png',
-      dataAiHint: 'user avatar',
-      level: 30,
-      followers: 567,
-      verified: true
+    metadata: {
+      createdAt: '2024-03-13T09:20:00Z',
+      updatedAt: '2024-03-13T11:45:00Z',
+      category: 'Natureza',
+      tags: ['coimbra', 'natureza', 'jardins', 'minimalista'],
+      rarity: 'Lendário',
+      featured: true,
+      trending: false,
+      sponsored: false,
+      nsfw: false,
+      forSale: true,
+      price: 500
     },
-    rarity: 'legendary',
-    price: 500,
-    views: 23450,
-    likes: 1234,
-    comments: 289,
-    shares: 156,
-    bookmarks: 445,
-    promoted: true,
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-    lastModified: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    imageUrl: 'https://placehold.co/200x200.png',
-    dataAiHint: 'pixel art guitar',
-    tags: ['fado', 'música', 'guitarra', 'interativo'],
-    region: 'Lisboa',
-    isFeatured: true,
-    isSponsored: false,
-    isTrending: true,
-    isAnimated: true,
-    isInteractive: true,
-    hasSound: true,
-    color: '#4682B4',
-    effects: ['music-notes', 'golden-glow', 'sound-waves'],
-    boostLevel: 4,
-    engagement: {
-      viewsToday: 2340,
-      likesThisWeek: 678,
-      commentsThisMonth: 145,
-      shareRate: 8.9
-    },
-    analytics: {
-      impressions: 45000,
-      clickRate: 15.2,
-      conversionRate: 4.5,
-      avgViewTime: 67
+    interactions: {
+      isLiked: false,
+      isBookmarked: true,
+      isFollowing: false,
+      hasCommented: false,
+      hasShared: true
     }
   }
 ];
 
-const rarityColors: Record<PixelRarity, string> = {
-  common: 'text-gray-500 bg-gray-500/10 border-gray-500/30',
-  uncommon: 'text-green-500 bg-green-500/10 border-green-500/30',
-  rare: 'text-blue-500 bg-blue-500/10 border-blue-500/30',
-  epic: 'text-purple-500 bg-purple-500/10 border-purple-500/30',
-  legendary: 'text-orange-500 bg-orange-500/10 border-orange-500/30',
-  featured: 'text-pink-500 bg-pink-500/10 border-pink-500/30',
-  unique: 'text-pink-500 bg-pink-500/10 border-pink-500/30'
-};
+const categories = [
+  { id: 'all', name: 'Todos', icon: <Palette className="h-4 w-4" />, count: 1247 },
+  { id: 'paisagem', name: 'Paisagem', icon: <Globe className="h-4 w-4" />, count: 234 },
+  { id: 'urbano', name: 'Urbano', icon: <MapPin className="h-4 w-4" />, count: 189 },
+  { id: 'natureza', name: 'Natureza', icon: <Lightbulb className="h-4 w-4" />, count: 156 },
+  { id: 'arte', name: 'Arte', icon: <Brush className="h-4 w-4" />, count: 298 },
+  { id: 'histórico', name: 'Histórico', icon: <Award className="h-4 w-4" />, count: 123 },
+  { id: 'abstrato', name: 'Abstrato', icon: <Sparkles className="h-4 w-4" />, count: 87 }
+];
 
-const rarityLabels: Record<PixelRarity, string> = {
-  common: 'Comum',
-  uncommon: 'Incomum',
-  rare: 'Raro',
-  epic: 'Épico',
-  legendary: 'Lendário',
-  featured: 'Destaque',
-  unique: 'Único'
-};
+const sortOptions = [
+  { id: 'trending', name: 'Tendências', icon: <TrendingUp className="h-4 w-4" /> },
+  { id: 'popular', name: 'Mais Populares', icon: <Fire className="h-4 w-4" /> },
+  { id: 'recent', name: 'Mais Recentes', icon: <Clock className="h-4 w-4" /> },
+  { id: 'views', name: 'Mais Vistos', icon: <Eye className="h-4 w-4" /> },
+  { id: 'likes', name: 'Mais Curtidos', icon: <Heart className="h-4 w-4" /> },
+  { id: 'comments', name: 'Mais Comentados', icon: <MessageSquare className="h-4 w-4" /> },
+  { id: 'rating', name: 'Melhor Avaliados', icon: <Star className="h-4 w-4" /> },
+  { id: 'price_high', name: 'Preço: Alto → Baixo', icon: <ArrowDown className="h-4 w-4" /> },
+  { id: 'price_low', name: 'Preço: Baixo → Alto', icon: <ArrowUp className="h-4 w-4" /> }
+];
 
-export default function PixelsPage() {
-  const [pixels, setPixels] = useState<PixelShowcase[]>(mockPixels);
-  const { addCredits, removeCredits } = useUserStore();
-  const { soundEffects } = useSettingsStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [filteredPixels, setFilteredPixels] = useState<PixelShowcase[]>(mockPixels);
+export default function PixelsGalleryPage() {
+  const [pixels, setPixels] = useState<PixelArtwork[]>(mockPixels);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('trending');
-  const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
-  const [selectedPixel, setSelectedPixel] = useState<PixelShowcase | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('trending');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedPixel, setSelectedPixel] = useState<PixelArtwork | null>(null);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
-  const [showPixelDetails, setShowPixelDetails] = useState(false);
-  const [playPromoteSound, setPlayPromoteSound] = useState(false);
+  const [selectedPromotion, setSelectedPromotion] = useState<PromotionPlan | null>(null);
+  const [promotionPixel, setPromotionPixel] = useState<PixelArtwork | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [rarityFilter, setRarityFilter] = useState<string[]>([]);
+  const [showOnlyForSale, setShowOnlyForSale] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [playSound, setPlaySound] = useState(false);
+  
   const { toast } = useToast();
-  const [selectedRegion, setSelectedRegion] = useState<string>('all');
+  const { credits, specialCredits, addCredits, removeCredits, removeSpecialCredits, addXp } = useUserStore();
 
-  useEffect(() => {
-    let filtered = pixels.filter(pixel => {
-      const matchesSearch = !searchQuery || 
-        pixel.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pixel.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pixel.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        pixel.owner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pixel.region.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filter and sort pixels
+  const filteredPixels = pixels
+    .filter(pixel => {
+      // Search filter
+      if (searchQuery && !pixel.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !pixel.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !pixel.author.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !pixel.metadata.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))) {
+        return false;
+      }
       
-      const matchesRegion = selectedRegion === 'all' || pixel.region === selectedRegion;
+      // Category filter
+      if (selectedCategory !== 'all' && pixel.metadata.category.toLowerCase() !== selectedCategory) {
+        return false;
+      }
       
-      const matchesCategory = filterCategory === 'all' || 
-        (filterCategory === 'featured' && pixel.isFeatured) ||
-        (filterCategory === 'trending' && pixel.isTrending) ||
-        (filterCategory === 'new' && pixel.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) ||
-        (filterCategory === 'rare' && ['epic', 'legendary', 'unique'].includes(pixel.rarity)) ||
-        (filterCategory === 'animated' && pixel.isAnimated) ||
-        (filterCategory === 'interactive' && pixel.isInteractive);
+      // Price filter
+      if (pixel.metadata.price && (pixel.metadata.price < priceRange[0] || pixel.metadata.price > priceRange[1])) {
+        return false;
+      }
       
-      return matchesSearch && matchesCategory && matchesRegion;
-    });
-
-    filtered.sort((a, b) => {
+      // Rarity filter
+      if (rarityFilter.length > 0 && !rarityFilter.includes(pixel.metadata.rarity)) {
+        return false;
+      }
+      
+      // For sale filter
+      if (showOnlyForSale && !pixel.metadata.forSale) {
+        return false;
+      }
+      
+      // Featured filter
+      if (showOnlyFeatured && !pixel.metadata.featured) {
+        return false;
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
       switch (sortBy) {
         case 'trending':
-          return (b.engagement.viewsToday + b.engagement.likesThisWeek) - 
-                 (a.engagement.viewsToday + a.engagement.likesThisWeek);
+          return (b.engagement.viralScore + (b.metadata.trending ? 50 : 0)) - 
+                 (a.engagement.viralScore + (a.metadata.trending ? 50 : 0));
+        case 'popular':
+          return b.stats.likes - a.stats.likes;
         case 'recent':
-          return b.lastModified.getTime() - a.lastModified.getTime();
+          return new Date(b.metadata.createdAt).getTime() - new Date(a.metadata.createdAt).getTime();
         case 'views':
-          return b.views - a.views;
+          return b.stats.views - a.stats.views;
         case 'likes':
-          return b.likes - a.likes;
+          return b.stats.likes - a.stats.likes;
         case 'comments':
-          return b.comments - a.comments;
-        case 'rarity':
-          if (b.isSponsored && !a.isSponsored) return 1;
-          if (!b.isSponsored && a.isSponsored) return -1;
-          const rarityOrder = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, unique: 6 };
-          return rarityOrder[b.rarity] - rarityOrder[a.rarity];
-        case 'price':
-          return b.price - a.price;
-        case 'featured':
-          if (a.isFeatured && !b.isFeatured) return -1;
-          if (!a.isFeatured && b.isFeatured) return 1;
-          return b.boostLevel - a.boostLevel;
+          return b.stats.comments - a.stats.comments;
+        case 'rating':
+          return b.engagement.rating - a.engagement.rating;
+        case 'price_high':
+          return (b.metadata.price || 0) - (a.metadata.price || 0);
+        case 'price_low':
+          return (a.metadata.price || 0) - (b.metadata.price || 0);
         default:
           return 0;
       }
     });
 
-    setFilteredPixels(filtered);
-  }, [pixels, searchQuery, sortBy, filterCategory, selectedRegion]);
-  
-  useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  const handleLikePixel = (pixelId: string) => {
-    setPixels(prev => prev.map(pixel => 
-      pixel.id === pixelId 
-        ? { ...pixel, likes: pixel.likes + 1 }
-        : pixel
-    ));
-
-    toast({
-      title: "Pixel Curtido!",
-      description: "O seu gosto foi registado.",
-    });
-  };
-
-  const handleBookmarkPixel = (pixelId: string) => {
-    setPixels(prev => prev.map(pixel => 
-      pixel.id === pixelId 
-        ? { ...pixel, bookmarks: pixel.bookmarks + 1 }
-        : pixel
-    ));
-
-    toast({
-      title: "Pixel Guardado!",
-      description: "Adicionado aos seus favoritos.",
-    });
-  };
-  
-  const handlePromotePixel = (pixelId: string, boostLevel: number) => {
-    const cost = boostLevel * 50; // 50 créditos por nível
+  const handleLike = (pixelId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPixels(prev => prev.map(pixel => {
+      if (pixel.id === pixelId) {
+        const newLiked = !pixel.interactions.isLiked;
+        return {
+          ...pixel,
+          stats: {
+            ...pixel.stats,
+            likes: newLiked ? pixel.stats.likes + 1 : pixel.stats.likes - 1
+          },
+          interactions: {
+            ...pixel.interactions,
+            isLiked: newLiked
+          }
+        };
+      }
+      return pixel;
+    }));
     
-    removeCredits(cost);
-    setPlayPromoteSound(true);
+    const pixel = pixels.find(p => p.id === pixelId);
+    if (pixel && !pixel.interactions.isLiked) {
+      addXp(5);
+      addCredits(2);
+      setPlaySound(true);
+      toast({
+        title: "❤️ Pixel Curtido!",
+        description: `Curtiu "${pixel.title}". +5 XP, +2 créditos!`,
+      });
+    }
+  };
+
+  const handleBookmark = (pixelId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPixels(prev => prev.map(pixel => {
+      if (pixel.id === pixelId) {
+        const newBookmarked = !pixel.interactions.isBookmarked;
+        return {
+          ...pixel,
+          stats: {
+            ...pixel.stats,
+            bookmarks: newBookmarked ? pixel.stats.bookmarks + 1 : pixel.stats.bookmarks - 1
+          },
+          interactions: {
+            ...pixel.interactions,
+            isBookmarked: newBookmarked
+          }
+        };
+      }
+      return pixel;
+    }));
+    
+    const pixel = pixels.find(p => p.id === pixelId);
+    if (pixel) {
+      addXp(3);
+      addCredits(1);
+      toast({
+        title: pixel.interactions.isBookmarked ? "🔖 Removido dos Favoritos" : "⭐ Adicionado aos Favoritos",
+        description: `"${pixel.title}" ${pixel.interactions.isBookmarked ? 'removido' : 'adicionado'}.`,
+      });
+    }
+  };
+
+  const handleShare = async (pixel: PixelArtwork, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const shareData = {
+      title: `${pixel.title} - Pixel Universe`,
+      text: `Confira esta obra incrível de ${pixel.author.name}!`,
+      url: `${window.location.origin}/pixel/${pixel.coordinates.x}-${pixel.coordinates.y}`
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setPixels(prev => prev.map(p => 
+          p.id === pixel.id 
+            ? { ...p, stats: { ...p.stats, shares: p.stats.shares + 1 } }
+            : p
+        ));
+        addXp(8);
+        addCredits(3);
+        toast({
+          title: "📤 Pixel Partilhado!",
+          description: `"${pixel.title}" partilhado com sucesso. +8 XP, +3 créditos!`,
+        });
+      } catch (error) {
+        // User cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(shareData.url);
+      toast({
+        title: "🔗 Link Copiado!",
+        description: "Link do pixel copiado para a área de transferência.",
+      });
+    }
+  };
+
+  const handleFollow = (authorId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPixels(prev => prev.map(pixel => {
+      if (pixel.author.id === authorId) {
+        const newFollowing = !pixel.interactions.isFollowing;
+        return {
+          ...pixel,
+          author: {
+            ...pixel.author,
+            followers: newFollowing ? pixel.author.followers + 1 : pixel.author.followers - 1
+          },
+          interactions: {
+            ...pixel.interactions,
+            isFollowing: newFollowing
+          }
+        };
+      }
+      return pixel;
+    }));
+    
+    const pixel = pixels.find(p => p.author.id === authorId);
+    if (pixel && !pixel.interactions.isFollowing) {
+      addXp(15);
+      addCredits(8);
+      setPlaySound(true);
+      toast({
+        title: "👥 A Seguir Artista!",
+        description: `Agora segue ${pixel.author.name}. +15 XP, +8 créditos!`,
+      });
+    }
+  };
+
+  const handlePromotePixel = (pixel: PixelArtwork, promotion: PromotionPlan) => {
+    const canAffordCredits = credits >= promotion.cost;
+    const canAffordSpecial = promotion.specialCost && specialCredits >= promotion.specialCost;
+    
+    if (!canAffordCredits && !canAffordSpecial) {
+      toast({
+        title: "Saldo Insuficiente",
+        description: `Precisa de ${promotion.cost} créditos ou ${promotion.specialCost} especiais.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Use special credits if available and cheaper
+    if (canAffordSpecial && promotion.specialCost && promotion.specialCost < promotion.cost / 5) {
+      removeSpecialCredits(promotion.specialCost);
+    } else {
+      removeCredits(promotion.cost);
+    }
+    
+    // Apply promotion
+    setPixels(prev => prev.map(p => 
+      p.id === pixel.id 
+        ? {
+            ...p,
+            promotion: {
+              type: promotion.id as any,
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+              cost: promotion.cost,
+              boost: promotion.boost.views
+            },
+            metadata: {
+              ...p.metadata,
+              featured: promotion.id === 'featured' || promotion.id === 'spotlight' || promotion.id === 'premium',
+              trending: promotion.id === 'trending' || promotion.id === 'premium'
+            }
+          }
+        : p
+    ));
+    
     setShowConfetti(true);
-    
-    setPixels(prev => prev.map(pixel => 
-      pixel.id === pixelId 
-        ? { ...pixel, boostLevel, isFeatured: boostLevel >= 3, promoted: true }
-        : pixel
-    ));
+    setPlaySound(true);
+    addXp(50);
     
     toast({
-      title: "Pixel Promovido!",
-      description: `Pixel promovido para nível ${boostLevel} por ${cost} créditos.`,
+      title: "🚀 Promoção Ativada!",
+      description: `"${pixel.title}" promovido com ${promotion.name}! +50 XP!`,
     });
     
     setShowPromotionModal(false);
+    setPromotionPixel(null);
+    setSelectedPromotion(null);
   };
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setFilterCategory('all');
-    setSortBy('trending');
-    setSelectedRegion('all');
-    setViewMode('grid');
+  const handleBuyPixel = (pixel: PixelArtwork, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!pixel.metadata.forSale || !pixel.metadata.price) {
+      toast({
+        title: "Pixel Não Disponível",
+        description: "Este pixel não está à venda.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (credits < pixel.metadata.price) {
+      toast({
+        title: "Saldo Insuficiente",
+        description: `Precisa de ${pixel.metadata.price} créditos para comprar este pixel.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    removeCredits(pixel.metadata.price);
+    addXp(25);
+    setShowConfetti(true);
+    setPlaySound(true);
+    
+    // Update pixel ownership
+    setPixels(prev => prev.map(p => 
+      p.id === pixel.id 
+        ? { ...p, metadata: { ...p.metadata, forSale: false } }
+        : p
+    ));
+    
+    toast({
+      title: "🛒 Pixel Comprado!",
+      description: `"${pixel.title}" agora é seu! +25 XP!`,
+    });
   };
 
-  const getEngagementScore = (pixel: PixelShowcase) => {
-    return (pixel.views * 0.1) + (pixel.likes * 2) + (pixel.comments * 5) + (pixel.shares * 10);
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'Comum': return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
+      case 'Incomum': return 'text-green-500 bg-green-500/10 border-green-500/30';
+      case 'Raro': return 'text-blue-500 bg-blue-500/10 border-blue-500/30';
+      case 'Épico': return 'text-purple-500 bg-purple-500/10 border-purple-500/30';
+      case 'Lendário': return 'text-amber-500 bg-amber-500/10 border-amber-500/30';
+      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
+    }
+  };
+
+  const getEngagementColor = (rate: number) => {
+    if (rate >= 15) return 'text-green-500';
+    if (rate >= 10) return 'text-yellow-500';
+    if (rate >= 5) return 'text-orange-500';
+    return 'text-red-500';
   };
 
   const formatNumber = (num: number) => {
@@ -460,806 +712,1009 @@ export default function PixelsPage() {
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
-  
-  // Mock user data for profile sheet
-  const mockUserData = {
-    id: "user123", name: "Pixel Master", username: "@pixelmaster", avatarUrl: "https://placehold.co/100x100.png",
-    dataAiHint: "user avatar", level: 25, xp: 2450, xpMax: 3000, credits: 12500, specialCredits: 120,
-    bio: "Colecionador apaixonado de pixels raros e criador de arte digital no Pixel Universe.",
-    pixelsOwned: 156, achievementsUnlocked: 23, unlockedAchievementIds: ["pixel_initiate", "color_master", "community_star"],
-    rank: 12, location: "Lisboa, Portugal", socials: [], albums: [] };
+
+  const timeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days}d atrás`;
+    if (hours > 0) return `${hours}h atrás`;
+    return 'Agora mesmo';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect 
-        src={SOUND_EFFECTS.SUCCESS} 
-        play={playPromoteSound} 
-        onEnd={() => setPlayPromoteSound(false)} 
-        volume={0.7}
-      /> 
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSound} onEnd={() => setPlaySound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
-      <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-7xl">
+      <div className="container mx-auto py-3 sm:py-6 px-2 sm:px-4 space-y-4 sm:space-y-6 max-w-7xl mb-16">
         {/* Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
-          <CardHeader className="relative">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 z-10">
+          <CardHeader className="relative p-4 sm:p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
               <div>
-                <CardTitle className="font-headline text-3xl text-gradient-gold flex items-center">
-                  <Palette className="h-8 w-8 mr-3 animate-glow" />
-                  Galeria de Píxeis
+                <CardTitle className="font-headline text-2xl sm:text-3xl text-gradient-gold flex items-center">
+                  <Palette className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3 animate-glow" />
+                  Galeria de Pixels
                 </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2">
-                  Descubra, explore e promova os píxeis mais incríveis do Pixel Universe
+                <CardDescription className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
+                  Descubra, curta e colecione as melhores obras de pixel art de Portugal
                 </CardDescription>
               </div>
-
-              <div className="flex items-center gap-3">
-                <Button 
-                  onClick={() => setShowPromotionModal(true)}
-                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+              
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="min-h-[36px]"
                 >
-                  <Megaphone className="h-4 w-4 mr-2" />
-                  Promover Pixel
+                  <Grid3X3 className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
-                <Button variant="outline" className="hover:bg-primary/10 transition-colors">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Submeter Pixel
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="min-h-[36px]"
+                >
+                  <List className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="min-h-[36px]"
+                >
+                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Filtros</span>
                 </Button>
               </div>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Filters and Search */}
-        <Card className="shadow-lg bg-card/80 backdrop-blur-sm border-primary/20 hover:border-primary/30 transition-colors">
-          <CardContent className="p-4">
-            <div className="space-y-4">
+        {/* Search and Quick Filters */}
+        <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
+          <CardContent className="p-3 sm:p-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Search Bar */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Pesquisar píxeis, criadores, tags..."
-                  value={searchQuery} 
+                  placeholder="Pesquisar pixels, artistas, tags..."
+                  value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background/70 focus:border-primary"
+                  className="pl-10 bg-background/70 focus:border-primary text-sm sm:text-base"
                 />
               </div>
 
-              {/* Filter Tabs */}
-              <Tabs value={filterCategory} onValueChange={(value) => setFilterCategory(value as FilterCategory)} className="animate-fade-in">
-                <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 h-12 bg-background/50 rounded-xl">
-                  <TabsTrigger value="all" className="text-xs">
-                    <Globe className="h-4 w-4 mr-1" />
-                    Todos
-                  </TabsTrigger>
-                  <TabsTrigger value="featured" className="text-xs">
-                    <Star className="h-4 w-4 mr-1" />
-                    Destaque
-                  </TabsTrigger>
-                  <TabsTrigger value="trending" className="text-xs">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    Trending
-                  </TabsTrigger>
-                  <TabsTrigger value="new" className="text-xs">
-                    <Sparkles className="h-4 w-4 mr-1" />
-                    Novos
-                  </TabsTrigger>
-                  <TabsTrigger value="rare" className="text-xs">
-                    <Gem className="h-4 w-4 mr-1" />
-                    Raros
-                  </TabsTrigger>
-                  <TabsTrigger value="animated" className="text-xs">
-                    <Play className="h-4 w-4 mr-1" />
-                    Animados
-                  </TabsTrigger>
-                  <TabsTrigger value="interactive" className="text-xs">
-                    <Target className="h-4 w-4 mr-1" />
-                    Interativos
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              
-              {/* Region Filter */}
-              <div className="flex flex-wrap gap-2">
-                <Badge 
-                  variant={selectedRegion === 'all' ? 'default' : 'outline'} 
-                  className="cursor-pointer hover:bg-primary/10 transition-colors"
-                  onClick={() => setSelectedRegion('all')}
-                >
-                  Todas as Regiões
-                </Badge>
-                {['Lisboa', 'Porto', 'Braga', 'Coimbra', 'Faro', 'Évora', 'Madeira', 'Açores'].map(region => (
-                  <Badge 
-                    key={region} 
-                    variant={selectedRegion === region ? 'default' : 'outline'} 
-                    className="cursor-pointer hover:bg-primary/10 transition-colors"
-                    onClick={() => setSelectedRegion(region)}
+              {/* Categories */}
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                {categories.map(category => (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.id ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category.id)}
+                    className="text-xs sm:text-sm min-h-[32px] sm:min-h-[36px]"
                   >
-                    {region}
-                  </Badge>
+                    {category.icon}
+                    <span className="ml-1 sm:ml-2">{category.name}</span>
+                    <Badge variant="secondary" className="ml-1 sm:ml-2 text-xs">
+                      {category.count}
+                    </Badge>
+                  </Button>
                 ))}
               </div>
 
-              {/* Sort and View Options */}
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex gap-2">
-                  <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                    <SelectTrigger className="w-48">
-                      <SortAsc className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="trending">Mais Populares</SelectItem>
-                      <SelectItem value="recent">Mais Recentes</SelectItem>
-                      <SelectItem value="views">Mais Vistos</SelectItem>
-                      <SelectItem value="likes">Mais Curtidos</SelectItem>
-                      <SelectItem value="comments">Mais Comentados</SelectItem>
-                      <SelectItem value="rarity">Por Raridade</SelectItem>
-                      <SelectItem value="price">Por Preço</SelectItem>
-                      <SelectItem value="featured">Em Destaque</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {(searchQuery || filterCategory !== 'all' || selectedRegion !== 'all') && (
-                    <Button variant="outline" size="sm" onClick={clearFilters}>
-                      Limpar
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="text-sm text-muted-foreground">
-                    {filteredPixels.length} píxeis encontrados
-                  </span>
+              {/* Sort Options */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Ordenar:</span>
+                {sortOptions.map(option => (
                   <Button
-                    variant="outline"
+                    key={option.id}
+                    variant={sortBy === option.id ? 'secondary' : 'ghost'}
                     size="sm"
-                    onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                    onClick={() => setSortBy(option.id)}
+                    className="text-xs whitespace-nowrap min-h-[32px]"
                   >
-                    {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                    {option.icon}
+                    <span className="ml-1">{option.name}</span>
                   </Button>
-                </div>
+                ))}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Pixels Grid/List */}
-        {isLoading ? (
-          <Card className="p-12 text-center">
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-              <h3 className="text-lg font-semibold mb-2">Carregando Pixels</h3>
-              <p className="text-muted-foreground">Aguarde enquanto carregamos os pixels mais incríveis...</p>
-            </div>
-          </Card>
-        ) : (
-          <div className={cn(
-          "gap-6",
-          viewMode === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-            : "space-y-4"
-        )}>
-          {filteredPixels.map((pixel) => (
+        {/* Advanced Filters */}
+        <AnimatePresence>
+          {showFilters && (
             <motion.div
-              key={pixel.id}
-              className={cn( 
-                "transition-all duration-300 hover:shadow-xl cursor-pointer group overflow-hidden",
-                pixel.isFeatured && "border-primary/50 bg-primary/5 shadow-primary/20",
-                pixel.boostLevel >= 3 && "ring-2 ring-accent/50",
-                viewMode === 'list' && "flex flex-row"
-              )}
-              whileHover={{ scale: 1.02, y: -5 }}
-              transition={{ type: "spring", stiffness: 300, damping: 10 }}
-              onClick={() => { setSelectedPixel(pixel); setShowPixelDetails(true); }} 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
             >
-              {/* Boost Level Indicator */}
-              {pixel.boostLevel > 0 && (
-                <div className="absolute top-2 left-2 z-10">
-                  <Badge className={cn(
-                    "text-xs px-2 py-1",
-                    pixel.boostLevel >= 4 ? "bg-gradient-to-r from-amber-500 to-orange-500" :
-                    pixel.boostLevel >= 2 ? "bg-gradient-to-r from-blue-500 to-purple-500" :
-                    "bg-gradient-to-r from-green-500 to-blue-500"
-                  )}>
-                    <Flame className="h-3 w-3 mr-1" />
-                    Boost {pixel.boostLevel}
-                  </Badge>
-                </div>
-              )}
-              
-              {/* Promoted Badge */}
-              {pixel.promoted && (
-                <div className="absolute top-2 right-2 z-10">
-                  <Badge className="bg-gradient-to-r from-primary to-accent text-white">Promovido</Badge>
-                </div>
-              )}
-
-              <Card className={cn(
-                "w-full",
-                viewMode === 'list' ? "flex" : ""
-              )}>
-                {/* Image */}
-                <div className={cn(
-                  "relative overflow-hidden group",
-                  viewMode === 'grid' ? "aspect-square" : "w-32 h-32 flex-shrink-0"
-                )} >
-                  {pixel.imageUrl && (
-                    <img 
-                      src={pixel.imageUrl} 
-                      alt={pixel.title}
-                      data-ai-hint={pixel.dataAiHint}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
-                    />
-                  )}
-                  
-                  {/* Enhanced Overlay with quick actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild> 
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLikePixel(pixel.id);
-                            }}
-                          > 
-                            <Heart className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Curtir Pixel</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild> 
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleBookmarkPixel(pixel.id);
-                            }}
-                          > 
-                            <Bookmark className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Guardar Pixel</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild> 
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            <Share2 className="h-4 w-4" /> 
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Partilhar</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip> 
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={(e) => { e.stopPropagation(); setShowPromotionModal(true); }}
-                          >
-                            <Megaphone className="h-4 w-4" />
-                          </Button> 
-                        </TooltipTrigger>
-                        <TooltipContent>Promover Pixel</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-
-                  {/* Status Badges */}
-                  <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                    {pixel.isTrending && (
-                      <Badge className="text-xs bg-red-500 hover:bg-red-500">
-                        <Fire className="h-3 w-3 mr-1" />
-                        Trending
-                      </Badge>
-                    )}
-                    {pixel.isAnimated && (
-                      <Badge className="text-xs bg-blue-500 hover:bg-blue-500">
-                        <Play className="h-3 w-3 mr-1" />
-                        Animado
-                      </Badge>
-                    )}
-                    {pixel.isInteractive && (
-                      <Badge className="text-xs bg-purple-500 hover:bg-purple-500">
-                        <Target className="h-3 w-3 mr-1" />
-                        Interativo
-                      </Badge>
-                    )}
-                    {pixel.hasSound && (
-                      <Badge className="text-xs bg-green-500 hover:bg-green-500">
-                        <Volume2 className="h-3 w-3 mr-1" />
-                        Som
-                      </Badge>
-                    )}
-                    {pixel.rarity === 'legendary' && (
-                      <Badge className="text-xs bg-amber-500 hover:bg-amber-500">
-                        <Crown className="h-3 w-3 mr-1" />
-                        Lendário
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Price Indicator */}
-                  {pixel.price > 0 && (
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                      {pixel.price}€
-                    </div>
-                  )} 
-                </div>
-
-                {/* Enhanced Content */}
-                <div className={cn(
-                  "p-4 flex-1",
-                  viewMode === 'list' && "flex flex-col justify-between"
-                )}>
-                  <div className="space-y-2"> 
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg line-clamp-1">{pixel.title}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <MapPin className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            ({pixel.coordinates.x}, {pixel.coordinates.y}) • <span className="hover:text-primary cursor-pointer" onClick={(e) => {e.stopPropagation(); setSelectedRegion(pixel.region);}}>{pixel.region}</span>
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <Badge 
-                        variant="outline"
-                        className={cn("text-xs", rarityColors[pixel.rarity])}
-                      >
-                        {rarityLabels[pixel.rarity]}
-                      </Badge>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                      {pixel.description}
-                    </p>
-                    
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1">
-                      {pixel.tags.slice(0, 3).map((tag) => ( 
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          #{tag}
-                        </Badge>
-                      ))}
-                      {pixel.tags.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{pixel.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Enhanced Owner Section */}
-                  <div className="flex items-center gap-2 mt-3 mb-3"> 
-                    <UserProfileSheet 
-                      userData={{
-                        ...mockUserData,
-                        name: pixel.owner.name,
-                        avatarUrl: pixel.owner.avatar,
-                        level: pixel.owner.level,
-                        rank: Math.floor(Math.random() * 100) + 1
-                      }} 
-                      achievementsData={[]}
-                    >
-                      <div className="cursor-pointer hover:scale-110 transition-transform">
-                        <Avatar className="h-6 w-6 border border-primary/30">
-                          <AvatarImage src={pixel.owner.avatar} alt={pixel.owner.name} data-ai-hint={pixel.owner.dataAiHint} />
-                          <AvatarFallback className="text-xs">{pixel.owner.name.substring(0, 1)}</AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </UserProfileSheet>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <UserProfileSheet 
-                          userData={{
-                            ...mockUserData,
-                            name: pixel.owner.name,
-                            avatarUrl: pixel.owner.avatar,
-                            level: pixel.owner.level,
-                            rank: Math.floor(Math.random() * 100) + 1
-                          }} 
-                          achievementsData={[]}
-                        >
-                          <span className="text-xs font-medium truncate hover:text-primary transition-colors cursor-pointer">{pixel.owner.name}</span>
-                        </UserProfileSheet>
-                        {pixel.owner.verified && (
-                          <Star className="h-3 w-3 text-blue-500 fill-current" />
-                        )}
-                        <Badge variant="outline" className="text-xs">
-                          Nv.{pixel.owner.level}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Enhanced Stats */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-3"> 
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {formatNumber(pixel.views)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="h-3 w-3" />
-                        {formatNumber(pixel.likes)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="h-3 w-3" />
-                        {formatNumber(pixel.comments)}
-                      </span>
-                    </div>
-                    
-                    <div className="text-right">
-                      <span className="font-bold text-primary">{pixel.price}€</span>
-                    </div>
-                  </div>
-                  
-                  <Separator className="bg-border/50" /> 
-                  
-                  {/* Engagement Bar */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Engagement</span>
-                      <span className="font-medium">{Math.round(getEngagementScore(pixel))}</span>
-                    </div>
-                    <Progress  
-                      value={Math.min(getEngagementScore(pixel) / 100, 100)}
-                      className="h-2 rounded-full"
-                    />
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-
-          {filteredPixels.length > 0 && (
-            <Button variant="outline" className="w-full mt-4">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Carregar Mais Pixels
-            </Button>
-          )}
-        </div>
-        )}
-
-        {/* Promotion Modal */}
-        <Dialog open={showPromotionModal} onOpenChange={setShowPromotionModal}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Megaphone className="h-5 w-5 text-primary" />
-                Promover Pixel
-              </DialogTitle> 
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Aumente a visibilidade do seu pixel com diferentes níveis de promoção:
-              </p>
-              
-              <div className="space-y-3"> 
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <Card key={level} className="p-3 cursor-pointer hover:border-primary/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Nível {level}</h4>
-                        <p className="text-xs text-muted-foreground">
-                          {level === 1 && "Destaque básico"}
-                          {level === 2 && "Destaque melhorado"}
-                          {level === 3 && "Destaque premium + Featured"}
-                          {level === 4 && "Destaque máximo + Trending"}
-                          {level === 5 && "Destaque lendário + Topo da página"} 
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">{level * 50} créditos</p>
-                        <p className="text-xs text-muted-foreground">24h</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div> 
-              
-              <Button 
-                className="w-full"
-                onClick={() => handlePromotePixel('1', 3)}
-              >
-                Promover Agora
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Empty State */}
-        {filteredPixels.length === 0 && (
-          <Card className="p-12 text-center"> 
-            <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum pixel encontrado</h3>
-            <p className="text-muted-foreground mb-4">
-              Tente ajustar os seus filtros ou pesquisar por outros termos
-            </p>
-            <Button onClick={() => {
-              setSearchQuery('');
-              setFilterCategory('all'); 
-              setSortBy('trending');
-            }}>
-              Limpar Filtros
-            </Button>
-          </Card>
-        )}
-        
-        {/* Pixel Details Dialog */} 
-        <Dialog open={showPixelDetails} onOpenChange={setShowPixelDetails}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-            {selectedPixel && (
-              <>
-                <DialogHeader className="p-6 border-b bg-gradient-to-br from-card via-card/95 to-primary/10 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-                       style={{ backgroundSize: '200% 200%' }} />
-                  <div className="relative"> 
-                    <DialogTitle className="flex items-center gap-3 font-headline text-2xl text-gradient-gold">
-                      <div className={cn(
-                        "p-2 rounded-xl",
-                        rarityColors[selectedPixel.rarity].replace('text-', 'bg-').replace('/10', '/20')
-                      )}>
-                        <MapPin className={cn("h-6 w-6", rarityColors[selectedPixel.rarity].split(' ')[0])} />
-                      </div>
-                      {selectedPixel.title} 
-                    </DialogTitle>
-                    <CardDescription className="mt-2">
-                      {selectedPixel.description}
-                    </CardDescription>
-                  </div>
-                </DialogHeader>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6"> 
-                  {/* Left Column - Image and Stats */}
-                  <div className="space-y-4">
-                    <div className="aspect-square relative rounded-lg overflow-hidden border-2 border-primary/30">
-                      {selectedPixel.imageUrl ? (
-                        <img 
-                          src={selectedPixel.imageUrl} 
-                          alt={selectedPixel.title}
-                          className="w-full h-full object-cover" 
-                          data-ai-hint={selectedPixel.dataAiHint}
+              <Card className="shadow-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <Filter className="h-5 w-5 mr-2 text-primary" />
+                    Filtros Avançados
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Preço (€)</Label>
+                      <div className="px-3">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1000"
+                          value={priceRange[1]}
+                          onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+                          className="w-full"
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                          <div className="text-center text-white drop-shadow-lg">
-                            <div className="text-2xl font-bold">({selectedPixel.coordinates.x}, {selectedPixel.coordinates.y})</div>
-                            <div className="text-sm opacity-80">{selectedPixel.region}</div>
-                          </div>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>€0</span>
+                          <span>€{priceRange[1]}</span>
                         </div>
-                      )}
-                      
-                      {/* Status Badges */} 
-                      <div className="absolute top-2 right-2 flex flex-col gap-1">
-                        <Badge className={cn(rarityColors[selectedPixel.rarity])}>
-                          {rarityLabels[selectedPixel.rarity]}
-                        </Badge>
-                        {selectedPixel.isAnimated && (
-                          <Badge className="bg-blue-500">Animado</Badge>
-                        )}
-                        {selectedPixel.isInteractive && (
-                          <Badge className="bg-purple-500">Interativo</Badge>
-                        )}
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <Card className="p-3 bg-muted/20 text-center">
-                        <Eye className="h-5 w-5 mx-auto mb-1 text-blue-500" />
-                        <p className="font-bold">{selectedPixel.views.toLocaleString('pt-PT')}</p>
-                        <p className="text-xs text-muted-foreground">Visualizações</p>
-                      </Card>
-                      <Card className="p-3 bg-muted/20 text-center">
-                        <Heart className="h-5 w-5 mx-auto mb-1 text-red-500" />
-                        <p className="font-bold">{selectedPixel.likes.toLocaleString('pt-PT')}</p>
-                        <p className="text-xs text-muted-foreground">Curtidas</p>
-                      </Card>
-                      <Card className="p-3 bg-muted/20 text-center">
-                        <MessageSquare className="h-5 w-5 mx-auto mb-1 text-green-500" />
-                        <p className="font-bold">{selectedPixel.comments.toLocaleString('pt-PT')}</p>
-                        <p className="text-xs text-muted-foreground">Comentários</p>
-                      </Card>
-                    </div>
-
-                    <Card className="p-4 bg-muted/20">
-                      <h3 className="font-semibold mb-3 flex items-center">
-                        <Layers className="h-4 w-4 mr-2 text-primary" />
-                        Características Especiais
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPixel.effects.map(effect => (
-                          <Badge key={effect} variant="outline" className="text-primary border-primary/50">
-                            {effect}
-                          </Badge>
+                    
+                    <div className="space-y-2">
+                      <Label>Raridade</Label>
+                      <div className="space-y-2">
+                        {['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário'].map(rarity => (
+                          <div key={rarity} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={rarity}
+                              checked={rarityFilter.includes(rarity)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setRarityFilter(prev => [...prev, rarity]);
+                                } else {
+                                  setRarityFilter(prev => prev.filter(r => r !== rarity));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={rarity} className="text-sm">{rarity}</Label>
+                          </div>
                         ))}
                       </div>
-                    </Card>
-                  </div>
-
-                  {/* Right Column - Details and Purchase */}
-                  <div className="space-y-4">
-                    <Card className="p-4 bg-muted/20">
-                      <h3 className="font-semibold mb-3 flex items-center">
-                        <Info className="h-4 w-4 mr-2 text-blue-500" />
-                        Detalhes do Pixel
-                      </h3>
-                      <div className="space-y-2"> 
-                        <div className="flex justify-between text-sm py-1 border-b border-border/30">
-                          <span className="text-muted-foreground">Coordenadas</span>
-                          <span className="font-medium">({selectedPixel.coordinates.x}, {selectedPixel.coordinates.y})</span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Opções</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="for-sale"
+                            checked={showOnlyForSale}
+                            onCheckedChange={setShowOnlyForSale}
+                          />
+                          <Label htmlFor="for-sale" className="text-sm">Apenas à venda</Label>
                         </div>
-                        <div className="flex justify-between text-sm py-1 border-b border-border/30">
-                          <span className="text-muted-foreground">Região</span>
-                          <span className="font-medium">{selectedPixel.region}</span>
-                        </div> 
-                        <div className="flex justify-between text-sm py-1 border-b border-border/30">
-                          <span className="text-muted-foreground">Proprietário</span>
-                          <UserProfileSheet 
-                            userData={{...mockUserData, name: selectedPixel.owner.name, avatarUrl: selectedPixel.owner.avatar}} 
-                            achievementsData={[]}
-                          >
-                            <span className="font-medium flex items-center cursor-pointer hover:text-primary transition-colors">
-                              {selectedPixel.owner.name}
-                            {selectedPixel.owner.verified && (
-                              <Star className="h-3 w-3 ml-1 text-blue-500 fill-current" />
-                            )}
-                            </span>
-                          </UserProfileSheet>
-                        </div>
-                        <div className="flex justify-between text-sm py-1 border-b border-border/30">
-                          <span className="text-muted-foreground">Data de Criação</span>
-                          <span className="font-medium">{selectedPixel.createdAt.toLocaleDateString('pt-PT')}</span> 
-                        </div>
-                        <div className="flex justify-between text-sm py-1 border-b border-border/30">
-                          <span className="text-muted-foreground">Última Modificação</span>
-                          <span className="font-medium">{selectedPixel.lastModified.toLocaleDateString('pt-PT')}</span>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="featured"
+                            checked={showOnlyFeatured}
+                            onCheckedChange={setShowOnlyFeatured}
+                          />
+                          <Label htmlFor="featured" className="text-sm">Apenas em destaque</Label>
                         </div>
                       </div>
-                    </Card>
-
-                    <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10">
-                      <h3 className="font-semibold mb-3 flex items-center">
-                        <Brush className="h-4 w-4 mr-2 text-primary" />
-                        Personalização
-                      </h3>
-                      <div className="space-y-4">
-                        <Button 
-                          className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Ações</Label>
+                      <div className="space-y-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => {
-                            setShowPixelDetails(false);
-                            toast({
-                              title: "Editor Aberto",
-                              description: "O editor de pixel foi aberto.",
-                            });
+                            setSearchQuery('');
+                            setSelectedCategory('all');
+                            setPriceRange([0, 1000]);
+                            setRarityFilter([]);
+                            setShowOnlyForSale(false);
+                            setShowOnlyFeatured(false);
                           }}
+                          className="w-full"
                         >
-                          <Brush className="h-4 w-4 mr-2" />
-                          Editar Pixel
-                        </Button> 
-                        
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Limpar Filtros
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <Tabs defaultValue="gallery" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-3 h-10 sm:h-12 bg-card/50 backdrop-blur-sm shadow-md">
+            <TabsTrigger value="gallery" className="font-headline text-xs sm:text-sm">
+              <Palette className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              Galeria
+            </TabsTrigger>
+            <TabsTrigger value="featured" className="font-headline text-xs sm:text-sm">
+              <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              Destaques
+            </TabsTrigger>
+            <TabsTrigger value="promote" className="font-headline text-xs sm:text-sm">
+              <Megaphone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              Promover
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Main Gallery */}
+          <TabsContent value="gallery" className="space-y-4 sm:space-y-6">
+            {/* Stats Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+              <Card className="text-center p-2 sm:p-4">
+                <div className="text-lg sm:text-2xl font-bold text-primary">{formatNumber(filteredPixels.length)}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Pixels</div>
+              </Card>
+              <Card className="text-center p-2 sm:p-4">
+                <div className="text-lg sm:text-2xl font-bold text-green-500">{formatNumber(filteredPixels.filter(p => p.metadata.forSale).length)}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">À Venda</div>
+              </Card>
+              <Card className="text-center p-2 sm:p-4">
+                <div className="text-lg sm:text-2xl font-bold text-yellow-500">{formatNumber(filteredPixels.filter(p => p.metadata.featured).length)}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Destaque</div>
+              </Card>
+              <Card className="text-center p-2 sm:p-4">
+                <div className="text-lg sm:text-2xl font-bold text-purple-500">{formatNumber(filteredPixels.reduce((sum, p) => sum + p.stats.views, 0))}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Views</div>
+              </Card>
+            </div>
+
+            {/* Pixels Grid */}
+            <div className={cn(
+              "grid gap-3 sm:gap-6",
+              viewMode === 'grid' 
+                ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" 
+                : "grid-cols-1"
+            )}>
+              {filteredPixels.map((pixel, index) => (
+                <motion.div
+                  key={pixel.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <Card 
+                    className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
+                    onClick={() => setSelectedPixel(pixel)}
+                  >
+                    <div className="relative">
+                      <img 
+                        src={pixel.thumbnailUrl} 
+                        alt={pixel.title}
+                        className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      
+                      {/* Badges - Positioned correctly */}
+                      <div className="absolute top-2 left-2">
+                        <Badge className={cn("text-xs", getRarityColor(pixel.metadata.rarity))}>
+                          {pixel.metadata.rarity}
+                        </Badge>
+                      </div>
+                      
+                      <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        {pixel.metadata.featured && (
+                          <Badge className="bg-yellow-500 text-xs animate-pulse">
+                            <Star className="h-3 w-3 mr-1" />
+                            Destaque
+                          </Badge>
+                        )}
+                        {pixel.metadata.trending && (
+                          <Badge className="bg-green-500 text-xs animate-pulse">
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            Trend
+                          </Badge>
+                        )}
+                        {pixel.metadata.sponsored && (
+                          <Badge className="bg-purple-500 text-xs">
+                            <Megaphone className="h-3 w-3 mr-1" />
+                            Pago
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {/* Quick Actions Overlay */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
-                            <Share2 className="h-4 w-4 mr-2" />
-                            Compartilhar
-                          </Button>
-                          <Button  
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => {
-                              setShowPixelDetails(false);
-                              setShowPromotionModal(true);
-                            }}
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => handleLike(pixel.id, e)}
+                            className={cn(
+                              "min-h-[36px]",
+                              pixel.interactions.isLiked && "bg-red-500 text-white"
+                            )}
                           >
-                            <Megaphone className="h-4 w-4 mr-2" />
-                            Promover
+                            <Heart className={cn("h-3 w-3", pixel.interactions.isLiked && "fill-current")} />
+                          </Button>
+                          
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => handleBookmark(pixel.id, e)}
+                            className={cn(
+                              "min-h-[36px]",
+                              pixel.interactions.isBookmarked && "bg-yellow-500 text-white"
+                            )}
+                          >
+                            <Bookmark className={cn("h-3 w-3", pixel.interactions.isBookmarked && "fill-current")} />
+                          </Button>
+                          
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => handleShare(pixel, e)}
+                            className="min-h-[36px]"
+                          >
+                            <Share2 className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
-                    </Card>
+                    </div>
+                    
+                    <CardContent className="p-2 sm:p-4">
+                      {/* Title and Author - Fixed spacing */}
+                      <div className="space-y-2 mb-3">
+                        <h3 className="font-semibold text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors">
+                          {pixel.title}
+                        </h3>
+                        
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
+                            <AvatarImage src={pixel.author.avatar} />
+                            <AvatarFallback className="text-xs">{pixel.author.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs sm:text-sm font-medium truncate">{pixel.author.name}</span>
+                              {pixel.author.verified && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
+                              {pixel.author.premium && <Crown className="h-3 w-3 text-amber-500" />}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Nível {pixel.author.level} • {formatNumber(pixel.author.followers)} seguidores
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                    <Card className="p-4 bg-muted/20">
-                      <h3 className="font-semibold mb-3 flex items-center">
-                        <Tag className="h-4 w-4 mr-2 text-purple-500" />
-                        Tags
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPixel.tags.map(tag => (
-                          <Badge key={tag} variant="outline" className="hover:bg-primary/10 cursor-pointer transition-colors"> 
+                      {/* Stats */}
+                      <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs mb-3">
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-3 w-3 text-blue-500" />
+                          <span>{formatNumber(pixel.stats.views)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Heart className="h-3 w-3 text-red-500" />
+                          <span>{formatNumber(pixel.stats.likes)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3 text-green-500" />
+                          <span>{formatNumber(pixel.stats.comments)}</span>
+                        </div>
+                      </div>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {pixel.metadata.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="outline" className="text-xs">
                             #{tag}
                           </Badge>
                         ))}
                       </div>
-                    </Card>
-                  </div>
-                </div>
 
-                <DialogFooter className="p-4 border-t">
-                  <Button variant="outline" onClick={() => setShowPixelDetails(false)}>
-                    Fechar
-                  </Button>
-                </DialogFooter>
+                      {/* Actions */}
+                      <div className="space-y-2">
+                        {pixel.metadata.forSale && pixel.metadata.price && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-primary">€{pixel.metadata.price}</span>
+                            <Button
+                              size="sm"
+                              onClick={(e) => handleBuyPixel(pixel, e)}
+                              className="min-h-[36px] bg-gradient-to-r from-primary to-accent"
+                            >
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              Comprar
+                            </Button>
+                          </div>
+                        )}
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => handleFollow(pixel.author.id, e)}
+                            className={cn(
+                              "min-h-[32px] text-xs",
+                              pixel.interactions.isFollowing && "bg-blue-500/10 border-blue-500/50 text-blue-500"
+                            )}
+                          >
+                            <Users className="h-3 w-3 mr-1" />
+                            {pixel.interactions.isFollowing ? 'Seguindo' : 'Seguir'}
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setPromotionPixel(pixel);
+                              setShowPromotionModal(true);
+                            }}
+                            className="min-h-[32px] text-xs"
+                          >
+                            <Rocket className="h-3 w-3 mr-1" />
+                            Promover
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {filteredPixels.length === 0 && (
+              <Card className="text-center p-8">
+                <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Nenhum pixel encontrado</h3>
+                <p className="text-muted-foreground">Tente ajustar os filtros ou pesquisar por outros termos.</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Featured Section */}
+          <TabsContent value="featured" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              {/* Spotlight */}
+              <Card className="lg:col-span-2 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-purple-500">
+                    <Zap className="h-5 w-5 mr-2" />
+                    Pixel em Holofote
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {filteredPixels.find(p => p.promotion?.type === 'spotlight') ? (
+                    <div className="space-y-4">
+                      {/* Spotlight pixel content */}
+                      <div className="text-center">
+                        <div className="text-4xl mb-4">🎨</div>
+                        <h3 className="text-xl font-bold mb-2">Obra em Destaque Premium</h3>
+                        <p className="text-muted-foreground">
+                          Esta secção mostra o pixel com promoção "Holofote" ativa.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">Nenhum pixel em holofote no momento.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Trending Sidebar */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-green-500">
+                    <Fire className="h-5 w-5 mr-2" />
+                    Tendências
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {filteredPixels
+                      .filter(p => p.metadata.trending)
+                      .slice(0, 5)
+                      .map((pixel, index) => (
+                        <div key={pixel.id} className="flex items-center gap-3 p-2 bg-muted/20 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer">
+                          <div className="text-lg font-bold text-green-500">#{index + 1}</div>
+                          <img 
+                            src={pixel.thumbnailUrl} 
+                            alt={pixel.title}
+                            className="w-10 h-10 rounded object-cover"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{pixel.title}</h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Eye className="h-3 w-3" />
+                              <span>{formatNumber(pixel.stats.views)}</span>
+                              <Heart className="h-3 w-3" />
+                              <span>{formatNumber(pixel.stats.likes)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Featured Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {filteredPixels
+                .filter(p => p.metadata.featured)
+                .map((pixel, index) => (
+                  <Card key={pixel.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                    <div className="relative">
+                      <img 
+                        src={pixel.thumbnailUrl} 
+                        alt={pixel.title}
+                        className="w-full h-32 sm:h-48 object-cover"
+                      />
+                      
+                      <Badge className="absolute top-2 left-2 bg-yellow-500 animate-pulse">
+                        <Crown className="h-3 w-3 mr-1" />
+                        VIP
+                      </Badge>
+                      
+                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                        #{index + 1}
+                      </div>
+                    </div>
+                    
+                    <CardContent className="p-2 sm:p-4">
+                      <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-1">{pixel.title}</h3>
+                      
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <Eye className="h-3 w-3" />
+                          <span>{formatNumber(pixel.stats.views)}</span>
+                          <Heart className="h-3 w-3" />
+                          <span>{formatNumber(pixel.stats.likes)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-current text-yellow-500" />
+                          <span>{pixel.engagement.rating}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          </TabsContent>
+
+          {/* Promotion Center */}
+          <TabsContent value="promote" className="space-y-4 sm:space-y-6">
+            <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl font-headline text-primary flex items-center">
+                  <Rocket className="h-6 w-6 mr-3" />
+                  Centro de Promoções
+                </CardTitle>
+                <CardDescription>
+                  Destaque os seus pixels e alcance milhares de utilizadores
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {promotionPlans.map((plan, index) => (
+                    <motion.div
+                      key={plan.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <Card className={cn(
+                        "relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105",
+                        plan.popular && "border-primary/50 shadow-primary/20 ring-2 ring-primary/20"
+                      )}>
+                        {plan.popular && (
+                          <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-accent text-primary-foreground text-center py-1 text-xs font-medium">
+                            <Sparkles className="inline h-3 w-3 mr-1" />
+                            Mais Popular
+                          </div>
+                        )}
+                        
+                        <CardHeader className={cn("text-center", plan.popular && "pt-8")}>
+                          <div className={cn(
+                            "w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full flex items-center justify-center mb-3 sm:mb-4 text-white shadow-lg",
+                            `bg-gradient-to-br ${plan.color}`
+                          )}>
+                            {plan.icon}
+                          </div>
+                          
+                          <CardTitle className="text-lg sm:text-xl font-headline">{plan.name}</CardTitle>
+                          <CardDescription className="text-xs sm:text-sm">{plan.description}</CardDescription>
+                          
+                          <div className="space-y-1 sm:space-y-2">
+                            <div className="text-2xl sm:text-3xl font-bold text-primary">
+                              {plan.cost} créditos
+                            </div>
+                            {plan.specialCost && (
+                              <div className="text-sm text-accent">
+                                ou {plan.specialCost} especiais
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground">
+                              Duração: {plan.duration}
+                            </div>
+                          </div>
+                        </CardHeader>
+                        
+                        <CardContent className="space-y-3 sm:space-y-4">
+                          <div className="space-y-2">
+                            {plan.benefits.map((benefit, idx) => (
+                              <div key={idx} className="flex items-start gap-2 text-xs sm:text-sm">
+                                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                <span>{benefit}</span>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div className="bg-muted/30 p-2 sm:p-3 rounded-lg">
+                            <h4 className="font-medium text-xs sm:text-sm mb-2">Boost Esperado:</h4>
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                              <div className="text-center">
+                                <div className="font-bold text-blue-500">+{plan.boost.views}%</div>
+                                <div className="text-muted-foreground">Views</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-bold text-green-500">+{plan.boost.engagement}%</div>
+                                <div className="text-muted-foreground">Engagement</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-bold text-purple-500">+{plan.boost.visibility}%</div>
+                                <div className="text-muted-foreground">Visibilidade</div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                        
+                        <CardFooter>
+                          <Button
+                            className="w-full"
+                            onClick={() => {
+                              setSelectedPromotion(plan);
+                              setShowPromotionModal(true);
+                            }}
+                          >
+                            <Rocket className="h-4 w-4 mr-2" />
+                            Escolher Plano
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Promotion Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="h-5 w-5 mr-2 text-primary" />
+                    Performance de Promoções
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { name: 'Destaque', views: 15420, engagement: 12.5, roi: 340 },
+                      { name: 'Tendência', views: 28930, engagement: 18.7, roi: 520 },
+                      { name: 'Holofote', views: 45670, engagement: 25.3, roi: 780 }
+                    ].map((promo, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{promo.name}</span>
+                          <Badge variant="outline">ROI: {promo.roi}%</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <div className="text-muted-foreground">Views</div>
+                            <div className="font-bold text-blue-500">{formatNumber(promo.views)}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Engagement</div>
+                            <div className="font-bold text-green-500">{promo.engagement}%</div>
+                          </div>
+                        </div>
+                        <Progress value={promo.engagement} className="h-2" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Target className="h-5 w-5 mr-2 text-primary" />
+                    Dicas de Promoção
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      {
+                        tip: 'Promova durante horários de pico',
+                        description: '19h-22h têm 40% mais engagement',
+                        icon: <Clock className="h-4 w-4 text-blue-500" />
+                      },
+                      {
+                        tip: 'Use tags populares',
+                        description: '#lisboa #arte aumentam visibilidade',
+                        icon: <Hash className="h-4 w-4 text-green-500" />
+                      },
+                      {
+                        tip: 'Interaja com a comunidade',
+                        description: 'Responda comentários para mais engagement',
+                        icon: <MessageSquare className="h-4 w-4 text-purple-500" />
+                      },
+                      {
+                        tip: 'Qualidade visual',
+                        description: 'Pixels de alta qualidade têm 3x mais likes',
+                        icon: <Sparkles className="h-4 w-4 text-yellow-500" />
+                      }
+                    ].map((tip, index) => (
+                      <div key={index} className="flex gap-3 p-3 bg-muted/20 rounded-lg">
+                        <div className="flex-shrink-0">{tip.icon}</div>
+                        <div>
+                          <h4 className="font-medium text-sm">{tip.tip}</h4>
+                          <p className="text-xs text-muted-foreground">{tip.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Pixel Detail Modal */}
+        <Dialog open={!!selectedPixel} onOpenChange={() => setSelectedPixel(null)}>
+          <DialogContent className="max-w-4xl h-[90vh] p-0">
+            {selectedPixel && (
+              <>
+                <DialogHeader className="p-4 sm:p-6 border-b">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <DialogTitle className="text-xl sm:text-2xl font-headline">{selectedPixel.title}</DialogTitle>
+                      <DialogDescription className="flex items-center gap-2 mt-2">
+                        <MapPin className="h-4 w-4" />
+                        ({selectedPixel.coordinates.x}, {selectedPixel.coordinates.y}) • {selectedPixel.region}
+                      </DialogDescription>
+                    </div>
+                    <Badge className={getRarityColor(selectedPixel.metadata.rarity)}>
+                      {selectedPixel.metadata.rarity}
+                    </Badge>
+                  </div>
+                </DialogHeader>
+                
+                <ScrollArea className="flex-1">
+                  <div className="p-4 sm:p-6 space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Image */}
+                      <div className="space-y-4">
+                        <img 
+                          src={selectedPixel.imageUrl} 
+                          alt={selectedPixel.title}
+                          className="w-full rounded-lg shadow-lg"
+                        />
+                        
+                        <div className="grid grid-cols-4 gap-4 text-center">
+                          <div>
+                            <div className="text-lg font-bold text-blue-500">{formatNumber(selectedPixel.stats.views)}</div>
+                            <div className="text-xs text-muted-foreground">Views</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-red-500">{formatNumber(selectedPixel.stats.likes)}</div>
+                            <div className="text-xs text-muted-foreground">Likes</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-green-500">{formatNumber(selectedPixel.stats.comments)}</div>
+                            <div className="text-xs text-muted-foreground">Comentários</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-purple-500">{formatNumber(selectedPixel.stats.shares)}</div>
+                            <div className="text-xs text-muted-foreground">Partilhas</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Details */}
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-semibold mb-2">Descrição</h3>
+                          <p className="text-muted-foreground leading-relaxed">{selectedPixel.description}</p>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-semibold mb-2">Artista</h3>
+                          <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={selectedPixel.author.avatar} />
+                              <AvatarFallback>{selectedPixel.author.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{selectedPixel.author.name}</span>
+                                {selectedPixel.author.verified && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
+                                {selectedPixel.author.premium && <Crown className="h-4 w-4 text-amber-500" />}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Nível {selectedPixel.author.level} • {formatNumber(selectedPixel.author.followers)} seguidores
+                              </div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => handleFollow(selectedPixel.author.id, e)}
+                              className={cn(
+                                selectedPixel.interactions.isFollowing && "bg-blue-500/10 border-blue-500/50 text-blue-500"
+                              )}
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              {selectedPixel.interactions.isFollowing ? 'Seguindo' : 'Seguir'}
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-semibold mb-2">Tags</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedPixel.metadata.tags.map(tag => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                #{tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-semibold mb-2">Engagement</h3>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Rating</span>
+                              <div className="flex items-center gap-1">
+                                <Star className="h-4 w-4 fill-current text-yellow-500" />
+                                <span>{selectedPixel.engagement.rating} ({selectedPixel.engagement.totalRatings})</span>
+                              </div>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Taxa de Engagement</span>
+                              <span className={cn("font-bold", getEngagementColor(selectedPixel.engagement.engagementRate))}>
+                                {selectedPixel.engagement.engagementRate}%
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Score Viral</span>
+                              <span className="font-bold text-purple-500">{selectedPixel.engagement.viralScore}/100</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {selectedPixel.metadata.forSale && selectedPixel.metadata.price && (
+                          <div className="p-4 bg-primary/10 rounded-lg">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="font-semibold">À Venda</span>
+                              <span className="text-2xl font-bold text-primary">€{selectedPixel.metadata.price}</span>
+                            </div>
+                            <Button
+                              className="w-full"
+                              onClick={(e) => handleBuyPixel(selectedPixel, e)}
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Comprar Agora
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </ScrollArea>
               </>
             )}
           </DialogContent>
-        </Dialog> 
-        
-        {/* Tips and Tricks Section */}
-        <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20 shadow-lg mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center text-primary">
-              <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
-              Dicas para Criadores de Pixel Art
-            </CardTitle> 
-            <CardDescription>
-              Estratégias para criar pixels impressionantes e aumentar seu engajamento
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
-                <h3 className="font-semibold flex items-center mb-2"> 
-                  <Palette className="h-4 w-4 mr-2 text-blue-500" />
-                  Escolha de Cores
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Use paletas de cores limitadas e harmoniosas para criar pixel art mais coesa e visualmente atraente.
-                </p>
+        </Dialog>
+
+        {/* Promotion Modal */}
+        <Dialog open={showPromotionModal} onOpenChange={setShowPromotionModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Rocket className="h-5 w-5 mr-2 text-primary" />
+                Promover Pixel
+              </DialogTitle>
+              <DialogDescription>
+                {promotionPixel && `Promover "${promotionPixel.title}" para maior visibilidade`}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedPromotion && promotionPixel && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-to-r from-primary/10 to-accent/10">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={promotionPixel.thumbnailUrl} 
+                        alt={promotionPixel.title}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div>
+                        <h3 className="font-semibold">{promotionPixel.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          ({promotionPixel.coordinates.x}, {promotionPixel.coordinates.y}) • {promotionPixel.region}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      {selectedPromotion.icon}
+                      <span className="ml-2">{selectedPromotion.name}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-muted/20 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">{selectedPromotion.cost}</div>
+                        <div className="text-sm text-muted-foreground">Créditos</div>
+                      </div>
+                      {selectedPromotion.specialCost && (
+                        <div className="text-center p-3 bg-muted/20 rounded-lg">
+                          <div className="text-2xl font-bold text-accent">{selectedPromotion.specialCost}</div>
+                          <div className="text-sm text-muted-foreground">Especiais</div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Benefícios Inclusos:</h4>
+                      {selectedPromotion.benefits.map((benefit, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span className="text-sm">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setShowPromotionModal(false)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        className="flex-1"
+                        onClick={() => handlePromotePixel(promotionPixel, selectedPromotion)}
+                        disabled={credits < selectedPromotion.cost && (!selectedPromotion.specialCost || specialCredits < selectedPromotion.specialCost)}
+                      >
+                        <Rocket className="h-4 w-4 mr-2" />
+                        Promover
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner"> 
-                <h3 className="font-semibold flex items-center mb-2">
-                  <Zap className="h-4 w-4 mr-2 text-purple-500" />
-                  Animações Simples
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Adicione pequenas animações para dar vida aos seus pixels e aumentar o engajamento dos visitantes.
-                </p>
-              </div> 
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
-                <h3 className="font-semibold flex items-center mb-2">
-                  <Target className="h-4 w-4 mr-2 text-green-500" />
-                  Localização Estratégica
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Escolha localizações em áreas populares ou com significado histórico para aumentar a visibilidade.
-                </p> 
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-center border-t border-primary/10 pt-4">
-            <Button variant="outline" className="w-full sm:w-auto">
-              <Compass className="h-4 w-4 mr-2" />
-              Explorar Tutoriais de Pixel Art
-            </Button> 
-          </CardFooter>
-        </Card>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
