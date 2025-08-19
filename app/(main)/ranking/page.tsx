@@ -17,8 +17,9 @@ import {
   TrendingUp, ArrowUp, ArrowDown, Map, Clock, Trophy, Medal, Info, Crown,
   Star, Flame, Zap, Activity, Calendar, Filter, Search, SortAsc, Download,
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
-  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, MapPinIcon,
-  Lightbulb
+  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, 
+  Lightbulb, MoreVertical, PlayCircle, Pause, Volume2, VolumeX, Shuffle,
+  RotateCcw, MousePointer2, Gamepad2, Layers, Grid3X3, FlashZap
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -231,6 +232,13 @@ export default function StatisticsPage() {
   const [filterRegion, setFilterRegion] = useState<string>('all');
   const { toast } = useToast();
   const [playRewardSound, setPlayRewardSound] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [animateCards, setAnimateCards] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('table');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const updateTime = () => {
@@ -242,6 +250,30 @@ export default function StatisticsPage() {
 
     return () => clearInterval(intervalId); 
   }, []);
+
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        setAnimateCards(true);
+        setTimeout(() => setAnimateCards(false), 500);
+        
+        toast({
+          title: "Dados Atualizados",
+          description: "Rankings atualizados automaticamente!",
+        });
+      }, 30000);
+      setRefreshInterval(interval);
+    } else {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        setRefreshInterval(null);
+      }
+    }
+
+    return () => {
+      if (refreshInterval) clearInterval(refreshInterval);
+    };
+  }, [autoRefresh, toast]);
 
   const timeRanges: { id: 'day' | 'week' | 'month' | 'year'; label: string; icon: React.ReactNode }[] = [
     { id: 'day', label: 'Hoje', icon: <Clock className="h-4 w-4" /> },
@@ -272,6 +304,42 @@ export default function StatisticsPage() {
     // Reward the user for sharing stats
     addCredits(50);
     addXp(25);
+  };
+
+  const handleToggleUser = (username: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(username) 
+        ? prev.filter(u => u !== username)
+        : [...prev, username].slice(0, 3) // Máximo 3 users para comparação
+    );
+  };
+
+  const handleBulkAction = (action: 'follow' | 'challenge' | 'message') => {
+    if (selectedUsers.length === 0) return;
+    
+    setPlayRewardSound(true);
+    toast({
+      title: `Ação ${action} aplicada`,
+      description: `${action} enviado para ${selectedUsers.length} utilizadores.`,
+    });
+    
+    addCredits(selectedUsers.length * 10);
+    setSelectedUsers([]);
+  };
+
+  const handleRandomizeView = () => {
+    setAnimateCards(true);
+    const modes: ('table' | 'cards' | 'compact')[] = ['table', 'cards', 'compact'];
+    const randomMode = modes[Math.floor(Math.random() * modes.length)];
+    setViewMode(randomMode);
+    
+    setTimeout(() => setAnimateCards(false), 800);
+    
+    toast({
+      title: "Vista Aleatória",
+      description: `Mudou para vista ${randomMode}. +15 XP!`,
+    });
+    addXp(15);
   };
 
   const filteredRanking = userRankingData
@@ -317,22 +385,53 @@ export default function StatisticsPage() {
               
               <div className="flex items-center gap-3 animate-fade-in">
                 <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <div className={cn(
+                    "w-2 h-2 rounded-full",
+                    autoRefresh ? "bg-green-400 animate-pulse" : "bg-orange-400"
+                  )} />
                   <span className="text-muted-foreground font-code">
                     Atualizado: {lastUpdated || '--:--'}
                   </span>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
-                  <Download className="h-4 w-4 mr-2 text-green-500" />
-                  Exportar
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
-                  <Share2 className="h-4 w-4 mr-2 text-blue-500" />
-                  Partilhar
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors button-hover-lift">
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
+                
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant={autoRefresh ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setAutoRefresh(!autoRefresh)}
+                    className="button-hover-lift"
+                  >
+                    {autoRefresh ? <Pause className="h-4 w-4 mr-2" /> : <PlayCircle className="h-4 w-4 mr-2" />}
+                    Auto
+                  </Button>
+                  
+                  <Button variant="outline" size="sm" onClick={handleRandomizeView} className="button-hover-lift">
+                    <Shuffle className="h-4 w-4 mr-2 text-purple-500" />
+                    Vista
+                  </Button>
+                  
+                  <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
+                    <Download className="h-4 w-4 mr-2 text-green-500" />
+                    Exportar
+                  </Button>
+                  
+                  <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
+                    <Share2 className="h-4 w-4 mr-2 text-blue-500" />
+                    Partilhar
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors button-hover-lift"
+                    onClick={() => {
+                      setAnimateCards(true);
+                      setTimeout(() => setAnimateCards(false), 500);
+                    }}
+                  >
+                    <RefreshCw className={cn("h-4 w-4", animateCards && "animate-spin")} />
+                  </Button>
+                </div>
               </div>
             </div>
             
@@ -456,144 +555,473 @@ export default function StatisticsPage() {
 
           {/* Leaderboard Tab */}
           <TabsContent value="leaderboard" className="space-y-6">
-            {/* Filters */}
+            {/* Enhanced Filters */}
             <Card className="card-hover-glow">
               <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Pesquisar utilizadores..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Pesquisar utilizadores..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant={showFilters ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="font-code"
+                      >
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filtros
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSortBy(sortBy === 'rank' ? 'pixels' : sortBy === 'pixels' ? 'score' : 'rank')}
+                        className="font-code"
+                      >
+                        <SortAsc className="h-4 w-4 mr-2" />
+                        {sortBy === 'rank' ? 'Rank' : sortBy === 'pixels' ? 'Pixels' : 'Pontuação'}
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setViewMode(viewMode === 'table' ? 'cards' : viewMode === 'cards' ? 'compact' : 'table')}
+                        className="font-code"
+                      >
+                        {viewMode === 'table' && <Grid3X3 className="h-4 w-4 mr-2" />}
+                        {viewMode === 'cards' && <Layers className="h-4 w-4 mr-2" />}
+                        {viewMode === 'compact' && <BarChart3 className="h-4 w-4 mr-2" />}
+                        Vista
+                      </Button>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSortBy(sortBy === 'rank' ? 'pixels' : 'rank')}
-                      className="font-code"
+                  {/* Advanced Filters */}
+                  {showFilters && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="border-t pt-4"
                     >
-                      <SortAsc className="h-4 w-4 mr-2" />
-                      {sortBy === 'rank' ? 'Rank' : 'Pixels'}
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFilterRegion(filterRegion === 'all' ? 'Lisboa' : 'all')}
-                      className="font-code"
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <Button
+                          variant={filterRegion === 'all' ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setFilterRegion('all')}
+                          className="text-xs"
+                        >
+                          Todas as Regiões
+                        </Button>
+                        {['Lisboa', 'Porto', 'Coimbra', 'Braga', 'Faro'].map(region => (
+                          <Button
+                            key={region}
+                            variant={filterRegion === region ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setFilterRegion(region)}
+                            className="text-xs"
+                          >
+                            {region}
+                          </Button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                  
+                  {/* Bulk Actions */}
+                  {selectedUsers.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border"
                     >
-                      <Filter className="h-4 w-4 mr-2" />
-                      {filterRegion === 'all' ? 'Todas' : filterRegion}
-                    </Button>
-                  </div>
+                      <span className="text-sm font-medium">
+                        {selectedUsers.length} utilizador{selectedUsers.length > 1 ? 'es' : ''} selecionado{selectedUsers.length > 1 ? 's' : ''}
+                      </span>
+                      <div className="flex gap-2 ml-auto">
+                        <Button size="sm" onClick={() => handleBulkAction('follow')}>
+                          <Users className="h-4 w-4 mr-1" />
+                          Seguir
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleBulkAction('challenge')}>
+                          <Trophy className="h-4 w-4 mr-1" />
+                          Desafiar
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setSelectedUsers([])}>
+                          Limpar
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Leaderboard Table */}
-            <Card className="card-hover-glow">
+            {/* Dynamic Leaderboard Views */}
+            <Card className={cn("card-hover-glow transition-all duration-500", animateCards && "animate-pulse")}>
               <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Trophy className="h-5 w-5 mr-2" />
-                  Classificação de Utilizadores
+                <CardTitle className="flex items-center justify-between text-primary">
+                  <div className="flex items-center">
+                    <Trophy className="h-5 w-5 mr-2" />
+                    Classificação de Utilizadores
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      {filteredRanking.length} utilizadores
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={showComparison ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setShowComparison(!showComparison)}
+                      disabled={selectedUsers.length < 2}
+                    >
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Comparar
+                    </Button>
+                    
+                    <Button variant="outline" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardTitle>
                 <CardDescription>Os mestres do Pixel Universe com mais pixels e pontuação.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-96">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[80px] font-code">Rank</TableHead>
-                        <TableHead className="font-code">Utilizador</TableHead>
-                        <TableHead className="text-right font-code">Pixels</TableHead>
-                        <TableHead className="text-right font-code">Pontuação</TableHead>
-                        <TableHead className="text-right font-code">Nível</TableHead>
-                        <TableHead className="text-right font-code">Sequência</TableHead>
-                        <TableHead className="text-center font-code">Mudança</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredRanking.map((entry) => (
-                        <TableRow key={entry.rank} className="hover:bg-muted/50 transition-colors">
-                          <TableCell className="font-semibold">
-                            <div className="flex items-center gap-2">
-                              {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-pulse" />}
-                              {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
-                              {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
-                              #{entry.rank}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="relative">
-                                <Avatar className="h-10 w-10 border-2 border-border">
-                                  <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
-                                  <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                                {entry.isPremium && (
-                                  <Crown className="absolute -top-1 -right-1 h-4 w-4 text-amber-400" />
-                                )}
+                {viewMode === 'table' && (
+                  <ScrollArea className="h-96">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[40px]"></TableHead>
+                          <TableHead className="w-[80px] font-code">Rank</TableHead>
+                          <TableHead className="font-code">Utilizador</TableHead>
+                          <TableHead className="text-right font-code">Pixels</TableHead>
+                          <TableHead className="text-right font-code">Pontuação</TableHead>
+                          <TableHead className="text-right font-code">Nível</TableHead>
+                          <TableHead className="text-right font-code">Sequência</TableHead>
+                          <TableHead className="text-center font-code">Mudança</TableHead>
+                          <TableHead className="w-[80px]"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredRanking.map((entry) => (
+                          <motion.tr 
+                            key={entry.rank} 
+                            className="hover:bg-muted/50 transition-colors group"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: entry.rank * 0.05 }}
+                          >
+                            <TableCell>
+                              <input
+                                type="checkbox"
+                                checked={selectedUsers.includes(entry.user)}
+                                onChange={() => handleToggleUser(entry.user)}
+                                className="rounded border-border"
+                              />
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              <div className="flex items-center gap-2">
+                                {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-pulse" />}
+                                {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
+                                {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
+                                #{entry.rank}
                               </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-foreground">{entry.user}</span>
-                                  {entry.isVerified && (
-                                    <Badge variant="outline" className="text-xs px-1 py-0">
-                                      <Star className="h-3 w-3" />
-                                    </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="relative">
+                                  <Avatar className="h-10 w-10 border-2 border-border group-hover:scale-110 transition-transform">
+                                    <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
+                                    <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
+                                  </Avatar>
+                                  {entry.isPremium && (
+                                    <Crown className="absolute -top-1 -right-1 h-4 w-4 text-amber-400" />
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground">{entry.region}</p>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-foreground">{entry.user}</span>
+                                    {entry.isVerified && (
+                                      <Badge variant="outline" className="text-xs px-1 py-0">
+                                        <Star className="h-3 w-3" />
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">{entry.region}</p>
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-code">
-                            <FormattedNumber value={entry.pixels} />
-                          </TableCell>
-                          <TableCell className="text-right font-code">
-                            <FormattedNumber value={entry.score} />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant="secondary" className="font-code">
-                              {entry.level}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Flame className="h-4 w-4 text-orange-500" />
-                              <span className="font-code">{entry.streak}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {entry.change > 0 && (
-                              <div className="flex items-center justify-center text-green-500">
-                                <ChevronUp className="h-4 w-4" />
-                                <span className="text-xs">{entry.change}</span>
+                            </TableCell>
+                            <TableCell className="text-right font-code">
+                              <FormattedNumber value={entry.pixels} />
+                            </TableCell>
+                            <TableCell className="text-right font-code">
+                              <FormattedNumber value={entry.score} />
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Badge variant="secondary" className="font-code">
+                                {entry.level}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Flame className="h-4 w-4 text-orange-500" />
+                                <span className="font-code">{entry.streak}</span>
                               </div>
-                            )}
-                            {entry.change < 0 && (
-                              <div className="flex items-center justify-center text-red-500">
-                                <ChevronDown className="h-4 w-4" />
-                                <span className="text-xs">{Math.abs(entry.change)}</span>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {entry.change > 0 && (
+                                <div className="flex items-center justify-center text-green-500">
+                                  <ChevronUp className="h-4 w-4" />
+                                  <span className="text-xs">{entry.change}</span>
+                                </div>
+                              )}
+                              {entry.change < 0 && (
+                                <div className="flex items-center justify-center text-red-500">
+                                  <ChevronDown className="h-4 w-4" />
+                                  <span className="text-xs">{Math.abs(entry.change)}</span>
+                                </div>
+                              )}
+                              {entry.change === 0 && (
+                                <span className="text-muted-foreground text-xs">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MousePointer2 className="h-4 w-4" />
+                                </Button>
                               </div>
-                            )}
-                            {entry.change === 0 && (
-                              <span className="text-muted-foreground text-xs">-</span>
-                            )}
-                          </TableCell>
-                        </TableRow>
+                            </TableCell>
+                          </motion.tr>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                )}
+
+                {viewMode === 'cards' && (
+                  <ScrollArea className="h-96">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {filteredRanking.map((entry, index) => (
+                        <motion.div
+                          key={entry.rank}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
+                        >
+                          <Card className={cn(
+                            "card-hover-glow cursor-pointer transition-all duration-300 hover:scale-105",
+                            selectedUsers.includes(entry.user) && "ring-2 ring-primary"
+                          )}
+                          onClick={() => handleToggleUser(entry.user)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400" />}
+                                  {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
+                                  {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
+                                  <span className="font-bold text-lg">#{entry.rank}</span>
+                                </div>
+                                <Badge variant={entry.change > 0 ? "default" : entry.change < 0 ? "destructive" : "secondary"}>
+                                  {entry.change > 0 && <ChevronUp className="h-3 w-3 mr-1" />}
+                                  {entry.change < 0 && <ChevronDown className="h-3 w-3 mr-1" />}
+                                  {entry.change || 0}
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center gap-3 mb-3">
+                                <Avatar className="h-12 w-12 border-2 border-primary/20">
+                                  <AvatarImage src={entry.avatar} alt={entry.user} />
+                                  <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <h3 className="font-semibold flex items-center gap-2">
+                                    {entry.user}
+                                    {entry.isVerified && <Star className="h-4 w-4 text-yellow-500" />}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">{entry.region}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div className="text-center p-2 bg-muted/30 rounded">
+                                  <p className="font-bold text-primary"><FormattedNumber value={entry.pixels} /></p>
+                                  <p className="text-xs text-muted-foreground">Pixels</p>
+                                </div>
+                                <div className="text-center p-2 bg-muted/30 rounded">
+                                  <p className="font-bold text-green-500"><FormattedNumber value={entry.score} /></p>
+                                  <p className="text-xs text-muted-foreground">Score</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
                       ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
+                    </div>
+                  </ScrollArea>
+                )}
+
+                {viewMode === 'compact' && (
+                  <ScrollArea className="h-96">
+                    <div className="space-y-2">
+                      {filteredRanking.map((entry, index) => (
+                        <motion.div
+                          key={entry.rank}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                          className={cn(
+                            "flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
+                            selectedUsers.includes(entry.user) && "bg-primary/10 border border-primary/20"
+                          )}
+                          onClick={() => handleToggleUser(entry.user)}
+                        >
+                          <div className="flex items-center gap-2 w-16">
+                            {entry.rank <= 3 && (
+                              <>
+                                {entry.rank === 1 && <Crown className="h-4 w-4 text-yellow-400" />}
+                                {entry.rank === 2 && <Medal className="h-4 w-4 text-gray-400" />}
+                                {entry.rank === 3 && <Medal className="h-4 w-4 text-orange-400" />}
+                              </>
+                            )}
+                            <span className="font-bold">#{entry.rank}</span>
+                          </div>
+                          
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={entry.avatar} alt={entry.user} />
+                            <AvatarFallback className="text-xs">{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{entry.user}</span>
+                              {entry.isVerified && <Star className="h-3 w-3 text-yellow-500" />}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{entry.region}</p>
+                          </div>
+                          
+                          <div className="text-right">
+                            <p className="font-bold text-sm"><FormattedNumber value={entry.pixels} /></p>
+                            <p className="text-xs text-muted-foreground">pixels</p>
+                          </div>
+                          
+                          <div className="text-right">
+                            <div className="flex items-center gap-1">
+                              <Flame className="h-3 w-3 text-orange-500" />
+                              <span className="text-sm font-code">{entry.streak}</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
               </CardContent>
             </Card>
+          {/* User Comparison Panel */}
+            {showComparison && selectedUsers.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mt-6"
+              >
+                <Card className="card-hover-glow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-primary">
+                      <BarChart3 className="h-5 w-5 mr-2" />
+                      Comparação de Utilizadores
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="ml-auto h-6 w-6"
+                        onClick={() => setShowComparison(false)}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {selectedUsers.map(username => {
+                        const user = userRankingData.find(u => u.user === username);
+                        if (!user) return null;
+                        
+                        return (
+                          <Card key={username} className="border-primary/20">
+                            <CardContent className="p-4">
+                              <div className="text-center mb-4">
+                                <Avatar className="h-16 w-16 mx-auto mb-2 border-2 border-primary/20">
+                                  <AvatarImage src={user.avatar} alt={user.user} />
+                                  <AvatarFallback>{user.user.substring(0,2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <h3 className="font-bold">{user.user}</h3>
+                                <p className="text-sm text-muted-foreground">Rank #{user.rank}</p>
+                              </div>
+                              
+                              <div className="space-y-3">
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Pixels:</span>
+                                  <span className="font-bold text-primary">
+                                    <FormattedNumber value={user.pixels} />
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Pontuação:</span>
+                                  <span className="font-bold text-green-500">
+                                    <FormattedNumber value={user.score} />
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Nível:</span>
+                                  <Badge variant="secondary">{user.level}</Badge>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Sequência:</span>
+                                  <div className="flex items-center gap-1">
+                                    <Flame className="h-4 w-4 text-orange-500" />
+                                    <span className="font-code">{user.streak}</span>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Região:</span>
+                                  <span className="text-sm text-accent">{user.region}</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="flex justify-center gap-2">
+                        <Button onClick={() => handleBulkAction('challenge')}>
+                          <Trophy className="h-4 w-4 mr-2" />
+                          Desafiar Todos
+                        </Button>
+                        <Button variant="outline" onClick={() => setSelectedUsers([])}>
+                          Limpar Seleção
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
           </TabsContent>
 
           {/* Regions Tab */}
