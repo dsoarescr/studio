@@ -42,7 +42,7 @@ import {
   ExternalLink, Navigation, Gavel, Timer, ChevronUp, ChevronDown,
   ThumbsUp, UserPlus, Send, Check, X, AlertTriangle, Info,
   BarChart3, TrendingDown, Calendar, Globe, Bookmark, Settings,
-  Plus, Minus, RefreshCw, Download, Upload, Copy, Link as LinkIcon,
+  Gavel, Timer, Users, CheckCircle, AlertTriangle, Loader2, RefreshCw, Rocket
   DollarSign, Percent, Activity, Bell, BellRing, Volume2, VolumeX
 } from "lucide-react";
 import { cn } from '@/lib/utils';
