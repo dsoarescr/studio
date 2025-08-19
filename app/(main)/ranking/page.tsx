@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { 
-  BarChartHorizontalBig, RefreshCw, Globe, Map, Target, Users, Eye, Heart, 
+  BarChartHorizontalBig, RefreshCw, Globe, MapPin, Target, Users, Eye, Heart, 
   TrendingUp, ArrowUp, ArrowDown, Map, Clock, Trophy, Medal, Info, Crown,
   Star, Flame, Zap, Activity, Calendar, Filter, Search, SortAsc, Download,
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
