@@ -19,7 +19,7 @@ import {
   LogIn, UserPlus, MapPin, Trophy, Coins, Gift, Star, Crown, 
   Sparkles, Target, Zap, Eye, Heart, Users, TrendingUp, 
   Compass, Palette, Award, Gem, X, ChevronRight, Play,
-  Lightbulb, Rocket, Shield, Globe, Calendar, Clock, Activity
+  Lightbulb, Rocket, Shield, Globe, Calendar, Clock
 } from 'lucide-react';
 
 export default function HomePage() {
