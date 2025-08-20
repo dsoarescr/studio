@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -185,8 +186,8 @@ const mockPixels: PixelArtwork[] = [
     coordinates: { x: 245, y: 156 },
     region: 'Lisboa',
     color: '#FF6B47',
-    imageUrl: 'https://placehold.co/400x400/FF6B47/FFFFFF?text=Lisboa+Sunset',
-    thumbnailUrl: 'https://placehold.co/200x200/FF6B47/FFFFFF?text=Lisboa',
+    imageUrl: 'https://placehold.co/400x400.png',
+    thumbnailUrl: 'https://placehold.co/200x200.png',
     author: {
       id: 'user1',
       name: 'PixelMaster',
@@ -245,8 +246,8 @@ const mockPixels: PixelArtwork[] = [
     coordinates: { x: 123, y: 89 },
     region: 'Porto',
     color: '#7DF9FF',
-    imageUrl: 'https://placehold.co/400x400/7DF9FF/000000?text=Porto+Street',
-    thumbnailUrl: 'https://placehold.co/200x200/7DF9FF/000000?text=Porto',
+    imageUrl: 'https://placehold.co/400x400.png',
+    thumbnailUrl: 'https://placehold.co/200x200.png',
     author: {
       id: 'user2',
       name: 'UrbanArtist',
@@ -298,8 +299,8 @@ const mockPixels: PixelArtwork[] = [
     coordinates: { x: 300, y: 200 },
     region: 'Coimbra',
     color: '#4CAF50',
-    imageUrl: 'https://placehold.co/400x400/4CAF50/FFFFFF?text=Coimbra+Nature',
-    thumbnailUrl: 'https://placehold.co/200x200/4CAF50/FFFFFF?text=Coimbra',
+    imageUrl: 'https://placehold.co/400x400.png',
+    thumbnailUrl: 'https://placehold.co/200x200.png',
     author: {
       id: 'user3',
       name: 'NatureLover',
@@ -884,7 +885,7 @@ export default function PixelsGalleryPage() {
                           <Checkbox
                             id="for-sale"
                             checked={showOnlyForSale}
-                            onCheckedChange={setShowOnlyForSale}
+                            onCheckedChange={setShowOnlyForSale as (checked: boolean) => void}
                           />
                           <Label htmlFor="for-sale" className="text-sm">Apenas à venda</Label>
                         </div>
@@ -892,7 +893,7 @@ export default function PixelsGalleryPage() {
                           <Checkbox
                             id="featured"
                             checked={showOnlyFeatured}
-                            onCheckedChange={setShowOnlyFeatured}
+                            onCheckedChange={setShowOnlyFeatured as (checked: boolean) => void}
                           />
                           <Label htmlFor="featured" className="text-sm">Apenas em destaque</Label>
                         </div>
@@ -987,6 +988,7 @@ export default function PixelsGalleryPage() {
                       <img 
                         src={pixel.thumbnailUrl} 
                         alt={pixel.title}
+                        data-ai-hint="pixel art"
                         className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       
@@ -1066,7 +1068,7 @@ export default function PixelsGalleryPage() {
                         
                         <div className="flex items-center gap-2">
                           <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
-                            <AvatarImage src={pixel.author.avatar} />
+                            <AvatarImage src={pixel.author.avatar} data-ai-hint="profile avatar" />
                             <AvatarFallback className="text-xs">{pixel.author.name[0]}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
@@ -1217,6 +1219,7 @@ export default function PixelsGalleryPage() {
                           <img 
                             src={pixel.thumbnailUrl} 
                             alt={pixel.title}
+                            data-ai-hint="pixel art"
                             className="w-10 h-10 rounded object-cover"
                           />
                           <div className="flex-1 min-w-0">
@@ -1245,6 +1248,7 @@ export default function PixelsGalleryPage() {
                       <img 
                         src={pixel.thumbnailUrl} 
                         alt={pixel.title}
+                        data-ai-hint="pixel art"
                         className="w-full h-32 sm:h-48 object-cover"
                       />
                       
@@ -1497,6 +1501,7 @@ export default function PixelsGalleryPage() {
                         <img 
                           src={selectedPixel.imageUrl} 
                           alt={selectedPixel.title}
+                          data-ai-hint="pixel art"
                           className="w-full rounded-lg shadow-lg"
                         />
                         
@@ -1531,7 +1536,7 @@ export default function PixelsGalleryPage() {
                           <h3 className="font-semibold mb-2">Artista</h3>
                           <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
                             <Avatar className="h-12 w-12">
-                              <AvatarImage src={selectedPixel.author.avatar} />
+                              <AvatarImage src={selectedPixel.author.avatar} data-ai-hint="profile avatar" />
                               <AvatarFallback>{selectedPixel.author.name[0]}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
@@ -1637,6 +1642,7 @@ export default function PixelsGalleryPage() {
                       <img 
                         src={promotionPixel.thumbnailUrl} 
                         alt={promotionPixel.title}
+                        data-ai-hint="pixel art"
                         className="w-16 h-16 rounded-lg object-cover"
                       />
                       <div>

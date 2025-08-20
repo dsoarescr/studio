@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -353,6 +354,7 @@ export default function MemberPage() {
                 <AvatarImage 
                   src={user?.photoURL || 'https://placehold.co/96x96.png'} 
                   alt={profileData.name} 
+                  data-ai-hint="profile avatar"
                 />
                 <AvatarFallback className="text-2xl font-headline">
                   {profileData.name.substring(0, 2).toUpperCase()}
@@ -652,7 +654,7 @@ export default function MemberPage() {
                                 <div className="flex items-center gap-3">
                                   <div className="relative">
                                     <Avatar className="h-12 w-12 border-2 border-border">
-                                      <AvatarImage src={connection.avatar} alt={connection.name} />
+                                      <AvatarImage src={connection.avatar} alt={connection.name} data-ai-hint="profile avatar" />
                                       <AvatarFallback>{connection.name[0]}</AvatarFallback>
                                     </Avatar>
                                     <div className={cn(
@@ -1045,7 +1047,7 @@ export default function MemberPage() {
                 </div>
               </div>
             </ScrollArea>
-          )}
+          </CardFooter>
         </DialogContent>
       </Dialog>
 
@@ -1154,7 +1156,7 @@ export default function MemberPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
+                  <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} data-ai-hint="profile avatar" />
                   <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -1210,7 +1212,7 @@ export default function MemberPage() {
                 {/* Header do Utilizador */}
                 <div className="text-center">
                   <Avatar className="h-20 w-20 mx-auto border-4 border-primary">
-                    <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
+                    <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} data-ai-hint="profile avatar" />
                     <AvatarFallback className="text-2xl">{selectedUser.name[0]}</AvatarFallback>
                   </Avatar>
                   <h3 className="text-xl font-bold mt-3">{selectedUser.name}</h3>

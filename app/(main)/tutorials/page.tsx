@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState } from 'react';
@@ -54,7 +55,7 @@ const mockTutorials: Tutorial[] = [
     duration: '45 min',
     difficulty: 'Iniciante',
     category: 'Básico',
-    thumbnail: 'https://placehold.co/300x200/D4A757/FFFFFF?text=Pixel+Básico',
+    thumbnail: 'https://placehold.co/300x200.png',
     views: 15420,
     likes: 1234,
     rating: 4.9,
@@ -77,7 +78,7 @@ const mockTutorials: Tutorial[] = [
     duration: '2h 15min',
     difficulty: 'Avançado',
     category: 'Animação',
-    thumbnail: 'https://placehold.co/300x200/7DF9FF/000000?text=Animação',
+    thumbnail: 'https://placehold.co/300x200.png',
     views: 8930,
     likes: 892,
     rating: 4.8,
@@ -100,7 +101,7 @@ const mockTutorials: Tutorial[] = [
     duration: '1h 30min',
     difficulty: 'Intermediário',
     category: 'Investimento',
-    thumbnail: 'https://placehold.co/300x200/9C27B0/FFFFFF?text=Investimento',
+    thumbnail: 'https://placehold.co/300x200.png',
     views: 12340,
     likes: 1567,
     rating: 4.7,
@@ -245,6 +246,7 @@ export default function TutorialsPage() {
                       <img 
                         src={tutorial.thumbnail} 
                         alt={tutorial.title}
+                        data-ai-hint="tutorial thumbnail"
                         className="w-full h-48 object-cover"
                       />
                       
@@ -290,6 +292,7 @@ export default function TutorialsPage() {
                         <img 
                           src={tutorial.instructor.avatar} 
                           alt={tutorial.instructor.name}
+                          data-ai-hint="profile avatar"
                           className="w-6 h-6 rounded-full"
                         />
                         <span className="text-sm text-muted-foreground">{tutorial.instructor.name}</span>
@@ -372,6 +375,7 @@ export default function TutorialsPage() {
                     <img 
                       src={instructor.avatar} 
                       alt={instructor.name}
+                      data-ai-hint="profile avatar"
                       className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary"
                     />
                     <h3 className="font-semibold text-lg mb-2">{instructor.name}</h3>

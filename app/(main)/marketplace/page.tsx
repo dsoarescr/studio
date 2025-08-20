@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -130,7 +131,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     currentBid: 420,
     bidCount: 23,
     buyNowPrice: 600,
-    imageUrl: 'https://placehold.co/300x200/D4A757/FFFFFF?text=Lisboa+Premium',
+    imageUrl: 'https://placehold.co/300x200.png',
     gpsCoords: { lat: 38.7223, lon: -9.1393 },
     isPromoted: true,
     lastPriceChange: '2 dias atrás',
@@ -160,7 +161,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     tags: ['porto', 'ribeira', 'arte', 'unesco'],
     features: ['Zona Ribeirinha', 'Património UNESCO', 'Vida Noturna'],
     isAuction: false,
-    imageUrl: 'https://placehold.co/300x200/7DF9FF/000000?text=Porto+Art',
+    imageUrl: 'https://placehold.co/300x200.png',
     gpsCoords: { lat: 41.1579, lon: -8.6291 },
     lastPriceChange: '1 semana atrás'
   },
@@ -183,7 +184,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     tags: ['coimbra', 'universidade', 'história', 'académico'],
     features: ['Universidade', 'Centro Histórico', 'Biblioteca Joanina'],
     isAuction: false,
-    imageUrl: 'https://placehold.co/300x200/9C27B0/FFFFFF?text=Coimbra+Uni',
+    imageUrl: 'https://placehold.co/300x200.png',
     gpsCoords: { lat: 40.2033, lon: -8.4103 },
     lastPriceChange: '3 dias atrás'
   },
@@ -206,7 +207,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     tags: ['braga', 'santuário', 'religioso', 'norte'],
     features: ['Santuário', 'Vista Panorâmica', 'Escadório'],
     isAuction: false,
-    imageUrl: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Braga+Santuário',
+    imageUrl: 'https://placehold.co/300x200.png',
     gpsCoords: { lat: 41.5518, lon: -8.4229 },
     lastPriceChange: '5 dias atrás'
   },
@@ -233,7 +234,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     currentBid: 180,
     bidCount: 12,
     buyNowPrice: 250,
-    imageUrl: 'https://placehold.co/300x200/FFD700/000000?text=Faro+Beach',
+    imageUrl: 'https://placehold.co/300x200.png',
     gpsCoords: { lat: 37.0194, lon: -7.9322 },
     lastPriceChange: '1 dia atrás'
   }
@@ -710,6 +711,7 @@ export default function MarketplacePage() {
                     <img 
                       src={pixel.imageUrl} 
                       alt={pixel.title}
+                      data-ai-hint="pixel art"
                       className="w-full h-32 sm:h-48 object-cover"
                     />
                     
@@ -848,6 +850,7 @@ export default function MarketplacePage() {
                     <img 
                       src={pixel.imageUrl} 
                       alt={pixel.title}
+                      data-ai-hint="pixel art"
                       className="w-full h-48 object-cover"
                     />
                     
@@ -999,7 +1002,7 @@ export default function MarketplacePage() {
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                   <div className="flex items-center gap-2 sm:gap-3">
                                     <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                                      <AvatarImage src={offer.buyerAvatar} />
+                                      <AvatarImage src={offer.buyerAvatar} data-ai-hint="profile avatar" />
                                       <AvatarFallback className="text-xs">{offer.buyer[0]}</AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -1247,6 +1250,7 @@ export default function MarketplacePage() {
                 <img 
                   src={selectedPixel.imageUrl} 
                   alt={selectedPixel.title}
+                  data-ai-hint="pixel art"
                   className="w-full h-48 object-cover rounded-lg"
                 />
                 

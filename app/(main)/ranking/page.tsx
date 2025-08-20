@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -296,7 +297,11 @@ export default function StatisticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
+      <SoundEffect 
+        src={SOUND_EFFECTS.SUCCESS} 
+        play={playRewardSound} 
+        onEnd={() => setPlayRewardSound(false)} 
+      />
       
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
         {/* Enhanced Header */}

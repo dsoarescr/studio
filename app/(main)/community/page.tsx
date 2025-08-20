@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -248,7 +249,7 @@ const mockPosts: Post[] = [
       x: 245,
       y: 156,
       region: 'Lisboa',
-      imageUrl: 'https://placehold.co/300x300/D4A757/FFFFFF?text=Lisboa+Art',
+      imageUrl: 'https://placehold.co/300x300.png',
       price: 150
     }
   },
@@ -296,7 +297,7 @@ const mockStories: Story[] = [
     },
     content: {
       type: 'image',
-      url: 'https://placehold.co/400x600/D4A757/FFFFFF?text=Story+1',
+      url: 'https://placehold.co/400x600.png',
       duration: 5
     },
     timestamp: '2h',
@@ -328,7 +329,7 @@ const mockGroups: Group[] = [
     description: 'Comunidade de criadores da capital portuguesa',
     category: 'Regional',
     members: 234,
-    avatar: 'https://placehold.co/60x60/D4A757/FFFFFF?text=LX',
+    avatar: 'https://placehold.co/60x60.png',
     isJoined: true,
     isPrivate: false,
     recentActivity: 'Nova obra partilhada há 2h',
@@ -346,7 +347,7 @@ const mockGroups: Group[] = [
     description: 'Investidores e colecionadores sérios de pixels raros',
     category: 'Interesse',
     members: 89,
-    avatar: 'https://placehold.co/60x60/7DF9FF/000000?text=💎',
+    avatar: 'https://placehold.co/60x60.png',
     isJoined: false,
     isPrivate: true,
     recentActivity: 'Discussão sobre tendências de mercado',
@@ -408,7 +409,7 @@ const mockEvents: Event[] = [
     difficulty: 'Médio',
     isParticipating: false,
     organizer: 'Equipa Pixel Universe',
-    imageUrl: 'https://placehold.co/400x200/D4A757/FFFFFF?text=Concurso+Natal'
+    imageUrl: 'https://placehold.co/400x200.png'
   },
   {
     id: '2',
@@ -431,7 +432,7 @@ const mockEvents: Event[] = [
     difficulty: 'Extremo',
     isParticipating: true,
     organizer: 'Comunidade',
-    imageUrl: 'https://placehold.co/400x200/7DF9FF/000000?text=Ano+Novo'
+    imageUrl: 'https://placehold.co/400x200.png'
   }
 ];
 
@@ -452,7 +453,7 @@ const mockTutorials: Tutorial[] = [
       'Técnicas de sombreamento',
       'Finalização e exportação'
     ],
-    videoUrl: 'https://placehold.co/400x300/D4A757/FFFFFF?text=Tutorial+Video',
+    videoUrl: 'https://placehold.co/400x300.png',
     isSaved: false
   },
   {
@@ -471,7 +472,7 @@ const mockTutorials: Tutorial[] = [
       'Diversificação de portfólio',
       'Gestão de risco'
     ],
-    videoUrl: 'https://placehold.co/400x300/7DF9FF/000000?text=Investimento',
+    videoUrl: 'https://placehold.co/400x300.png',
     isSaved: true
   }
 ];
@@ -1033,7 +1034,7 @@ export default function CommunityPage() {
                         story.isViewed ? "bg-muted" : "bg-gradient-to-tr from-primary to-accent"
                       )}>
                         <Avatar className="w-full h-full">
-                          <AvatarImage src={story.author.avatar} />
+                          <AvatarImage src={story.author.avatar} data-ai-hint="story avatar" />
                           <AvatarFallback>{story.author.name[0]}</AvatarFallback>
                         </Avatar>
                       </div>
@@ -1051,7 +1052,7 @@ export default function CommunityPage() {
               <CardContent className="p-4">
                 <div className="flex gap-3">
                   <Avatar>
-                    <AvatarImage src="https://placehold.co/40x40.png" />
+                    <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile avatar" />
                     <AvatarFallback>V</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-3">
@@ -1117,7 +1118,7 @@ export default function CommunityPage() {
                         className="cursor-pointer hover:scale-105 transition-transform"
                         onClick={() => openUserProfile(post.author)}
                       >
-                        <AvatarImage src={post.author.avatar} />
+                        <AvatarImage src={post.author.avatar} data-ai-hint="profile avatar" />
                         <AvatarFallback>{post.author.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
@@ -1166,6 +1167,7 @@ export default function CommunityPage() {
                               <img 
                                 src={post.pixel.imageUrl} 
                                 alt="Pixel"
+                                data-ai-hint="pixel art"
                                 className="w-20 h-20 rounded border object-cover"
                               />
                               <div className="flex-1">
@@ -1282,7 +1284,7 @@ export default function CommunityPage() {
                           {post.comments.map(comment => (
                             <div key={comment.id} className="flex gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={comment.author.avatar} />
+                                <AvatarImage src={comment.author.avatar} data-ai-hint="profile avatar" />
                                 <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
@@ -1315,7 +1317,7 @@ export default function CommunityPage() {
                           {/* Add Comment */}
                           <div className="flex gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src="https://placehold.co/40x40.png" />
+                              <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile avatar" />
                               <AvatarFallback>V</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 flex gap-2">
@@ -1354,6 +1356,7 @@ export default function CommunityPage() {
                       <img 
                         src={group.avatar} 
                         alt={group.name}
+                        data-ai-hint="group logo"
                         className="w-16 h-16 rounded-full object-cover"
                       />
                       <div className="flex-1">
@@ -1413,7 +1416,7 @@ export default function CommunityPage() {
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <Avatar>
-                          <AvatarImage src={conversation.avatar} />
+                          <AvatarImage src={conversation.avatar} data-ai-hint="profile avatar" />
                           <AvatarFallback>{conversation.name[0]}</AvatarFallback>
                         </Avatar>
                         {conversation.isOnline && (
@@ -1461,6 +1464,7 @@ export default function CommunityPage() {
                     <img 
                       src={event.imageUrl} 
                       alt={event.title}
+                      data-ai-hint="event poster"
                       className="w-full h-32 object-cover rounded-t-lg"
                     />
                     <Badge className="absolute top-2 left-2 bg-primary">
@@ -1541,6 +1545,7 @@ export default function CommunityPage() {
                       <img 
                         src={tutorial.videoUrl} 
                         alt={tutorial.title}
+                        data-ai-hint="tutorial video"
                         className="w-24 h-16 rounded object-cover bg-muted"
                       />
                       <div className="flex-1">
@@ -1645,7 +1650,7 @@ export default function CommunityPage() {
               <div className="absolute top-6 left-4 right-4 z-40 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border-2 border-white">
-                    <AvatarImage src={selectedStory.author.avatar} />
+                    <AvatarImage src={selectedStory.author.avatar} data-ai-hint="story avatar" />
                     <AvatarFallback>{selectedStory.author.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -1670,6 +1675,7 @@ export default function CommunityPage() {
                   <img 
                     src={selectedStory.content.url} 
                     alt="Story"
+                    data-ai-hint="story content"
                     className="w-full h-full object-cover"
                   />
                 )}
@@ -1741,7 +1747,7 @@ export default function CommunityPage() {
               <SheetHeader className="p-6 border-b bg-gradient-to-br from-primary/10 to-accent/10">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-20 w-20 border-4 border-primary">
-                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarImage src={selectedUser.avatar} data-ai-hint="profile avatar" />
                     <AvatarFallback className="text-2xl">{selectedUser.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -1833,6 +1839,7 @@ export default function CommunityPage() {
                   <img 
                     src={selectedGroup.avatar} 
                     alt={selectedGroup.name}
+                    data-ai-hint="group logo"
                     className="w-16 h-16 rounded-full"
                   />
                   <div>
@@ -1915,7 +1922,7 @@ export default function CommunityPage() {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Avatar>
-                      <AvatarImage src={selectedChat.avatar} />
+                      <AvatarImage src={selectedChat.avatar} data-ai-hint="profile avatar" />
                       <AvatarFallback>{selectedChat.name[0]}</AvatarFallback>
                     </Avatar>
                     {selectedChat.isOnline && (
@@ -1989,6 +1996,7 @@ export default function CommunityPage() {
                 <img 
                   src={selectedEvent.imageUrl} 
                   alt={selectedEvent.title}
+                  data-ai-hint="event poster"
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
                 <DialogTitle className="text-2xl">{selectedEvent.title}</DialogTitle>
