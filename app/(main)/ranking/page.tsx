@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -297,16 +296,8 @@ export default function StatisticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-<<<<<<< HEAD
-      <SoundEffect 
-        src={SOUND_EFFECTS.SUCCESS} 
-        play={playRewardSound} 
-        onEnd={() => setPlayRewardSound(false)} 
-      />
-=======
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
       
->>>>>>> 33bbc07bd2df37f912d440ac7eb4047a7936b8bd
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
         {/* Enhanced Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
@@ -404,27 +395,29 @@ export default function StatisticsPage() {
                     <Badge variant="outline" className="ml-2 text-xs">Últimos 7 dias</Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
-                    <div className="flex items-center gap-3">
-                      <ArrowUp className="h-5 w-5 text-green-500" />
-                      <span className="font-medium">Utilizadores Ativos</span>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
+                      <div className="flex items-center gap-3">
+                        <ArrowUp className="h-5 w-5 text-green-500" />
+                        <span className="font-medium">Utilizadores Ativos</span>
+                      </div>
+                      <span className="text-green-500 font-bold">+23.4%</span>
                     </div>
-                    <span className="text-green-500 font-bold">+23.4%</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
-                    <div className="flex items-center gap-3">
-                      <ArrowUp className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium">Volume de Transações</span>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
+                      <div className="flex items-center gap-3">
+                        <ArrowUp className="h-5 w-5 text-blue-500" />
+                        <span className="font-medium">Volume de Transações</span>
+                      </div>
+                      <span className="text-blue-500 font-bold">+18.9%</span>
                     </div>
-                    <span className="text-blue-500 font-bold">+18.9%</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10">
-                    <div className="flex items-center gap-3">
-                      <ArrowUp className="h-5 w-5 text-purple-500" />
-                      <span className="font-medium">Novos Registos</span>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10">
+                      <div className="flex items-center gap-3">
+                        <ArrowUp className="h-5 w-5 text-purple-500" />
+                        <span className="font-medium">Novos Registos</span>
+                      </div>
+                      <span className="text-purple-500 font-bold">+15.2%</span>
                     </div>
-                    <span className="text-purple-500 font-bold">+15.2%</span>
                   </div>
                 </CardContent>
               </Card>
@@ -437,22 +430,24 @@ export default function StatisticsPage() {
                     <Badge variant="outline" className="ml-2 text-xs">Ao vivo</Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Pixels comprados (última hora)</span>
-                    <span className="font-bold text-primary">47</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Utilizadores online</span>
-                    <span className="font-bold text-green-500">1,247</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Transações pendentes</span>
-                    <span className="font-bold text-orange-500">23</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Região mais ativa</span>
-                    <span className="font-bold text-accent">Lisboa</span>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Pixels comprados (última hora)</span>
+                      <span className="font-bold text-primary">47</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Utilizadores online</span>
+                      <span className="font-bold text-green-500">1,247</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Transações pendentes</span>
+                      <span className="font-bold text-orange-500">23</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Região mais ativa</span>
+                      <span className="font-bold text-accent">Lisboa</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -510,155 +505,6 @@ export default function StatisticsPage() {
                 <CardDescription>Os mestres do Pixel Universe com mais pixels e pontuação.</CardDescription>
               </CardHeader>
               <CardContent>
-<<<<<<< HEAD
-                {viewMode === 'table' && (
-                  <ScrollArea className="h-96">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[40px]"></TableHead>
-                          <TableHead className="w-[80px] font-code">Rank</TableHead>
-                          <TableHead className="font-code">Utilizador</TableHead>
-                          <TableHead className="text-right font-code">Pixels</TableHead>
-                          <TableHead className="text-right font-code">Pontuação</TableHead>
-                          <TableHead className="text-right font-code">Nível</TableHead>
-                          <TableHead className="text-right font-code">Sequência</TableHead>
-                          <TableHead className="text-center font-code">Mudança</TableHead>
-                          <TableHead className="w-[80px]"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredRanking.map((entry) => (
-                          <motion.tr 
-                            key={entry.rank} 
-                            className="hover:bg-muted/50 transition-colors group"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: entry.rank * 0.05 }}
-                          >
-                            <TableCell>
-                              <input
-                                type="checkbox"
-                                checked={selectedUsers.includes(entry.user)}
-                                onChange={() => handleToggleUser(entry.user)}
-                                className="rounded border-border"
-                              />
-                            </TableCell>
-                            <TableCell className="font-semibold">
-                              <div className="flex items-center gap-2">
-                                {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-pulse" />}
-                                {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
-                                {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
-                                #{entry.rank}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <div className="relative">
-                                  <Avatar className="h-10 w-10 border-2 border-border group-hover:scale-110 transition-transform">
-                                    <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
-                                    <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                                  </Avatar>
-                                  {entry.isPremium && (
-                                    <Crown className="absolute -top-1 -right-1 h-4 w-4 text-amber-400" />
-                                  )}
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-foreground">{entry.user}</span>
-                                    {entry.isVerified && (
-                                      <Badge variant="outline" className="text-xs px-1 py-0">
-                                        <Star className="h-3 w-3" />
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-muted-foreground">{entry.region}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right font-code">
-                              <FormattedNumber value={entry.pixels} />
-                            </TableCell>
-                            <TableCell className="text-right font-code">
-                              <FormattedNumber value={entry.score} />
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Badge variant="secondary" className="font-code">
-                                {entry.level}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <Flame className="h-4 w-4 text-orange-500" />
-                                <span className="font-code">{entry.streak}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {entry.change > 0 && (
-                                <div className="flex items-center justify-center text-green-500">
-                                  <ChevronUp className="h-4 w-4" />
-                                  <span className="text-xs">{entry.change}</span>
-                                </div>
-                              )}
-                              {entry.change < 0 && (
-                                <div className="flex items-center justify-center text-red-500">
-                                  <ChevronDown className="h-4 w-4" />
-                                  <span className="text-xs">{Math.abs(entry.change)}</span>
-                                </div>
-                              )}
-                              {entry.change === 0 && (
-                                <span className="text-muted-foreground text-xs">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setExpandedUserInfo(entry.user)}>
-                                  <User2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </motion.tr>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                )}
-
-                {viewMode === 'cards' && (
-                  <ScrollArea className="h-96">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredRanking.map((entry, index) => (
-                        <motion.div
-                          key={entry.rank}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: index * 0.1 }}
-                        >
-                          <Card className={cn(
-                            "card-hover-glow cursor-pointer transition-all duration-300 hover:scale-105",
-                            selectedUsers.includes(entry.user) && "ring-2 ring-primary"
-                          )}
-                          onClick={() => handleToggleUser(entry.user)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400" />}
-                                  {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
-                                  {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
-                                  <span className="font-bold text-lg">#{entry.rank}</span>
-                                </div>
-                                <Badge variant={entry.change > 0 ? 'default' : entry.change < 0 ? 'destructive' : 'secondary'}>
-                                  {entry.change > 0 && <ChevronUp className="h-3 w-3 mr-1" />}
-                                  {entry.change < 0 && <ChevronDown className="h-3 w-3 mr-1" />}
-                                  {entry.change || 0}
-                                </Badge>
-                              </div>
-
-                              <div className="flex items-center gap-3 mb-3">
-                                <Avatar className="h-12 w-12 border-2 border-primary/20">
-                                  <AvatarImage src={entry.avatar} alt={entry.user} />
-=======
                 <ScrollArea className="h-96">
                   <Table>
                     <TableHeader>
@@ -688,7 +534,6 @@ export default function StatisticsPage() {
                               <div className="relative">
                                 <Avatar className="h-10 w-10 border-2 border-border">
                                   <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
->>>>>>> 33bbc07bd2df37f912d440ac7eb4047a7936b8bd
                                   <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 {entry.isPremium && (
@@ -975,4 +820,3 @@ export default function StatisticsPage() {
     </div>
   );
 }
-
