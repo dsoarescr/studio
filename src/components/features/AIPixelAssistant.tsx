@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Brain, Sparkles, Wand2, Palette, TrendingUp, Target, 
   Lightbulb, Zap, Star, Crown, Gem, Eye, Heart, MessageSquare,
-  Camera, Image as ImageIcon, Video, Music, Download, Upload,
+  Camera, Video, Music, Download, Upload,
   RefreshCw, Play, Pause, Settings, Info, CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";

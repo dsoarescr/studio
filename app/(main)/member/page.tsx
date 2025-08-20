@@ -1047,7 +1047,7 @@ export default function MemberPage() {
                 </div>
               </div>
             </ScrollArea>
-          </CardFooter>
+          )}
         </DialogContent>
       </Dialog>
 

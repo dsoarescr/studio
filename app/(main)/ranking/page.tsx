@@ -19,12 +19,16 @@ import {
   Star, Flame, Zap, Activity, Calendar, Filter, Search, SortAsc, Download,
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
   ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, MapPinIcon,
-  Lightbulb
+  Lightbulb, Play, Pause, Square, Sword, Shield
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { DynamicRankingSystem } from '@/components/features/DynamicRankingSystem';
+import { AdvancedAchievementSystem } from '@/components/features/AdvancedAchievementSystem';
+import { TournamentSystem } from '@/components/features/TournamentSystem';
+import { RewardSystem } from '@/components/features/RewardSystem';
 
 interface StatCardData {
   title: string;
@@ -313,10 +317,10 @@ export default function StatisticsPage() {
               <div>
                 <CardTitle className="font-headline text-3xl text-gradient-gold-animated flex items-center">
                   <BarChartHorizontalBig className="h-8 w-8 mr-3 animate-glow" />
-                  Estatísticas do Universo
+                  Ranking & Gamificação
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  Análise completa e em tempo real do ecossistema Pixel Universe
+                  Sistema completo de rankings, torneios, conquistas e recompensas
                 </CardDescription>
               </div>
               
@@ -364,18 +368,26 @@ export default function StatisticsPage() {
 
         {/* Enhanced Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-12 bg-card/50 backdrop-blur-sm shadow-md">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 h-12 bg-card/50 backdrop-blur-sm shadow-md">
             <TabsTrigger value="overview" className="font-headline">
               <Globe className="h-4 w-4 mr-2"/>
               Visão Geral
             </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="font-headline">
+            <TabsTrigger value="rankings" className="font-headline">
               <Trophy className="h-4 w-4 mr-2"/>
-              Classificação
+              Rankings
             </TabsTrigger>
-            <TabsTrigger value="regions" className="font-headline">
-              <Map className="h-4 w-4 mr-2"/>
-              Regiões
+            <TabsTrigger value="tournaments" className="font-headline">
+              <Sword className="h-4 w-4 mr-2"/>
+              Torneios
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="font-headline">
+              <Award className="h-4 w-4 mr-2"/>
+              Conquistas
+            </TabsTrigger>
+            <TabsTrigger value="rewards" className="font-headline">
+              <Gift className="h-4 w-4 mr-2"/>
+              Recompensas
             </TabsTrigger>
             <TabsTrigger value="analytics" className="font-headline">
               <LineChart className="h-4 w-4 mr-2"/>
@@ -459,239 +471,24 @@ export default function StatisticsPage() {
             </div>
           </TabsContent>
 
-          {/* Leaderboard Tab */}
-          <TabsContent value="leaderboard" className="space-y-6">
-            {/* Filters */}
-            <Card className="card-hover-glow">
-              <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Pesquisar utilizadores..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSortBy(sortBy === 'rank' ? 'pixels' : 'rank')}
-                      className="font-code"
-                    >
-                      <SortAsc className="h-4 w-4 mr-2" />
-                      {sortBy === 'rank' ? 'Rank' : 'Pixels'}
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFilterRegion(filterRegion === 'all' ? 'Lisboa' : 'all')}
-                      className="font-code"
-                    >
-                      <Filter className="h-4 w-4 mr-2" />
-                      {filterRegion === 'all' ? 'Todas' : filterRegion}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Leaderboard Table */}
-            <Card className="card-hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center text-primary">
-                  <Trophy className="h-5 w-5 mr-2" />
-                  Classificação de Utilizadores
-                </CardTitle>
-                <CardDescription>Os mestres do Pixel Universe com mais pixels e pontuação.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-96">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[80px] font-code">Rank</TableHead>
-                        <TableHead className="font-code">Utilizador</TableHead>
-                        <TableHead className="text-right font-code">Pixels</TableHead>
-                        <TableHead className="text-right font-code">Pontuação</TableHead>
-                        <TableHead className="text-right font-code">Nível</TableHead>
-                        <TableHead className="text-right font-code">Sequência</TableHead>
-                        <TableHead className="text-center font-code">Mudança</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredRanking.map((entry) => (
-                        <TableRow key={entry.rank} className="hover:bg-muted/50 transition-colors">
-                          <TableCell className="font-semibold">
-                            <div className="flex items-center gap-2">
-                              {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-pulse" />}
-                              {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
-                              {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
-                              #{entry.rank}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="relative">
-                                <Avatar className="h-10 w-10 border-2 border-border">
-                                  <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
-                                  <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                                {entry.isPremium && (
-                                  <Crown className="absolute -top-1 -right-1 h-4 w-4 text-amber-400" />
-                                )}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-foreground">{entry.user}</span>
-                                  {entry.isVerified && (
-                                    <Badge variant="outline" className="text-xs px-1 py-0">
-                                      <Star className="h-3 w-3" />
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-muted-foreground">{entry.region}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-code">
-                            <FormattedNumber value={entry.pixels} />
-                          </TableCell>
-                          <TableCell className="text-right font-code">
-                            <FormattedNumber value={entry.score} />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant="secondary" className="font-code">
-                              {entry.level}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Flame className="h-4 w-4 text-orange-500" />
-                              <span className="font-code">{entry.streak}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {entry.change > 0 && (
-                              <div className="flex items-center justify-center text-green-500">
-                                <ChevronUp className="h-4 w-4" />
-                                <span className="text-xs">{entry.change}</span>
-                              </div>
-                            )}
-                            {entry.change < 0 && (
-                              <div className="flex items-center justify-center text-red-500">
-                                <ChevronDown className="h-4 w-4" />
-                                <span className="text-xs">{Math.abs(entry.change)}</span>
-                              </div>
-                            )}
-                            {entry.change === 0 && (
-                              <span className="text-muted-foreground text-xs">-</span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+          {/* Rankings Tab */}
+          <TabsContent value="rankings" className="space-y-6">
+            <DynamicRankingSystem />
           </TabsContent>
 
-          {/* Regions Tab */}
-          <TabsContent value="regions" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Regional Distribution */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <PieChart className="h-5 w-5 mr-2" />
-                    Distribuição Regional de Pixels
-                    <Badge variant="outline" className="ml-2 text-xs">Mapa de Portugal</Badge>
-                  </CardTitle>
-                  <CardDescription>Percentagem de pixels adquiridos por região.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {regionalDistributionData.map(region => (
-                    <div key={region.name} className="space-y-2">
-                      <div className="flex justify-between items-center text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-foreground font-medium">{region.name}</span>
-                          {region.trend === 'up' && <ArrowUp className="h-3 w-3 text-green-500" />}
-                          {region.trend === 'down' && <ArrowDown className="h-3 w-3 text-red-500" />}
-                        </div>
-                        <span className="font-semibold text-primary">{region.percentage}%</span>
-                      </div>
-                      <Progress 
-                        value={region.percentage} 
-                        className="h-3 [&>div]:transition-all [&>div]:duration-500" 
-                        style={{ '--progress-color': region.color } as React.CSSProperties} 
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{region.pixels.toLocaleString('pt-PT')} pixels</span>
-                        <span>{region.activeUsers} utilizadores ativos</span>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+          {/* Tournaments Tab */}
+          <TabsContent value="tournaments" className="space-y-6">
+            <TournamentSystem />
+          </TabsContent>
 
-              {/* Regional Performance */}
-              <Card className="card-hover-glow">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <BarChart3 className="h-5 w-5 mr-2" />
-                    Performance Regional
-                    <Badge variant="outline" className="ml-2 text-xs">Análise Detalhada</Badge>
-                  </CardTitle>
-                  <CardDescription>Métricas detalhadas por região.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-80">
-                    <div className="space-y-4">
-                      {regionalDistributionData.map(region => (
-                        <Card key={region.name} className="p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
-                          <div className="flex justify-between items-start mb-3">
-                            <h4 className="font-semibold text-lg">{region.name}</h4>
-                            <Badge 
-                              variant={region.trend === 'up' ? 'default' : region.trend === 'down' ? 'destructive' : 'secondary'}
-                              className="text-xs"
-                            >
-                              {region.trend === 'up' && <TrendingUp className="h-3 w-3 mr-1" />}
-                              {region.trend === 'down' && <TrendingDown className="h-3 w-3 mr-1" />}
-                              {region.trend === 'neutral' && <Activity className="h-3 w-3 mr-1" />}
-                              {region.trend}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <p className="text-muted-foreground">Pixels</p>
-                              <p className="font-bold text-primary">{region.pixels.toLocaleString('pt-PT')}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Utilizadores</p>
-                              <p className="font-bold text-accent">{region.activeUsers}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Preço Médio</p>
-                              <p className="font-bold text-green-500">{region.avgPrice.toFixed(2)}€</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Quota</p>
-                              <p className="font-bold text-purple-500">{region.percentage}%</p>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Achievements Tab */}
+          <TabsContent value="achievements" className="space-y-6">
+            <AdvancedAchievementSystem />
+          </TabsContent>
+
+          {/* Rewards Tab */}
+          <TabsContent value="rewards" className="space-y-6">
+            <RewardSystem />
           </TabsContent>
 
           {/* Analytics Tab */}

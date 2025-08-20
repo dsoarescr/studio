@@ -1,0 +1,52 @@
+{
+  "name": "Pixel Universe",
+  "short_name": "PixelUniverse",
+  "description": "Compre e venda pixels únicos de Portugal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-PT",
+  "categories": ["entertainment", "games", "social"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Explorar Mapa",
+      "short_name": "Mapa",
+      "description": "Explorar o mapa de pixels",
+      "url": "/"
+    },
+    {
+      "name": "Marketplace",
+      "short_name": "Market",
+      "description": "Comprar e vender pixels",
+      "url": "/marketplace"
+    },
+    {
+      "name": "Comunidade",
+      "short_name": "Community",
+      "description": "Interagir com a comunidade",
+      "url": "/community"
+    }
+  ]
+}

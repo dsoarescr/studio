@@ -37,7 +37,7 @@ import {
   Download, Upload, Camera, Palette, Zap, Gift, Globe, Navigation, Compass, 
   Target, Award, Trophy, Coins, Info, ChevronRight, ChevronLeft, X, Send, 
   ThumbsUp, UserPlus, Settings, BarChart3, TrendingUp, Activity, Hash, 
-  Link as LinkIcon, Image as ImageIcon, Plus, Minus
+  Link as LinkIcon, Plus, Minus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDate, timeAgo } from '@/lib/utils';

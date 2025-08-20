@@ -1,509 +1,441 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Bell, BellOff, Settings, X, CheckCircle, AlertTriangle, Info, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { Confetti } from '@/components/ui/confetti';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Check, Star, Trophy, Coins, Gift, Heart, MessageSquare, UserPlus, MapPin, Palette, Crown, Gem, Sparkles, Zap, Target, Award, Shield, Activity, TrendingUp, Calendar, Clock, Info, AlertTriangle, CheckCircle, XCircle, Flame, CloudLightning as Lightning } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
-export type NotificationType = 
-  | 'achievement' 
-  | 'level_up' 
-  | 'purchase' 
-  | 'sale' 
-  | 'like' 
-  | 'comment' 
-  | 'follow' 
-  | 'mention' 
-  | 'system' 
-  | 'event' 
-  | 'reward'
-  | 'warning'
-  | 'error'
-  | 'success';
-
-export interface NotificationData {
+export interface Notification {
   id: string;
-  type: NotificationType;
+  type: 'info' | 'success' | 'warning' | 'error' | 'achievement' | 'purchase' | 'price_alert';
   title: string;
   message: string;
   timestamp: Date;
   read: boolean;
-  important: boolean;
   actionUrl?: string;
-  actionLabel?: string;
-  metadata?: {
-    userId?: string;
-    pixelId?: string;
-    achievementId?: string;
-    amount?: number;
-    level?: number;
-    xp?: number;
-    credits?: number;
-  };
-  avatar?: string;
-  icon?: React.ReactNode;
-  color?: string;
-  progress?: number;
-  autoHide?: boolean;
-  duration?: number;
+  data?: any;
 }
 
-interface NotificationSystemProps {
-  notifications: NotificationData[];
-  onNotificationRead?: (id: string) => void;
-  onNotificationDismiss?: (id: string) => void;
-  onNotificationAction?: (notification: NotificationData) => void;
-  maxVisible?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
-  showSounds?: boolean;
-  showConfetti?: boolean;
+interface NotificationSettings {
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  priceAlerts: boolean;
+  achievementAlerts: boolean;
+  activityAlerts: boolean;
+  soundEnabled: boolean;
 }
 
-const notificationIcons: Record<NotificationType, React.ReactNode> = {
-  achievement: <Trophy className="h-5 w-5" />,
-  level_up: <Star className="h-5 w-5" />,
-  purchase: <Coins className="h-5 w-5" />,
-  sale: <TrendingUp className="h-5 w-5" />,
-  like: <Heart className="h-5 w-5" />,
-  comment: <MessageSquare className="h-5 w-5" />,
-  follow: <UserPlus className="h-5 w-5" />,
-  mention: <Bell className="h-5 w-5" />,
-  system: <Info className="h-5 w-5" />,
-  event: <Calendar className="h-5 w-5" />,
-  reward: <Gift className="h-5 w-5" />,
-  warning: <AlertTriangle className="h-5 w-5" />,
-  error: <XCircle className="h-5 w-5" />,
-  success: <CheckCircle className="h-5 w-5" />
+const defaultSettings: NotificationSettings = {
+  pushEnabled: true,
+  emailEnabled: true,
+  priceAlerts: true,
+  achievementAlerts: true,
+  activityAlerts: true,
+  soundEnabled: true,
 };
 
-const notificationColors: Record<NotificationType, string> = {
-  achievement: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
-  level_up: 'text-purple-500 bg-purple-500/10 border-purple-500/20',
-  purchase: 'text-green-500 bg-green-500/10 border-green-500/20',
-  sale: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
-  like: 'text-red-500 bg-red-500/10 border-red-500/20',
-  comment: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
-  follow: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
-  mention: 'text-pink-500 bg-pink-500/10 border-pink-500/20',
-  system: 'text-gray-500 bg-gray-500/10 border-gray-500/20',
-  event: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20',
-  reward: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
-  warning: 'text-yellow-600 bg-yellow-600/10 border-yellow-600/20',
-  error: 'text-red-600 bg-red-600/10 border-red-600/20',
-  success: 'text-green-600 bg-green-600/10 border-green-600/20'
-};
+export const useNotificationSystem = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-const notificationSounds: Record<NotificationType, string> = {
-  achievement: SOUND_EFFECTS.ACHIEVEMENT,
-  level_up: SOUND_EFFECTS.SUCCESS,
-  purchase: SOUND_EFFECTS.PURCHASE,
-  sale: SOUND_EFFECTS.SUCCESS,
-  like: SOUND_EFFECTS.NOTIFICATION,
-  comment: SOUND_EFFECTS.NOTIFICATION,
-  follow: SOUND_EFFECTS.NOTIFICATION,
-  mention: SOUND_EFFECTS.NOTIFICATION,
-  system: SOUND_EFFECTS.NOTIFICATION,
-  event: SOUND_EFFECTS.NOTIFICATION,
-  reward: SOUND_EFFECTS.SUCCESS,
-  warning: SOUND_EFFECTS.ERROR,
-  error: SOUND_EFFECTS.ERROR,
-  success: SOUND_EFFECTS.SUCCESS
-};
-
-export function NotificationSystem({
-  notifications,
-  onNotificationRead,
-  onNotificationDismiss,
-  onNotificationAction,
-  maxVisible = 5,
-  position = 'top-right',
-  showSounds = true,
-  showConfetti = true
-}: NotificationSystemProps) {
-  const [visibleNotifications, setVisibleNotifications] = useState<NotificationData[]>([]);
-  const [playingSound, setPlayingSound] = useState<string | null>(null);
-  const [showConfettiEffect, setShowConfettiEffect] = useState(false);
-
+  // Load settings from localStorage
   useEffect(() => {
-    // Show new notifications
-    const newNotifications = notifications
-      .filter(n => !n.read)
-      .slice(0, maxVisible);
-    
-    setVisibleNotifications(newNotifications);
+    const savedSettings = localStorage.getItem('pixel-universe-notification-settings');
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    }
+  }, []);
 
-    // Play sound for new notifications
-    if (showSounds && newNotifications.length > 0) {
-      const latestNotification = newNotifications[0];
-      setPlayingSound(notificationSounds[latestNotification.type]);
+  // Save settings to localStorage
+  useEffect(() => {
+    localStorage.setItem('pixel-universe-notification-settings', JSON.stringify(settings));
+  }, [settings]);
+
+  // Update unread count
+  useEffect(() => {
+    setUnreadCount(notifications.filter(n => !n.read).length);
+  }, [notifications]);
+
+  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Date.now().toString(),
+      timestamp: new Date(),
+      read: false,
+    };
+
+    setNotifications(prev => [newNotification, ...prev.slice(0, 99)]); // Keep only last 100
+
+    // Show toast if enabled
+    if (settings.pushEnabled) {
+      toast({
+        title: notification.title,
+        description: notification.message,
+        variant: notification.type === 'error' ? 'destructive' : 'default',
+      });
     }
 
-    // Show confetti for special notifications
-    if (showConfetti && newNotifications.some(n => 
-      ['achievement', 'level_up', 'reward'].includes(n.type)
-    )) {
-      setShowConfettiEffect(true);
+    // Play sound if enabled
+    if (settings.soundEnabled) {
+      playNotificationSound(notification.type);
     }
+  }, [settings, toast]);
 
-    // Auto-hide notifications
-    newNotifications.forEach(notification => {
-      if (notification.autoHide !== false) {
-        const duration = notification.duration || 5000;
-        setTimeout(() => {
-          handleDismiss(notification.id);
-        }, duration);
-      }
-    });
-  }, [notifications, maxVisible, showSounds, showConfetti]);
+  const markAsRead = useCallback((id: string) => {
+    setNotifications(prev => 
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    );
+  }, []);
 
-  const handleDismiss = (id: string) => {
-    setVisibleNotifications(prev => prev.filter(n => n.id !== id));
-    onNotificationDismiss?.(id);
+  const markAllAsRead = useCallback(() => {
+    setNotifications(prev => 
+      prev.map(n => ({ ...n, read: true }))
+    );
+  }, []);
+
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setNotifications([]);
+  }, []);
+
+  const updateSettings = useCallback((newSettings: Partial<NotificationSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  }, []);
+
+  return {
+    notifications,
+    settings,
+    unreadCount,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearAll,
+    updateSettings,
   };
+};
 
-  const handleMarkAsRead = (id: string) => {
-    onNotificationRead?.(id);
-  };
+const playNotificationSound = (type: Notification['type']) => {
+  const audio = new Audio();
+  
+  switch (type) {
+    case 'achievement':
+      audio.src = '/sounds/achievement.mp3';
+      break;
+    case 'purchase':
+      audio.src = '/sounds/purchase.mp3';
+      break;
+    case 'success':
+      audio.src = '/sounds/success.mp3';
+      break;
+    case 'error':
+      audio.src = '/sounds/error.mp3';
+      break;
+    default:
+      audio.src = '/sounds/notification.mp3';
+  }
+  
+  audio.play().catch(() => {
+    // Ignore errors if audio fails to play
+  });
+};
 
-  const handleAction = (notification: NotificationData) => {
-    onNotificationAction?.(notification);
-    handleDismiss(notification.id);
-  };
+const getNotificationIcon = (type: Notification['type']) => {
+  switch (type) {
+    case 'success':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'warning':
+      return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+    case 'error':
+      return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    case 'achievement':
+      return <Star className="h-4 w-4 text-yellow-500" />;
+    case 'purchase':
+      return <CheckCircle className="h-4 w-4 text-blue-500" />;
+    case 'price_alert':
+      return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+    default:
+      return <Info className="h-4 w-4 text-blue-500" />;
+  }
+};
 
-  const getPositionClasses = () => {
-    switch (position) {
-      case 'top-right':
-        return 'top-4 right-4';
-      case 'top-left':
-        return 'top-4 left-4';
-      case 'bottom-right':
-        return 'bottom-4 right-4';
-      case 'bottom-left':
-        return 'bottom-4 left-4';
-      case 'top-center':
-        return 'top-4 left-1/2 transform -translate-x-1/2';
-      case 'bottom-center':
-        return 'bottom-4 left-1/2 transform -translate-x-1/2';
-      default:
-        return 'top-4 right-4';
-    }
+const getNotificationColor = (type: Notification['type']) => {
+  switch (type) {
+    case 'success':
+      return 'border-green-500/20 bg-green-500/5';
+    case 'warning':
+      return 'border-yellow-500/20 bg-yellow-500/5';
+    case 'error':
+      return 'border-red-500/20 bg-red-500/5';
+    case 'achievement':
+      return 'border-yellow-500/20 bg-yellow-500/5';
+    case 'purchase':
+      return 'border-blue-500/20 bg-blue-500/5';
+    case 'price_alert':
+      return 'border-orange-500/20 bg-orange-500/5';
+    default:
+      return 'border-blue-500/20 bg-blue-500/5';
+  }
+};
+
+export const NotificationCenter: React.FC = () => {
+  const {
+    notifications,
+    settings,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearAll,
+    updateSettings,
+  } = useNotificationSystem();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const formatTime = (date: Date) => {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Agora';
+    if (minutes < 60) return `${minutes}m`;
+    if (hours < 24) return `${hours}h`;
+    return `${days}d`;
   };
 
   return (
-    <>
-      {/* Sound Effects */}
-      {playingSound && (
-        <SoundEffect
-          src={playingSound}
-          play={true}
-          onEnd={() => setPlayingSound(null)}
-          volume={0.3}
-        />
-      )}
+    <div className="relative">
+      {/* Notification Bell */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative"
+      >
+        {unreadCount > 0 ? (
+          <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Badge>
+        ) : null}
+        <Bell className="h-5 w-5" />
+      </Button>
 
-      {/* Confetti */}
-      <Confetti
-        active={showConfettiEffect}
-        duration={3000}
-        onComplete={() => setShowConfettiEffect(false)}
-        particleCount={100}
-      />
-
-      {/* Notifications Container */}
-      <div className={`fixed z-[100] ${getPositionClasses()} space-y-3 max-w-sm w-full pointer-events-none`}>
-        <AnimatePresence>
-          {visibleNotifications.map((notification, index) => (
-            <motion.div
-              key={notification.id}
-              initial={{ opacity: 0, x: position.includes('right') ? 300 : -300, scale: 0.8 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: position.includes('right') ? 300 : -300, scale: 0.8 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 30,
-                delay: index * 0.1 
-              }}
-              className="pointer-events-auto"
-            >
-              <NotificationCard
-                notification={notification}
-                onDismiss={() => handleDismiss(notification.id)}
-                onMarkAsRead={() => handleMarkAsRead(notification.id)}
-                onAction={() => handleAction(notification)}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-    </>
-  );
-}
-
-interface NotificationCardProps {
-  notification: NotificationData;
-  onDismiss: () => void;
-  onMarkAsRead: () => void;
-  onAction: () => void;
-}
-
-function NotificationCard({ notification, onDismiss, onMarkAsRead, onAction }: NotificationCardProps) {
-  const [progress, setProgress] = useState(100);
-
-  useEffect(() => {
-    if (notification.autoHide !== false) {
-      const duration = notification.duration || 5000;
-      const interval = setInterval(() => {
-        setProgress(prev => {
-          const newProgress = prev - (100 / (duration / 100));
-          return Math.max(0, newProgress);
-        });
-      }, 100);
-
-      return () => clearInterval(interval);
-    }
-  }, [notification.autoHide, notification.duration]);
-
-  const colorClasses = notificationColors[notification.type];
-  const icon = notification.icon || notificationIcons[notification.type];
-
-  return (
-    <Card className={`shadow-2xl border-2 ${colorClasses} backdrop-blur-sm bg-background/95 overflow-hidden`}>
-      {/* Progress Bar */}
-      {notification.autoHide !== false && (
-        <div className="h-1 bg-muted">
-          <div 
-            className="h-full bg-primary transition-all duration-100 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          {/* Icon/Avatar */}
-          <div className="flex-shrink-0">
-            {notification.avatar ? (
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={notification.avatar} />
-                <AvatarFallback>{notification.title[0]}</AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className={`p-2 rounded-full ${colorClasses}`}>
-                {icon}
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="font-semibold text-sm truncate">{notification.title}</h4>
-              <div className="flex items-center gap-1">
-                {notification.important && (
-                  <Flame className="h-3 w-3 text-orange-500" />
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onDismiss}
-                  className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
-              {notification.message}
-            </p>
-
-            {/* Metadata */}
-            {notification.metadata && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {notification.metadata.xp && (
-                  <Badge variant="outline" className="text-xs">
-                    <Zap className="h-3 w-3 mr-1" />
-                    +{notification.metadata.xp} XP
-                  </Badge>
-                )}
-                {notification.metadata.credits && (
-                  <Badge variant="outline" className="text-xs">
-                    <Coins className="h-3 w-3 mr-1" />
-                    +{notification.metadata.credits}
-                  </Badge>
-                )}
-                {notification.metadata.level && (
-                  <Badge variant="outline" className="text-xs">
-                    <Star className="h-3 w-3 mr-1" />
-                    Nível {notification.metadata.level}
-                  </Badge>
-                )}
-              </div>
-            )}
-
-            {/* Progress Bar for Achievements */}
-            {notification.progress !== undefined && (
-              <div className="mb-2">
-                <Progress value={notification.progress} className="h-2" />
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
-                {notification.timestamp.toLocaleTimeString('pt-PT', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
-              </span>
-
-              <div className="flex gap-2">
-                {!notification.read && (
+      {/* Notification Panel */}
+      {isOpen && (
+        <div className="absolute right-0 top-12 w-80 bg-background border border-border rounded-lg shadow-lg z-50">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Notificações</CardTitle>
+                <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    onClick={onMarkAsRead}
-                    className="h-6 text-xs"
+                    size="icon"
+                    onClick={() => setShowSettings(!showSettings)}
                   >
-                    <Check className="h-3 w-3 mr-1" />
-                    Marcar como Lida
+                    <Settings className="h-4 w-4" />
                   </Button>
-                )}
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={markAllAsRead}
+                      className="text-xs"
+                    >
+                      Marcar como lidas
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
 
-                {notification.actionLabel && (
-                  <Button
-                    size="sm"
-                    onClick={onAction}
-                    className="h-6 text-xs"
-                  >
-                    {notification.actionLabel}
-                  </Button>
-                )}
+            <CardContent className="p-0">
+              {showSettings ? (
+                <NotificationSettings
+                  settings={settings}
+                  onUpdate={updateSettings}
+                />
+              ) : (
+                <NotificationList
+                  notifications={notifications}
+                  onMarkAsRead={markAsRead}
+                  onRemove={removeNotification}
+                  onClearAll={clearAll}
+                  formatTime={formatTime}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const NotificationList: React.FC<{
+  notifications: Notification[];
+  onMarkAsRead: (id: string) => void;
+  onRemove: (id: string) => void;
+  onClearAll: () => void;
+  formatTime: (date: Date) => string;
+}> = ({ notifications, onMarkAsRead, onRemove, onClearAll, formatTime }) => {
+  if (notifications.length === 0) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        <BellOff className="h-8 w-8 mx-auto mb-2 opacity-50" />
+        <p className="text-sm">Nenhuma notificação</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <ScrollArea className="h-64">
+        <div className="space-y-1 p-2">
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`p-3 rounded-lg border transition-all cursor-pointer hover:bg-muted/50 ${
+                notification.read ? 'opacity-75' : ''
+              } ${getNotificationColor(notification.type)}`}
+              onClick={() => onMarkAsRead(notification.id)}
+            >
+              <div className="flex items-start gap-3">
+                {getNotificationIcon(notification.type)}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <h4 className="text-sm font-medium truncate">
+                      {notification.title}
+                    </h4>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 opacity-50 hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemove(notification.id);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {formatTime(notification.timestamp)}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      </ScrollArea>
+      
+      {notifications.length > 0 && (
+        <div className="p-2 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearAll}
+            className="w-full text-xs"
+          >
+            Limpar todas
+          </Button>
+        </div>
+      )}
+    </div>
   );
-}
+};
 
-// Utility functions for creating notifications
-export function createAchievementNotification(
-  achievementName: string,
-  description: string,
-  xp: number,
-  credits: number
-): NotificationData {
-  return {
-    id: `achievement-${Date.now()}`,
-    type: 'achievement',
-    title: 'Conquista Desbloqueada!',
-    message: `Parabéns! Você desbloqueou "${achievementName}": ${description}`,
-    timestamp: new Date(),
-    read: false,
-    important: true,
-    metadata: { xp, credits },
-    autoHide: false,
-    actionLabel: 'Ver Conquistas',
-    actionUrl: '/achievements'
-  };
-}
-
-export function createLevelUpNotification(
-  newLevel: number,
-  xpGained: number
-): NotificationData {
-  return {
-    id: `level-up-${Date.now()}`,
-    type: 'level_up',
-    title: 'Nível Aumentado!',
-    message: `Parabéns! Você alcançou o nível ${newLevel}!`,
-    timestamp: new Date(),
-    read: false,
-    important: true,
-    metadata: { level: newLevel, xp: xpGained },
-    autoHide: false,
-    actionLabel: 'Ver Perfil',
-    actionUrl: '/member'
-  };
-}
-
-export function createPurchaseNotification(
-  pixelTitle: string,
-  coordinates: { x: number; y: number },
-  amount: number
-): NotificationData {
-  return {
-    id: `purchase-${Date.now()}`,
-    type: 'purchase',
-    title: 'Pixel Comprado!',
-    message: `Você comprou "${pixelTitle}" em (${coordinates.x}, ${coordinates.y}) por €${amount}`,
-    timestamp: new Date(),
-    read: false,
-    important: false,
-    metadata: { amount },
-    duration: 4000
-  };
-}
-
-export function createSaleNotification(
-  pixelTitle: string,
-  amount: number,
-  buyerName: string
-): NotificationData {
-  return {
-    id: `sale-${Date.now()}`,
-    type: 'sale',
-    title: 'Pixel Vendido!',
-    message: `${buyerName} comprou seu pixel "${pixelTitle}" por €${amount}`,
-    timestamp: new Date(),
-    read: false,
-    important: true,
-    metadata: { amount },
-    duration: 6000
-  };
-}
-
-export function createLikeNotification(
-  userName: string,
-  pixelTitle: string,
-  userAvatar?: string
-): NotificationData {
-  return {
-    id: `like-${Date.now()}`,
-    type: 'like',
-    title: 'Novo Like!',
-    message: `${userName} curtiu seu pixel "${pixelTitle}"`,
-    timestamp: new Date(),
-    read: false,
-    important: false,
-    avatar: userAvatar,
-    duration: 3000
-  };
-}
-
-export function createSystemNotification(
-  title: string,
-  message: string,
-  type: 'info' | 'warning' | 'error' | 'success' = 'info'
-): NotificationData {
-  return {
-    id: `system-${Date.now()}`,
-    type: type === 'info' ? 'system' : type,
-    title,
-    message,
-    timestamp: new Date(),
-    read: false,
-    important: type === 'error' || type === 'warning',
-    duration: type === 'error' ? 8000 : 5000
-  };
-}
+const NotificationSettings: React.FC<{
+  settings: NotificationSettings;
+  onUpdate: (settings: Partial<NotificationSettings>) => void;
+}> = ({ settings, onUpdate }) => {
+  return (
+    <div className="p-4 space-y-4">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="push-notifications" className="text-sm">
+            Notificações Push
+          </Label>
+          <Switch
+            id="push-notifications"
+            checked={settings.pushEnabled}
+            onCheckedChange={(checked) => onUpdate({ pushEnabled: checked })}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="email-notifications" className="text-sm">
+            Notificações por Email
+          </Label>
+          <Switch
+            id="email-notifications"
+            checked={settings.emailEnabled}
+            onCheckedChange={(checked) => onUpdate({ emailEnabled: checked })}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="price-alerts" className="text-sm">
+            Alertas de Preço
+          </Label>
+          <Switch
+            id="price-alerts"
+            checked={settings.priceAlerts}
+            onCheckedChange={(checked) => onUpdate({ priceAlerts: checked })}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="achievement-alerts" className="text-sm">
+            Alertas de Conquistas
+          </Label>
+          <Switch
+            id="achievement-alerts"
+            checked={settings.achievementAlerts}
+            onCheckedChange={(checked) => onUpdate({ achievementAlerts: checked })}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="activity-alerts" className="text-sm">
+            Alertas de Atividade
+          </Label>
+          <Switch
+            id="activity-alerts"
+            checked={settings.activityAlerts}
+            onCheckedChange={(checked) => onUpdate({ activityAlerts: checked })}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="sound-enabled" className="text-sm">
+            Sons de Notificação
+          </Label>
+          <Switch
+            id="sound-enabled"
+            checked={settings.soundEnabled}
+            onCheckedChange={(checked) => onUpdate({ soundEnabled: checked })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};

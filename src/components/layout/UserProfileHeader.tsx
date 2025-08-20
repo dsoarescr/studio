@@ -3,14 +3,16 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NotificationCenter from './NotificationCenter';
+import { NotificationCenter } from '@/components/ui/notification-system';
+import { RealTimeChat } from '@/components/features/RealTimeChat';
+import { CollectionsSystem } from '@/components/features/CollectionsSystem';
 import { useUserStore } from '@/lib/store';
 import SearchSystem from './SearchSystem';
 import { 
   Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
   User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield
+  BarChart3 as AnalyticsIcon, Shield, RefreshCw
 } from "lucide-react"; 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -325,24 +327,29 @@ export default function UserProfileHeader() {
           </Button>
 
           {/* Notifications */}
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}><NotificationCenter>
-            <Button 
-              variant="ghost"
-              size="icon"
-              onClick={() => clearNotifications()} 
-              className="h-8 w-8 relative hover:bg-primary/10 transition-colors"
-            >
-              <Bell className="h-4 w-4" />
-              {notifications > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-heartbeat"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 text-[10px] text-white font-bold items-center justify-center">
-                  {notifications > 9 ? '9+' : notifications}
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <NotificationCenter>
+              <Button 
+                variant="ghost"
+                size="icon"
+                onClick={() => clearNotifications()} 
+                className="h-8 w-8 relative hover:bg-primary/10 transition-colors"
+              >
+                <Bell className="h-4 w-4" />
+                {notifications > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-heartbeat"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 text-[10px] text-white font-bold items-center justify-center">
+                    {notifications > 9 ? '9+' : notifications}
+                  </span>
                 </span>
-              </span>
-              )}
-            </Button>
-          </NotificationCenter></motion.div>
+                )}
+              </Button>
+            </NotificationCenter>
+          </motion.div>
+
+          {/* Real-time Chat */}
+          <RealTimeChat />
 
           {/* Credits (Mobile Compact) */}
           <div className="flex items-center space-x-1 sm:space-x-2">

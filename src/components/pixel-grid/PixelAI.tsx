@@ -9,13 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Brain, Sparkles, Wand2, Palette, Image as ImageIcon, 
+  Brain, Sparkles, Wand2, Palette,
   Zap, Star, Crown, Gem, Target, TrendingUp, BarChart3,
   Lightbulb, Rocket, Shield, Eye, Heart, MessageSquare
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
-import { generatePixelDescription } from '@/ai/flows/generate-pixel-description';
+// import { generatePixelDescription } from '@/ai/flows/generate-pixel-description';
 import { cn } from '@/lib/utils';
 
 interface AIFeature {
@@ -110,18 +110,10 @@ export default function PixelAI({ children, pixelData }: PixelAIProps) {
           break;
         case 'auto-description':
           if (pixelData) {
-            try {
-              const result = await generatePixelDescription({
-                x: pixelData.x,
-                y: pixelData.y,
-                surroundingAreaImageDataUri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-              });
-              setAiResult(result.description);
-            } catch (error) {
-              setAiResult(`Este pixel em ${pixelData.region} (${pixelData.x}, ${pixelData.y}) representa um local único com grande potencial artístico e histórico.`);
-            }
+            // Temporarily disabled AI generation - using fallback description
+            setAiResult(`Este pixel em ${pixelData.region} (${pixelData.x}, ${pixelData.y}) representa um local único com grande potencial artístico e histórico. Uma verdadeira joia digital com características especiais que refletem a beleza e cultura portuguesa.`);
           } else {
-            setAiResult('Pixel único com características especiais e potencial de valorização.');
+            setAiResult('Pixel único com características especiais e potencial de valorização. Um investimento digital inteligente com valor cultural agregado.');
           }
           break;
         case 'market-analysis':

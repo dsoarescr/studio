@@ -1,12 +1,11 @@
-
 // src/components/pixel-grid/PixelGrid.tsx
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   ZoomIn, ZoomOut, Expand, Search, Sparkles, Info, User, CalendarDays,
   History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
-  Image as ImageIcon, XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
+  XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
   Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
   Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
 } from 'lucide-react';
@@ -15,7 +14,7 @@ import Link from 'next/link';
 import PortugalMapSvg, { type MapData } from './PortugalMapSvg';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { generatePixelDescription, type GeneratePixelDescriptionInput } from '@/ai/flows/generate-pixel-description';
+// import { generatePixelDescription, type GeneratePixelDescriptionInput } from '@/ai/flows/generate-pixel-description';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -49,13 +48,19 @@ import PixelLiveStream from './PixelLiveStream';
 import PixelCollaborativeEditor from './PixelCollaborativeEditor';
 import PixelAuction from './PixelAuction';
 import PixelGameification from './PixelGameification';
-import PixelAI from './PixelAI';
+
 import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
 import { Search as SearchIcon, Eye, Grid3X3, Bookmark, MapPin as MapPinIcon } from 'lucide-react';
 
+// Performance optimization constants
+const VIRTUALIZATION_THRESHOLD = 10000;
+const LAZY_LOADING_DISTANCE = 100;
+const CACHE_SIZE = 1000;
+const RENDER_BATCH_SIZE = 100;
+const DEBOUNCE_DELAY = 16; // ~60fps
 
 // Configuration constants
 const SVG_VIEWBOX_WIDTH = 12969;
@@ -940,7 +945,7 @@ export default function PixelGrid() {
         const randomRarity = mockRarities[Math.floor(Math.random() * mockRarities.length)];
         const randomLore = mockLoreSnippets[Math.floor(Math.random() * mockLoreSnippets.length)];
         const approxGps = mapPixelToApproxGps(logicalCol, logicalRow, LOGICAL_GRID_COLS_CONFIG, logicalGridRows);
-        const region = mapData?.districtMapping?.[`${logicalCol},${logicalRow}`] || "Desconhecida";
+        const region = (mapData as any)?.districtMapping?.[`${logicalCol},${logicalRow}`] || "Desconhecida";
         const basePrice = PIXEL_BASE_PRICE * (PIXEL_RARITY_MULTIPLIERS[randomRarity] || 1);
         const specialCreditsPrice = SPECIAL_CREDITS_CONVERSION[randomRarity] || 10;
 
@@ -1171,7 +1176,7 @@ export default function PixelGrid() {
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
+                    <Button variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
                       <ZoomIn className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -1179,7 +1184,7 @@ export default function PixelGrid() {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
+                    <Button variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
                       <ZoomOut className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -1187,7 +1192,7 @@ export default function PixelGrid() {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button pointerEvents="auto" variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
+                    <Button variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
                       <Expand className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -1196,7 +1201,6 @@ export default function PixelGrid() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
-                      pointerEvents="auto" 
                       variant={showGrid ? "default" : "outline"} 
                       size="icon" 
                       onClick={() => setShowGrid(!showGrid)}
@@ -1267,7 +1271,7 @@ export default function PixelGrid() {
         <EnhancedPixelPurchaseModal
           isOpen={showPixelEditModal}
           onClose={() => setShowPixelEditModal(false)}
-          pixelData={selectedPixelDetails}
+          pixelData={selectedPixelDetails!}
           userCredits={12500} // Mocked value, ideally from user store
           userSpecialCredits={120} // Mocked value
           onPurchase={handlePurchase}
@@ -1352,7 +1356,7 @@ export default function PixelGrid() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
+                <Button variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
                   <ZoomIn className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -1360,7 +1364,7 @@ export default function PixelGrid() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
+                <Button variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
                   <ZoomOut className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -1368,7 +1372,7 @@ export default function PixelGrid() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button style={{ pointerEvents: 'auto' }} variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
+                <Button variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
                   <Expand className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -1580,12 +1584,7 @@ export default function PixelGrid() {
             </Dialog>
           </EnhancedTooltip>
 
-          {/* IA Assistant */}
-          <PixelAI pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, region: selectedPixelDetails.region } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-              <Brain className="h-6 w-6" />
-            </Button>
-          </PixelAI>
+
           
           {/* Social Features */}
           <PixelSocialFeatures>

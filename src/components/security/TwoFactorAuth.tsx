@@ -11,9 +11,10 @@ import { useAuth } from '@/lib/auth-context';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import {
-  Shield, Key, Smartphone, Lock, Copy, RefreshCw, CheckCircle, AlertTriangle, Loader2
+  Shield, Key, Smartphone, Lock, Copy, RefreshCw, CheckCircle, AlertTriangle, Loader2, Info
 } from 'lucide-react';
-import QRCode from 'qrcode.react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface TwoFactorAuthProps {
   children: React.ReactNode;
@@ -244,7 +245,7 @@ export default function TwoFactorAuth({ children }: TwoFactorAuthProps) {
                     <Label>2. Digitalize o código QR ou insira o código manualmente</Label>
                     {qrCodeUrl && (
                       <div className="flex flex-col items-center bg-white p-4 rounded-lg">
-                        <QRCode value={qrCodeUrl} size={180} />
+                        <QRCodeSVG value={qrCodeUrl} size={180} />
                       </div>
                     )}
                     

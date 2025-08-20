@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,15 +13,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { 
   Heart, MessageSquare, Share2, Send, Users, MapPin, Calendar, 
   Clock, Star, Crown, Gift, Zap, Eye, ThumbsUp, UserPlus, 
-  Play, Pause, X, ChevronLeft, ChevronRight, Camera, Image as ImageIcon,
+  Play, Pause, X, ChevronLeft, ChevronRight, Camera,
   Palette, Trophy, Target, Flame, TrendingUp, BookOpen, Video,
   Music, Mic, Settings, Filter, Search, Plus, MoreHorizontal,
   Bookmark, Flag, Volume2, VolumeX, Compass, Globe, Award,
   Sparkles, Coins, Bell, Phone, MessageCircle, User, Edit,
-  Copy, ExternalLink, Info, CheckCircle, AlertTriangle, Lock
+  Copy, ExternalLink, Info, CheckCircle, AlertTriangle, Lock,
+  Shield, UserCheck, Ban, AlertOctagon, TrendingDown, FileText,
+  BarChart4, PieChart, Gavel, Handshake, Megaphone, Lightbulb,
+  Hash, Sliders, Timer, RefreshCw, Trending, Activity, Layers,
+  Database, Robot, Brain, Wand2, Magic, Network, Link2,
+  Smile, AtSign, Download, Upload, RotateCcw, RotateCw, Volume,
+  VolumeOff, Vibrate, Wifi, WifiOff, Battery, Signal, Menu,
+  ChevronUp, ChevronDown, MoreVertical, Reply, Forward, Trash2,
+  Archive, Pin, PinOff, Maximize2, Minimize2, FileVideo,
+  Headphones, Smartphone, Laptop, Monitor, Watch, Gamepad2, EyeOff
 } from "lucide-react";
 import {
   Dialog,
@@ -48,6 +60,11 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+// Import new community features
+import { CommunityModeration } from '@/components/features/CommunityModeration';
+import { CommunityGamification } from '@/components/features/CommunityGamification';
+import { CommunityAnalytics } from '@/components/features/CommunityAnalytics';
 
 // Types
 interface Post {
@@ -518,9 +535,39 @@ export default function CommunityPage() {
   const [playSuccessSound, setPlaySuccessSound] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   
+  // Mobile-specific states
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showCreateOptions, setShowCreateOptions] = useState(false);
+  const [activeTab, setActiveTab] = useState('feed');
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [hasNewContent, setHasNewContent] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [cameraMode, setCameraMode] = useState<'photo' | 'video'>('photo');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(3);
+  
+  // Mobile interaction states
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [doubleTapTimeout, setDoubleTapTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [lastTap, setLastTap] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  
   // Refs
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const storyProgressRef = useRef<NodeJS.Timeout | null>(null);
+  const feedScrollRef = useRef<HTMLDivElement>(null);
+  const pullToRefreshRef = useRef<HTMLDivElement>(null);
+  const postInputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -528,6 +575,98 @@ export default function CommunityPage() {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
   }, [chatMessages]);
+
+  // Online/Offline detection
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Pull to refresh detection
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        setTouchStart({ 
+          x: e.touches[0].clientX, 
+          y: e.touches[0].clientY 
+        });
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1 && feedScrollRef.current) {
+        const scrollTop = feedScrollRef.current.scrollTop;
+        const deltaY = e.touches[0].clientY - touchStart.y;
+        
+        if (scrollTop === 0 && deltaY > 0) {
+          e.preventDefault();
+          const distance = Math.min(deltaY * 0.5, 100);
+          setPullDistance(distance);
+          
+          if (distance > 60) {
+            setHasNewContent(true);
+          }
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (pullDistance > 60) {
+        refreshFeed();
+      }
+      setPullDistance(0);
+      setHasNewContent(false);
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [touchStart, pullDistance]);
+
+  // Typing indicator simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomUsers = ['Ana Silva', 'Carlos Santos', 'Maria Costa'];
+      const isTyping = Math.random() > 0.8;
+      
+      if (isTyping) {
+        const randomUser = randomUsers[Math.floor(Math.random() * randomUsers.length)];
+        setTypingUsers(prev => [...prev.slice(-2), randomUser]);
+        
+        setTimeout(() => {
+          setTypingUsers(prev => prev.filter(user => user !== randomUser));
+        }, 3000);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Haptic feedback for mobile
+  const hapticFeedback = useCallback((type: 'light' | 'medium' | 'heavy' = 'light') => {
+    if ('vibrate' in navigator) {
+      const patterns = {
+        light: [10],
+        medium: [20],
+        heavy: [30]
+      };
+      navigator.vibrate(patterns[type]);
+    }
+  }, []);
 
   // Story progress timer
   useEffect(() => {
@@ -555,6 +694,177 @@ export default function CommunityPage() {
       }
     };
   }, [selectedStory, isStoryPlaying]);
+
+  // New mobile-optimized functions
+  const refreshFeed = async () => {
+    setIsRefreshing(true);
+    hapticFeedback('medium');
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Add some new mock posts
+    const newPosts = [
+      {
+        id: Date.now().toString(),
+        author: {
+          id: 'newUser',
+          name: 'Novo Utilizador',
+          username: '@novoutilizador',
+          avatar: 'https://placehold.co/40x40.png',
+          verified: false,
+          level: 8,
+          followers: 89,
+          following: 45,
+          bio: 'Novo na comunidade!',
+          joinDate: '2024-01-15',
+          pixelsOwned: 12,
+          achievements: 3
+        },
+        content: 'Acabei de me juntar à comunidade! Que emocionante! 🎉',
+        type: 'text' as const,
+        timestamp: 'agora',
+        likes: 0,
+        comments: [],
+        shares: 0,
+        isLiked: false,
+        isSaved: false,
+        tags: []
+      }
+    ];
+    
+    setPosts(prev => [...newPosts, ...prev]);
+    setIsRefreshing(false);
+    setPlaySuccessSound(true);
+    
+    toast({
+      title: "Feed Atualizado! 🔄",
+      description: "Novos posts carregados com sucesso!",
+    });
+  };
+
+  const handleDoubleTap = (postId: string, event: React.TouchEvent) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (doubleTapTimeout) {
+      clearTimeout(doubleTapTimeout);
+      setDoubleTapTimeout(null);
+      
+      // Double tap detected
+      if (now - lastTap < DOUBLE_TAP_DELAY) {
+        toggleLike(postId);
+        hapticFeedback('heavy');
+        
+        // Create heart animation
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤️';
+        heart.style.position = 'absolute';
+        heart.style.fontSize = '2rem';
+        heart.style.pointerEvents = 'none';
+        heart.style.animation = 'heartAnimation 1s ease-out forwards';
+        heart.style.left = `${event.changedTouches[0].clientX}px`;
+        heart.style.top = `${event.changedTouches[0].clientY}px`;
+        heart.style.transform = 'translate(-50%, -50%)';
+        heart.style.zIndex = '1000';
+        
+        document.body.appendChild(heart);
+        
+        setTimeout(() => {
+          document.body.removeChild(heart);
+        }, 1000);
+      }
+    } else {
+      setDoubleTapTimeout(setTimeout(() => {
+        setDoubleTapTimeout(null);
+      }, DOUBLE_TAP_DELAY));
+    }
+    
+    setLastTap(now);
+  };
+
+  const handleCameraCapture = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleAudioRecord = () => {
+    setIsRecording(!isRecording);
+    hapticFeedback('medium');
+    
+    if (!isRecording) {
+      toast({
+        title: "Gravação Iniciada 🎤",
+        description: "Toque novamente para parar.",
+      });
+    } else {
+      toast({
+        title: "Áudio Gravado! 📹",
+        description: "Mensagem de voz adicionada ao post.",
+      });
+    }
+  };
+
+  const addEmoji = (emoji: string) => {
+    setNewPostContent(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const quickReaction = (postId: string, reaction: string) => {
+    hapticFeedback('light');
+    
+    // Add reaction to post
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return { 
+          ...post, 
+          content: post.content + ` ${reaction}`,
+          likes: post.likes + 1
+        };
+      }
+      return post;
+    }));
+    
+    addXp(2);
+    addCredits(1);
+  };
+
+  const handleSwipeGesture = (direction: 'left' | 'right') => {
+    hapticFeedback('light');
+    
+    if (direction === 'left') {
+      // Navigate to next tab
+      const tabs = ['feed', 'groups', 'chat', 'events', 'learn', 'gamification', 'analytics', 'moderation'];
+      const currentIndex = tabs.indexOf(activeTab);
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex]);
+    } else if (direction === 'right') {
+      // Navigate to previous tab
+      const tabs = ['feed', 'groups', 'chat', 'events', 'learn', 'gamification', 'analytics', 'moderation'];
+      const currentIndex = tabs.indexOf(activeTab);
+      const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
+      setActiveTab(tabs[prevIndex]);
+    }
+  };
+
+  const searchContent = (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) return;
+    
+    // Filter posts by search query
+    const filteredPosts = posts.filter(post => 
+      post.content.toLowerCase().includes(query.toLowerCase()) ||
+      post.author.name.toLowerCase().includes(query.toLowerCase()) ||
+      post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+    );
+    
+    toast({
+      title: `Pesquisa: "${query}" 🔍`,
+      description: `Encontrados ${filteredPosts.length} resultados.`,
+    });
+  };
 
   // Functions
   const createPost = () => {
@@ -975,26 +1285,193 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      {/* Mobile CSS Animations */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes heartAnimation {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -70%) scale(1.5); opacity: 0.8; }
+            100% { transform: translate(-50%, -100%) scale(0.5); opacity: 0; }
+          }
+          
+          @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          
+          @keyframes slideInUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+          
+          @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+          }
+          
+          .animate-bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          }
+          
+          .animate-slide-up {
+            animation: slideInUp 0.3s ease-out;
+          }
+          
+          .animate-pulse-glow {
+            animation: pulseGlow 2s infinite;
+          }
+          
+          /* Custom scrollbar for mobile */
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+          }
+          
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 2px;
+          }
+          
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+          }
+        `
+      }} />
+      
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playLikeSound} onEnd={() => setPlayLikeSound(false)} />
       <SoundEffect src={SOUND_EFFECTS.ACHIEVEMENT} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
       
       <div className="container mx-auto py-4 px-3 space-y-4 max-w-4xl">
-        {/* Header */}
-        <Card className="shadow-lg bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30">
+        {/* Enhanced Mobile Header */}
+        <Card className="shadow-lg bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 sticky top-0 z-50 backdrop-blur-md bg-opacity-95">
           <CardHeader className="pb-3">
-            <CardTitle className="font-headline text-2xl text-gradient-gold flex items-center">
-              <Users className="h-6 w-6 mr-3" />
-              Comunidade Pixel
-            </CardTitle>
-            <CardDescription>
-              Conecte-se, partilhe e descubra arte incrível com outros criadores
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Users className="h-6 w-6 mr-3 text-primary" />
+                <div>
+                  <CardTitle className="font-headline text-xl text-gradient-gold">
+                    Comunidade Pixel
+                  </CardTitle>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className={cn(
+                      "w-2 h-2 rounded-full",
+                      isOnline ? "bg-green-500" : "bg-red-500"
+                    )} />
+                    <span className="text-xs text-muted-foreground">
+                      {isOnline ? 'Online' : 'Offline'}
+                    </span>
+                    {typingUsers.length > 0 && (
+                      <>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-primary animate-pulse">
+                          {typingUsers[0]} está a escrever...
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {/* Search Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setShowSearchModal(true)}
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+                
+                {/* Notifications */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 relative"
+                  onClick={() => {
+                    setShowNotifications(!showNotifications);
+                    hapticFeedback('light');
+                  }}
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadNotifications > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 text-xs bg-red-500 border-0">
+                      {unreadNotifications}
+                    </Badge>
+                  )}
+                </Button>
+                
+                {/* Dark Mode Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setIsDarkMode(!isDarkMode);
+                    hapticFeedback('light');
+                    toast({
+                      title: isDarkMode ? "Modo Claro Ativado ☀️" : "Modo Escuro Ativado 🌙",
+                      description: "Tema alterado com sucesso!",
+                    });
+                  }}
+                >
+                  {isDarkMode ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </Button>
+                
+                {/* Settings */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    hapticFeedback('light');
+                    toast({
+                      title: "Definições ⚙️",
+                      description: "Funcionalidade em desenvolvimento!",
+                    });
+                  }}
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Pull to Refresh Indicator */}
+            <AnimatePresence>
+              {pullDistance > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="flex items-center justify-center py-2"
+                  style={{ transform: `translateY(${Math.min(pullDistance * 0.5, 30)}px)` }}
+                >
+                  <div className="flex items-center gap-2 text-primary">
+                    {isRefreshing ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : hasNewContent ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {isRefreshing ? 'A atualizar...' : hasNewContent ? 'Solte para atualizar' : 'Puxe para atualizar'}
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </CardHeader>
         </Card>
 
         <Tabs defaultValue="feed" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-card/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 h-12 bg-card/50 backdrop-blur-sm">
             <TabsTrigger value="feed" className="text-xs">
               <MessageSquare className="h-4 w-4 mb-1" />
               Feed
@@ -1014,6 +1491,18 @@ export default function CommunityPage() {
             <TabsTrigger value="learn" className="text-xs">
               <BookOpen className="h-4 w-4 mb-1" />
               Aprender
+            </TabsTrigger>
+            <TabsTrigger value="gamification" className="text-xs">
+              <Trophy className="h-4 w-4 mb-1" />
+              Badges
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs">
+              <BarChart4 className="h-4 w-4 mb-1" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="moderation" className="text-xs">
+              <Shield className="h-4 w-4 mb-1" />
+              Moderação
             </TabsTrigger>
           </TabsList>
 
@@ -1047,70 +1536,259 @@ export default function CommunityPage() {
               </CardContent>
             </Card>
 
-            {/* Create Post */}
-            <Card>
+            {/* Enhanced Create Post */}
+            <Card className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex gap-3">
-                  <Avatar>
+                  <Avatar className="ring-2 ring-primary/20">
                     <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile avatar" />
                     <AvatarFallback>V</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-3">
-                    <Textarea
-                      placeholder="Partilhe algo com a comunidade..."
-                      value={newPostContent}
-                      onChange={(e) => setNewPostContent(e.target.value)}
-                      className="min-h-[80px] resize-none"
-                      maxLength={500}
-                    />
+                    <div className="relative">
+                      <Textarea
+                        ref={postInputRef}
+                        placeholder="Partilhe algo com a comunidade..."
+                        value={newPostContent}
+                        onChange={(e) => {
+                          setNewPostContent(e.target.value);
+                          setIsTyping(e.target.value.length > 0);
+                        }}
+                        className="min-h-[80px] resize-none pr-12"
+                        maxLength={500}
+                        onFocus={() => hapticFeedback('light')}
+                      />
+                      
+                      {/* Emoji Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8"
+                        onClick={() => {
+                          setShowEmojiPicker(!showEmojiPicker);
+                          hapticFeedback('light');
+                        }}
+                      >
+                        <Smile className="h-4 w-4" />
+                      </Button>
+                      
+                      {/* Emoji Picker */}
+                      <AnimatePresence>
+                        {showEmojiPicker && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                            className="absolute top-12 right-0 bg-card border rounded-lg p-3 shadow-lg z-10 grid grid-cols-6 gap-2"
+                          >
+                            {['😀', '😍', '🤔', '😢', '😡', '👍', '❤️', '🔥', '💯', '🎉', '🚀', '✨'].map(emoji => (
+                              <Button
+                                key={emoji}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={() => addEmoji(emoji)}
+                              >
+                                {emoji}
+                              </Button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    
+                    {/* Post Type Selection */}
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      <Button
+                        variant={newPostType === 'text' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setNewPostType('text');
+                          hapticFeedback('light');
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        Texto
+                      </Button>
+                      <Button
+                        variant={newPostType === 'pixel' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setNewPostType('pixel');
+                          hapticFeedback('light');
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        <Palette className="h-4 w-4 mr-1" />
+                        Pixel
+                      </Button>
+                      <Button
+                        variant={newPostType === 'image' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setNewPostType('image');
+                          handleCameraCapture();
+                          hapticFeedback('light');
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        <Camera className="h-4 w-4 mr-1" />
+                        Foto
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAudioRecord}
+                        className={cn(
+                          "flex-shrink-0",
+                          isRecording && "bg-red-500 text-white animate-pulse"
+                        )}
+                      >
+                        <Mic className="h-4 w-4 mr-1" />
+                        {isRecording ? 'Parar' : 'Áudio'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowCreateOptions(!showCreateOptions);
+                          hapticFeedback('light');
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Mais
+                      </Button>
+                    </div>
+
+                    {/* Advanced Create Options */}
+                    <AnimatePresence>
+                      {showCreateOptions && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-3 border-t pt-3"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast({
+                                  title: "Evento Criado! 📅",
+                                  description: "Funcionalidade em desenvolvimento!",
+                                });
+                                hapticFeedback('medium');
+                              }}
+                            >
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Evento
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast({
+                                  title: "Sondagem Criada! 📊",
+                                  description: "Funcionalidade em desenvolvimento!",
+                                });
+                                hapticFeedback('medium');
+                              }}
+                            >
+                              <BarChart4 className="h-4 w-4 mr-2" />
+                              Sondagem
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <Switch
+                              id="location"
+                              onCheckedChange={(checked) => {
+                                toast({
+                                  title: checked ? "Localização Ativada 📍" : "Localização Desativada",
+                                  description: checked ? "A sua localização será incluída no post." : "A sua localização não será partilhada.",
+                                });
+                                hapticFeedback('light');
+                              }}
+                            />
+                            <Label htmlFor="location" className="text-sm">
+                              Incluir localização
+                            </Label>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     
                     <div className="flex justify-between items-center">
-                      <div className="flex gap-2">
-                        <Button
-                          variant={newPostType === 'text' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setNewPostType('text')}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Texto
-                        </Button>
-                        <Button
-                          variant={newPostType === 'pixel' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setNewPostType('pixel')}
-                        >
-                          <Palette className="h-4 w-4 mr-1" />
-                          Pixel
-                        </Button>
-                        <Button
-                          variant={newPostType === 'image' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setNewPostType('image')}
-                        >
-                          <ImageIcon className="h-4 w-4 mr-1" />
-                          Imagem
-                        </Button>
-                      </div>
-                      
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
+                        <span className={cn(
+                          "text-xs transition-colors",
+                          newPostContent.length > 450 ? "text-red-500" : "text-muted-foreground"
+                        )}>
                           {newPostContent.length}/500
                         </span>
-                        <Button onClick={createPost} disabled={!newPostContent.trim()}>
-                          <Send className="h-4 w-4 mr-2" />
-                          Publicar
-                        </Button>
+                        {isTyping && (
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                            <span className="text-xs text-primary">A escrever...</span>
+                          </div>
+                        )}
                       </div>
+                      
+                      <Button 
+                        onClick={() => {
+                          createPost();
+                          hapticFeedback('heavy');
+                          setShowCreateOptions(false);
+                        }} 
+                        disabled={!newPostContent.trim()}
+                        className="relative overflow-hidden"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Publicar
+                      </Button>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Hidden File Inputs */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  toast({
+                    title: "Ficheiro Selecionado! 📎",
+                    description: `${e.target.files[0].name} adicionado ao post.`,
+                  });
+                  hapticFeedback('medium');
+                }
+              }}
+            />
+            
+            <input
+              ref={audioInputRef}
+              type="file"
+              accept="audio/*"
+              capture="microphone"
+              className="hidden"
+            />
+
             {/* Posts */}
-            <div className="space-y-4">
+            <div className="space-y-4" ref={feedScrollRef}>
               {posts.map(post => (
-                <Card key={post.id} className="hover:shadow-md transition-shadow">
+                <Card 
+                  key={post.id} 
+                  className="hover:shadow-md transition-shadow relative overflow-hidden"
+                  onTouchEnd={(e) => handleDoubleTap(post.id, e)}
+                >
                   <CardContent className="p-4">
                     {/* Post Header */}
                     <div className="flex items-center gap-3 mb-3">
@@ -1222,54 +1900,115 @@ export default function CommunityPage() {
                       )}
                     </div>
 
-                    {/* Post Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleLike(post.id)}
-                          className={cn(
-                            "gap-2 transition-colors",
-                            post.isLiked && "text-red-500"
-                          )}
-                        >
-                          <Heart className={cn("h-4 w-4", post.isLiked && "fill-current")} />
-                          {post.likes}
-                        </Button>
+                    {/* Enhanced Post Actions */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              toggleLike(post.id);
+                              hapticFeedback('medium');
+                            }}
+                            onDoubleClick={() => {
+                              quickReaction(post.id, '❤️');
+                            }}
+                            className={cn(
+                              "gap-2 transition-all duration-300",
+                              post.isLiked && "text-red-500 scale-110"
+                            )}
+                          >
+                            <Heart className={cn(
+                              "h-4 w-4 transition-all", 
+                              post.isLiked && "fill-current animate-pulse"
+                            )} />
+                            {post.likes}
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setShowComments(showComments === post.id ? null : post.id);
+                              hapticFeedback('light');
+                            }}
+                            className="gap-2"
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                            {post.comments.length}
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              sharePost(post);
+                              hapticFeedback('medium');
+                            }}
+                            className="gap-2"
+                          >
+                            <Share2 className="h-4 w-4" />
+                            {post.shares}
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              quickReaction(post.id, '👍');
+                              hapticFeedback('light');
+                            }}
+                            className="gap-1"
+                          >
+                            <ThumbsUp className="h-4 w-4" />
+                          </Button>
+                        </div>
                         
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowComments(showComments === post.id ? null : post.id)}
-                          className="gap-2"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          {post.comments.length}
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => sharePost(post)}
-                          className="gap-2"
-                        >
-                          <Share2 className="h-4 w-4" />
-                          {post.shares}
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              toggleSave(post.id);
+                              hapticFeedback('light');
+                            }}
+                            className={cn(
+                              "transition-colors",
+                              post.isSaved && "text-blue-500"
+                            )}
+                          >
+                            <Bookmark className={cn("h-4 w-4", post.isSaved && "fill-current")} />
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              openUserActions(post.author);
+                              hapticFeedback('light');
+                            }}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleSave(post.id)}
-                        className={cn(
-                          "transition-colors",
-                          post.isSaved && "text-blue-500"
-                        )}
-                      >
-                        <Bookmark className={cn("h-4 w-4", post.isSaved && "fill-current")} />
-                      </Button>
+                      {/* Quick Reactions */}
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">Reações rápidas:</span>
+                        {['👍', '❤️', '😂', '😮', '😢', '😡'].map(reaction => (
+                          <Button
+                            key={reaction}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => quickReaction(post.id, reaction)}
+                            className="h-8 w-8 p-0 flex-shrink-0 hover:scale-125 transition-transform"
+                          >
+                            {reaction}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Comments Section */}
@@ -1619,8 +2358,196 @@ export default function CommunityPage() {
               ))}
             </div>
           </TabsContent>
+
+          {/* New Community Features Tabs */}
+          
+          {/* Gamification Tab */}
+          <TabsContent value="gamification" className="space-y-4">
+            <CommunityGamification />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <CommunityAnalytics />
+          </TabsContent>
+
+          {/* Moderation Tab */}
+          <TabsContent value="moderation" className="space-y-4">
+            <CommunityModeration />
+          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Mobile-Specific Modals and Dialogs */}
+      
+      {/* Search Modal */}
+      <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Pesquisar Conteúdo
+            </DialogTitle>
+            <DialogDescription>
+              Procure por posts, utilizadores ou hashtags
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Input
+              placeholder="Digite sua pesquisa..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  searchContent(searchQuery);
+                  setShowSearchModal(false);
+                }
+              }}
+              className="w-full"
+              autoFocus
+            />
+            
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => {
+                  searchContent(searchQuery);
+                  setShowSearchModal(false);
+                }}
+                className="flex-1"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Pesquisar
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSearchModal(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+            
+            {/* Quick Search Suggestions */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Pesquisas populares:</p>
+              <div className="flex flex-wrap gap-2">
+                {['#PixelArt', '#Lisboa', '#Tutorial', '#Comunidade'].map(tag => (
+                  <Button
+                    key={tag}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery(tag);
+                      searchContent(tag);
+                      setShowSearchModal(false);
+                    }}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Panel */}
+      <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
+        <SheetContent className="w-full max-w-md p-0">
+          <SheetHeader className="p-6 border-b">
+            <SheetTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notificações
+              {unreadNotifications > 0 && (
+                <Badge className="bg-red-500">
+                  {unreadNotifications}
+                </Badge>
+              )}
+            </SheetTitle>
+          </SheetHeader>
+          
+          <ScrollArea className="h-[calc(100vh-120px)]">
+            <div className="p-4 space-y-4">
+              {/* Mock Notifications */}
+              {[
+                {
+                  id: '1',
+                  type: 'like',
+                  user: 'Ana Silva',
+                  action: 'gostou do seu post',
+                  time: '2 min',
+                  unread: true
+                },
+                {
+                  id: '2',
+                  type: 'comment',
+                  user: 'Carlos Santos',
+                  action: 'comentou no seu pixel',
+                  time: '5 min',
+                  unread: true
+                },
+                {
+                  id: '3',
+                  type: 'follow',
+                  user: 'Maria Costa',
+                  action: 'começou a seguir-te',
+                  time: '1h',
+                  unread: false
+                }
+              ].map(notification => (
+                <Card 
+                  key={notification.id}
+                  className={cn(
+                    "p-3 cursor-pointer transition-colors",
+                    notification.unread && "bg-primary/5 border-primary/20"
+                  )}
+                  onClick={() => {
+                    hapticFeedback('light');
+                    toast({
+                      title: "Notificação Aberta 📱",
+                      description: `${notification.user} ${notification.action}`,
+                    });
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="https://placehold.co/40x40.png" />
+                      <AvatarFallback>{notification.user[0]}</AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1">
+                      <p className="text-sm">
+                        <span className="font-medium">{notification.user}</span>
+                        {' '}{notification.action}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{notification.time}</p>
+                    </div>
+                    
+                    {notification.unread && (
+                      <div className="w-2 h-2 bg-primary rounded-full" />
+                    )}
+                  </div>
+                </Card>
+              ))}
+              
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setUnreadNotifications(0);
+                  hapticFeedback('medium');
+                  toast({
+                    title: "Notificações Limpas ✅",
+                    description: "Todas as notificações foram marcadas como lidas.",
+                  });
+                }}
+              >
+                Marcar todas como lidas
+              </Button>
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
 
       {/* Stories Viewer */}
       <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
@@ -2160,6 +3087,7 @@ export default function CommunityPage() {
           )}
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }

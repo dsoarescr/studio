@@ -1,10 +1,12 @@
 
 import type {Metadata} from 'next';
 import './globals.css';
+import '@/lib/i18n'; // Initialize i18n
 import { Toaster } from "@/components/ui/toaster";
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { AuthProvider } from '@/lib/auth-context';
 import { StripeProvider } from '@/components/payment/StripePaymentProvider';
+import { registerServiceWorker } from '@/lib/pwa';
 
 export const metadata: Metadata = {
   title: 'Pixel Universe - Mapa Interativo de Portugal',
@@ -35,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark h-full">{/* Keep 'dark' for now, h-full is important */}
+    <html lang="en" className="dark h-full">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -43,15 +45,35 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
-        <meta name="theme-color" content="#D4A757" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#6366f1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Pixel Universe" />
       </head>
-      {/* h-full on body, overflow-hidden removed to allow MainLayout's overflow-y-auto to work */}
       <body className="font-body antialiased h-full">
         <AuthProvider>
           <StripeProvider>
             {children}
             <OfflineIndicator />
             <Toaster />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function() {
+                      navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                          console.log('SW registered: ', registration);
+                        })
+                        .catch(function(registrationError) {
+                          console.log('SW registration failed: ', registrationError);
+                        });
+                    });
+                  }
+                `,
+              }}
+            />
           </StripeProvider>
         </AuthProvider>
       </body>

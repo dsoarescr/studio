@@ -41,13 +41,17 @@ interface SelectedPixelDetails {
   owner?: string;
   price: number;
   region: string;
-  rarity: string;
+  rarity: 'Comum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
   color?: string;
   title?: string;
   description?: string;
   isOwnedByCurrentUser?: boolean;
   isForSaleBySystem?: boolean;
   specialCreditsPrice?: number;
+  history: Array<{ owner: string; date: string; price?: number }>;
+  views?: number;
+  likes?: number;
+  isProtected?: boolean;
 }
 
 interface EnhancedPixelPurchaseModalProps {
