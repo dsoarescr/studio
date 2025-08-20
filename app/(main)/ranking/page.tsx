@@ -19,9 +19,10 @@ import {
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
   ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, 
   Lightbulb, MoreVertical, PlayCircle, Pause, Volume2, VolumeX, Shuffle,
-  RotateCcw, MousePointer2, Gamepad2, Layers, Grid3X3, Zap as FlashZap
+  RotateCcw, MousePointer2, Gamepad2, Layers, Grid3X3, Zap as FlashZap,
+  Users2, X, UserPlus, UserMinus, Swords, MessageCircle, Plus, User2, User
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -239,6 +240,12 @@ export default function StatisticsPage() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [expandedUserInfo, setExpandedUserInfo] = useState<string | null>(null);
+  const [followedUsers, setFollowedUsers] = useState<string[]>([]);
+  const [favoriteUsers, setFavoriteUsers] = useState<string[]>([]);
+  const [userNotes, setUserNotes] = useState<{ [key: string]: string }>({});
+  const [showUserNotes, setShowUserNotes] = useState<{ [key: string]: boolean }>({});
+  const [userInteractions, setUserInteractions] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     const updateTime = () => {
@@ -256,7 +263,7 @@ export default function StatisticsPage() {
       const interval = setInterval(() => {
         setAnimateCards(true);
         setTimeout(() => setAnimateCards(false), 500);
-        
+
         toast({
           title: "Dados Atualizados",
           description: "Rankings atualizados automaticamente!",
@@ -288,8 +295,7 @@ export default function StatisticsPage() {
       title: "Dados Exportados",
       description: "Os dados estatísticos foram exportados com sucesso. Recebeu 25 créditos como recompensa!",
     });
-    
-    // Reward the user for exporting data
+
     addCredits(25);
     addXp(10);
   };
@@ -300,8 +306,7 @@ export default function StatisticsPage() {
       title: "Estatísticas Partilhadas",
       description: "Link das estatísticas copiado para a área de transferência. Recebeu 50 créditos como recompensa!",
     });
-    
-    // Reward the user for sharing stats
+
     addCredits(50);
     addXp(25);
   };
@@ -310,19 +315,19 @@ export default function StatisticsPage() {
     setSelectedUsers(prev => 
       prev.includes(username) 
         ? prev.filter(u => u !== username)
-        : [...prev, username].slice(0, 3) // Máximo 3 users para comparação
+        : [...prev, username].slice(0, 3)
     );
   };
 
   const handleBulkAction = (action: 'follow' | 'challenge' | 'message') => {
     if (selectedUsers.length === 0) return;
-    
+
     setPlayRewardSound(true);
     toast({
       title: `Ação ${action} aplicada`,
       description: `${action} enviado para ${selectedUsers.length} utilizadores.`,
     });
-    
+
     addCredits(selectedUsers.length * 10);
     setSelectedUsers([]);
   };
@@ -332,15 +337,63 @@ export default function StatisticsPage() {
     const modes: ('table' | 'cards' | 'compact')[] = ['table', 'cards', 'compact'];
     const randomMode = modes[Math.floor(Math.random() * modes.length)];
     setViewMode(randomMode);
-    
+
     setTimeout(() => setAnimateCards(false), 800);
-    
+
     toast({
       title: "Vista Aleatória",
       description: `Mudou para vista ${randomMode}. +15 XP!`,
     });
     addXp(15);
   };
+
+  const handleFollowUser = (username: string) => {
+    setFollowedUsers(prev => 
+      prev.includes(username) ? prev.filter(u => u !== username) : [...prev, username]
+    );
+    setPlayRewardSound(true);
+    toast({
+      title: "Utilizador Gerido",
+      description: `${followedUsers.includes(username) ? 'Deixou de seguir' : 'Começou a seguir'} ${username}.`,
+    });
+  };
+
+  const handleFavoriteUser = (username: string) => {
+    setFavoriteUsers(prev => 
+      prev.includes(username) ? prev.filter(u => u !== username) : [...prev, username]
+    );
+    setPlayRewardSound(true);
+    toast({
+      title: "Favorito Atualizado",
+      description: `${favoriteUsers.includes(username) ? 'Removeu' : 'Adicionou'} ${username} aos favoritos.`,
+    });
+  };
+
+  const handleChallengeUser = (username: string) => {
+    setPlayRewardSound(true);
+    toast({
+      title: "Desafio Enviado",
+      description: `Desafio enviado para ${username}. Que comecem os jogos!`,
+    });
+    addCredits(20);
+  };
+
+  const handleAddNote = (username: string, note: string) => {
+    if (note.trim() === '') return;
+    setUserNotes(prev => ({ ...prev, [username]: note }));
+    setShowUserNotes(prev => ({ ...prev, [username]: false }));
+    setPlayRewardSound(true);
+    toast({
+      title: "Nota Guardada",
+      description: `Nota adicionada a ${username}.`,
+    });
+  };
+
+  useEffect(() => {
+    userRankingData.forEach(user => {
+      setUserInteractions(prev => ({ ...prev, [user.user]: Math.floor(Math.random() * 500) }));
+    });
+  }, []);
 
   const filteredRanking = userRankingData
     .filter(user => {
@@ -365,9 +418,8 @@ export default function StatisticsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
-      
+
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
-        {/* Enhanced Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
@@ -382,7 +434,7 @@ export default function StatisticsPage() {
                   Análise completa e em tempo real do ecossistema Pixel Universe
                 </CardDescription>
               </div>
-              
+
               <div className="flex items-center gap-3 animate-fade-in">
                 <div className="flex items-center gap-2 text-sm">
                   <div className={cn(
@@ -393,7 +445,7 @@ export default function StatisticsPage() {
                     Atualizado: {lastUpdated || '--:--'}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Button 
                     variant={autoRefresh ? "default" : "outline"} 
@@ -404,22 +456,22 @@ export default function StatisticsPage() {
                     {autoRefresh ? <Pause className="h-4 w-4 mr-2" /> : <PlayCircle className="h-4 w-4 mr-2" />}
                     Auto
                   </Button>
-                  
+
                   <Button variant="outline" size="sm" onClick={handleRandomizeView} className="button-hover-lift">
                     <Shuffle className="h-4 w-4 mr-2 text-purple-500" />
                     Vista
                   </Button>
-                  
+
                   <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
                     <Download className="h-4 w-4 mr-2 text-green-500" />
                     Exportar
                   </Button>
-                  
+
                   <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
                     <Share2 className="h-4 w-4 mr-2 text-blue-500" />
                     Partilhar
                   </Button>
-                  
+
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -434,8 +486,7 @@ export default function StatisticsPage() {
                 </div>
               </div>
             </div>
-            
-            {/* Time Range Selector */}
+
             <div className="flex flex-wrap gap-2 mt-4 animate-fade-in animation-delay-200">
               {timeRanges.map(range => (
                 <Button 
@@ -456,7 +507,6 @@ export default function StatisticsPage() {
           </CardHeader>
         </Card>
 
-        {/* Enhanced Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-12 bg-card/50 backdrop-blur-sm shadow-md">
             <TabsTrigger value="overview" className="font-headline">
@@ -477,14 +527,11 @@ export default function StatisticsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Global Metrics Grid */}
             <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" layout>
               {globalStatsData.map(stat => <StatDisplayCard key={stat.title} {...stat} />)}
             </motion.div>
 
-            {/* Quick Insights */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="card-hover-glow">
                 <CardHeader>
@@ -553,9 +600,7 @@ export default function StatisticsPage() {
             </div>
           </TabsContent>
 
-          {/* Leaderboard Tab */}
           <TabsContent value="leaderboard" className="space-y-6">
-            {/* Enhanced Filters */}
             <Card className="card-hover-glow">
               <CardContent className="p-4">
                 <div className="flex flex-col gap-4">
@@ -569,7 +614,7 @@ export default function StatisticsPage() {
                         className="pl-10"
                       />
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <Button
                         variant={showFilters ? "default" : "outline"}
@@ -580,7 +625,7 @@ export default function StatisticsPage() {
                         <Filter className="h-4 w-4 mr-2" />
                         Filtros
                       </Button>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -590,7 +635,7 @@ export default function StatisticsPage() {
                         <SortAsc className="h-4 w-4 mr-2" />
                         {sortBy === 'rank' ? 'Rank' : sortBy === 'pixels' ? 'Pixels' : 'Pontuação'}
                       </Button>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -604,8 +649,7 @@ export default function StatisticsPage() {
                       </Button>
                     </div>
                   </div>
-                  
-                  {/* Advanced Filters */}
+
                   {showFilters && (
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
@@ -637,8 +681,7 @@ export default function StatisticsPage() {
                       </div>
                     </motion.div>
                   )}
-                  
-                  {/* Bulk Actions */}
+
                   {selectedUsers.length > 0 && (
                     <motion.div 
                       initial={{ opacity: 0, y: -10 }}
@@ -667,7 +710,6 @@ export default function StatisticsPage() {
               </CardContent>
             </Card>
 
-            {/* Dynamic Leaderboard Views */}
             <Card className={cn("card-hover-glow transition-all duration-500", animateCards && "animate-pulse")}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-primary">
@@ -678,7 +720,7 @@ export default function StatisticsPage() {
                       {filteredRanking.length} utilizadores
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <Button
                       variant={showComparison ? "default" : "outline"}
@@ -689,7 +731,7 @@ export default function StatisticsPage() {
                       <BarChart3 className="h-4 w-4 mr-2" />
                       Comparar
                     </Button>
-                    
+
                     <Button variant="outline" size="icon" className="h-8 w-8">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -799,8 +841,8 @@ export default function StatisticsPage() {
                             </TableCell>
                             <TableCell>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MousePointer2 className="h-4 w-4" />
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setExpandedUserInfo(entry.user)}>
+                                  <User2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -841,7 +883,7 @@ export default function StatisticsPage() {
                                   {entry.change || 0}
                                 </Badge>
                               </div>
-                              
+
                               <div className="flex items-center gap-3 mb-3">
                                 <Avatar className="h-12 w-12 border-2 border-primary/20">
                                   <AvatarImage src={entry.avatar} alt={entry.user} />
@@ -855,7 +897,7 @@ export default function StatisticsPage() {
                                   <p className="text-sm text-muted-foreground">{entry.region}</p>
                                 </div>
                               </div>
-                              
+
                               <div className="grid grid-cols-2 gap-2 text-sm">
                                 <div className="text-center p-2 bg-muted/30 rounded">
                                   <p className="font-bold text-primary"><FormattedNumber value={entry.pixels} /></p>
@@ -899,12 +941,12 @@ export default function StatisticsPage() {
                             )}
                             <span className="font-bold">#{entry.rank}</span>
                           </div>
-                          
+
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={entry.avatar} alt={entry.user} />
                             <AvatarFallback className="text-xs">{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          
+
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{entry.user}</span>
@@ -912,12 +954,12 @@ export default function StatisticsPage() {
                             </div>
                             <p className="text-xs text-muted-foreground">{entry.region}</p>
                           </div>
-                          
+
                           <div className="text-right">
                             <p className="font-bold text-sm"><FormattedNumber value={entry.pixels} /></p>
                             <p className="text-xs text-muted-foreground">pixels</p>
                           </div>
-                          
+
                           <div className="text-right">
                             <div className="flex items-center gap-1">
                               <Flame className="h-3 w-3 text-orange-500" />
@@ -931,7 +973,6 @@ export default function StatisticsPage() {
                 )}
               </CardContent>
             </Card>
-          {/* User Comparison Panel */}
             {showComparison && selectedUsers.length >= 2 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -959,7 +1000,7 @@ export default function StatisticsPage() {
                       {selectedUsers.map(username => {
                         const user = userRankingData.find(u => u.user === username);
                         if (!user) return null;
-                        
+
                         return (
                           <Card key={username} className="border-primary/20">
                             <CardContent className="p-4">
@@ -971,7 +1012,7 @@ export default function StatisticsPage() {
                                 <h3 className="font-bold">{user.user}</h3>
                                 <p className="text-sm text-muted-foreground">Rank #{user.rank}</p>
                               </div>
-                              
+
                               <div className="space-y-3">
                                 <div className="flex justify-between">
                                   <span className="text-sm">Pixels:</span>
@@ -1006,7 +1047,7 @@ export default function StatisticsPage() {
                         );
                       })}
                     </div>
-                    
+
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex justify-center gap-2">
                         <Button onClick={() => handleBulkAction('challenge')}>
@@ -1024,10 +1065,8 @@ export default function StatisticsPage() {
             )}
           </TabsContent>
 
-          {/* Regions Tab */}
           <TabsContent value="regions" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Regional Distribution */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1062,7 +1101,6 @@ export default function StatisticsPage() {
                 </CardContent>
               </Card>
 
-              {/* Regional Performance */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1089,7 +1127,7 @@ export default function StatisticsPage() {
                               {region.trend}
                             </Badge>
                           </div>
-                          
+
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                               <p className="text-muted-foreground">Pixels</p>
@@ -1117,10 +1155,8 @@ export default function StatisticsPage() {
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Market Trends */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1137,7 +1173,6 @@ export default function StatisticsPage() {
                 </CardContent>
               </Card>
 
-              {/* User Engagement */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1167,7 +1202,6 @@ export default function StatisticsPage() {
               </Card>
             </div>
 
-            {/* Detailed Analytics */}
             <Card className="card-hover-glow">
               <CardHeader>
                 <CardTitle className="flex items-center text-primary">
@@ -1193,9 +1227,177 @@ export default function StatisticsPage() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
-        
-        {/* New Section: Data Insights */}
+
+          {/* Expanded User Information Panels */}
+          {expandedUserInfo && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-6"
+            >
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center">
+                      <Users2 className="h-5 w-5 mr-2" />
+                      Perfil Detalhado: {expandedUserInfo}
+                      {favoriteUsers.includes(expandedUserInfo) && <Star className="h-4 w-4 ml-2 text-yellow-500" />}
+                    </CardTitle>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setExpandedUserInfo(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const user = userRankingData.find(u => u.user === expandedUserInfo);
+                    if (!user) return null;
+
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Basic Info */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-16 w-16 border-2 border-primary/20">
+                              <AvatarImage src={user.avatar} alt={user.user} />
+                              <AvatarFallback>{user.user.substring(0,2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h3 className="font-bold text-lg">{user.user}</h3>
+                              <p className="text-muted-foreground">Rank #{user.rank}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="outline">Nível {user.level}</Badge>
+                                <Badge variant="secondary">{user.region}</Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="text-center p-3 bg-muted/30 rounded">
+                              <p className="font-bold text-primary"><FormattedNumber value={user.pixels} /></p>
+                              <p className="text-xs text-muted-foreground">Pixels</p>
+                            </div>
+                            <div className="text-center p-3 bg-muted/30 rounded">
+                              <p className="font-bold text-green-500"><FormattedNumber value={user.score} /></p>
+                              <p className="text-xs text-muted-foreground">Pontuação</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="space-y-3">
+                          <h4 className="font-semibold">Ações Rápidas</h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleFollowUser(user.user)}
+                              variant={followedUsers.includes(user.user) ? "default" : "outline"}
+                            >
+                              {followedUsers.includes(user.user) ? <UserMinus className="h-4 w-4 mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+                              {followedUsers.includes(user.user) ? 'Deixar' : 'Seguir'}
+                            </Button>
+
+                            <Button size="sm" onClick={() => handleChallengeUser(user.user)}>
+                              <Swords className="h-4 w-4 mr-2" />
+                              Desafiar
+                            </Button>
+
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleFavoriteUser(user.user)}
+                            >
+                              <Star className={cn("h-4 w-4 mr-2", favoriteUsers.includes(user.user) && "text-yellow-500")} />
+                              Favorito
+                            </Button>
+
+                            <Button size="sm" variant="outline">
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Mensagem
+                            </Button>
+                          </div>
+
+                          {/* User Notes */}
+                          <div className="mt-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h5 className="text-sm font-medium">Notas Pessoais</h5>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-4 w-4"
+                                onClick={() => setShowUserNotes(prev => ({ ...prev, [user.user]: !prev[user.user] }))}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+
+                            {userNotes[user.user] && (
+                              <div className="p-2 bg-muted/30 rounded text-sm mb-2">
+                                {userNotes[user.user]}
+                              </div>
+                            )}
+
+                            {showUserNotes[user.user] && (
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Adicionar nota..."
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleAddNote(user.user, e.currentTarget.value);
+                                      e.currentTarget.value = '';
+                                    }
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Statistics */}
+                        <div className="space-y-3">
+                          <h4 className="font-semibold">Estatísticas</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Sequência:</span>
+                              <div className="flex items-center gap-1">
+                                <Flame className="h-4 w-4 text-orange-500" />
+                                <span>{user.streak} dias</span>
+                              </div>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Visualizações:</span>
+                              <span>{userInteractions[user.user] || 0}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Última atividade:</span>
+                              <span>Há 2 horas</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Emblemas:</span>
+                              <div className="flex gap-1">
+                                {user.badges.map(badge => (
+                                  <Badge key={badge} variant="outline" className="text-xs">
+                                    {badge}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </TabsContent>
+
         <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center text-primary">
