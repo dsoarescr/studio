@@ -32,7 +32,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen">
       <UserProfileHeader />
       <main className="flex-1 flex overflow-hidden pt-14 pb-[var(--bottom-nav-height)]">
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={false}>
           <div className="relative h-full w-full flex">
             <MapSidebar />
             <div className="flex-1 h-full relative">
