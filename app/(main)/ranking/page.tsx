@@ -172,7 +172,7 @@ const userRankingData: LeaderboardEntry[] = [
 ];
 
 const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, footer, tooltip, change24h }) => (
-  <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card via-card/95 to-primary/5 relative group overflow-hidden card-hover-glow">
+  <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card via-card/95 to-primary/5 relative group overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     <CardContent className="p-6 relative z-10">
       <div className="flex items-center justify-between mb-4">
@@ -187,7 +187,7 @@ const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, fo
           </Badge>
         )}
       </div>
-      <p className="text-3xl font-bold font-headline mt-2 text-gradient-gold">{value}</p>
+      <p className="text-3xl font-bold font-headline mt-2">{value}</p>
       <p className="text-sm text-muted-foreground mt-1">{title}</p>
       {change24h !== undefined && (
         <p className="text-xs text-accent mt-2">+{change24h.toLocaleString('pt-PT')} hoje</p>
@@ -213,6 +213,7 @@ const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, fo
 
 const FormattedNumber: React.FC<{ value: number }> = ({ value }) => {
   const [formattedValue, setFormattedValue] = useState<string | null>(null);
+
   useEffect(() => {
     setFormattedValue(value.toLocaleString('pt-PT'));
   }, [value]);
@@ -417,7 +418,11 @@ export default function StatisticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
+      <SoundEffect 
+        src={SOUND_EFFECTS.SUCCESS} 
+        play={playRewardSound} 
+        onEnd={() => setPlayRewardSound(false)} 
+      />
 
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
