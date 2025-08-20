@@ -1,11 +1,11 @@
 'use client';
 
  import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-import { Label } from "../../../components/ui/label";
-import { Button } from "../../../components/ui/button";
-import { useToast } from "../../../hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Globe, Save, RefreshCw } from "lucide-react";
 
 export default function LanguageSettingsPage() {
