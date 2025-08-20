@@ -424,7 +424,6 @@ export default function StatisticsPage() {
         play={playRewardSound} 
         onEnd={() => setPlayRewardSound(false)} 
       />
-
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
@@ -879,7 +878,7 @@ export default function StatisticsPage() {
                                   {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
                                   <span className="font-bold text-lg">#{entry.rank}</span>
                                 </div>
-                                <Badge variant={entry.change > 0 ? "default" : entry.change < 0 ? "destructive" : "secondary"}>
+                                <Badge variant={entry.change > 0 ? 'default' : entry.change < 0 ? 'destructive' : 'secondary'}>
                                   {entry.change > 0 && <ChevronUp className="h-3 w-3 mr-1" />}
                                   {entry.change < 0 && <ChevronDown className="h-3 w-3 mr-1" />}
                                   {entry.change || 0}
@@ -1452,3 +1451,4 @@ export default function StatisticsPage() {
     </div>
   );
 }
+
