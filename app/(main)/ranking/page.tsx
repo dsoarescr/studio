@@ -547,29 +547,27 @@ export default function StatisticsPage() {
                     <Badge variant="outline" className="ml-2 text-xs">Últimos 7 dias</Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
-                      <div className="flex items-center gap-3">
-                        <ArrowUp className="h-5 w-5 text-green-500" />
-                        <span className="font-medium">Utilizadores Ativos</span>
-                      </div>
-                      <span className="text-green-500 font-bold">+23.4%</span>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
+                    <div className="flex items-center gap-3">
+                      <ArrowUp className="h-5 w-5 text-green-500" />
+                      <span className="font-medium">Utilizadores Ativos</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
-                      <div className="flex items-center gap-3">
-                        <ArrowUp className="h-5 w-5 text-blue-500" />
-                        <span className="font-medium">Volume de Transações</span>
-                      </div>
-                      <span className="text-blue-500 font-bold">+18.9%</span>
+                    <span className="text-green-500 font-bold">+23.4%</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
+                    <div className="flex items-center gap-3">
+                      <ArrowUp className="h-5 w-5 text-blue-500" />
+                      <span className="font-medium">Volume de Transações</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10">
-                      <div className="flex items-center gap-3">
-                        <ArrowUp className="h-5 w-5 text-purple-500" />
-                        <span className="font-medium">Novos Registos</span>
-                      </div>
-                      <span className="text-purple-500 font-bold">+15.2%</span>
+                    <span className="text-blue-500 font-bold">+18.9%</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10">
+                    <div className="flex items-center gap-3">
+                      <ArrowUp className="h-5 w-5 text-purple-500" />
+                      <span className="font-medium">Novos Registos</span>
                     </div>
+                    <span className="text-purple-500 font-bold">+15.2%</span>
                   </div>
                 </CardContent>
               </Card>
@@ -582,24 +580,22 @@ export default function StatisticsPage() {
                     <Badge variant="outline" className="ml-2 text-xs">Ao vivo</Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Pixels comprados (última hora)</span>
-                      <span className="font-bold text-primary">47</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Utilizadores online</span>
-                      <span className="font-bold text-green-500">1,247</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Transações pendentes</span>
-                      <span className="font-bold text-orange-500">23</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Região mais ativa</span>
-                      <span className="font-bold text-accent">Lisboa</span>
-                    </div>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Pixels comprados (última hora)</span>
+                    <span className="font-bold text-primary">47</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Utilizadores online</span>
+                    <span className="font-bold text-green-500">1,247</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Transações pendentes</span>
+                    <span className="font-bold text-orange-500">23</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Região mais ativa</span>
+                    <span className="font-bold text-accent">Lisboa</span>
                   </div>
                 </CardContent>
               </Card>
