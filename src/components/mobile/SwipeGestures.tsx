@@ -90,14 +90,21 @@ export default function SwipeGestures({
       label: 'Partilhar',
       color: 'text-green-500',
       threshold: 80,
-      action: () => {
-        if (navigator.share) {
-          navigator.share({
-            title: 'Pixel Universe',
-            text: 'Confira este pixel incrível!',
-            url: window.location.href
-          });
-        } else {
+      action: async () => {
+        try {
+          if (navigator.share) {
+            await navigator.share({
+              title: 'Pixel Universe',
+              text: 'Confira este pixel incrível!',
+              url: window.location.href
+            });
+          } else {
+            throw new Error('Web Share API not available.');
+          }
+        } catch (error) {
+          console.error("Share failed:", error);
+          // Fallback to clipboard
+          navigator.clipboard.writeText(window.location.href);
           toast({
             title: "📤 Partilhado!",
             description: "Link copiado para a área de transferência.",
