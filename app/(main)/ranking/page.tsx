@@ -18,12 +18,10 @@ import {
   TrendingUp, ArrowUp, ArrowDown, Map, Clock, Trophy, Medal, Info, Crown,
   Star, Flame, Zap, Activity, Calendar, Filter, Search, SortAsc, Download,
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
-  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, 
-  Lightbulb, MoreVertical, PlayCircle, Pause, Volume2, VolumeX, Shuffle,
-  RotateCcw, MousePointer2, Gamepad2, Layers, Grid3X3, Zap as FlashZap,
-  Users2, X, UserPlus, UserMinus, Swords, MessageCircle, Plus, User2, User
+  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, MapPinIcon,
+  Lightbulb
 } from "lucide-react";
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -173,7 +171,7 @@ const userRankingData: LeaderboardEntry[] = [
 ];
 
 const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, footer, tooltip, change24h }) => (
-  <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card via-card/95 to-primary/5 relative group overflow-hidden">
+  <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card via-card/95 to-primary/5 relative group overflow-hidden card-hover-glow">
     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     <CardContent className="p-6 relative z-10">
       <div className="flex items-center justify-between mb-4">
@@ -188,7 +186,7 @@ const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, fo
           </Badge>
         )}
       </div>
-      <p className="text-3xl font-bold font-headline mt-2">{value}</p>
+      <p className="text-3xl font-bold font-headline mt-2 text-gradient-gold">{value}</p>
       <p className="text-sm text-muted-foreground mt-1">{title}</p>
       {change24h !== undefined && (
         <p className="text-xs text-accent mt-2">+{change24h.toLocaleString('pt-PT')} hoje</p>
@@ -214,7 +212,6 @@ const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, fo
 
 const FormattedNumber: React.FC<{ value: number }> = ({ value }) => {
   const [formattedValue, setFormattedValue] = useState<string | null>(null);
-
   useEffect(() => {
     setFormattedValue(value.toLocaleString('pt-PT'));
   }, [value]);
@@ -235,19 +232,6 @@ export default function StatisticsPage() {
   const [filterRegion, setFilterRegion] = useState<string>('all');
   const { toast } = useToast();
   const [playRewardSound, setPlayRewardSound] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [animateCards, setAnimateCards] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('table');
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [showComparison, setShowComparison] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
-  const [expandedUserInfo, setExpandedUserInfo] = useState<string | null>(null);
-  const [followedUsers, setFollowedUsers] = useState<string[]>([]);
-  const [favoriteUsers, setFavoriteUsers] = useState<string[]>([]);
-  const [userNotes, setUserNotes] = useState<{ [key: string]: string }>({});
-  const [showUserNotes, setShowUserNotes] = useState<{ [key: string]: boolean }>({});
-  const [userInteractions, setUserInteractions] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     const updateTime = () => {
@@ -259,30 +243,6 @@ export default function StatisticsPage() {
 
     return () => clearInterval(intervalId); 
   }, []);
-
-  useEffect(() => {
-    if (autoRefresh) {
-      const interval = setInterval(() => {
-        setAnimateCards(true);
-        setTimeout(() => setAnimateCards(false), 500);
-
-        toast({
-          title: "Dados Atualizados",
-          description: "Rankings atualizados automaticamente!",
-        });
-      }, 30000);
-      setRefreshInterval(interval);
-    } else {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-        setRefreshInterval(null);
-      }
-    }
-
-    return () => {
-      if (refreshInterval) clearInterval(refreshInterval);
-    };
-  }, [autoRefresh, toast]);
 
   const timeRanges: { id: 'day' | 'week' | 'month' | 'year'; label: string; icon: React.ReactNode }[] = [
     { id: 'day', label: 'Hoje', icon: <Clock className="h-4 w-4" /> },
@@ -297,7 +257,8 @@ export default function StatisticsPage() {
       title: "Dados Exportados",
       description: "Os dados estatísticos foram exportados com sucesso. Recebeu 25 créditos como recompensa!",
     });
-
+    
+    // Reward the user for exporting data
     addCredits(25);
     addXp(10);
   };
@@ -308,94 +269,11 @@ export default function StatisticsPage() {
       title: "Estatísticas Partilhadas",
       description: "Link das estatísticas copiado para a área de transferência. Recebeu 50 créditos como recompensa!",
     });
-
+    
+    // Reward the user for sharing stats
     addCredits(50);
     addXp(25);
   };
-
-  const handleToggleUser = (username: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(username) 
-        ? prev.filter(u => u !== username)
-        : [...prev, username].slice(0, 3)
-    );
-  };
-
-  const handleBulkAction = (action: 'follow' | 'challenge' | 'message') => {
-    if (selectedUsers.length === 0) return;
-
-    setPlayRewardSound(true);
-    toast({
-      title: `Ação ${action} aplicada`,
-      description: `${action} enviado para ${selectedUsers.length} utilizadores.`,
-    });
-
-    addCredits(selectedUsers.length * 10);
-    setSelectedUsers([]);
-  };
-
-  const handleRandomizeView = () => {
-    setAnimateCards(true);
-    const modes: ('table' | 'cards' | 'compact')[] = ['table', 'cards', 'compact'];
-    const randomMode = modes[Math.floor(Math.random() * modes.length)];
-    setViewMode(randomMode);
-
-    setTimeout(() => setAnimateCards(false), 800);
-
-    toast({
-      title: "Vista Aleatória",
-      description: `Mudou para vista ${randomMode}. +15 XP!`,
-    });
-    addXp(15);
-  };
-
-  const handleFollowUser = (username: string) => {
-    setFollowedUsers(prev => 
-      prev.includes(username) ? prev.filter(u => u !== username) : [...prev, username]
-    );
-    setPlayRewardSound(true);
-    toast({
-      title: "Utilizador Gerido",
-      description: `${followedUsers.includes(username) ? 'Deixou de seguir' : 'Começou a seguir'} ${username}.`,
-    });
-  };
-
-  const handleFavoriteUser = (username: string) => {
-    setFavoriteUsers(prev => 
-      prev.includes(username) ? prev.filter(u => u !== username) : [...prev, username]
-    );
-    setPlayRewardSound(true);
-    toast({
-      title: "Favorito Atualizado",
-      description: `${favoriteUsers.includes(username) ? 'Removeu' : 'Adicionou'} ${username} aos favoritos.`,
-    });
-  };
-
-  const handleChallengeUser = (username: string) => {
-    setPlayRewardSound(true);
-    toast({
-      title: "Desafio Enviado",
-      description: `Desafio enviado para ${username}. Que comecem os jogos!`,
-    });
-    addCredits(20);
-  };
-
-  const handleAddNote = (username: string, note: string) => {
-    if (note.trim() === '') return;
-    setUserNotes(prev => ({ ...prev, [username]: note }));
-    setShowUserNotes(prev => ({ ...prev, [username]: false }));
-    setPlayRewardSound(true);
-    toast({
-      title: "Nota Guardada",
-      description: `Nota adicionada a ${username}.`,
-    });
-  };
-
-  useEffect(() => {
-    userRankingData.forEach(user => {
-      setUserInteractions(prev => ({ ...prev, [user.user]: Math.floor(Math.random() * 500) }));
-    });
-  }, []);
 
   const filteredRanking = userRankingData
     .filter(user => {
@@ -419,12 +297,18 @@ export default function StatisticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+<<<<<<< HEAD
       <SoundEffect 
         src={SOUND_EFFECTS.SUCCESS} 
         play={playRewardSound} 
         onEnd={() => setPlayRewardSound(false)} 
       />
+=======
+      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
+      
+>>>>>>> 33bbc07bd2df37f912d440ac7eb4047a7936b8bd
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
+        {/* Enhanced Header */}
         <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
                style={{ backgroundSize: '200% 200%' }} />
@@ -439,59 +323,29 @@ export default function StatisticsPage() {
                   Análise completa e em tempo real do ecossistema Pixel Universe
                 </CardDescription>
               </div>
-
+              
               <div className="flex items-center gap-3 animate-fade-in">
                 <div className="flex items-center gap-2 text-sm">
-                  <div className={cn(
-                    "w-2 h-2 rounded-full",
-                    autoRefresh ? "bg-green-400 animate-pulse" : "bg-orange-400"
-                  )} />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                   <span className="text-muted-foreground font-code">
                     Atualizado: {lastUpdated || '--:--'}
                   </span>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant={autoRefresh ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setAutoRefresh(!autoRefresh)}
-                    className="button-hover-lift"
-                  >
-                    {autoRefresh ? <Pause className="h-4 w-4 mr-2" /> : <PlayCircle className="h-4 w-4 mr-2" />}
-                    Auto
-                  </Button>
-
-                  <Button variant="outline" size="sm" onClick={handleRandomizeView} className="button-hover-lift">
-                    <Shuffle className="h-4 w-4 mr-2 text-purple-500" />
-                    Vista
-                  </Button>
-
-                  <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
-                    <Download className="h-4 w-4 mr-2 text-green-500" />
-                    Exportar
-                  </Button>
-
-                  <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
-                    <Share2 className="h-4 w-4 mr-2 text-blue-500" />
-                    Partilhar
-                  </Button>
-
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors button-hover-lift"
-                    onClick={() => {
-                      setAnimateCards(true);
-                      setTimeout(() => setAnimateCards(false), 500);
-                    }}
-                  >
-                    <RefreshCw className={cn("h-4 w-4", animateCards && "animate-spin")} />
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
+                  <Download className="h-4 w-4 mr-2 text-green-500" />
+                  Exportar
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
+                  <Share2 className="h-4 w-4 mr-2 text-blue-500" />
+                  Partilhar
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors button-hover-lift">
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-
+            
+            {/* Time Range Selector */}
             <div className="flex flex-wrap gap-2 mt-4 animate-fade-in animation-delay-200">
               {timeRanges.map(range => (
                 <Button 
@@ -512,6 +366,7 @@ export default function StatisticsPage() {
           </CardHeader>
         </Card>
 
+        {/* Enhanced Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-12 bg-card/50 backdrop-blur-sm shadow-md">
             <TabsTrigger value="overview" className="font-headline">
@@ -532,11 +387,14 @@ export default function StatisticsPage() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Global Metrics Grid */}
             <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" layout>
               {globalStatsData.map(stat => <StatDisplayCard key={stat.title} {...stat} />)}
             </motion.div>
 
+            {/* Quick Insights */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="card-hover-glow">
                 <CardHeader>
@@ -601,146 +459,58 @@ export default function StatisticsPage() {
             </div>
           </TabsContent>
 
+          {/* Leaderboard Tab */}
           <TabsContent value="leaderboard" className="space-y-6">
+            {/* Filters */}
             <Card className="card-hover-glow">
               <CardContent className="p-4">
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Pesquisar utilizadores..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant={showFilters ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="font-code"
-                      >
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filtros
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSortBy(sortBy === 'rank' ? 'pixels' : sortBy === 'pixels' ? 'score' : 'rank')}
-                        className="font-code"
-                      >
-                        <SortAsc className="h-4 w-4 mr-2" />
-                        {sortBy === 'rank' ? 'Rank' : sortBy === 'pixels' ? 'Pixels' : 'Pontuação'}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setViewMode(viewMode === 'table' ? 'cards' : viewMode === 'cards' ? 'compact' : 'table')}
-                        className="font-code"
-                      >
-                        {viewMode === 'table' && <Grid3X3 className="h-4 w-4 mr-2" />}
-                        {viewMode === 'cards' && <Layers className="h-4 w-4 mr-2" />}
-                        {viewMode === 'compact' && <BarChart3 className="h-4 w-4 mr-2" />}
-                        Vista
-                      </Button>
-                    </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Pesquisar utilizadores..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-
-                  {showFilters && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="border-t pt-4"
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSortBy(sortBy === 'rank' ? 'pixels' : 'rank')}
+                      className="font-code"
                     >
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <Button
-                          variant={filterRegion === 'all' ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterRegion('all')}
-                          className="text-xs"
-                        >
-                          Todas as Regiões
-                        </Button>
-                        {['Lisboa', 'Porto', 'Coimbra', 'Braga', 'Faro'].map(region => (
-                          <Button
-                            key={region}
-                            variant={filterRegion === region ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setFilterRegion(region)}
-                            className="text-xs"
-                          >
-                            {region}
-                          </Button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {selectedUsers.length > 0 && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border"
+                      <SortAsc className="h-4 w-4 mr-2" />
+                      {sortBy === 'rank' ? 'Rank' : 'Pixels'}
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFilterRegion(filterRegion === 'all' ? 'Lisboa' : 'all')}
+                      className="font-code"
                     >
-                      <span className="text-sm font-medium">
-                        {selectedUsers.length} utilizador{selectedUsers.length > 1 ? 'es' : ''} selecionado{selectedUsers.length > 1 ? 's' : ''}
-                      </span>
-                      <div className="flex gap-2 ml-auto">
-                        <Button size="sm" onClick={() => handleBulkAction('follow')}>
-                          <Users className="h-4 w-4 mr-1" />
-                          Seguir
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleBulkAction('challenge')}>
-                          <Trophy className="h-4 w-4 mr-1" />
-                          Desafiar
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setSelectedUsers([])}>
-                          Limpar
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
+                      <Filter className="h-4 w-4 mr-2" />
+                      {filterRegion === 'all' ? 'Todas' : filterRegion}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className={cn("card-hover-glow transition-all duration-500", animateCards && "animate-pulse")}>
+            {/* Leaderboard Table */}
+            <Card className="card-hover-glow">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between text-primary">
-                  <div className="flex items-center">
-                    <Trophy className="h-5 w-5 mr-2" />
-                    Classificação de Utilizadores
-                    <Badge variant="outline" className="ml-2 text-xs">
-                      {filteredRanking.length} utilizadores
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={showComparison ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setShowComparison(!showComparison)}
-                      disabled={selectedUsers.length < 2}
-                    >
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Comparar
-                    </Button>
-
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <CardTitle className="flex items-center text-primary">
+                  <Trophy className="h-5 w-5 mr-2" />
+                  Classificação de Utilizadores
                 </CardTitle>
                 <CardDescription>Os mestres do Pixel Universe com mais pixels e pontuação.</CardDescription>
               </CardHeader>
               <CardContent>
+<<<<<<< HEAD
                 {viewMode === 'table' && (
                   <ScrollArea className="h-96">
                     <Table>
@@ -888,186 +658,103 @@ export default function StatisticsPage() {
                               <div className="flex items-center gap-3 mb-3">
                                 <Avatar className="h-12 w-12 border-2 border-primary/20">
                                   <AvatarImage src={entry.avatar} alt={entry.user} />
+=======
+                <ScrollArea className="h-96">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[80px] font-code">Rank</TableHead>
+                        <TableHead className="font-code">Utilizador</TableHead>
+                        <TableHead className="text-right font-code">Pixels</TableHead>
+                        <TableHead className="text-right font-code">Pontuação</TableHead>
+                        <TableHead className="text-right font-code">Nível</TableHead>
+                        <TableHead className="text-right font-code">Sequência</TableHead>
+                        <TableHead className="text-center font-code">Mudança</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredRanking.map((entry) => (
+                        <TableRow key={entry.rank} className="hover:bg-muted/50 transition-colors">
+                          <TableCell className="font-semibold">
+                            <div className="flex items-center gap-2">
+                              {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-pulse" />}
+                              {entry.rank === 2 && <Medal className="h-5 w-5 text-gray-400" />}
+                              {entry.rank === 3 && <Medal className="h-5 w-5 text-orange-400" />}
+                              #{entry.rank}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <Avatar className="h-10 w-10 border-2 border-border">
+                                  <AvatarImage src={entry.avatar} alt={entry.user} data-ai-hint={entry.dataAiHint || 'avatar user'} />
+>>>>>>> 33bbc07bd2df37f912d440ac7eb4047a7936b8bd
                                   <AvatarFallback>{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
-                                <div>
-                                  <h3 className="font-semibold flex items-center gap-2">
-                                    {entry.user}
-                                    {entry.isVerified && <Star className="h-4 w-4 text-yellow-500" />}
-                                  </h3>
-                                  <p className="text-sm text-muted-foreground">{entry.region}</p>
-                                </div>
+                                {entry.isPremium && (
+                                  <Crown className="absolute -top-1 -right-1 h-4 w-4 text-amber-400" />
+                                )}
                               </div>
-
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div className="text-center p-2 bg-muted/30 rounded">
-                                  <p className="font-bold text-primary"><FormattedNumber value={entry.pixels} /></p>
-                                  <p className="text-xs text-muted-foreground">Pixels</p>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-foreground">{entry.user}</span>
+                                  {entry.isVerified && (
+                                    <Badge variant="outline" className="text-xs px-1 py-0">
+                                      <Star className="h-3 w-3" />
+                                    </Badge>
+                                  )}
                                 </div>
-                                <div className="text-center p-2 bg-muted/30 rounded">
-                                  <p className="font-bold text-green-500"><FormattedNumber value={entry.score} /></p>
-                                  <p className="text-xs text-muted-foreground">Score</p>
-                                </div>
+                                <p className="text-xs text-muted-foreground">{entry.region}</p>
                               </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-
-                {viewMode === 'compact' && (
-                  <ScrollArea className="h-96">
-                    <div className="space-y-2">
-                      {filteredRanking.map((entry, index) => (
-                        <motion.div
-                          key={entry.rank}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
-                          className={cn(
-                            "flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
-                            selectedUsers.includes(entry.user) && "bg-primary/10 border border-primary/20"
-                          )}
-                          onClick={() => handleToggleUser(entry.user)}
-                        >
-                          <div className="flex items-center gap-2 w-16">
-                            {entry.rank <= 3 && (
-                              <>
-                                {entry.rank === 1 && <Crown className="h-4 w-4 text-yellow-400" />}
-                                {entry.rank === 2 && <Medal className="h-4 w-4 text-gray-400" />}
-                                {entry.rank === 3 && <Medal className="h-4 w-4 text-orange-400" />}
-                              </>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-code">
+                            <FormattedNumber value={entry.pixels} />
+                          </TableCell>
+                          <TableCell className="text-right font-code">
+                            <FormattedNumber value={entry.score} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="secondary" className="font-code">
+                              {entry.level}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Flame className="h-4 w-4 text-orange-500" />
+                              <span className="font-code">{entry.streak}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {entry.change > 0 && (
+                              <div className="flex items-center justify-center text-green-500">
+                                <ChevronUp className="h-4 w-4" />
+                                <span className="text-xs">{entry.change}</span>
+                              </div>
                             )}
-                            <span className="font-bold">#{entry.rank}</span>
-                          </div>
-
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={entry.avatar} alt={entry.user} />
-                            <AvatarFallback className="text-xs">{entry.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{entry.user}</span>
-                              {entry.isVerified && <Star className="h-3 w-3 text-yellow-500" />}
-                            </div>
-                            <p className="text-xs text-muted-foreground">{entry.region}</p>
-                          </div>
-
-                          <div className="text-right">
-                            <p className="font-bold text-sm"><FormattedNumber value={entry.pixels} /></p>
-                            <p className="text-xs text-muted-foreground">pixels</p>
-                          </div>
-
-                          <div className="text-right">
-                            <div className="flex items-center gap-1">
-                              <Flame className="h-3 w-3 text-orange-500" />
-                              <span className="text-sm font-code">{entry.streak}</span>
-                            </div>
-                          </div>
-                        </motion.div>
+                            {entry.change < 0 && (
+                              <div className="flex items-center justify-center text-red-500">
+                                <ChevronDown className="h-4 w-4" />
+                                <span className="text-xs">{Math.abs(entry.change)}</span>
+                              </div>
+                            )}
+                            {entry.change === 0 && (
+                              <span className="text-muted-foreground text-xs">-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </div>
-                  </ScrollArea>
-                )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </CardContent>
             </Card>
-            {showComparison && selectedUsers.length >= 2 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mt-6"
-              >
-                <Card className="card-hover-glow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-primary">
-                      <BarChart3 className="h-5 w-5 mr-2" />
-                      Comparação de Utilizadores
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="ml-auto h-6 w-6"
-                        onClick={() => setShowComparison(false)}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {selectedUsers.map(username => {
-                        const user = userRankingData.find(u => u.user === username);
-                        if (!user) return null;
-
-                        return (
-                          <Card key={username} className="border-primary/20">
-                            <CardContent className="p-4">
-                              <div className="text-center mb-4">
-                                <Avatar className="h-16 w-16 mx-auto mb-2 border-2 border-primary/20">
-                                  <AvatarImage src={user.avatar} alt={user.user} />
-                                  <AvatarFallback>{user.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                                <h3 className="font-bold">{user.user}</h3>
-                                <p className="text-sm text-muted-foreground">Rank #{user.rank}</p>
-                              </div>
-
-                              <div className="space-y-3">
-                                <div className="flex justify-between">
-                                  <span className="text-sm">Pixels:</span>
-                                  <span className="font-bold text-primary">
-                                    <FormattedNumber value={user.pixels} />
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm">Pontuação:</span>
-                                  <span className="font-bold text-green-500">
-                                    <FormattedNumber value={user.score} />
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm">Nível:</span>
-                                  <Badge variant="secondary">{user.level}</Badge>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm">Sequência:</span>
-                                  <div className="flex items-center gap-1">
-                                    <Flame className="h-4 w-4 text-orange-500" />
-                                    <span className="font-code">{user.streak}</span>
-                                  </div>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm">Região:</span>
-                                  <span className="text-sm text-accent">{user.region}</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="flex justify-center gap-2">
-                        <Button onClick={() => handleBulkAction('challenge')}>
-                          <Trophy className="h-4 w-4 mr-2" />
-                          Desafiar Todos
-                        </Button>
-                        <Button variant="outline" onClick={() => setSelectedUsers([])}>
-                          Limpar Seleção
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
           </TabsContent>
 
+          {/* Regions Tab */}
           <TabsContent value="regions" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Regional Distribution */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1102,6 +789,7 @@ export default function StatisticsPage() {
                 </CardContent>
               </Card>
 
+              {/* Regional Performance */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1128,7 +816,7 @@ export default function StatisticsPage() {
                               {region.trend}
                             </Badge>
                           </div>
-
+                          
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                               <p className="text-muted-foreground">Pixels</p>
@@ -1156,8 +844,10 @@ export default function StatisticsPage() {
             </div>
           </TabsContent>
 
+          {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Market Trends */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1174,6 +864,7 @@ export default function StatisticsPage() {
                 </CardContent>
               </Card>
 
+              {/* User Engagement */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
@@ -1203,6 +894,7 @@ export default function StatisticsPage() {
               </Card>
             </div>
 
+            {/* Detailed Analytics */}
             <Card className="card-hover-glow">
               <CardHeader>
                 <CardTitle className="flex items-center text-primary">
@@ -1228,177 +920,9 @@ export default function StatisticsPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Expanded User Information Panels */}
-          {expandedUserInfo && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-6"
-            >
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <Users2 className="h-5 w-5 mr-2" />
-                      Perfil Detalhado: {expandedUserInfo}
-                      {favoriteUsers.includes(expandedUserInfo) && <Star className="h-4 w-4 ml-2 text-yellow-500" />}
-                    </CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setExpandedUserInfo(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {(() => {
-                    const user = userRankingData.find(u => u.user === expandedUserInfo);
-                    if (!user) return null;
-
-                    return (
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Basic Info */}
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-16 w-16 border-2 border-primary/20">
-                              <AvatarImage src={user.avatar} alt={user.user} />
-                              <AvatarFallback>{user.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-bold text-lg">{user.user}</h3>
-                              <p className="text-muted-foreground">Rank #{user.rank}</p>
-                              <div className="flex gap-2 mt-2">
-                                <Badge variant="outline">Nível {user.level}</Badge>
-                                <Badge variant="secondary">{user.region}</Badge>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="text-center p-3 bg-muted/30 rounded">
-                              <p className="font-bold text-primary"><FormattedNumber value={user.pixels} /></p>
-                              <p className="text-xs text-muted-foreground">Pixels</p>
-                            </div>
-                            <div className="text-center p-3 bg-muted/30 rounded">
-                              <p className="font-bold text-green-500"><FormattedNumber value={user.score} /></p>
-                              <p className="text-xs text-muted-foreground">Pontuação</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Quick Actions */}
-                        <div className="space-y-3">
-                          <h4 className="font-semibold">Ações Rápidas</h4>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleFollowUser(user.user)}
-                              variant={followedUsers.includes(user.user) ? "default" : "outline"}
-                            >
-                              {followedUsers.includes(user.user) ? <UserMinus className="h-4 w-4 mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
-                              {followedUsers.includes(user.user) ? 'Deixar' : 'Seguir'}
-                            </Button>
-
-                            <Button size="sm" onClick={() => handleChallengeUser(user.user)}>
-                              <Swords className="h-4 w-4 mr-2" />
-                              Desafiar
-                            </Button>
-
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleFavoriteUser(user.user)}
-                            >
-                              <Star className={cn("h-4 w-4 mr-2", favoriteUsers.includes(user.user) && "text-yellow-500")} />
-                              Favorito
-                            </Button>
-
-                            <Button size="sm" variant="outline">
-                              <MessageCircle className="h-4 w-4 mr-2" />
-                              Mensagem
-                            </Button>
-                          </div>
-
-                          {/* User Notes */}
-                          <div className="mt-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h5 className="text-sm font-medium">Notas Pessoais</h5>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-4 w-4"
-                                onClick={() => setShowUserNotes(prev => ({ ...prev, [user.user]: !prev[user.user] }))}
-                              >
-                                <Plus className="h-3 w-3" />
-                              </Button>
-                            </div>
-
-                            {userNotes[user.user] && (
-                              <div className="p-2 bg-muted/30 rounded text-sm mb-2">
-                                {userNotes[user.user]}
-                              </div>
-                            )}
-
-                            {showUserNotes[user.user] && (
-                              <div className="flex gap-2">
-                                <Input
-                                  placeholder="Adicionar nota..."
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      handleAddNote(user.user, e.currentTarget.value);
-                                      e.currentTarget.value = '';
-                                    }
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Statistics */}
-                        <div className="space-y-3">
-                          <h4 className="font-semibold">Estatísticas</h4>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span>Sequência:</span>
-                              <div className="flex items-center gap-1">
-                                <Flame className="h-4 w-4 text-orange-500" />
-                                <span>{user.streak} dias</span>
-                              </div>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Visualizações:</span>
-                              <span>{userInteractions[user.user] || 0}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Última atividade:</span>
-                              <span>Há 2 horas</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Emblemas:</span>
-                              <div className="flex gap-1">
-                                {user.badges.map(badge => (
-                                  <Badge key={badge} variant="outline" className="text-xs">
-                                    {badge}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </TabsContent>
-
+        </Tabs>
+        
+        {/* New Section: Data Insights */}
         <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center text-primary">
