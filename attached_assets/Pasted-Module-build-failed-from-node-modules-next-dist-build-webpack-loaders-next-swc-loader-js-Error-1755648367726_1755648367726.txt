@@ -1,0 +1,58 @@
+Module build failed (from ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js):
+Error:   × Unexpected token `div`. Expected jsx identifier
+     ╭─[/home/runner/workspace/app/(main)/ranking/page.tsx:419:1]
+ 416 │     });
+ 417 │ 
+ 418 │   return (
+ 419 │     
+
+     ·      ───
+ 420 │        setPlayRewardSound(false)} />
+ 421 │ 
+ 422 │       
+ 
+     ╰────
+
+
+Caused by:
+    Syntax Error
+Error: × Unexpected token `div`. Expected jsx identifier
+╭─[/home/runner/workspace/app/(main)/ranking/page.tsx:419:1]
+416 │ });
+417 │
+418 │ return (
+419 │ <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+· ───
+420 │ <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
+421 │
+422 │ <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl">
+╰────
+
+
+Caused by:
+Syntax Error
+at processResult (file:///home/runner/workspace/node_modules/next/dist/compiled/webpack/bundle5.js:29:407111)
+at <unknown> (file:///home/runner/workspace/node_modules/next/dist/compiled/webpack/bundle5.js:29:408906)
+at <unknown> (file:///home/runner/workspace/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8645)
+at <unknown> (file:///home/runner/workspace/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5019)
+at r.callback (file:///home/runner/workspace/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:4039)
+
+      
+
+    
+[HMR] connected
+./app/(main)/ranking/page.tsx
+Error:   × Unexpected token `div`. Expected jsx identifier
+     ╭─[/home/runner/workspace/app/(main)/ranking/page.tsx:419:1]
+ 416 │     });
+ 417 │ 
+ 418 │   return (
+ 419 │     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+     ·      ───
+ 420 │       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
+ 421 │ 
+ 422 │       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
+     ╰────
+
+Caused by:
+    Syntax Error
