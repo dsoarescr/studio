@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Camera, Smartphone, MapPin, Crosshair, Scan, X, Share2, Download } from 'lucide-react';
+// Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 
@@ -145,7 +145,7 @@ export default function PixelAR({ children }: PixelARProps) {
         stopAR();
       }
     };
-  }, [isOpen]);
+  }, [isOpen, getCurrentLocation, isARActive, stopAR]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

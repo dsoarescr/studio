@@ -392,7 +392,7 @@ export default function MemberPage() {
           <CardContent className="pt-0 pb-6">
             <div className="text-center mb-6">
               <p className="text-sm text-muted-foreground italic">
-                "{profileData.bio}"
+                &quot;{profileData.bio}&quot;
               </p>
             </div>
             
@@ -1223,7 +1223,7 @@ export default function MemberPage() {
                 {/* Bio */}
                 <Card className="bg-muted/20">
                   <CardContent className="p-4">
-                    <p className="text-sm text-center italic">"{selectedUser.bio}"</p>
+                    <p className="text-sm text-center italic">&quot;{selectedUser.bio}&quot;</p>
                   </CardContent>
                 </Card>
                 

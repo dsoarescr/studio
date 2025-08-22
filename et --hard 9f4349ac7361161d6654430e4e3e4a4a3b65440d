@@ -1,0 +1,10 @@
+[33mc79271c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m quero que a grelha de pixeis tenha 10.749.635 pixeis ok?
+[33mc62ce3a[m I see this error with the app, reported by NextJS, please fix it. The er
+[33m4f7bbc3[m fix: corrigir erro de webpack e SSR - Simplificar providers para evitar conflitos de SSR - Remover imports problemáticos do layout - Criar AppStoreProvider para Zustand store - Simplificar página inicial para evitar erros de hidratação - Corrigir estrutura de componentes client-side
+[33mfc36b89[m feat: implementar melhorias visuais e funcionalidades avançadas - Sistema de temas avançado com modo escuro/claro e temas sazonais - Sistema de partículas animadas para melhor experiência visual - Sistema de camadas para visualização de dados - Editor de pixel art avançado com ferramentas e efeitos - Animações e micro-interações fluidas - Gradientes dinâmicos e efeitos visuais - Interface melhorada com glassmorphism - Controles de tema e camadas integrados - CSS global atualizado com variáveis e animações - Layout responsivo e otimizado para mobile
+[33m9f4349a[m feat: implementar melhorias e correções na aplicação - Corrigir conflito de favicon entre app/ e public/ - Adicionar sistema de achievements avançado - Implementar PWA com service worker e manifest - Melhorar componentes de UI e funcionalidades - Adicionar novas páginas: analytics, collections - Atualizar dependências e configurações - Reorganizar estrutura de arquivos AI
+[33me3c261e[m a app está pronta para ser publicada?
+[33m7051d2e[m ===> RESTORING ===> BUILDING target distro name/version labels not found
+[33m2b79683[m Make the following changes:
+[33mbd48162[m I see this error with the app, reported by NextJS, please fix it. The er
+[33maa73512[m compensa instalar o turbopack?

@@ -4,15 +4,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Brain, Sparkles, Wand2, Palette,
-  Zap, Star, Crown, Gem, Target, TrendingUp, BarChart3,
-  Lightbulb, Rocket, Shield, Eye, Heart, MessageSquare
-} from 'lucide-react';
+// Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 // import { generatePixelDescription } from '@/ai/flows/generate-pixel-description';
@@ -160,7 +156,7 @@ export default function PixelAI({ children, pixelData }: PixelAIProps) {
         description: "Resposta gerada baseada no seu pedido.",
       });
       
-    } catch (error) {
+    } catch {
       toast({
         title: "Erro na IA",
         description: "Não foi possível processar o pedido personalizado.",

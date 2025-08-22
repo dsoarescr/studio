@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import { AuthModal } from './AuthModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Lock, UserPlus } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface RequireAuthProps {
   children: React.ReactNode;

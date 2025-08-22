@@ -8,11 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-import {
-  BarChart4, TrendingUp, Users, MessageSquare, Heart, Share2,
-  Eye, Target, PieChart, Activity, Clock, Calendar, Zap,
-  Award, Star, Flame, ThumbsUp, Network, Globe, UserPlus, User
-} from "lucide-react";
+// Lucide imports removed
 import { cn } from '@/lib/utils';
 
 interface CommunityStats {
@@ -494,3 +490,4 @@ export function CommunityAnalytics() {
     </div>
   );
 }
+

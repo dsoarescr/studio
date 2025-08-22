@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
@@ -19,14 +17,8 @@ import { Confetti } from '@/components/ui/confetti';
 import { motion } from "framer-motion";
 import {
   ShoppingCart, Gavel, Eye, Heart, MessageSquare, Star, Crown, Gem, 
-  MapPin, Clock, TrendingUp, Filter, Search, SortAsc, ExternalLink,
-  Share2, Bookmark, Gift, Coins, Zap, Target, Award, Users, Globe,
-  BarChart3, PieChart, LineChart, Calendar, Bell, Settings, Info,
-  CheckCircle, X, Plus, Minus, ArrowRight, ChevronRight, Sparkles,
-  Flame, Timer, AlertTriangle, Check, RefreshCw, Download, Upload,
-  Edit, Trash2, Copy, Link as LinkIcon, Camera, Palette, Brush,
-  Package, PackageOpen, DollarSign, CreditCard, Smartphone, Laptop,
-  Headphones, Monitor, Tablet, Watch, Home, Building, Car, Plane
+  MapPin, TrendingUp, Search, Gift, Users, Globe,
+  BarChart3, X, Sparkles, Timer, Check, Edit, DollarSign, Package
 } from "lucide-react";
 import {
   Dialog,
@@ -387,7 +379,7 @@ export default function MarketplacePage() {
     
     toast({
       title: "Pixel Comprado! 🎉",
-      description: `Adquiriu "${selectedPixel.title}" por €${selectedPixel.price}. Recebeu 50 XP!`,
+      description: `Adquiriu &quot;${selectedPixel.title}&quot; por €${selectedPixel.price}. Recebeu 50 XP!`,
     });
     
     setShowPurchaseModal(false);
@@ -517,7 +509,7 @@ export default function MarketplacePage() {
     
     toast({
       title: "Oferta Aceite! 💰",
-      description: `Vendeu "${pixel.title}" por €${offer.amount}. Recebeu €${finalAmount} (após comissão de ${Math.round(commission * 100)}%). +100 XP!`,
+      description: `Vendeu &quot;${pixel.title}&quot; por €${offer.amount}. Recebeu €${finalAmount} (após comissão de ${Math.round(commission * 100)}%). +100 XP!`,
     });
   };
 
@@ -1038,7 +1030,7 @@ export default function MarketplacePage() {
                                 
                                 {offer.message && (
                                   <p className="text-xs text-muted-foreground mt-2 italic">
-                                    "{offer.message}"
+                                    &quot;{offer.message}&quot;
                                   </p>
                                 )}
                               </div>
@@ -1083,7 +1075,7 @@ export default function MarketplacePage() {
           <DialogHeader>
             <DialogTitle>Confirmar Compra</DialogTitle>
             <DialogDescription>
-              {selectedPixel && `Pixel "${selectedPixel.title}" em ${selectedPixel.region}`}
+              {selectedPixel && `Pixel &quot;${selectedPixel.title}&quot; em ${selectedPixel.region}`}
             </DialogDescription>
           </DialogHeader>
           
@@ -1131,7 +1123,7 @@ export default function MarketplacePage() {
           <DialogHeader>
             <DialogTitle>Fazer Lance</DialogTitle>
             <DialogDescription>
-              {selectedPixel && `Leilão: "${selectedPixel.title}"`}
+              {selectedPixel && `Leilão: &quot;${selectedPixel.title}&quot;`}
             </DialogDescription>
           </DialogHeader>
           

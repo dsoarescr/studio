@@ -18,10 +18,9 @@ import { ScrollArea } from '../ui/scroll-area';
 interface UserProfileSheetProps {
   children: React.ReactNode;
   userData: UserProfileData;
-  achievementsData: Achievement[]; // Keep this prop as it's passed down
 }
 
-export function UserProfileSheet({ children, userData, achievementsData }: UserProfileSheetProps) {
+export function UserProfileSheet({ children, userData }: UserProfileSheetProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -40,3 +39,4 @@ export function UserProfileSheet({ children, userData, achievementsData }: UserP
     </Sheet>
   );
 }
+

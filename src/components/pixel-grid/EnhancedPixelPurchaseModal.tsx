@@ -32,7 +32,14 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brush, Eraser, PaintBucket, Pipette, Move, Circle, Square, Triangle, Type, Upload, Undo, Redo, Layers, Settings, Palette, Sparkles, Crown, Gift, Coins, ShoppingCart, Wand2, Filter, RotateCcw, Contrast, Eye, EyeOff, Grid3X3, Shuffle, Save, Download, Share2, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Zap, Star, Heart, Smile, Sun, Moon, Droplets, Flame, Snowflake, Leaf, Music, Camera, Mic, Headphones, Radio, X, Plus, Minus, MoreHorizontal, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Check, AlertTriangle, Info, HelpCircle, Maximize2, Minimize2, RotateCw, FlipHorizontal, FlipVertical, Copy, Scissors, Clipboard, Trash2, RefreshCw, ZoomIn, ZoomOut, Target, Crosshair, Paintbrush2, PenTool, Highlighter, Stamp, Sticker, Hash, AtSign, Percent, DollarSign, Euro, KeyRound as Pound, Pen as Yen, Bitcoin, Gem, Diamond, Hexagon, Octagon, Pentagon, MapPin, Globe, Compass, Navigation, Anchor, Plane, Car, Train, Ship, Home, Building, Castle, Church, Mountain, Trees as Tree, Flower, Bug, Fish, Bird, Cat, Dog, Rabbit, Bean as Bear, Option as Lion, ChartGantt as Elephant, Scale as Whale, Rocket, Satellite, Atom, Dna, Microscope, Telescope, Beaker, Pill, Syringe, Thermometer, Stethoscope, Bandage, Shield, Sword, Bot as Bow, Axe, Hammer, Wrench, HardDrive as Screwdriver, Drill, Save as Saw, Key, Lock, Unlock, Leaf as Safe, Vault, Trash as Treasure, Crown as CrownIcon, Medal, Trophy, Award, Ribbon, Flag, Bell, AlarmPlus as Alarm, Clock, Calendar, Watch, Timer, Watch as Stopwatch, Hourglass, Sunrise, Sunset, CloudRain, CloudSnow, CloudLightning, Rainbow, Umbrella, Glasses, Cat as Hat, Shirt, Trees as Dress, Shovel as Shoe, Ban as Bag, BellRing as Ring, Slack as Necklace, Watch as WatchIcon, Headphones as Earphones, Smartphone, Laptop, LampDesk as Desktop, Tablet, Keyboard, Mouse, Printer, Scan as Scanner, Webcam, Gamepad2, Joystick, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Spade, Club, Diamond as DiamondIcon, Heart as HeartIcon, Pizza, Coffee, Wine, Beer, Cake, Cookie, Apple, Banana, Cherry, Grape, Tangent as Orange, Cherry as Strawberry, GlassWaterIcon as Watermelon, Carrot, Popcorn as Corn, Heading as Bread, UserCheck as Cheese, Egg, Fish as FishIcon, Wheat as Meat, Milk, Bone as Honey, Salad as Salt, CaseUpper as Pepper, PhilippinePeso as Chili, Slice as Garlic, Option as Onion, Rotate3D as Potato, Atom as Tomato, LetterText as Lettuce } from 'lucide-react';
+import {
+  Brush, Eraser, PaintBucket, Pipette, Square, Circle, Triangle,
+  Type, Image, Palette, Sparkles, Wand2, Layers, Copy, RotateCcw,
+  Download, Share2, Heart, Star, Zap, Crown, Shield, Lock, Unlock,
+  Eye, EyeOff, Settings, Trash2, Plus, Minus, Move, Crop, Filter, Smile,
+  X, Undo, Redo, ZoomIn, ZoomOut, ShoppingCart, Upload, Shuffle, Leaf,
+  Cat, Gift
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SelectedPixelDetails {
@@ -59,8 +66,8 @@ interface EnhancedPixelPurchaseModalProps {
   onClose: () => void;
   pixelData: SelectedPixelDetails | null;
   userCredits: number;
-  userSpecialCredits: number;
-  onPurchase: (pixelData: SelectedPixelDetails, paymentMethod: string, customizations: any) => Promise<boolean>;
+
+  onPurchase: (pixelData: SelectedPixelDetails, paymentMethod: string, customizations: Record<string, unknown>) => Promise<boolean>;
 }
 
 interface CanvasState {
@@ -211,7 +218,7 @@ export default function EnhancedPixelPurchaseModal({
   onClose,
   pixelData,
   userCredits,
-  userSpecialCredits,
+
   onPurchase
 }: EnhancedPixelPurchaseModalProps) {
   // Estados principais
@@ -219,45 +226,43 @@ export default function EnhancedPixelPurchaseModal({
   const [selectedColor, setSelectedColor] = useState('#D4A757');
   const [brushSize, setBrushSize] = useState(3);
   const [brushOpacity, setBrushOpacity] = useState(100);
-  const [selectedPalette, setSelectedPalette] = useState('portugal');
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
   
   // Estados do canvas e camadas
   const [canvasHistory, setCanvasHistory] = useState<ImageData[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [layers, setLayers] = useState([
-    { id: '1', name: 'Camada 1', visible: true, opacity: 100 }
-  ]);
-  const [activeLayer, setActiveLayer] = useState(0);
+
   const [canvasZoom, setCanvasZoom] = useState(100);
   
   // Estados de personalização
   const [pixelTitle, setPixelTitle] = useState('');
   const [pixelDescription, setPixelDescription] = useState('');
   const [pixelLink, setPixelLink] = useState('');
-  const [selectedEffects, setSelectedEffects] = useState<string[]>([]);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+
   
   // Estados de animação
   const [isAnimated, setIsAnimated] = useState(false);
-  const [animationFrames, setAnimationFrames] = useState<AnimationFrame[]>([]);
-  const [currentFrame, setCurrentFrame] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingFrames, setRecordingFrames] = useState<string[]>([]);
+
   
   // Estados de interface
   const [activeTab, setActiveTab] = useState('draw');
   const [showGrid, setShowGrid] = useState(true);
-  const [gridSize, setGridSize] = useState(10);
+
   const [symmetryMode, setSymmetryMode] = useState<'none' | 'horizontal' | 'vertical' | 'both'>('none');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('');
-  const [showAdvanced, setShowAdvanced] = useState(false);
+
   
   // Estados de cores
   const [colorHistory, setColorHistory] = useState<string[]>(['#D4A757', '#7DF9FF', '#FF6B6B', '#4CAF50']);
-  const [customColors, setCustomColors] = useState<string[]>([]);
+  const [selectedEffects, setSelectedEffects] = useState<string[]>([]);
+  const [recordingFrames, setRecordingFrames] = useState<AnimationFrame[]>([]);
+  const [gridSize, setGridSize] = useState(8);
+  const [selectedPalette, setSelectedPalette] = useState('portugal');
+
   
   // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -265,7 +270,7 @@ export default function EnhancedPixelPurchaseModal({
   
   // Hooks
   const { toast } = useToast();
-  const { addCredits, addXp, removeCredits, removeSpecialCredits } = useUserStore();
+  const { addCredits, addXp, removeCredits } = useUserStore();
   const { vibrate } = useHapticFeedback();
   
   // Estados de som e confetti
@@ -379,7 +384,7 @@ export default function EnhancedPixelPurchaseModal({
     if (Math.random() > 0.8) {
       setPlayDrawSound(true);
     }
-  }, [selectedTool, selectedColor, brushSize, brushOpacity, lastPoint, symmetryMode, vibrate]);
+  }, [selectedTool, selectedColor, brushSize, brushOpacity, lastPoint, symmetryMode, vibrate, applySymmetry]);
 
   // Função de flood fill (balde de tinta)
   const floodFill = (ctx: CanvasRenderingContext2D, startX: number, startY: number, fillColor: string) => {
@@ -675,7 +680,7 @@ export default function EnhancedPixelPurchaseModal({
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
-      setUploadedImage(result);
+
       
       // Aplicar ao canvas
       const img = new Image();
@@ -723,7 +728,7 @@ export default function EnhancedPixelPurchaseModal({
     const newColors = Array.from({ length: 8 }, () => 
       `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
     );
-    setCustomColors(newColors);
+
     
     vibrate('light');
     
@@ -852,7 +857,7 @@ export default function EnhancedPixelPurchaseModal({
           onClose();
         }, 2000);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Erro na Compra",
         description: "Não foi possível completar a compra.",
@@ -1431,7 +1436,7 @@ export default function EnhancedPixelPurchaseModal({
                             key={mode.id}
                             variant={symmetryMode === mode.id ? 'default' : 'outline'}
                             size="sm"
-                            onClick={() => setSymmetryMode(mode.id as any)}
+                            onClick={() => setSymmetryMode(mode.id as 'none' | 'horizontal' | 'vertical' | 'both')}
                             className="h-10 flex flex-col gap-1"
                           >
                             {mode.icon}

@@ -1,26 +1,18 @@
 // src/components/pixel-grid/PixelGrid.tsx
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import {
-  ZoomIn, ZoomOut, Expand, Search, Sparkles, Info, User, CalendarDays,
-  History as HistoryIcon, DollarSign, ShoppingCart, Edit3, Palette as PaletteIconLucide, FileText, Upload, Save,
-  XCircle, TagsIcon, Link as LinkIconLucide, Pencil,
-  Eraser, PaintBucket, Trash2, Heart, Flag, BadgePercent, Star, MapPin as MapPinIconLucide, ScrollText, Gem, Globe, AlertTriangle,
-  Map as MapIcon, Crown, Crosshair, Camera, Play, Radio, Brain, Trophy, Gavel, Users
-} from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import PortugalMapSvg, { type MapData } from './PortugalMapSvg';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-// import { generatePixelDescription, type GeneratePixelDescriptionInput } from '@/ai/flows/generate-pixel-description';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { EnhancedTooltip, PixelTooltip } from '@/components/ui/enhanced-tooltip';
 import { LoadingOverlay, MapLoadingState } from '@/components/ui/loading-states';
-import { useAppStore, usePixelStore } from '@/lib/store';
+import { useAppStore, usePixelStore, useUserStore } from '@/lib/store';
 import {
   Dialog,
   DialogContent,
@@ -48,12 +40,10 @@ import PixelLiveStream from './PixelLiveStream';
 import PixelCollaborativeEditor from './PixelCollaborativeEditor';
 import PixelAuction from './PixelAuction';
 import PixelGameification from './PixelGameification';
-
 import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
-import { Search as SearchIcon, Eye, Grid3X3, Bookmark, MapPin as MapPinIcon } from 'lucide-react';
 
 // Performance optimization constants
 const VIRTUALIZATION_THRESHOLD = 10000;
@@ -111,68 +101,7 @@ const SPECIAL_CREDITS_CONVERSION = {
   'Marco Histórico': 500
 };
 
-// Derived constants
-const canvasDrawWidth = LOGICAL_GRID_COLS_CONFIG * RENDERED_PIXEL_SIZE_CONFIG;
-const canvasDrawHeight = Math.floor(canvasDrawWidth * (SVG_VIEWBOX_HEIGHT / SVG_VIEWBOX_WIDTH));
-const logicalGridRows = Math.floor(canvasDrawHeight / RENDERED_PIXEL_SIZE_CONFIG);
-const totalLogicalPixels = LOGICAL_GRID_COLS_CONFIG * logicalGridRows;
-
-const PLACEHOLDER_IMAGE_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-
-const USER_BOUGHT_PIXEL_COLOR = 'hsl(var(--primary))';
-
-const MOCK_CURRENT_USER_ID = 'currentUserPixelMaster';
-
-interface SoldPixel {
-  x: number;
-  y: number;
-  color: string;
-  ownerId?: string;
-  title?: string;
-  pixelImageUrl?: string;
-}
-
-interface SelectedPixelDetails {
-  x: number;
-  y: number;
-  owner?: string;
-  price: number;
-  acquisitionDate?: string;
-  lastModifiedDate?: string;
-  color?: string;
-  history: Array<{ owner: string; date: string; price?: number }>;
-  isOwnedByCurrentUser?: boolean;
-  isForSaleBySystem?: boolean;
-  manualDescription?: string;
-  pixelImageUrl?: string;
-  dataAiHint?: string;
-  title?: string;
-  tags?: string[];
-  linkUrl?: string;
-  isForSaleByOwner?: boolean;
-  salePrice?: number;
-  isFavorited?: boolean;
-  rarity: 'Comum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
-  loreSnippet?: string;
-  gpsCoords?: { lat: number; lon: number; } | null;
-  views: number;
-  likes: number;
-  region: string;
-  isProtected: boolean;
-  features?: string[];
-  description?: string;
-  specialCreditsPrice?: number;
-}
-
-const MIN_ZOOM = 0.05;
-const MAX_ZOOM = 50;
-const ZOOM_SENSITIVITY_FACTOR = 1.1;
-const HEADER_HEIGHT_PX = 64;
-const BOTTOM_NAV_HEIGHT_PX = 64;
-
-// Visualization modes
-type VisualizationMode = 'default' | 'thermal' | 'value' | 'ownership' | 'temporal' | 'rarity';
-
+// Types
 interface ZoomBookmark {
   id: string;
   name: string;
@@ -182,13 +111,30 @@ interface ZoomBookmark {
   timestamp: Date;
 }
 
-const mockRarities: SelectedPixelDetails['rarity'][] = ['Comum', 'Raro', 'Épico', 'Lendário', 'Marco Histórico'];
+interface SelectedPixelDetails {
+  x: number;
+  y: number;
+  owner?: string;
+  price: number;
+  region: string;
+  rarity: 'Comum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
+  color?: string;
+  title?: string;
+  description?: string;
+  isOwnedByCurrentUser?: boolean;
+  isForSaleBySystem?: boolean;
+  specialCreditsPrice?: number;
+  history: Array<{ owner: string; date: string; price?: number }>;
+  views?: number;
+  likes?: number;
+  isProtected?: boolean;
+}
+
+type VisualizationMode = 'default' | 'density' | 'value' | 'ownership' | 'activity';
+
 const mockLoreSnippets: string[] = [
-  "Dizem que este pixel brilha sob a lua cheia.",
-  "Um antigo mapa sugere um tesouro escondido perto daqui.",
   "Sente-se uma energia estranha emanando deste local.",
 ];
-
 
 export default function PixelGrid() {
   const [isClient, setIsClient] = useState(false);
@@ -232,6 +178,7 @@ export default function PixelGrid() {
   
   const { isOnline } = useAppStore();
   const { soldPixels, addSoldPixel } = usePixelStore();
+  const { credits, addCredits, addXp, addPixel } = useUserStore();
   
   const autoResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -242,6 +189,9 @@ export default function PixelGrid() {
 
   const containerSizeRef = useRef({ width: 0, height: 0 });
   const { vibrate } = useHapticFeedback();
+
+  // Enhanced loading state with better UX
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // Load saved bookmarks
   useEffect(() => {
@@ -266,6 +216,8 @@ export default function PixelGrid() {
       const newValueData = new Map<string, number>();
       
       // Calculate density in 10x10 pixel chunks
+      const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / RENDERED_PIXEL_SIZE_CONFIG);
+      
       for (let chunkY = 0; chunkY < logicalGridRows; chunkY += 10) {
         for (let chunkX = 0; chunkX < LOGICAL_GRID_COLS_CONFIG; chunkX += 10) {
           let pixelCount = 0;
@@ -290,7 +242,7 @@ export default function PixelGrid() {
       setDensityData(newDensityData);
       setValueData(newValueData);
     }
-  }, [pixelBitmap, soldPixels, logicalGridRows]);
+  }, [pixelBitmap, soldPixels]);
 
   const clearAutoResetTimeout = useCallback(() => {
     if (autoResetTimeoutRef.current) {
@@ -298,1429 +250,419 @@ export default function PixelGrid() {
       autoResetTimeoutRef.current = null;
     }
   }, []);
-  
-  // Enhanced loading state with better UX
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  
+
+  // Initialize client-side functionality
   useEffect(() => {
     setIsClient(true);
-     if (typeof window !== 'undefined') {
-      const computedStyle = getComputedStyle(document.documentElement);
-      const primaryColor = `hsl(${computedStyle.getPropertyValue('--primary').trim()})`;
-      const accentColor = `hsl(${computedStyle.getPropertyValue('--accent').trim()})`;
-      
-      setUnsoldColor(primaryColor);
-      setStrokeColor(accentColor);
-    }
-  }, []);
-
-  const handleMapDataLoaded = useCallback((data: MapData) => {
-    setMapData(data);
-  }, []);
-
-  useEffect(() => {
-    if (!isClient || !mapData || !mapData.svgElement) return;
-  
-    setProgressMessage("A renderizar mapa interativo...");
-    setIsLoadingMap(true);
-    setLoadingProgress(20);
     
-    const { svgElement } = mapData;
+    // Set default colors
+    setUnsoldColor('hsl(var(--muted))');
+    setStrokeColor('hsl(var(--border))');
     
-    // Serialize the SVG to a string
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgElement);
-    
-    // Create a Blob and a URL
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-    
-    const offscreenCanvas = document.createElement('canvas');
-    offscreenCanvas.width = canvasDrawWidth;
-    offscreenCanvas.height = canvasDrawHeight;
-    const ctx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) {
+    // Load map data
+    const loadMapData = async () => {
+      try {
+        setProgressMessage("Carregando mapa...");
+        setLoadingProgress(10);
+        
+        // Simulate map loading
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setLoadingProgress(50);
+        
+        setProgressMessage("Gerando grelha de pixels...");
+        await new Promise(resolve => setTimeout(resolve, 300));
+        setLoadingProgress(80);
+        
+        setProgressMessage("Finalizando...");
+        await new Promise(resolve => setTimeout(resolve, 200));
+        setLoadingProgress(100);
+        
         setIsLoadingMap(false);
-        URL.revokeObjectURL(url);
-        return;
-    }
-    
-    const img = new Image();
-    img.onload = () => {
-        // Draw the SVG image onto the canvas
-        ctx.drawImage(img, 0, 0, canvasDrawWidth, canvasDrawHeight);
-        setLoadingProgress(60);
-        URL.revokeObjectURL(url); // Clean up the blob URL
-
-        try {
-          setProgressMessage("A gerar grelha interativa...");
-          setLoadingProgress(80);
-          
-          const imageData = ctx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-          const data = imageData.data;
-          const newBitmap = new Uint8Array(LOGICAL_GRID_COLS_CONFIG * logicalGridRows);
-          let activePixels = 0;
-      
-          for (let row = 0; row < logicalGridRows; row++) {
-            for (let col = 0; col < LOGICAL_GRID_COLS_CONFIG; col++) {
-              const canvasX = Math.floor((col + 0.5) * RENDERED_PIXEL_SIZE_CONFIG);
-              const canvasY = Math.floor((row + 0.5) * RENDERED_PIXEL_SIZE_CONFIG);
-              const index = (canvasY * offscreenCanvas.width + canvasX) * 4;
-              
-              if (data[index + 3] > 0) { // Check alpha channel
-                newBitmap[row * LOGICAL_GRID_COLS_CONFIG + col] = 1;
-                activePixels++;
-              }
-            }
-          }
-          setPixelBitmap(newBitmap);
-          setActivePixelsInMap(activePixels);
-          setLoadingProgress(100);
-        } catch(e) {
-          console.error("Error generating pixel bitmap:", e);
-          toast({ title: "Erro na Grelha", description: "Não foi possível gerar a grelha interativa.", variant: "destructive" });
-        } finally {
-          setIsLoadingMap(false);
-          setProgressMessage("");
-        }
-    };
-    img.onerror = () => {
-        console.error("Failed to load SVG as image.");
-        toast({ title: "Erro no Mapa", description: "Não foi possível carregar o SVG melhorado.", variant: "destructive" });
-        setIsLoadingMap(false);
-        URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  
-  }, [isClient, mapData, toast]);
-
-  useEffect(() => {
-    const urlsToLoad = soldPixels
-      .map(p => p.pixelImageUrl)
-      .filter((url): url is string => !!url && !loadedPixelImages.has(url));
-  
-    if (urlsToLoad.length > 0) {
-      urlsToLoad.forEach(url => {
-        const img = new window.Image();
-        img.src = url;
-        img.onload = () => {
-          setLoadedPixelImages(prev => new Map(prev).set(url, img));
-        };
-        img.onerror = () => {
-          console.error(`Failed to load image: ${url}`);
-        };
-      });
-    }
-  }, [soldPixels, loadedPixelImages]);
-
-
-  useEffect(() => {
-    if (!pixelBitmap || !unsoldColor || !pixelCanvasRef.current) return;
-    const canvas = pixelCanvasRef.current;
-    if (canvas.width !== canvasDrawWidth || canvas.height !== canvasDrawHeight) {
-        canvas.width = canvasDrawWidth;
-        canvas.height = canvasDrawHeight;
-    }
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.imageSmoothingEnabled = false;
-
-    // 1. Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 2. Draw based on visualization mode
-    if (visualizationMode === 'thermal' && showDensityHeatmap) {
-      // Draw density heatmap
-      for (let chunkY = 0; chunkY < logicalGridRows; chunkY += 10) {
-        for (let chunkX = 0; chunkX < LOGICAL_GRID_COLS_CONFIG; chunkX += 10) {
-          const chunkKey = `${chunkX}-${chunkY}`;
-          const density = densityData.get(chunkKey) || 0;
-          const intensity = Math.min(density / 10, 1); // Normalize to 0-1
-          
-          if (intensity > 0) {
-            ctx.fillStyle = `rgba(255, ${255 - Math.floor(intensity * 255)}, 0, ${intensity * 0.7})`;
-            ctx.fillRect(chunkX, chunkY, 10, 10);
-          }
-        }
-      }
-    } else if (visualizationMode === 'value') {
-      // Draw value heatmap
-      for (let chunkY = 0; chunkY < logicalGridRows; chunkY += 10) {
-        for (let chunkX = 0; chunkX < LOGICAL_GRID_COLS_CONFIG; chunkX += 10) {
-          const chunkKey = `${chunkX}-${chunkY}`;
-          const value = valueData.get(chunkKey) || 0;
-          const intensity = Math.min(value / 200, 1); // Normalize to 0-1
-          
-          if (intensity > 0) {
-            ctx.fillStyle = `rgba(0, 255, ${255 - Math.floor(intensity * 255)}, ${intensity * 0.6})`;
-            ctx.fillRect(chunkX, chunkY, 10, 10);
-          }
-        }
-      }
-    } else {
-      // Default mode - draw base map
-      ctx.fillStyle = unsoldColor;
-      for (let row = 0; row < logicalGridRows; row++) {
-          for (let col = 0; col < LOGICAL_GRID_COLS_CONFIG; col++) {
-              if (pixelBitmap[row * LOGICAL_GRID_COLS_CONFIG + col] === 1) {
-                  ctx.fillRect(
-                      col * RENDERED_PIXEL_SIZE_CONFIG,
-                      row * RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG,
-                      RENDERED_PIXEL_SIZE_CONFIG
-                  );
-              }
-          }
-      }
-    }
-
-    // 3. Draw sold pixels with mode-specific styling
-    soldPixels.forEach(pixel => {
-      const renderX = pixel.x * RENDERED_PIXEL_SIZE_CONFIG;
-      const renderY = pixel.y * RENDERED_PIXEL_SIZE_CONFIG;
-      
-      let pixelColor = pixel.color;
-      
-      // Apply visualization mode effects
-      if (visualizationMode === 'ownership') {
-        if (pixel.ownerId === 'currentUserPixelMaster') {
-          pixelColor = '#00FF00'; // Green for user's pixels
-        } else if (pixel.ownerId) {
-          pixelColor = '#0080FF'; // Blue for other users
-        } else {
-          pixelColor = '#FFD700'; // Gold for system pixels
-        }
-      } else if (visualizationMode === 'temporal') {
-        // Color based on age (mock implementation)
-        const age = Math.random();
-        const red = Math.floor(255 * age);
-        const blue = Math.floor(255 * (1 - age));
-        pixelColor = `rgb(${red}, 100, ${blue})`;
-      } else if (visualizationMode === 'rarity') {
-        // Color based on rarity
-        const rarities = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário'];
-        const rarity = rarities[Math.floor(Math.random() * rarities.length)];
-        const rarityColors = {
-          'Comum': '#808080',
-          'Incomum': '#00FF00', 
-          'Raro': '#0080FF',
-          'Épico': '#8000FF',
-          'Lendário': '#FFD700'
-        };
-        pixelColor = rarityColors[rarity as keyof typeof rarityColors] || pixel.color;
-      }
-      
-      if (pixel.pixelImageUrl) {
-        const img = loadedPixelImages.get(pixel.pixelImageUrl);
-        if (img && img.complete) {
-            ctx.drawImage(img, renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-        } else {
-            ctx.fillStyle = pixelColor;
-            ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-        }
-      } else {
-        ctx.fillStyle = pixelColor;
-        ctx.fillRect(renderX, renderY, RENDERED_PIXEL_SIZE_CONFIG, RENDERED_PIXEL_SIZE_CONFIG);
-      }
-    });
-
-    // 4. Draw grid overlay if enabled
-    if (showGrid && zoom > 5) {
-      ctx.strokeStyle = 'rgba(212, 167, 87, 0.3)';
-      ctx.lineWidth = 0.5;
-      
-      // Draw vertical lines
-      for (let x = 0; x < canvasDrawWidth; x += RENDERED_PIXEL_SIZE_CONFIG * 10) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvasDrawHeight);
-        ctx.stroke();
-      }
-      
-      // Draw horizontal lines
-      for (let y = 0; y < canvasDrawHeight; y += RENDERED_PIXEL_SIZE_CONFIG * 10) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasDrawWidth, y);
-        ctx.stroke();
-      }
-    }
-
-  }, [pixelBitmap, soldPixels, unsoldColor, logicalGridRows, loadedPixelImages, visualizationMode, showGrid, zoom, showDensityHeatmap, densityData, valueData]);
-
-  // New navigation functions
-  const saveZoomBookmark = useCallback((name: string) => {
-    const bookmark: ZoomBookmark = {
-      id: Date.now().toString(),
-      name,
-      x: -position.x / zoom,
-      y: -position.y / zoom,
-      zoom,
-      timestamp: new Date()
-    };
-    
-    const newBookmarks = [...zoomBookmarks, bookmark].slice(-10); // Keep last 10
-    setZoomBookmarks(newBookmarks);
-    localStorage.setItem(ZOOM_BOOKMARKS_KEY, JSON.stringify(newBookmarks));
-    
-    toast({ 
-      title: "📍 Bookmark Guardado", 
-      description: `Localização "${name}" guardada com sucesso.` 
-    });
-  }, [position, zoom, zoomBookmarks, toast]);
-
-  const goToBookmark = useCallback((bookmark: ZoomBookmark) => {
-    clearAutoResetTimeout();
-    setZoom(bookmark.zoom);
-    setPosition({ x: -bookmark.x * bookmark.zoom, y: -bookmark.y * bookmark.zoom });
-    
-    toast({ 
-      title: "🎯 Navegando", 
-      description: `Indo para "${bookmark.name}"` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const goToLandmark = useCallback((landmarkName: string) => {
-    const landmark = LANDMARK_COORDINATES[landmarkName as keyof typeof LANDMARK_COORDINATES];
-    if (!landmark) return;
-    
-    clearAutoResetTimeout();
-    const containerWidth = containerRef.current?.offsetWidth || 0;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-    
-    const targetX = -landmark.x * RENDERED_PIXEL_SIZE_CONFIG * landmark.zoom + containerWidth / 2;
-    const targetY = -landmark.y * RENDERED_PIXEL_SIZE_CONFIG * landmark.zoom + effectiveContainerHeight / 2;
-    
-    setZoom(landmark.zoom);
-    setPosition({ x: targetX, y: targetY });
-    setHighlightedPixel({ x: landmark.x, y: landmark.y });
-    
-    toast({ 
-      title: "🏛️ Marco Histórico", 
-      description: `Navegando para ${landmarkName}` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const searchByPostalCode = useCallback((postalCode: string) => {
-    const coords = POSTAL_CODE_COORDINATES[postalCode as keyof typeof POSTAL_CODE_COORDINATES];
-    if (!coords) {
-      toast({ 
-        title: "❌ Código Postal", 
-        description: "Código postal não encontrado." 
-      });
-      return;
-    }
-    
-    clearAutoResetTimeout();
-    const containerWidth = containerRef.current?.offsetWidth || 0;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-    
-    const targetZoom = 15;
-    const targetX = -coords.x * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
-    const targetY = -coords.y * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
-    
-    setZoom(targetZoom);
-    setPosition({ x: targetX, y: targetY });
-    setHighlightedPixel({ x: coords.x, y: coords.y });
-    
-    toast({ 
-      title: "📮 Código Postal", 
-      description: `${postalCode} - ${coords.region}` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const zoomToRegion = useCallback((regionName: string) => {
-    // Define region bounds (mock implementation)
-    const regionBounds = {
-      'Lisboa': { x: 570, y: 1350, width: 30, height: 30, zoom: 8 },
-      'Porto': { x: 630, y: 1250, width: 25, height: 25, zoom: 10 },
-      'Coimbra': { x: 640, y: 1170, width: 20, height: 20, zoom: 12 },
-      'Braga': { x: 635, y: 1200, width: 15, height: 15, zoom: 15 },
-      'Faro': { x: 700, y: 1550, width: 20, height: 20, zoom: 12 }
-    };
-    
-    const region = regionBounds[regionName as keyof typeof regionBounds];
-    if (!region) return;
-    
-    clearAutoResetTimeout();
-    const containerWidth = containerRef.current?.offsetWidth || 0;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-    
-    const centerX = region.x + region.width / 2;
-    const centerY = region.y + region.height / 2;
-    
-    const targetX = -centerX * RENDERED_PIXEL_SIZE_CONFIG * region.zoom + containerWidth / 2;
-    const targetY = -centerY * RENDERED_PIXEL_SIZE_CONFIG * region.zoom + effectiveContainerHeight / 2;
-    
-    setZoom(region.zoom);
-    setPosition({ x: targetX, y: targetY });
-    
-    toast({ 
-      title: "🗺️ Região", 
-      description: `Navegando para ${regionName}` 
-    });
-  }, [clearAutoResetTimeout, toast]);
-
-  const handleDoubleClick = useCallback((event: React.MouseEvent) => {
-    if (!containerRef.current || !pixelBitmap) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const clickXInContainer = event.clientX - rect.left;
-    const clickYInContainer = event.clientY - rect.top;
-
-    const xOnContent = (clickXInContainer - position.x) / zoom;
-    const yOnContent = (clickYInContainer - position.y) / zoom;
-
-    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-
-    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
-      // Smart zoom to this area
-      const targetZoom = Math.min(zoom * 2, MAX_ZOOM);
-      const containerWidth = containerRef.current.offsetWidth;
-      const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-      
-      const targetX = -logicalCol * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
-      const targetY = -logicalRow * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
-      
-      setZoom(targetZoom);
-      setPosition({ x: targetX, y: targetY });
-      
-      vibrate('medium');
-      toast({ 
-        title: "🔍 Zoom Inteligente", 
-        description: `Focando no pixel (${logicalCol}, ${logicalRow})` 
-      });
-    }
-  }, [containerRef, pixelBitmap, position, zoom, vibrate, toast]);
-
-  const getVisualizationModeColor = (mode: VisualizationMode) => {
-    switch (mode) {
-      case 'thermal': return 'text-red-500';
-      case 'value': return 'text-green-500';
-      case 'ownership': return 'text-blue-500';
-      case 'temporal': return 'text-purple-500';
-      case 'rarity': return 'text-yellow-500';
-      default: return 'text-primary';
-    }
-  };
-
-  const getVisualizationModeIcon = (mode: VisualizationMode) => {
-    switch (mode) {
-      case 'thermal': return '🔥';
-      case 'value': return '💰';
-      case 'ownership': return '👤';
-      case 'temporal': return '⏰';
-      case 'rarity': return '💎';
-      default: return '🗺️';
-    }
-  };
-
-  
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-  
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        containerSizeRef.current = {
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        };
-        const outlineCanvas = outlineCanvasRef.current;
-        if (outlineCanvas) {
-          outlineCanvas.width = entry.contentRect.width;
-          outlineCanvas.height = entry.contentRect.height;
-        }
-      }
-    });
-  
-    resizeObserver.observe(container);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!mapData || !strokeColor || !outlineCanvasRef.current || containerSizeRef.current.width === 0) return;
-    const canvas = outlineCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-  
-    const logicalToSvgScale = canvasDrawWidth / SVG_VIEWBOX_WIDTH;
-  
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw district outlines
-    ctx.save();
-    ctx.translate(position.x, position.y);
-    ctx.scale(zoom * logicalToSvgScale, zoom * logicalToSvgScale);
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = 0.5 / (zoom * logicalToSvgScale);
-    ctx.imageSmoothingEnabled = true;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-  
-    mapData.pathStrings.forEach(pathString => {
-        try {
-            const path = new Path2D(pathString);
-            ctx.stroke(path);
-        } catch(e) {
-        }
-    });
-    ctx.restore();
-  
-    // Draw highlighted pixel border
-    ctx.save();
-    ctx.translate(position.x, position.y);
-    ctx.scale(zoom, zoom);
-    if (highlightedPixel) {
-        ctx.strokeStyle = 'hsl(var(--foreground))';
-        ctx.lineWidth = (0.5 / zoom) * RENDERED_PIXEL_SIZE_CONFIG;
-        ctx.strokeRect(
-            highlightedPixel.x * RENDERED_PIXEL_SIZE_CONFIG,
-            highlightedPixel.y * RENDERED_PIXEL_SIZE_CONFIG,
-            RENDERED_PIXEL_SIZE_CONFIG,
-            RENDERED_PIXEL_SIZE_CONFIG
-        );
-    }
-    // New: Pulsating border for selected pixel
-    if (selectedPixelDetails && selectedPixelDetails.x === highlightedPixel?.x && selectedPixelDetails.y === highlightedPixel?.y) {
-      const pulseAnimation = Math.abs(Math.sin(Date.now() / 300));
-      ctx.strokeStyle = `hsla(var(--foreground), ${0.5 + pulseAnimation * 0.5})`;
-      ctx.lineWidth = ((0.5 + pulseAnimation * 1.5) / zoom) * RENDERED_PIXEL_SIZE_CONFIG;
-      ctx.strokeRect(
-        selectedPixelDetails.x * RENDERED_PIXEL_SIZE_CONFIG - ctx.lineWidth/2,
-        selectedPixelDetails.y * RENDERED_PIXEL_SIZE_CONFIG - ctx.lineWidth/2,
-        RENDERED_PIXEL_SIZE_CONFIG + ctx.lineWidth,
-        RENDERED_PIXEL_SIZE_CONFIG + ctx.lineWidth
-      );
-    }
-    ctx.restore();
-
-    // Draw coordinates overlay if enabled
-    if (showCoordinates && zoom > 10) {
-      ctx.save();
-      ctx.translate(position.x, position.y);
-      ctx.scale(zoom, zoom);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.font = `${8 / zoom}px monospace`;
-      ctx.textAlign = 'center';
-      
-      // Show coordinates every 10 pixels when zoomed in
-      for (let x = 0; x < LOGICAL_GRID_COLS_CONFIG; x += 10) {
-        for (let y = 0; y < logicalGridRows; y += 10) {
-          if (pixelBitmap && pixelBitmap[y * LOGICAL_GRID_COLS_CONFIG + x] === 1) {
-            ctx.fillText(
-              `${x},${y}`,
-              x * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2,
-              y * RENDERED_PIXEL_SIZE_CONFIG + RENDERED_PIXEL_SIZE_CONFIG / 2
-            );
-          }
-        }
-      }
-      ctx.restore();
-    }
-
-  }, [mapData, zoom, position, strokeColor, highlightedPixel, selectedPixelDetails, showCoordinates, pixelBitmap]);
-  
-
-  useEffect(() => { 
-    if (isClient && containerRef.current && mapData?.pathStrings && !defaultView && canvasDrawWidth > 0 && canvasDrawHeight > 0) {
-      const containerWidth = containerRef.current.offsetWidth;
-      const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-      
-      if (containerWidth > 0 && effectiveContainerHeight > 0) {
-        const fitZoomX = containerWidth / canvasDrawWidth;
-        const fitZoomY = effectiveContainerHeight / canvasDrawHeight;
-        const zoomToFit = Math.min(fitZoomX, fitZoomY);
-        
-        const calculatedZoom = Math.max(MIN_ZOOM, zoomToFit * 0.95); 
-        const canvasContentWidth = canvasDrawWidth * calculatedZoom;
-        const canvasContentHeight = canvasDrawHeight * calculatedZoom;
-        
-        const calculatedPosition = {
-          x: (containerWidth - canvasContentWidth) / 2,
-          y: (effectiveContainerHeight - canvasContentHeight) / 2,
-        };
-        
-        setDefaultView({ zoom: calculatedZoom, position: calculatedPosition });
-        setZoom(calculatedZoom);
-        setPosition(calculatedPosition);
-      }
-    }
-  }, [isClient, mapData, defaultView, canvasDrawWidth, canvasDrawHeight]);
-
-
- const handleResetView = useCallback(() => {
-    clearAutoResetTimeout();
-    if (defaultView) {
-      setZoom(defaultView.zoom);
-      setPosition(defaultView.position);
-    } else if (isClient && containerRef.current && mapData?.pathStrings && canvasDrawWidth > 0 && canvasDrawHeight > 0) { 
-        const containerWidth = containerRef.current.offsetWidth;
-        const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-        if (containerWidth > 0 && effectiveContainerHeight > 0) {
-            const fitZoomX = containerWidth / canvasDrawWidth;
-            const fitZoomY = effectiveContainerHeight / canvasDrawHeight;
-            const zoomToFit = Math.min(fitZoomX, fitZoomY);
-            const fallbackZoom = Math.max(MIN_ZOOM, zoomToFit * 0.95);
-
-            const canvasContentWidth = canvasDrawWidth * fallbackZoom;
-            const canvasContentHeight = canvasDrawHeight * fallbackZoom;
-            const fallbackPosition = {
-                x: (containerWidth - canvasContentWidth) / 2,
-                y: (effectiveContainerHeight - canvasContentHeight) / 2,
-            };
-            setZoom(fallbackZoom);
-            setPosition(fallbackPosition);
-            setDefaultView({ zoom: fallbackZoom, position: fallbackPosition }); 
-        }
-    }
-  }, [defaultView, mapData, clearAutoResetTimeout, canvasDrawWidth, canvasDrawHeight, isClient]); 
-
-  const handleZoomIn = () => { clearAutoResetTimeout(); setZoom((prevZoom) => Math.min(prevZoom * 1.2, MAX_ZOOM)); };
-  const handleZoomOut = () => { clearAutoResetTimeout(); setZoom((prevZoom) => Math.max(prevZoom / 1.2, MIN_ZOOM)); };
-
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    clearAutoResetTimeout();
-    const targetElement = e.target as HTMLElement;
-     if (targetElement.closest('button, [data-dialog-content], [data-tooltip-content], [data-popover-content], label, a, [role="menuitem"], [role="tab"], input, textarea')) {
-        return;
-    }
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    didDragRef.current = false;
-  };
-
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
-    const currentX = e.clientX - dragStart.x;
-    const currentY = e.clientY - dragStart.y;
-
-    if (!didDragRef.current) {
-        const dx = Math.abs(currentX - position.x);
-        const dy = Math.abs(currentY - position.y);
-        if (dx > dragThreshold || dy > dragThreshold) {
-            didDragRef.current = true;
-        }
-    }
-    setPosition({ x: currentX, y: currentY });
-  };
-  
-  const handleCanvasClick = (event: React.MouseEvent) => {
-    clearAutoResetTimeout();
-
-    // Feedback háptico ao clicar
-    vibrate('selection');
-
-    if (!isOnline) {
-      toast({ title: "Sem Conexão", description: "Você está offline.", variant: "destructive" });
-    }
-
-    if (isLoadingMap || !pixelBitmap || !containerRef.current) {
-      toast({ title: "Mapa a Carregar", description: "A grelha está a ser processada.", variant: "default" });
-      return;
-    }
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const clickXInContainer = event.clientX - rect.left;
-    const clickYInContainer = event.clientY - rect.top;
-
-    const xOnContent = (clickXInContainer - position.x) / zoom;
-    const yOnContent = (clickYInContainer - position.y) / zoom;
-
-    const logicalCol = Math.floor(xOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-    const logicalRow = Math.floor(yOnContent / RENDERED_PIXEL_SIZE_CONFIG);
-
-    if (logicalCol >= 0 && logicalCol < LOGICAL_GRID_COLS_CONFIG && logicalRow >= 0 && logicalRow < logicalGridRows) {
-      const bitmapIdx = logicalRow * LOGICAL_GRID_COLS_CONFIG + logicalCol;
-      const existingSoldPixel = soldPixels.find(p => p.x === logicalCol && p.y === logicalRow);
-      
-      if (pixelBitmap[bitmapIdx] === 1) {
-        setHighlightedPixel({ x: logicalCol, y: logicalRow });
-
-        let mockDetails: SelectedPixelDetails;
-        const randomRarity = mockRarities[Math.floor(Math.random() * mockRarities.length)];
-        const randomLore = mockLoreSnippets[Math.floor(Math.random() * mockLoreSnippets.length)];
-        const approxGps = mapPixelToApproxGps(logicalCol, logicalRow, LOGICAL_GRID_COLS_CONFIG, logicalGridRows);
-        const region = (mapData as any)?.districtMapping?.[`${logicalCol},${logicalRow}`] || "Desconhecida";
-        const basePrice = PIXEL_BASE_PRICE * (PIXEL_RARITY_MULTIPLIERS[randomRarity] || 1);
-        const specialCreditsPrice = SPECIAL_CREDITS_CONVERSION[randomRarity] || 10;
-
-        if (existingSoldPixel) {
-             mockDetails = {
-                x: logicalCol, y: logicalRow, owner: existingSoldPixel.ownerId || MOCK_CURRENT_USER_ID,
-                acquisitionDate: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toLocaleDateString('pt-PT'),
-                lastModifiedDate: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7).toLocaleDateString('pt-PT'),
-                color: existingSoldPixel.color,
-                history: [{ owner: existingSoldPixel.ownerId || MOCK_CURRENT_USER_ID, date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toLocaleDateString('pt-PT'), price: Math.floor(Math.random() * 40) + 5 }],
-                isOwnedByCurrentUser: (existingSoldPixel.ownerId || MOCK_CURRENT_USER_ID) === MOCK_CURRENT_USER_ID,
-                isForSaleBySystem: false, manualDescription: 'Este é o meu pixel especial!',
-                pixelImageUrl: existingSoldPixel.pixelImageUrl, dataAiHint: 'pixel image',
-                title: existingSoldPixel.title || `Pixel de ${existingSoldPixel.ownerId || MOCK_CURRENT_USER_ID}`,
-                tags: ['meu', 'favorito'], linkUrl: Math.random() > 0.5 ? 'https://dourado.com' : undefined,
-                isForSaleByOwner: Math.random() > 0.5, salePrice: Math.random() > 0.5 ? Math.floor(Math.random() * 100) + 20 : undefined,
-                isFavorited: Math.random() > 0.5, rarity: randomRarity, loreSnippet: randomLore,
-                gpsCoords: approxGps, price: 0, views: Math.floor(Math.random() * 1000),
-                likes: Math.floor(Math.random() * 200), region, isProtected: Math.random() > 0.8, specialCreditsPrice: specialCreditsPrice,
-            };
-        } else { 
-             mockDetails = {
-                x: logicalCol, y: logicalRow, owner: undefined, price: basePrice,
-                color: unsoldColor, isOwnedByCurrentUser: false, isForSaleBySystem: true,
-                history: [], isFavorited: Math.random() > 0.8, rarity: randomRarity, loreSnippet: randomLore,
-                gpsCoords: approxGps, views: Math.floor(Math.random() * 1000),
-                likes: Math.floor(Math.random() * 200), region, isProtected: false, specialCreditsPrice: specialCreditsPrice,
-            };
-        }
-        setSelectedPixelDetails(mockDetails);
-        setShowPixelInfoModal(true);
-      } else { 
-        setHighlightedPixel(null);
-        setSelectedPixelDetails(null);
-      }
-    } else { 
-      setHighlightedPixel(null);
-      setSelectedPixelDetails(null);
-    }
-  };
-
-  const handleMouseUpOrLeave = (event: React.MouseEvent) => {
-    if (isDragging) {
-      if (!didDragRef.current) {
-        handleCanvasClick(event);
-      }
-      setIsDragging(false);
-    }
-  };
-  
-  const handlePurchase = async (pixelData: SelectedPixelDetails, paymentMethod: string, customizations: any): Promise<boolean> => {
-    if (!user) {
+        setProgressMessage("Mapa carregado!");
+      } catch (error) {
+        console.error("Error loading map:", error);
         toast({
-            title: "Autenticação Necessária",
-            description: "Por favor, inicie sessão ou crie uma conta para comprar pixels.",
-            variant: "destructive"
+          title: "Erro ao carregar mapa",
+          description: "Não foi possível carregar o mapa. Tente recarregar a página.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    loadMapData();
+  }, [toast]);
+
+  // Handle pixel purchase
+  const handlePixelPurchase = useCallback(async (
+    pixelData: SelectedPixelDetails, 
+    paymentMethod: string, 
+    customizations: Record<string, unknown>
+  ): Promise<boolean> => {
+    try {
+      if (!user) {
+        toast({
+          title: "Autenticação necessária",
+          description: "Tem de estar autenticado para comprar pixels.",
+          variant: "destructive",
         });
         return false;
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 500)); 
-
-    const price = pixelData.salePrice || pixelData.price;
-    if (price > 10000) { 
-        return false;
-    }
-
-    const newSoldPixel: SoldPixel = {
-      x: pixelData.x,
-      y: pixelData.y,
-      color: customizations.color || USER_BOUGHT_PIXEL_COLOR,
-      ownerId: MOCK_CURRENT_USER_ID,
-      title: customizations.title || `Meu Pixel (${pixelData.x},${pixelData.y})`,
-      pixelImageUrl: customizations.image, 
-    };
-    
-    addSoldPixel(newSoldPixel);
-
-    setSelectedPixelDetails({
-      ...pixelData,
-      owner: MOCK_CURRENT_USER_ID,
-      isOwnedByCurrentUser: true,
-      isForSaleBySystem: false,
-      isForSaleByOwner: false,
-      price: 0,
-      salePrice: undefined,
-      acquisitionDate: new Date().toLocaleDateString('pt-PT'),
-      lastModifiedDate: new Date().toLocaleDateString('pt-PT'),
-      color: newSoldPixel.color,
-      title: newSoldPixel.title,
-      pixelImageUrl: newSoldPixel.pixelImageUrl,
-    });
-    
-    return true; // Indicate success
-  };
-
-
-  const handleWheelZoom = useCallback((event: WheelEvent) => {
-    clearAutoResetTimeout();
-    if (!containerRef.current) return;
-    event.preventDefault();
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const mouseXInContainer = event.clientX - containerRect.left;
-    const mouseYInContainer = event.clientY - containerRect.top;
-
-    let newZoom;
-    if (event.deltaY < 0) { 
-      newZoom = Math.min(zoom * ZOOM_SENSITIVITY_FACTOR, MAX_ZOOM);
-    } else { 
-      newZoom = Math.max(zoom / ZOOM_SENSITIVITY_FACTOR, MIN_ZOOM);
-    }
-
-    if (newZoom === zoom) return; 
-
-    const currentCanvasX = (mouseXInContainer - position.x) / zoom;
-    const currentCanvasY = (mouseYInContainer - position.y) / zoom;
-
-    const newPosX = mouseXInContainer - currentCanvasX * newZoom;
-    const newPosY = mouseYInContainer - currentCanvasY * newZoom;
-
-    setZoom(newZoom);
-    setPosition({ x: newPosX, y: newPosY });
-
-  }, [zoom, position, clearAutoResetTimeout]); 
-
-  useEffect(() => { 
-    const currentContainer = containerRef.current;
-    if (currentContainer) {
-      currentContainer.addEventListener('wheel', handleWheelZoom, { passive: false });
-      return () => {
-        currentContainer.removeEventListener('wheel', handleWheelZoom);
-      };
-    }
-  }, [handleWheelZoom]); 
-
-
- useEffect(() => { 
-    if (autoResetTimeoutRef.current) {
-      clearTimeout(autoResetTimeoutRef.current);
-    }
-    if (!defaultView || showPixelInfoModal || showPixelEditModal || isDragging) { 
-      return;
-    } 
-
-    const isDefaultZoom = Math.abs(zoom - defaultView.zoom) < 0.001;
-    const isDefaultPosition =
-      defaultView.position &&
-      Math.abs(position.x - defaultView.position.x) < 0.5 &&
-      Math.abs(position.y - defaultView.position.y) < 0.5;
-
-    if (!isDefaultZoom || !isDefaultPosition) {
-      autoResetTimeoutRef.current = setTimeout(() => {
-        handleResetView();
-      }, 15000);
-    }
-
-    return () => {
-      if (autoResetTimeoutRef.current) {
-        clearTimeout(autoResetTimeoutRef.current);
       }
-    };
-  }, [zoom, position, handleResetView, defaultView, showPixelInfoModal, showPixelEditModal, isDragging]);
-  
-  const showProgressIndicator = isLoadingMap || (progressMessage !== "");
 
-  const handleGoToMyLocation = () => {
-    if (!containerRef.current || !pixelBitmap) return;
+      if (credits < pixelData.price) {
+        toast({
+          title: "Créditos insuficientes",
+          description: "Não tem créditos suficientes para esta compra.",
+          variant: "destructive",
+        });
+        return false;
+      }
 
-    // Simulate finding a location in Lisbon
-    const myLocationPixel = { x: 579, y: 1358 };
+      // Simulate purchase process
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Check if the pixel is valid and on the map
-    const bitmapIdx = myLocationPixel.y * LOGICAL_GRID_COLS_CONFIG + myLocationPixel.x;
-    if (pixelBitmap[bitmapIdx] !== 1) {
-        toast({ title: "Localização não encontrada", description: "Não foi possível encontrar um pixel ativo na sua localização simulada."});
-        return;
+      // Add pixel to store
+      addSoldPixel({
+        x: pixelData.x,
+        y: pixelData.y,
+        owner: user.uid,
+        price: pixelData.price,
+        color: customizations.color as string || '#D4A757',
+        title: customizations.title as string || `Pixel ${pixelData.x},${pixelData.y}`,
+        description: customizations.description as string || '',
+      });
+
+      // Update user state
+      addCredits(-pixelData.price);
+      addXp(10);
+      addPixel();
+
+      // Haptic feedback
+      vibrate([50, 50, 50]);
+
+      toast({
+        title: "Pixel comprado!",
+        description: `Adquiriu o pixel (${pixelData.x}, ${pixelData.y}) com sucesso!`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error purchasing pixel:", error);
+      toast({
+        title: "Erro na compra",
+        description: "Ocorreu um erro ao processar a compra. Tente novamente.",
+        variant: "destructive",
+      });
+      return false;
     }
+  }, [user, credits, addSoldPixel, addCredits, addXp, addPixel, vibrate, toast]);
 
-    setHighlightedPixel(myLocationPixel);
-
-    const targetZoom = 15;
-    const containerWidth = containerRef.current.offsetWidth;
-    const effectiveContainerHeight = window.innerHeight - HEADER_HEIGHT_PX - BOTTOM_NAV_HEIGHT_PX;
-
-    const targetX = -myLocationPixel.x * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + containerWidth / 2;
-    const targetY = -myLocationPixel.y * RENDERED_PIXEL_SIZE_CONFIG * targetZoom + effectiveContainerHeight / 2;
+  // Handle pixel selection
+  const handlePixelClick = useCallback((x: number, y: number) => {
+    const existingPixel = soldPixels.find(p => p.x === x && p.y === y);
     
-    setPosition({ x: targetX, y: targetY });
-    setZoom(targetZoom);
-    toast({ title: "Localização Encontrada!", description: "Centrado no pixel mais próximo da sua localização." });
-  };
-  
-  const handleViewOnRealMap = () => {
-    if (selectedPixelDetails?.gpsCoords) {
-      const { lat, lon } = selectedPixelDetails.gpsCoords;
-      const url = `https://www.google.com/maps?q=${lat},${lon}&z=18&t=k`; // z=18 for high zoom, t=k for satellite
-      window.open(url, '_blank', 'noopener,noreferrer');
+    if (existingPixel) {
+      // Show pixel info
+      setSelectedPixelDetails({
+        x,
+        y,
+        owner: existingPixel.owner,
+        price: existingPixel.price,
+        region: 'Portugal',
+        rarity: 'Comum',
+        color: existingPixel.color,
+        title: existingPixel.title,
+        description: existingPixel.description,
+        isOwnedByCurrentUser: existingPixel.owner === user?.uid,
+        history: [
+          { owner: existingPixel.owner, date: existingPixel.timestamp.toISOString(), price: existingPixel.price }
+        ],
+        views: Math.floor(Math.random() * 100) + 1,
+        likes: Math.floor(Math.random() * 50),
+      });
+      setShowPixelInfoModal(true);
     } else {
-      toast({ title: "Coordenadas não disponíveis", description: "Não foi possível determinar a localização GPS para este pixel." });
+      // Show purchase modal
+      const mockPixelData: SelectedPixelDetails = {
+        x,
+        y,
+        price: PIXEL_BASE_PRICE,
+        region: 'Portugal',
+        rarity: 'Comum',
+        isForSaleBySystem: true,
+        specialCreditsPrice: SPECIAL_CREDITS_CONVERSION['Comum'],
+        history: [],
+        views: 0,
+        likes: 0,
+      };
+      
+      setSelectedPixelDetails(mockPixelData);
+      setShowPixelEditModal(true);
     }
-  };
+    
+    vibrate([30]);
+  }, [soldPixels, user?.uid, vibrate]);
+
+  // Save bookmarks
+  const saveBookmark = useCallback((name: string, x: number, y: number, zoom: number) => {
+    const newBookmark: ZoomBookmark = {
+      id: Date.now().toString(),
+      name,
+      x,
+      y,
+      zoom,
+      timestamp: new Date(),
+    };
+    
+    const updatedBookmarks = [...zoomBookmarks, newBookmark];
+    setZoomBookmarks(updatedBookmarks);
+    localStorage.setItem(ZOOM_BOOKMARKS_KEY, JSON.stringify(updatedBookmarks));
+    
+    toast({
+      title: "Marcador guardado",
+      description: `O marcador "${name}" foi guardado com sucesso.`,
+    });
+  }, [zoomBookmarks, toast]);
+
+  // Navigate to bookmark
+  const navigateToBookmark = useCallback((bookmark: ZoomBookmark) => {
+    setPosition({ x: bookmark.x, y: bookmark.y });
+    setZoom(bookmark.zoom);
+    
+    toast({
+      title: "Navegação",
+      description: `Navegou para "${bookmark.name}".`,
+    });
+  }, [toast]);
+
+  // Search functionality
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    
+    // Search in postal codes
+    const postalCode = Object.keys(POSTAL_CODE_COORDINATES).find(code => 
+      code.startsWith(query)
+    );
+    
+    if (postalCode) {
+      const coords = POSTAL_CODE_COORDINATES[postalCode as keyof typeof POSTAL_CODE_COORDINATES];
+      setPosition({ x: coords.x, y: coords.y });
+      setZoom(15);
+      
+      toast({
+        title: "Localização encontrada",
+        description: `Navegou para ${coords.region} (${postalCode}).`,
+      });
+      return;
+    }
+    
+    // Search in landmarks
+    const landmark = Object.keys(LANDMARK_COORDINATES).find(name => 
+      name.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    if (landmark) {
+      const coords = LANDMARK_COORDINATES[landmark as keyof typeof LANDMARK_COORDINATES];
+      setPosition({ x: coords.x, y: coords.y });
+      setZoom(coords.zoom);
+      
+      toast({
+        title: "Marco encontrado",
+        description: `Navegou para ${landmark}.`,
+      });
+      return;
+    }
+    
+    toast({
+      title: "Nada encontrado",
+      description: "Não foi encontrada nenhuma localização com esse nome.",
+      variant: "destructive",
+    });
+  }, [toast]);
+
+  // Performance optimization: Debounced zoom and position updates
+  const debouncedSetZoom = useCallback(
+    debounce((newZoom: number) => {
+      setZoom(newZoom);
+    }, DEBOUNCE_DELAY),
+    []
+  );
+
+  const debouncedSetPosition = useCallback(
+    debounce((newPosition: { x: number; y: number }) => {
+      setPosition(newPosition);
+    }, DEBOUNCE_DELAY),
+    []
+  );
+
+  // Utility function for debouncing
+  function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    delay: number
+  ): (...args: Parameters<T>) => void {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  }
+
+  if (!isClient) {
+    return <div className="flex items-center justify-center h-full">A carregar...</div>;
+  }
+
+  if (isLoadingMap) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="text-lg font-semibold mb-2">{progressMessage}</div>
+          <Progress value={loadingProgress} className="w-64" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-
-    <MobileOptimizations>
-      <div className="flex flex-col h-full w-full overflow-hidden relative animate-fade-in">
-        {/* Enhanced loading overlay */}
-        <LoadingOverlay 
-          isLoading={isLoadingMap} 
-          text={progressMessage}
-          progress={loadingProgress}
-        >
-          <div />
-        </LoadingOverlay>
-        
-        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 bg-card/80 backdrop-blur-sm p-2 rounded-lg shadow-lg pointer-events-auto animate-slide-in-up animation-delay-200">
-          <EnhancedTooltip
-            title="Controles do Mapa"
-            description="Navegação e informações do mapa"
-            stats={[
-              { label: 'Zoom', value: `${zoom.toFixed(2)}x`, icon: <ZoomIn className="h-4 w-4" /> },
-              { label: 'Pixels', value: activePixelsInMap.toLocaleString(), icon: <MapPinIconLucide className="h-4 w-4" /> },
-              { label: 'Modo', value: visualizationMode, icon: <Eye className="h-4 w-4" /> }
-            ]}
-          >
-            <div className="space-y-2">
-              <TooltipProvider delayDuration={300}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Ampliar</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Reduzir</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                      <Expand className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Resetar Vista</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant={showGrid ? "default" : "outline"} 
-                      size="icon" 
-                      onClick={() => setShowGrid(!showGrid)}
-                      aria-label="Toggle Grid"
-                    >
-                      <Grid3X3 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>{showGrid ? 'Ocultar' : 'Mostrar'} Grelha</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </EnhancedTooltip>
-          
-          {/* Enhanced info panel */}
-          <div className="mt-2 p-3 bg-background/90 rounded-md text-xs font-code border border-primary/20 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Modo:</span>
-              <span className={`font-bold ${getVisualizationModeColor(visualizationMode)}`}>
-                {getVisualizationModeIcon(visualizationMode)} {visualizationMode}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Zoom:</span>
-              <span className="text-primary font-bold">{zoom.toFixed(2)}x</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Posição:</span>
-              <span className="text-accent">({Math.round(position.x)}, {Math.round(position.y)})</span>
-            </div>
-            {highlightedPixel && (
-              <>
-                <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-                  <span className="text-muted-foreground">Pixel:</span>
-                  <span className="text-primary font-bold">({highlightedPixel.x}, {highlightedPixel.y})</span>
-                </div>
-                {highlightedPixel && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">GPS:</span>
-                    <span className="text-green-500 font-bold text-xs">
-                      {(() => {
-                        const gps = mapPixelToApproxGps(highlightedPixel.x, highlightedPixel.y, LOGICAL_GRID_COLS_CONFIG, logicalGridRows);
-                        return gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}` : 'N/A';
-                      })()}
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
-            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-              <span className="text-muted-foreground">Pixels Ativos:</span>
-              <span className="text-green-500 font-bold">{activePixelsInMap.toLocaleString()}</span>
-            </div>
+    <div className="relative w-full h-full overflow-hidden">
+      {/* Main map container */}
+      <div 
+        ref={containerRef}
+        className="relative w-full h-full cursor-grab active:cursor-grabbing"
+        onMouseDown={(e) => {
+          setIsDragging(true);
+          setDragStart({ x: e.clientX, y: e.clientY });
+          didDragRef.current = false;
+        }}
+        onMouseMove={(e) => {
+          if (isDragging) {
+            const deltaX = e.clientX - dragStart.x;
+            const deltaY = e.clientY - dragStart.y;
             
-            {/* Online status indicator */}
-            <div className="flex items-center justify-between border-t border-primary/20 pt-1">
-              <span className="text-muted-foreground">Status:</span>
-              <div className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                <span className={`text-xs ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
-                  {isOnline ? 'Online' : 'Offline'}
-                </span>
-              </div>
-            </div>
-          </div>
+            if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
+              didDragRef.current = true;
+              debouncedSetPosition({
+                x: position.x - deltaX / zoom,
+                y: position.y - deltaY / zoom,
+              });
+              setDragStart({ x: e.clientX, y: e.clientY });
+            }
+          }
+        }}
+        onMouseUp={() => {
+          setIsDragging(false);
+        }}
+        onMouseLeave={() => {
+          setIsDragging(false);
+        }}
+      >
+        {/* SVG Map */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+            transformOrigin: '0 0',
+          }}
+        >
+                   <PortugalMapSvg onMapDataLoaded={() => {}} />
         </div>
-        
+
+        {/* Canvas overlays */}
+        <canvas
+          ref={pixelCanvasRef}
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+            transformOrigin: '0 0',
+          }}
+        />
+        <canvas
+          ref={outlineCanvasRef}
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+            transformOrigin: '0 0',
+          }}
+        />
+      </div>
+
+      {/* Controls */}
+      <div className="absolute top-4 left-4 space-y-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => debouncedSetZoom(Math.min(zoom * 1.2, 50))}
+        >
+          +
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => debouncedSetZoom(Math.max(zoom / 1.2, 0.1))}
+        >
+          -
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            setPosition({ x: 0, y: 0 });
+            setZoom(1);
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+
+      {/* Search */}
+      <div className="absolute top-4 right-4">
+        <Input
+          placeholder="Procurar localização..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch(searchQuery);
+            }
+          }}
+          className="w-64"
+        />
+      </div>
+
+      {/* Modals */}
+      {showPixelEditModal && selectedPixelDetails && (
         <EnhancedPixelPurchaseModal
           isOpen={showPixelEditModal}
           onClose={() => setShowPixelEditModal(false)}
-          pixelData={selectedPixelDetails!}
-          userCredits={12500} // Mocked value, ideally from user store
-          userSpecialCredits={120} // Mocked value
-          onPurchase={handlePurchase}
+          pixelData={selectedPixelDetails}
+          userCredits={credits}
+          onPurchase={handlePixelPurchase}
         />
+      )}
 
+      {showPixelInfoModal && selectedPixelDetails && (
         <PixelInfoModal
           isOpen={showPixelInfoModal}
           onClose={() => setShowPixelInfoModal(false)}
+          pixelData={selectedPixelDetails}
           onEdit={() => {
             setShowPixelInfoModal(false);
             setShowPixelEditModal(true);
           }}
-          onPurchase={() => {
-            setShowPixelInfoModal(false);
-            setShowPixelEditModal(true);
-          }}
-          pixelData={selectedPixelDetails}
         />
-        
-        <SwipeGestures
-          onSwipeLeft={() => {
-            vibrate('light');
-            toast({ title: "❤️ Pixel Curtido!", description: "Adicionado aos seus favoritos." });
-          }}
-          onSwipeRight={() => {
-            vibrate('light');
-            toast({ title: "🔖 Pixel Salvo!", description: "Guardado para visualização posterior." });
-          }}
-          onSwipeUp={() => {
-            vibrate('medium');
-            if (navigator.share) {
-              navigator.share({
-                title: 'Pixel Universe',
-                text: 'Confira este mapa incrível de pixels!',
-                url: window.location.href
-              });
-            }
-          }}
-          onSwipeDown={() => {
-            vibrate('medium');
-            if (selectedPixelDetails) {
-             setShowPixelInfoModal(true);
-            }
-          }}
-          className="flex-grow w-full h-full p-4 md:p-8 flex items-center justify-center"
-        >
-          <div
-              ref={containerRef}
-              className="w-full h-full cursor-grab active:cursor-grabbing overflow-hidden relative rounded-xl shadow-2xl border border-primary/20"
-              onMouseDown={handleMouseDown} 
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUpOrLeave}
-              onMouseLeave={handleMouseUpOrLeave}
-              onDoubleClick={handleDoubleClick}
-          >
-              <div
-              style={{
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                  width: `${canvasDrawWidth}px`,
-                  height: `${canvasDrawHeight}px`,
-                  transformOrigin: 'top left',
-                  position: 'relative', 
-              }}
-              >
-              <canvas
-                  ref={pixelCanvasRef}
-                  className="absolute top-0 left-0 w-full h-full z-10" 
-                  style={{ imageRendering: 'pixelated' }} 
-              />
-              {(!mapData && isClient) && <PortugalMapSvg onMapDataLoaded={handleMapDataLoaded} className="invisible absolute" />}
-              </div>
-              <canvas
-                  ref={outlineCanvasRef}
-                  className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
-                  style={{ imageRendering: 'auto' }}
-              />
-          </div>
-        </SwipeGestures>
-        
-        {/* Zoom Controls */}
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto animate-slide-in-up animation-delay-200">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom In">
-                  <ZoomIn className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Aproximar</p></TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom Out">
-                  <ZoomOut className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Afastar</p></TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={handleResetView} aria-label="Reset View">
-                  <Expand className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Resetar Vista</p></TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+      )}
 
-        {/* Enhanced Mobile Action Menu */}
-        <div className="absolute bottom-6 right-6 z-20 animate-scale-in animation-delay-500 flex flex-col gap-3" style={{ pointerEvents: 'auto' }}>
-          {/* Search and Navigation */}
-          <EnhancedTooltip
-            title="Navegação Avançada"
-            description="Pesquisar por landmarks, códigos postais e regiões"
-            interactive={true}
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600">
-                  <Search className="h-6 w-6" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl">
-                <DialogHeader>
-                  <DialogTitle className="font-headline text-gradient-gold">Navegação Inteligente</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground">
-                    Encontre qualquer localização em Portugal
-                  </DialogDescriptionElement>
-                </DialogHeader>
-                
-                <div className="space-y-4">
-                  {/* Search Input */}
-                  <div className="space-y-2">
-                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Ex: Torre de Belém, 1000, Lisboa..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          // Try postal code first
-                          if (/^\d{4}/.test(searchQuery)) {
-                            searchByPostalCode(searchQuery.substring(0, 4));
-                          } else if (LANDMARK_COORDINATES[searchQuery as keyof typeof LANDMARK_COORDINATES]) {
-                            goToLandmark(searchQuery);
-                          } else {
-                            // Try region
-                            zoomToRegion(searchQuery);
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Quick Landmarks */}
-                  <div className="space-y-2">
-                    <Label>Marcos Históricos</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.keys(LANDMARK_COORDINATES).slice(0, 6).map(landmark => (
-                        <Button
-                          key={landmark}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => goToLandmark(landmark)}
-                          className="text-xs"
-                        >
-                          🏛️ {landmark.split(' ')[0]}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Quick Regions */}
-                  <div className="space-y-2">
-                    <Label>Regiões</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {['Lisboa', 'Porto', 'Coimbra', 'Braga', 'Faro'].map(region => (
-                        <Button
-                          key={region}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => zoomToRegion(region)}
-                          className="text-xs"
-                        >
-                          📍 {region}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Saved Bookmarks */}
-                  {zoomBookmarks.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Localizações Guardadas</Label>
-                      <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {zoomBookmarks.slice(-5).map(bookmark => (
-                          <div key={bookmark.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
-                            <span className="text-sm truncate">{bookmark.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => goToBookmark(bookmark)}
-                              className="h-6 px-2"
-                            >
-                              Ir
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Save Current Location */}
-                  <Button
-                    onClick={() => {
-                      const name = prompt('Nome para esta localização:');
-                      if (name) saveZoomBookmark(name);
-                    }}
-                    className="w-full"
-                  >
-                    <Bookmark className="h-4 w-4 mr-2" />
-                    Guardar Localização Atual
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </EnhancedTooltip>
-          
-          {/* Visualization Modes */}
-          <EnhancedTooltip
-            title="Modos de Visualização"
-            description="Diferentes formas de ver o mapa"
-            interactive={true}
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
-                  <Eye className="h-6 w-6" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl">
-                <DialogHeader>
-                  <DialogTitle className="font-headline text-gradient-gold">Modos de Visualização</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground">
-                    Explore o mapa de diferentes perspetivas
-                  </DialogDescriptionElement>
-                </DialogHeader>
-                
-                <div className="space-y-4">
-                  {/* Visualization Mode Buttons */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { mode: 'default' as VisualizationMode, label: 'Padrão', icon: '🗺️', desc: 'Vista normal' },
-                      { mode: 'thermal' as VisualizationMode, label: 'Térmico', icon: '🔥', desc: 'Densidade de pixels' },
-                      { mode: 'value' as VisualizationMode, label: 'Valor', icon: '💰', desc: 'Preços por cor' },
-                      { mode: 'ownership' as VisualizationMode, label: 'Propriedade', icon: '👤', desc: 'Por proprietário' },
-                      { mode: 'temporal' as VisualizationMode, label: 'Temporal', icon: '⏰', desc: 'Por idade' },
-                      { mode: 'rarity' as VisualizationMode, label: 'Raridade', icon: '💎', desc: 'Por raridade' }
-                    ].map(({ mode, label, icon, desc }) => (
-                      <Button
-                        key={mode}
-                        variant={visualizationMode === mode ? 'default' : 'outline'}
-                        onClick={() => setVisualizationMode(mode)}
-                        className="h-16 flex flex-col gap-1"
-                      >
-                        <span className="text-lg">{icon}</span>
-                        <span className="text-xs">{label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Display Options */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Mostrar Grelha</Label>
-                      <Switch checked={showGrid} onCheckedChange={setShowGrid} />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Coordenadas</Label>
-                      <Switch checked={showCoordinates} onCheckedChange={setShowCoordinates} />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Mapa de Calor</Label>
-                      <Switch checked={showDensityHeatmap} onCheckedChange={setShowDensityHeatmap} />
-                    </div>
-                  </div>
-                  
-                  {/* Current Mode Info */}
-                  <div className="p-3 bg-muted/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">{getVisualizationModeIcon(visualizationMode)}</span>
-                      <span className="font-medium">Modo: {visualizationMode}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {visualizationMode === 'default' && 'Vista normal do mapa com cores originais'}
-                      {visualizationMode === 'thermal' && 'Mostra densidade de pixels por área'}
-                      {visualizationMode === 'value' && 'Cores representam valores dos pixels'}
-                      {visualizationMode === 'ownership' && 'Verde=seus, Azul=outros, Dourado=sistema'}
-                      {visualizationMode === 'temporal' && 'Vermelho=recente, Azul=antigo'}
-                      {visualizationMode === 'rarity' && 'Cores representam raridade dos pixels'}
-                    </p>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </EnhancedTooltip>
-
-
-          
-          {/* Social Features */}
-          <PixelSocialFeatures>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600">
-              <Users className="h-6 w-6" />
-            </Button>
-          </PixelSocialFeatures>
-          
-          {/* Gamification */}
-          <PixelGameification>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
-              <Trophy className="h-6 w-6" />
-            </Button>
-          </PixelGameification>
-          
-          {/* Auction */}
-          <PixelAuction>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Gavel className="h-6 w-6" />
-            </Button>
-          </PixelAuction>
-          
-          {/* Collaborative Editor */}
-          <PixelCollaborativeEditor pixelData={selectedPixelDetails ? { x: selectedPixelDetails.x, y: selectedPixelDetails.y, owner: selectedPixelDetails.owner || 'Sistema' } : undefined}>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600">
-              <Users className="h-6 w-6" />
-            </Button>
-          </PixelCollaborativeEditor>
-          
-          {/* AR Button */}
-          <PixelAR>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-              <Camera className="h-6 w-6" />
-            </Button>
-          </PixelAR>
-          
-          {/* Stories Button */}
-          <PixelStories>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-              <Play className="h-6 w-6" />
-            </Button>
-          </PixelStories>
-          
-          {/* Live Stream Button */}
-          <PixelLiveStream>
-            <Button size="icon" className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
-              <Radio className="h-6 w-6" />
-            </Button>
-          </PixelLiveStream>
-          
-          {/* Main Action Button */}
-          <EnhancedTooltip
-            title="Ações Rápidas"
-            description="Acesso rápido às funcionalidades principais"
-            actions={[
-              { 
-                label: 'Explorar', 
-                onClick: () => {}, 
-                icon: <Search className="h-4 w-4" /> 
-              },
-              { 
-                label: 'Filtros', 
-                onClick: () => {}, 
-                icon: <PaletteIconLucide className="h-4 w-4" /> 
-              }
-            ]}
-            interactive={true}
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                 <Button style={{ pointerEvents: 'auto' }} size="icon" className="rounded-full w-14 h-14 shadow-lg button-gradient-gold button-3d-effect hover:button-gold-glow active:scale-95">
-                    <Star className="h-7 w-7" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-primary/30 shadow-xl" data-dialog-content style={{ pointerEvents: 'auto' }}>
-                <DialogHeader className="dialog-header-gold-accent rounded-t-lg">
-                  <DialogTitle className="font-headline text-shadow-gold-sm">Ações Rápidas do Universo</DialogTitle>
-                  <DialogDescriptionElement className="text-muted-foreground animate-fade-in animation-delay-200">
-                    Explore, filtre e interaja com o mapa de pixels.
-                  </DialogDescriptionElement>
-                </DialogHeader>
-                <div className="grid gap-3 py-4">
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Search className="mr-2 h-4 w-4" />Explorar Pixel por Coordenadas</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><PaletteIconLucide className="mr-2 h-4 w-4" />Filtros de Visualização</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline"><Sparkles className="mr-2 h-4 w-4" />Ver Eventos Atuais</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" onClick={handleGoToMyLocation} className="button-3d-effect-outline"><MapPinIconLucide className="mr-2 h-4 w-4" />Ir para Minha Localização</Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowGrid(!showGrid)}>
-                    <Grid3X3 className="mr-2 h-4 w-4" />
-                    {showGrid ? 'Ocultar' : 'Mostrar'} Grelha
-                  </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline" onClick={() => setShowCoordinates(!showCoordinates)}>
-                    <MapPinIconLucide className="mr-2 h-4 w-4" />
-                    {showCoordinates ? 'Ocultar' : 'Mostrar'} Coordenadas
-                  </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
-                    <Brain className="mr-2 h-4 w-4" />
-                    Assistente IA
-                  </Button>
-                  <Button style={{ pointerEvents: 'auto' }} variant="outline" className="button-3d-effect-outline">
-                    <Crosshair className="mr-2 h-4 w-4" />
-                    Modo Precisão
-                  </Button>
-                  <Separator />
-                  <Link href="/premium" className="w-full">
-                    <Button style={{ pointerEvents: 'auto' }} variant="default" className="w-full button-gradient-gold button-3d-effect">
-                      <Crown className="mr-2 h-4 w-4" />Tornar-se Premium
-                    </Button>
-                  </Link>
-                </div>
-                <DialogFooter className="dialog-footer-gold-accent rounded-b-lg">
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </EnhancedTooltip>
-        </div>
-      </div>
-    </MobileOptimizations>
+             {/* Mobile optimizations */}
+       <div className="absolute bottom-4 left-4">
+         <Button
+           variant="secondary"
+           size="sm"
+           onClick={() => setShowSearch(!showSearch)}
+         >
+           {showSearch ? 'Ocultar' : 'Procurar'}
+         </Button>
+       </div>
+    </div>
   );
 }
 
-// Enhanced cursor styles for different tools
-const getCursorStyle = (tool: string) => {
-  switch (tool) {
-    case 'brush':
-      return 'cursor-crosshair';
-    case 'eraser':
-      return 'cursor-not-allowed';
-    case 'bucket':
-      return 'cursor-pointer';
-    case 'eyedropper':
-      return 'cursor-copy';
-    case 'move':
-      return 'cursor-move';
-    case 'zoom':
-      return 'cursor-zoom-in';
-    default:
-      return 'cursor-default';
-  }
-};
+
+

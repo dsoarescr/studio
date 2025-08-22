@@ -8,15 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { useUserStore, useSettingsStore } from '@/lib/store';
 import { 
-  CheckCircle2, Lock, Award, Edit3, Users, Eye, Map, Compass, Puzzle, Activity, 
-  CheckCheck, ShieldCheck, Share2, Trophy, Search, Filter, SortAsc, Star, 
-  Flame, Target, Crown, Sparkles, TrendingUp, Calendar, Clock, Gift, Zap,
-  BarChart3, PieChart, LineChart, Medal, Gem, Heart, ThumbsUp, MessageSquare,
-  BookImage, Palette, MapPin, Globe, Rocket, Settings, Bell, Download, Coins,
-  Lightbulb, Megaphone
+  Lock, Award, Edit3, Users, Eye, Compass, Puzzle, Activity, 
+  CheckCheck, ShieldCheck, SortAsc, Star, 
+  TrendingUp, Calendar, Clock
 } from "lucide-react";
 import { achievementsData, type Achievement, type AchievementCategory, type AchievementRarity } from '@/data/achievements-data';
 import { useToast } from '@/hooks/use-toast';
@@ -129,7 +125,7 @@ export default function AchievementsPage() {
   const handleShareAchievement = (achievementName: string) => {
     toast({
       title: "Conquista Partilhada!",
-      description: `Partilhaste a conquista "${achievementName}" nas redes sociais.`,
+      description: `Partilhaste a conquista &quot;${achievementName}&quot; nas redes sociais.`,
     });
   };
 
@@ -149,7 +145,7 @@ export default function AchievementsPage() {
     
     toast({
       title: "Conquista Desbloqueada!",
-      description: "Você desbloqueou a conquista 'Personalizador de Perfil'!",
+      description: "Você desbloqueou a conquista &apos;Personalizador de Perfil&apos;!",
     });
     
     // Reward the user

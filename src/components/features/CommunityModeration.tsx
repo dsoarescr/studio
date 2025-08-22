@@ -13,10 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import {
-  Shield, Flag, Ban, AlertOctagon, UserCheck, Gavel, Eye,
-  MessageSquare, Clock, CheckCircle, X, AlertTriangle, FileText
-} from "lucide-react";
+import { Shield, Flag, Ban, Gavel, Clock, CheckCircle, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ModerationReport {
@@ -364,3 +361,4 @@ export function CommunityModeration() {
     </div>
   );
 }
+

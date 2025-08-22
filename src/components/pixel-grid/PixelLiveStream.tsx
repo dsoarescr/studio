@@ -8,11 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  Video, VideoOff, Mic, MicOff, Users, Heart, Gift, Share2, 
-  Send, Eye, Crown, Star, Coins, Zap, MessageSquare, X,
-  Radio, Wifi, Signal, Volume2, Settings
-} from 'lucide-react';
+// Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -194,7 +190,7 @@ export default function PixelLiveStream({ children }: PixelLiveStreamProps) {
           description: "Você está agora ao vivo no Pixel Universe.",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Erro na Stream",
         description: "Não foi possível iniciar a transmissão.",

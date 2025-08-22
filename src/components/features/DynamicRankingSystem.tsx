@@ -1,17 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Trophy, Crown, Medal, Star, Flame, TrendingUp, TrendingDown, 
-  Calendar, Clock, Target, Users, MapPin, Award, Zap, Sparkles,
-  ChevronUp, ChevronDown, Minus, Activity, BarChart3, PieChart
-} from 'lucide-react';
+// Lucide imports removed
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -345,3 +339,4 @@ export const DynamicRankingSystem: React.FC = () => {
     </div>
   );
 };
+

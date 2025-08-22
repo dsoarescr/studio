@@ -10,10 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  Award, Gem, MapPin as MapPinIcon, Coins, Gift, Trophy, BookImage, FolderPlus, Link as LinkIcon, 
-  Twitter, Instagram, Github, UserCircle
-} from "lucide-react";
+import { MapPin, Calendar, Trophy, Star, Users, Eye, Heart, Award, Crown, Zap } from 'lucide-react';
 import type { Achievement } from '@/data/achievements-data'; // Corrected import
 import { achievementsData } from '@/data/achievements-data'; // Corrected import
 
@@ -128,7 +125,7 @@ export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {
       <CardContent className="w-full max-w-md p-4 pt-2 space-y-4">
         <Card className="w-full bg-background/50 p-3 text-center rounded-lg shadow">
           <CardDescription className="text-sm text-foreground italic">
-            &quot;{userData.bio || 'Nenhuma bio disponível.'}&quot;
+            "{userData.bio || 'Nenhuma bio disponível.'}"
           </CardDescription>
         </Card>
 
@@ -137,7 +134,7 @@ export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {
             <span className="font-semibold">Progresso de Nível</span>
             <span className="font-code">{userData.xp.toLocaleString('pt-PT')} / {userData.xpMax.toLocaleString('pt-PT')} XP</span>
           </div>
-          <Progress value={xpPercentage} className="h-2.5 [&>div]:bg-primary shadow-inner" />
+          <Progress value={xpPercentage} className=&quot;h-2.5 [&>div]:bg-primary shadow-inner" />
           <p className="text-xs text-muted-foreground text-right font-code">
             {nextLevelXp > 0 ? `Faltam ${nextLevelXp.toLocaleString('pt-PT')} XP para o próximo nível` : 'Nível Máximo!'}
           </p>
@@ -176,7 +173,7 @@ export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {
                     Álbuns de Píxeis
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 space-y-2 max-h-40 overflow-y-auto">
+            <CardContent className="p-0 space-y-2 max-h-40 overflow-y-auto&quot;>
                 {userData.albums && userData.albums.length > 0 ? (
                     userData.albums.map(album => (
                         <div key={album.id} className="flex items-center space-x-2 p-2 bg-muted/30 rounded-md border border-border hover:border-primary/30 transition-colors">
@@ -220,3 +217,4 @@ export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {
     </div>
   );
 }
+
