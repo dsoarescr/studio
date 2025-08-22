@@ -27,8 +27,8 @@ import {
   Copy, ExternalLink, Info, CheckCircle, AlertTriangle, Lock,
   Shield, UserCheck, Ban, AlertOctagon, TrendingDown, FileText,
   BarChart4, PieChart, Gavel, Handshake, Megaphone, Lightbulb,
-  Hash, Sliders, Timer, RefreshCw, Trending, Activity, Layers,
-  Database, Robot, Brain, Wand2, Magic, Network, Link2,
+  Hash, Sliders, Timer, RefreshCw, Activity, Layers,
+  Database, Bot, Brain, Wand2, Network, Link2,
   Smile, AtSign, Download, Upload, RotateCcw, RotateCw, Volume,
   VolumeOff, Vibrate, Wifi, WifiOff, Battery, Signal, Menu,
   ChevronUp, ChevronDown, MoreVertical, Reply, Forward, Trash2,
@@ -1777,7 +1777,7 @@ export default function CommunityPage() {
               ref={audioInputRef}
               type="file"
               accept="audio/*"
-              capture="microphone"
+              capture="user"
               className="hidden"
             />
 

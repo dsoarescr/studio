@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Info, Star, Heart, Eye, MapPin, Calendar, User, Coins, 
-  Trophy, Crown, Gem, Sparkles, Zap, Target, Award, Shield
+  Trophy, Crown, Gem, Sparkles, Zap, Target, Award, Shield, UserPlus
 } from 'lucide-react';
 
 interface EnhancedTooltipProps {

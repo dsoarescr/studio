@@ -16,7 +16,9 @@ interface CacheEntry {
   lastAccessed: number;
 }
 
-export const usePixelCache = (maxSize: number = CACHE_SIZE) => {
+const DEFAULT_CACHE_SIZE = 1000;
+
+export const usePixelCache = (maxSize: number = DEFAULT_CACHE_SIZE) => {
   const cache = useRef<Map<string, CacheEntry>>(new Map());
   const [hitCount, setHitCount] = useState(0);
   const [missCount, setMissCount] = useState(0);
