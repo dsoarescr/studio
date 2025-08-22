@@ -2,18 +2,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +16,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Palette, Star, Eye, Heart, MessageSquare, Share2, Crown, Gem, Sparkles, TrendingUp, Siren as Fire, Zap, Target, Award, Gift, Coins, Calendar, Clock, Filter, Search, SortAsc, Grid3X3, List, Play, Pause, Volume2, VolumeX, Download, Upload, Edit3, Trash2, Copy, ExternalLink, MapPin, Globe, Users, ThumbsUp, Bookmark, Flag, Settings, Info, AlertTriangle, CheckCircle, X, Plus, Minus, ArrowUp, ArrowDown, BarChart3, PieChart, Megaphone, Rocket, Shield, CloudLightning as Lightning, Flame, Lightbulb, Camera, Video, Music, Type, Brush, Eraser, PaintBucket, Layers, RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Maximize, Minimize, RefreshCw, Save, FolderPlus, Tag, Hash, Link as LinkIcon, Send, Reply, Forward, Archive, Archive as Unarchive, Pin, PinOff, Lock, Unlock, ShoppingCart } from "lucide-react";
+import { Palette, Star, Eye, Heart, MessageSquare, Crown, Gem, Sparkles, TrendingUp, Siren as Fire, Zap, Award, Clock, Filter, Search, Grid3X3, List, ArrowUp, ArrowDown, Lightbulb, Brush, RefreshCw, Globe, MapPin } from "lucide-react";
 
 interface PixelArtwork {
   id: string;
@@ -113,7 +107,7 @@ const promotionPlans: PromotionPlan[] = [
     cost: 100,
     specialCost: 20,
     benefits: [
-      'Aparece na secção "Em Destaque"',
+      'Aparece na secção &quot;Em Destaque&quot;',
       '+200% visualizações',
       'Badge dourado de destaque',
       'Prioridade nos resultados de pesquisa'
@@ -130,7 +124,7 @@ const promotionPlans: PromotionPlan[] = [
     cost: 200,
     specialCost: 35,
     benefits: [
-      'Aparece na secção "Tendências"',
+      'Aparece na secção &quot;Tendências&quot;',
       '+300% visualizações',
       'Badge de tendência animado',
       'Notificação para seguidores'
@@ -482,7 +476,7 @@ export default function PixelsGalleryPage() {
       setPlaySound(true);
       toast({
         title: "❤️ Pixel Curtido!",
-        description: `Curtiu "${pixel.title}". +5 XP, +2 créditos!`,
+        description: `Curtiu &quot;${pixel.title}&quot;. +5 XP, +2 créditos!`,
       });
     }
   };
@@ -513,7 +507,7 @@ export default function PixelsGalleryPage() {
       addCredits(1);
       toast({
         title: pixel.interactions.isBookmarked ? "🔖 Removido dos Favoritos" : "⭐ Adicionado aos Favoritos",
-        description: `"${pixel.title}" ${pixel.interactions.isBookmarked ? 'removido' : 'adicionado'}.`,
+        description: `&quot;${pixel.title}&quot; ${pixel.interactions.isBookmarked ? 'removido' : 'adicionado'}.`,
       });
     }
   };
@@ -539,7 +533,7 @@ export default function PixelsGalleryPage() {
         addCredits(3);
         toast({
           title: "📤 Pixel Partilhado!",
-          description: `"${pixel.title}" partilhado com sucesso. +8 XP, +3 créditos!`,
+          description: `&quot;${pixel.title}&quot; partilhado com sucesso. +8 XP, +3 créditos!`,
         });
       } catch (error) {
         // User cancelled
@@ -631,7 +625,7 @@ export default function PixelsGalleryPage() {
     
     toast({
       title: "🚀 Promoção Ativada!",
-      description: `"${pixel.title}" promovido com ${promotion.name}! +50 XP!`,
+      description: `&quot;${pixel.title}&quot; promovido com ${promotion.name}! +50 XP!`,
     });
     
     setShowPromotionModal(false);
@@ -1187,7 +1181,7 @@ export default function PixelsGalleryPage() {
                         <div className="text-4xl mb-4">🎨</div>
                         <h3 className="text-xl font-bold mb-2">Obra em Destaque Premium</h3>
                         <p className="text-muted-foreground">
-                          Esta secção mostra o pixel com promoção "Holofote" ativa.
+                          Esta secção mostra o pixel com promoção &quot;Holofote&quot; ativa.
                         </p>
                       </div>
                     </div>

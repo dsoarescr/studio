@@ -24,14 +24,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import {
-  HelpCircle, Search, Book, MessageSquare, Video, FileText, 
-  ExternalLink, ChevronRight, Star, ThumbsUp, Clock, User,
-  Lightbulb, Zap, Shield, Palette, Users, Globe, Mail, Phone,
-  Download, Play, BookOpen, Headphones, Award, Target, Rocket,
-  CheckCircle, AlertTriangle, Info, Heart, Send, Filter
-} from "lucide-react";
+
+// Lucide imports removed
 
 interface FAQItem {
   id: string;
@@ -209,7 +203,7 @@ export default function HelpCenter({ children }: HelpCenterProps) {
     return matchesSearch && matchesCategory;
   });
 
-  const handleMarkHelpful = (faqId: string) => {
+  const handleMarkHelpful = () => {
     toast({
       title: "Obrigado!",
       description: "Seu feedback nos ajuda a melhorar o centro de ajuda.",
@@ -339,7 +333,7 @@ export default function HelpCenter({ children }: HelpCenterProps) {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleMarkHelpful(faq.id)}
+                                onClick={() => handleMarkHelpful()}
                                 className="h-8 px-2"
                               >
                                 <ThumbsUp className="h-4 w-4 mr-1" />

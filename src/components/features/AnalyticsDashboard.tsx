@@ -1,12 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  TrendingUp, TrendingDown, DollarSign, Users, MapPin, Calendar,
-  BarChart3, PieChart, LineChart, Activity, Target, Award, Coins,
-  Eye, Heart, Share2, Download, Filter, RefreshCw, Zap, Crown,
-  Gem, Star, Clock, ArrowUpRight, ArrowDownRight, Minus
-} from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { DollarSign, MapPin, Activity, Eye, Heart, RefreshCw, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -463,3 +458,4 @@ export const AnalyticsDashboard: React.FC = () => {
     </div>
   );
 };
+

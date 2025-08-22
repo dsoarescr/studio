@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useUserStore } from "@/lib/store";
 import { useAuth } from '@/lib/auth-context';
 import { 
-   Settings, Paintbrush, Eye, Bell, User, Shield, Zap, Globe, HelpCircle, Coins, Gift, LogOut
+   Settings, Paintbrush, Eye, Bell, User, Zap, Globe, HelpCircle, Coins, Gift, LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';

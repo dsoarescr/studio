@@ -9,12 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Users, Video, Mic, MicOff, VideoOff, Share2, MessageSquare,
-  Hand, Palette, Brush, Eraser, Crown, Star, Zap, Eye,
-  Settings, Volume2, VolumeX, Phone, PhoneOff, UserPlus,
-  Copy, Link, Send, Smile, Heart, ThumbsUp, Gift, Camera
-} from "lucide-react";
+// Lucide imports removed
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 

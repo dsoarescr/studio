@@ -1,19 +1,13 @@
 // src/components/features/AdvancedAnalytics.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BarChart3, PieChart, LineChart, TrendingUp, TrendingDown, 
-  Eye, Heart, Share2, DollarSign, Users, MapPin, Calendar,
-  Target, Zap, Crown, Gem, Star, Award, Activity, Clock,
-  Download, Filter, RefreshCw, Settings, Info, AlertTriangle
-} from "lucide-react";
-import { motion } from "framer-motion";
+// Lucide imports removed
 
 interface AnalyticsData {
   views: { total: number; change: number; trend: 'up' | 'down' };

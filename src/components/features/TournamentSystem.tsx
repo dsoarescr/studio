@@ -1,18 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Trophy, Crown, Medal, Star, Flame, Award, Zap, Sparkles, 
-  Target, Users, MapPin, Calendar, Clock, TrendingUp, 
-  ChevronUp, ChevronDown, Minus, Activity, BarChart3, 
-  Gift, Coins, Gem, Shield, Sword, Heart, Eye, Play, Pause, Square
-} from 'lucide-react';
+// Lucide imports removed
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -492,3 +487,4 @@ export const TournamentSystem: React.FC = () => {
     </div>
   );
 };
+

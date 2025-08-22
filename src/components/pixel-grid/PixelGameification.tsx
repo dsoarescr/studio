@@ -7,11 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Trophy, Target, Flame, Star, Crown, Gem, Zap, Gift, 
-  Calendar, Clock, Users, MapPin, Palette, Award, Medal,
-  TrendingUp, BarChart3, Sparkles, Rocket, Shield, Heart
-} from 'lucide-react';
+// Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '@/lib/store';

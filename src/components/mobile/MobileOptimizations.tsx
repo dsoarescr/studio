@@ -1,14 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Smartphone, Wifi, Battery, Signal, Zap, Settings, 
-  Download, Upload, Gauge, Eye, EyeOff, Volume2, VolumeX
-} from 'lucide-react';
+// Lucide imports removed
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettingsStore } from '@/lib/store';
 
@@ -382,7 +379,7 @@ export function useMobileOptimizations() {
     );
 
     // Verificar recursos do dispositivo
-    const hasLowMemory = (navigator as any).deviceMemory && (navigator as any).deviceMemory < 4;
+    const hasLowMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory && (navigator as Navigator & { deviceMemory?: number }).deviceMemory < 4;
     const hasSlowCPU = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
 
     if (isMobile && (hasLowMemory || hasSlowCPU) && !performanceMode) {

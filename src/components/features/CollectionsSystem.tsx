@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,17 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
-import { useUserStore } from '@/lib/store';
-import { 
-  FolderPlus, FolderOpen, Star, Users, Eye, Heart, Share2, Edit, Trash2, 
-  Plus, Search, Filter, SortAsc, SortDesc, Grid, List, BookOpen, 
-  Palette, MapPin, Crown, Gem, Award, Zap, Target, Flame, Shield,
-  CheckCircle, Clock, TrendingUp, BarChart3, PieChart, LineChart,
-  Download, Upload, Copy, Link as LinkIcon, Settings, MoreVertical
-} from 'lucide-react';
+import { FolderPlus, Star, Users, Eye, Heart, Share2, Edit, Trash2, Plus, Search, Grid, List, BookOpen, Palette, Crown, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Collection {
@@ -747,3 +739,4 @@ const CollectionTemplateCard: React.FC<{
     </Card>
   );
 };
+

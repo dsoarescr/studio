@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,16 +16,12 @@ import CheckoutForm from "@/components/payment/CheckoutForm";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from "framer-motion";
-import {
+import { 
   Crown, Star, Zap, Shield, Sparkles, Check, X, CreditCard, Gift,
-  Palette, Users, Globe, Headphones, Eye, Settings, Award, Gem,
-  Rocket, Heart, Coins, Calendar, Clock, ArrowRight,
-  ChevronRight, Info, AlertTriangle, CheckCircle, Flame, Target,
-  TrendingUp, BarChart3, UserPlus, Share2, Trophy, Medal, Diamond,
-  Play, Pause, Square, MousePointer, Layers, Filter, Wand2,
-  MessageCircle, Video, BookOpen, Calculator, Percent, DollarSign,
-  ShoppingCart, Tag, Timer, Bell, Lock, Unlock, RefreshCw
-} from "lucide-react";
+  Palette, Users, Globe, Headphones, Coins, Percent,
+  Rocket, Diamond, UserPlus, TrendingUp, BarChart3,
+  Play, Layers, MessageCircle, ShoppingCart
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const subscriptionPlans = [
@@ -926,3 +922,4 @@ export default function PremiumSubscription() {
     </div>
   );
 }
+

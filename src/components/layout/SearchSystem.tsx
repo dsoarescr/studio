@@ -15,10 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Search, MapPin, User, Trophy, BookImage, Hash, Filter, Clock,
-  TrendingUp, Star, Compass, Palette, Users, Globe, X, ArrowRight
-} from 'lucide-react';
+import { Search, MapPin, User, Trophy, BookImage, Hash, Clock, TrendingUp, Globe, X, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 

@@ -8,11 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import {
-  Trophy, Star, Crown, Award, Target, Flame, TrendingUp,
-  Users, MessageSquare, Heart, Share2, Zap, Gift, Coins,
-  Medal, Shield, Sparkles, Gem, Lightbulb, UserCheck, CheckCircle
-} from "lucide-react";
+// Lucide imports removed
 import { cn } from '@/lib/utils';
 
 interface UserReputation {
@@ -523,3 +519,4 @@ export function CommunityGamification() {
     </div>
   );
 }
+

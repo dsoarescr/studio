@@ -9,6 +9,9 @@
     "build": "next build",
     "start": "next dev -p 9002",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -19,17 +19,7 @@ import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
-import { 
-  MessageSquare, Send, ThumbsUp, ThumbsDown, Star, Lightbulb, 
-  Bug, Zap, Award, Gift, Check, X, AlertTriangle, Info, 
-  HelpCircle, Smile, Frown, Meh, Heart, Flag, Clock, Calendar,
-  Users, Sparkles, Camera, Upload, Paperclip, Trash2, Save,
-  RefreshCw, ArrowRight, ArrowLeft, Plus, Minus, Copy, Share2,
-  Bookmark, Edit, Eye, Filter, Search, SortAsc, CheckSquare,
-  XSquare, BarChart3, PieChart, LineChart, TrendingUp, Download,
-  Printer, Mail, Phone, Globe, MapPin, User, Settings, Bell, Map as MapIcon,
-  ClipboardList
-} from "lucide-react";
+// Lucide imports removed
 import {
   Dialog,
   DialogContent,
@@ -159,80 +149,13 @@ const surveyQuestions: SurveyQuestion[] = [
 
 
 // Helper Components
-const CategoryIcon = ({ category }: { category: FeedbackCategory }) => {
-  switch (category) {
-    case 'bug':
-      return <Bug className="h-4 w-4 text-red-500" />;
-    case 'feature':
-      return <Lightbulb className="h-4 w-4 text-yellow-500" />;
-    case 'improvement':
-      return <Zap className="h-4 w-4 text-blue-500" />;
-    case 'question':
-      return <HelpCircle className="h-4 w-4 text-purple-500" />;
-    case 'praise':
-      return <Heart className="h-4 w-4 text-pink-500" />;
-    default:
-      return <MessageSquare className="h-4 w-4 text-gray-500" />;
-  }
-};
 
-const StatusBadge = ({ status }: { status: FeedbackStatus }) => {
-  switch (status) {
-    case 'open':
-      return <Badge variant="outline" className="text-blue-500 border-blue-500/50 bg-blue-500/10">Aberto</Badge>;
-    case 'in_progress':
-      return <Badge variant="outline" className="text-yellow-500 border-yellow-500/50 bg-yellow-500/10">Em Progresso</Badge>;
-    case 'resolved':
-      return <Badge variant="outline" className="text-green-500 border-green-500/50 bg-green-500/10">Resolvido</Badge>;
-    case 'closed':
-      return <Badge variant="outline" className="text-gray-500 border-gray-500/50 bg-gray-500/10">Fechado</Badge>;
-    default:
-      return <Badge variant="outline">Desconhecido</Badge>;
-  }
-};
 
-const PriorityBadge = ({ priority }: { priority: FeedbackPriority }) => {
-  switch (priority) {
-    case 'low':
-      return <Badge variant="outline" className="text-green-500 border-green-500/50 bg-green-500/10">Baixa</Badge>;
-    case 'medium':
-      return <Badge variant="outline" className="text-blue-500 border-blue-500/50 bg-blue-500/10">Média</Badge>;
-    case 'high':
-      return <Badge variant="outline" className="text-orange-500 border-orange-500/50 bg-orange-500/10">Alta</Badge>;
-    case 'critical':
-      return <Badge variant="outline" className="text-red-500 border-red-500/50 bg-red-500/10">Crítica</Badge>;
-    default:
-      return <Badge variant="outline">Desconhecida</Badge>;
-  }
-};
 
-const SatisfactionRating = ({ value, onChange }: { value: SatisfactionLevel | null; onChange: (value: SatisfactionLevel) => void }) => {
-  const ratings = [
-    { value: 1, icon: <Frown className="h-6 w-6" />, label: 'Muito Insatisfeito' },
-    { value: 2, icon: <Meh className="h-6 w-6" />, label: 'Insatisfeito' },
-    { value: 3, icon: <Meh className="h-6 w-6" />, label: 'Neutro' },
-    { value: 4, icon: <Smile className="h-6 w-6" />, label: 'Satisfeito' },
-    { value: 5, icon: <Smile className="h-6 w-6" />, label: 'Muito Satisfeito' }
-  ];
 
-  return (
-    <div className="flex justify-between items-center">
-      {ratings.map((rating) => (
-        <Button
-          key={rating.value}
-          variant="outline"
-          className={`flex flex-col items-center p-3 h-auto ${value === rating.value ? 'bg-primary/20 border-primary' : ''}`}
-          onClick={() => onChange(rating.value as SatisfactionLevel)}
-        >
-          <div className={`text-2xl ${value === rating.value ? 'text-primary' : 'text-muted-foreground'}`}>
-            {rating.icon}
-          </div>
-          <span className="text-xs mt-1">{rating.label}</span>
-        </Button>
-      ))}
-    </div>
-  );
-};
+
+
+
 
 interface FeedbackSystemProps {
     children: React.ReactNode;
@@ -245,44 +168,17 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
   const [feedbackDescription, setFeedbackDescription] = useState('');
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>('improvement');
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>(mockFeedbackItems);
-  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
-  const [newComment, setNewComment] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<FeedbackStatus | 'all'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<FeedbackCategory | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'votes' | 'date' | 'status'>('votes');
+
+
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [satisfaction, setSatisfaction] = useState<SatisfactionLevel | null>(null);
-  const [surveyAnswers, setSurveyAnswers] = useState<Record<string, any>>({});
+
+
   const [showConfetti, setShowConfetti] = useState(false);
   const [playRewardSound, setPlayRewardSound] = useState(false);
   const { toast } = useToast();
   const { addCredits, addXp } = useUserStore();
 
-  // Filter feedback items
-  const filteredFeedbackItems = feedbackItems.filter(item => {
-    const matchesSearch = !searchQuery || 
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    
-    return matchesSearch && matchesStatus && matchesCategory;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'votes':
-        return b.votes - a.votes;
-      case 'date':
-        return b.updatedAt.getTime() - a.updatedAt.getTime();
-      case 'status':
-        const statusOrder = { open: 0, in_progress: 1, resolved: 2, closed: 3 };
-        return statusOrder[a.status] - statusOrder[b.status];
-      default:
-        return 0;
-    }
-  });
+
 
   const handleSubmitFeedback = () => {
     if (!feedbackTitle.trim() || !feedbackDescription.trim()) {
@@ -335,52 +231,9 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
     });
   };
 
-  const handleVote = (id: string) => {
-    setFeedbackItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const newVotes = item.hasVoted ? item.votes - 1 : item.votes + 1;
-        return { ...item, votes: newVotes, hasVoted: !item.hasVoted };
-      }
-      return item;
-    }));
-  };
 
-  const handleAddComment = () => {
-    if (!selectedFeedback || !newComment.trim()) return;
 
-    const updatedFeedback = {
-      ...selectedFeedback,
-      comments: [
-        ...selectedFeedback.comments,
-        {
-          id: Date.now().toString(),
-          content: newComment,
-          createdAt: new Date(),
-          author: {
-            name: 'Você',
-            avatar: 'https://placehold.co/40x40.png',
-            dataAiHint: 'user avatar'
-          }
-        }
-      ],
-      updatedAt: new Date()
-    };
 
-    setFeedbackItems(prev => prev.map(item => 
-      item.id === selectedFeedback.id ? updatedFeedback : item
-    ));
-    setSelectedFeedback(updatedFeedback);
-    setNewComment('');
-    
-    // Reward user
-    addCredits(5);
-    addXp(2);
-    
-    toast({
-      title: "Comentário Adicionado",
-      description: "O seu comentário foi adicionado com sucesso. Recebeu 5 créditos.",
-    });
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -393,55 +246,11 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmitSurvey = () => {
-    // Check required questions
-    const unansweredRequired = surveyQuestions
-      .filter(q => q.required)
-      .some(q => !surveyAnswers[q.id]);
-    
-    if (unansweredRequired) {
-      toast({
-        title: "Campos Obrigatórios",
-        description: "Por favor, responda todas as perguntas obrigatórias.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Show success message
-    setShowConfetti(true);
-    setPlayRewardSound(true);
-    
-    // Reward user
-    addCredits(50);
-    addXp(25);
-    
-    toast({
-      title: "Pesquisa Enviada",
-      description: "Obrigado por participar! Recebeu 50 créditos como recompensa.",
-    });
-    
-    // Reset form
-    setSurveyAnswers({});
-    setSatisfaction(null);
-  };
 
-  const handleSurveyAnswer = (questionId: string, answer: any) => {
-    setSurveyAnswers(prev => ({
-      ...prev,
-      [questionId]: answer
-    }));
-  };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-PT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
+
+
+
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,11 +14,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Bell, X, Check, Star, MessageSquare, ShoppingCart, Trophy, Users, MapPin, Palette, Gift, AlertTriangle, Info, Heart, Share2, Crown, Zap, Clock, Filter, SquaresUnite as MarkAsUnread, Settings, Archive } from 'lucide-react';
+import { Bell, X, Check, Info, AlertTriangle, MessageSquare, Heart, Star, Trophy, Coins, ShoppingCart, Users, Zap, MapPin, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { VirtualizedList } from '@/components/ui/virtualized-list';
-import { useTranslation } from 'react-i18next';
+// import { VirtualizedList } from '@/components/ui/virtualized-list';
+// import { useTranslation } from 'react-i18next';
 
 type NotificationType = 
   | 'achievement' 
@@ -228,10 +228,10 @@ export default function NotificationCenter({ children }: NotificationCenterProps
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-primary" />
-              {t('notifications.title')}
+                                Notificações
               {unreadCount > 0 && (
                 <Badge variant="secondary" className="text-xs">
-                  {unreadCount} {t('notifications.new')}
+                  {unreadCount} novas
                 </Badge>
               )}
             </SheetTitle>
@@ -244,7 +244,7 @@ export default function NotificationCenter({ children }: NotificationCenterProps
                 className="text-xs"
               >
                 <Check className="h-4 w-4 mr-1" />
-                {t('notifications.markAll')}
+                Marcar todas como lidas
               </Button>
             </div>
           </div>
@@ -255,12 +255,15 @@ export default function NotificationCenter({ children }: NotificationCenterProps
               { key: 'all', label: t('notifications.all'), count: notifications.length },
               { key: 'unread', label: t('notifications.unread'), count: unreadCount },
               { key: 'important', label: t('notifications.important'), count: importantCount }
-            ].map(({ key, label, count }) => (
+            { key: 'all', label: 'Todas', count: notifications.length },
+            { key: 'unread', label: 'Não lidas', count: unreadCount },
+            { key: 'important', label: 'Importantes', count: importantCount }
+          ].map(({ key, label, count }) => (
               <Button
                 key={key}
                 variant={filter === key ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setFilter(key as any)}
+                onClick={() => setFilter(key as NotificationFilter)}
                 className="text-xs flex-1"
               >
                 {label}
@@ -280,22 +283,16 @@ export default function NotificationCenter({ children }: NotificationCenterProps
               <Card className="m-2 p-8 text-center">
                 <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <p className="text-muted-foreground">
-                  {filter === 'all' ? t('notifications.empty.all') : 
-                   filter === 'unread' ? t('notifications.empty.unread') : 
-                   t('notifications.empty.important')}
+                  {filter === 'all' ? 'Nenhuma notificação encontrada' : 
+                   filter === 'unread' ? 'Nenhuma notificação não lida' : 
+                   'Nenhuma notificação importante'}
                 </p>
               </Card>
             ) : (
-              <VirtualizedList
-                items={filteredNotifications}
-                itemSize={120}
-                height={Math.min(filteredNotifications.length * 120, 500)}
-                width="100%"
-                className="pr-2"
-                renderItem={(notification) => (
-                  <div className="py-1">
+              <div className="space-y-2 pr-2">
+                {filteredNotifications.map((notification) => (
+                  <div key={notification.id} className="py-1">
                     <Card
-                      key={notification.id}
                       className={cn(
                         "transition-all duration-200 hover:shadow-md cursor-pointer",
                         !notification.isRead && "border-primary/50 bg-primary/5",
@@ -365,8 +362,8 @@ export default function NotificationCenter({ children }: NotificationCenterProps
                       </CardContent>
                     </Card>
                   </div>
-                )}
-              />
+                ))}
+              </div>
             )}
           </div>
         </ScrollArea>

@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -31,14 +31,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
-import {
-  MapPin, Eye, Heart, MessageSquare, Share2, User, Calendar, Clock, Star, Crown, 
-  Gem, Sparkles, Edit3, ShoppingCart, Copy, ExternalLink, Flag, Bookmark, 
-  Download, Upload, Camera, Palette, Zap, Gift, Globe, Navigation, Compass, 
-  Target, Award, Trophy, Coins, Info, ChevronRight, ChevronLeft, X, Send, 
-  ThumbsUp, UserPlus, Settings, BarChart3, TrendingUp, Activity, Hash, 
-  Link as LinkIcon, Plus, Minus
-} from 'lucide-react';
+// Lucide imports removed
 import { cn } from '@/lib/utils';
 import { formatDate, timeAgo } from '@/lib/utils';
 

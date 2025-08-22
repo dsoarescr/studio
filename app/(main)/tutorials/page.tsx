@@ -11,9 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Play, BookOpen, Video, Star, Clock, Users, Search, Filter,
-  Palette, Target, Zap, Crown, Award, Heart, Eye, Download,
-  Share2, Bookmark, ChevronRight, Lightbulb, Rocket, Gem
+  Play, BookOpen, Star, Clock, Search, Filter,
+  Target, Crown, Heart, Eye, Bookmark, Lightbulb, Rocket
 } from "lucide-react";
 import { motion } from "framer-motion";
 

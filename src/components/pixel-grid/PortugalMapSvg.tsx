@@ -388,3 +388,4 @@ export default function PortugalMapSvg({ onMapDataLoaded, className }: PortugalM
     </svg>
   );
 }
+

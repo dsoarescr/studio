@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -11,11 +11,11 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import TwoFactorAuth from './TwoFactorAuth';
-import {
-  Shield, Lock, Key, Smartphone, AlertTriangle, CheckCircle, 
+import { 
+  Shield, Lock, Smartphone, AlertTriangle, CheckCircle, 
   Eye, EyeOff, LogOut, RefreshCw, Laptop, Smartphone as SmartphoneIcon,
   Globe, Clock, Info, Settings, User, Mail, CreditCard, FileText,
-  Trash2, Download, HelpCircle
+  Key, Bell, Wifi, Battery, Signal
 } from 'lucide-react';
 
 export default function SecurityDashboard() {
@@ -29,7 +29,7 @@ export default function SecurityDashboard() {
   const [isDataEncryptionEnabled, setIsDataEncryptionEnabled] = useState(true);
   
   const { toast } = useToast();
-  const { user } = useAuth();
+
 
   const activeSessions = [
     {

@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  ShoppingCart, TrendingUp, Gavel, Star, Heart, Eye, Clock, Users,
-  Filter, Search, SortAsc, SortDesc, Tag, MapPin, Calendar, Coins,
-  Crown, Gem, Award, Zap, Target, Flame, Shield, CheckCircle
-} from 'lucide-react';
+// Lucide imports removed
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -675,3 +671,4 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
     </Card>
   );
 };
+

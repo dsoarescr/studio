@@ -11,11 +11,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Brain, Sparkles, Wand2, Palette, TrendingUp, Target, 
-  Lightbulb, Zap, Star, Crown, Gem, Eye, Heart, MessageSquare,
-  Camera, Video, Music, Download, Upload,
-  RefreshCw, Play, Pause, Settings, Info, CheckCircle
-} from "lucide-react";
+  Wand2, 
+  Palette, 
+  TrendingUp, 
+  Sparkles, 
+  Eye, 
+  MessageSquare, 
+  Zap, 
+  Lightbulb, 
+  Star, 
+  RotateCcw, 
+  Crown, 
+  CheckCircle, 
+  Heart, 
+  Download,
+  Bot
+} from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -167,7 +178,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
       <DialogContent className="max-w-5xl h-[90vh] p-0">
         <DialogHeader className="p-6 border-b bg-gradient-to-r from-purple-500/10 to-blue-500/10">
           <DialogTitle className="flex items-center">
-            <Brain className="h-6 w-6 mr-3 text-purple-500" />
+                            <Bot className="h-6 w-6 mr-3 text-purple-500" />
             Assistente IA para Pixels
             <Badge className="ml-3 bg-gradient-to-r from-purple-500 to-blue-500">
               <Sparkles className="h-3 w-3 mr-1" />
@@ -191,7 +202,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
               Templates IA
             </TabsTrigger>
             <TabsTrigger value="history">
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 mr-2" />
               Histórico
             </TabsTrigger>
           </TabsList>
@@ -249,7 +260,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                       >
                         {isProcessing && selectedFeature === feature.id ? (
                           <>
-                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
                             Processando...
                           </>
                         ) : (
@@ -274,7 +285,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                   <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3 mb-3">
-                        <Brain className="h-6 w-6 text-purple-500 animate-pulse" />
+                        <Bot className="h-6 w-6 text-purple-500 animate-pulse" />
                         <div>
                           <h3 className="font-semibold">IA Processando...</h3>
                           <p className="text-sm text-muted-foreground">
@@ -319,7 +330,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                           Partilhar
                         </Button>
                         <Button variant="outline" size="sm">
-                          <RefreshCw className="h-4 w-4 mr-2" />
+                          <RotateCcw className="h-4 w-4 mr-2" />
                           Regenerar
                         </Button>
                       </div>
@@ -388,12 +399,12 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                   >
                     {isProcessing ? (
                       <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
                         IA a processar...
                       </>
                     ) : (
                       <>
-                        <Brain className="h-4 w-4 mr-2" />
+                        <Bot className="h-4 w-4 mr-2" />
                         Consultar IA
                       </>
                     )}
@@ -523,7 +534,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <RefreshCw className="h-5 w-5 mr-2" />
+                    <RotateCcw className="h-5 w-5 mr-2" />
                     Histórico de IA
                   </CardTitle>
                 </CardHeader>
@@ -572,7 +583,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                           <span className="text-xs text-muted-foreground">{item.time}</span>
                           <div className="flex gap-2">
                             <Button variant="ghost" size="sm">
-                              <RefreshCw className="h-3 w-3 mr-1" />
+                              <RotateCcw className="h-3 w-3 mr-1" />
                               Repetir
                             </Button>
                             <Button variant="ghost" size="sm">

@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NotificationCenter } from '@/components/ui/notification-system';
 import { RealTimeChat } from '@/components/features/RealTimeChat';
-import { CollectionsSystem } from '@/components/features/CollectionsSystem';
+
 import { useUserStore } from '@/lib/store';
 import SearchSystem from './SearchSystem';
 import { 
-  Award, CreditCard, Sparkles, Gift, Bell, Settings, Menu,
-  User, Search, Plus, Crown, Star, LogOut, HelpCircle, MessageSquare,
+  Award, Sparkles, Gift, Bell, Settings, Menu,
+  Search, Plus, Crown, Star, LogOut, HelpCircle,
   BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, Shield, RefreshCw
-} from "lucide-react"; 
+  BarChart3 as AnalyticsIcon, RefreshCw, Shield
+} from 'lucide-react'; 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
@@ -423,3 +423,4 @@ export default function UserProfileHeader() {
     </div>
   );
 }
+

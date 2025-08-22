@@ -196,12 +196,13 @@ if (!i18n.isInitialized) {
     .use(initReactI18next)
     .init({
       resources,
-      lng: typeof window !== 'undefined' ? 
-        (localStorage.getItem('pixel-universe-locale') || 'pt-PT') : 
-        'pt-PT',
+      lng: 'pt-PT',
       fallbackLng: 'pt-PT',
       interpolation: {
         escapeValue: false // React already escapes values
+      },
+      react: {
+        useSuspense: false
       }
     });
 }

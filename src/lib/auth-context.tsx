@@ -47,37 +47,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   } = useUserStore();
 
   useEffect(() => {
-    // The auth object might not be available immediately on SSR
-    if (!auth || typeof auth.onAuthStateChanged !== 'function') {
+    // Check if we're on the client side and Firebase is available
+    if (typeof window === 'undefined' || !auth || typeof auth.onAuthStateChanged !== 'function') {
       setLoading(false);
       return;
     }
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      
-      if (user) {
-        // Check if user exists in Firestore
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
+      try {
+        setUser(user);
         
-        if (userSnap.exists()) {
-          // Update last login
-          await updateDoc(userRef, {
-            lastLogin: serverTimestamp()
-          });
+        if (user) {
+          // Check if user exists in Firestore
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
           
+          if (userSnap.exists()) {
+            // Update last login
+            await updateDoc(userRef, {
+              lastLogin: serverTimestamp()
+            });
+            
+            // Initialize user store with Firestore data
+            const userData = userSnap.data();
+            if (userData) {
+              // Update local store with user data
+              // This ensures consistency between Firestore and local state
+            }
+          } else {
+            // Create user document if it doesn't exist
+            await setDoc(userRef, {
+              uid: user.uid,
+              displayName: user.displayName || 'User',
+              email: user.email,
+              photoURL: user.photoURL || '',
+              credits: 500,
+              specialCredits: 50,
+              level: 1,
+              xp: 0,
+              xpMax: 1000,
+              achievements: [],
+              pixels: [],
+              isPremium: false,
+              isVerified: user.emailVerified,
+              createdAt: serverTimestamp(),
+              lastLogin: serverTimestamp(),
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error in auth state change:", error);
+        toast({
+          title: "Erro de Autenticação",
+          description: "Ocorreu um erro ao verificar o estado da autenticação.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const signIn = async (email: string, password: string) => {
     try {
+      if (!auth) {
+        throw new Error("Firebase Auth não está disponível");
+      }
+      
       await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Login bem-sucedido",
@@ -96,6 +134,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
+      if (!auth || !db) {
+        throw new Error("Firebase não está disponível");
+      }
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
@@ -139,6 +181,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logOut = async () => {
     try {
+      if (!auth) {
+        throw new Error("Firebase Auth não está disponível");
+      }
+      
       await signOut(auth);
       toast({
         title: "Sessão terminada",
@@ -157,6 +203,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithSocialProvider = async (provider: FirebaseAuthProvider) => {
     try {
+      if (!auth || !db) {
+        throw new Error("Firebase não está disponível");
+      }
+      
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
@@ -168,8 +218,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await setDoc(userRef, {
           uid: user.uid,
           email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
+          displayName: user.displayName || 'User',
+          photoURL: user.photoURL || '',
           createdAt: serverTimestamp(),
           lastLogin: serverTimestamp(),
           credits: 500,
@@ -211,6 +261,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
+      if (!auth) {
+        throw new Error("Firebase Auth não está disponível");
+      }
+      
       await sendPasswordResetEmail(auth, email);
       toast({
         title: "Email enviado",
@@ -230,6 +284,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUserProfile = async (displayName?: string, photoURL?: string) => {
     try {
       if (!user) throw new Error("No user logged in");
+      if (!auth || !db) {
+        throw new Error("Firebase não está disponível");
+      }
       
       const updates: { displayName?: string; photoURL?: string } = {};
       if (displayName) updates.displayName = displayName;
@@ -278,6 +335,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return 'Esta operação não é permitida.';
       case 'auth/requires-recent-login':
         return 'Esta operação requer um login recente. Por favor, faça login novamente.';
+      case 'auth/network-request-failed':
+        return 'Erro de rede. Verifique a sua ligação à internet.';
+      case 'auth/too-many-requests':
+        return 'Demasiadas tentativas. Tente novamente mais tarde.';
       default:
         return 'Ocorreu um erro. Por favor, tente novamente.';
     }
@@ -311,3 +372,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

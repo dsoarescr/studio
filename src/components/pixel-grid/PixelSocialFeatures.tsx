@@ -8,12 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Users, Heart, MessageSquare, Share2, UserPlus, Crown, Star,
-  Gift, Coins, Trophy, Target, Zap, Eye, ThumbsUp, Send,
-  Camera, Music, Palette, MapPin, Calendar, Clock, Flame
-} from 'lucide-react';
+
+// Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 

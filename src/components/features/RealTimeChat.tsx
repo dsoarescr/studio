@@ -15,12 +15,17 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { useUserStore } from '@/lib/store';
 import { 
-  MessageSquare, Send, Users, Hash, Bell, BellOff, Settings, 
-  MoreVertical, Smile, Paperclip, Mic, Video, Phone, 
-  Search, Filter, Crown, Star, Shield, Zap, Target, Flame,
-  CheckCircle, Clock, TrendingUp, BarChart3, PieChart, LineChart,
-  Download, Upload, Copy, Link as LinkIcon, Edit, Trash2,
-  UserPlus, UserMinus, Volume2, VolumeX, Maximize, Minimize
+  MessageSquare, Send, Mic, MicOff, Phone, PhoneOff, Video, VideoOff,
+  MoreVertical, Settings, Users, Crown, Star, Shield, Eye, EyeOff,
+  Volume2, VolumeX, Smile, Image, FileText, Link, Copy, Check,
+  X, Plus, Minus, Search, Filter, SortAsc, SortDesc, Clock,
+  Calendar, MapPin, TrendingUp, Activity, Home, User, LogOut,
+  Sun, Moon, Monitor, Smartphone, Tablet, Wifi, WifiOff, Battery,
+  BatteryCharging, Volume1, MicOff as MicOffIcon, Headphones,
+  Gamepad, Mouse, Keyboard, Laptop, Server, Database, Cloud,
+  CloudOff, Lock, Unlock, Eye as EyeIcon, EyeOff as EyeOffIcon,
+  ShieldCheck, ShieldAlert, AlertTriangle, CheckCircle, XCircle,
+  Info, ExternalLink, ThumbsUp, ThumbsDown, MessageCircle, Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -811,3 +816,4 @@ function extractMentions(text: string): string[] {
   
   return mentions;
 }
+

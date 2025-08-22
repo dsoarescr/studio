@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   PaymentElement,
   useStripe,
@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-import { Loader2, CheckCircle, AlertTriangle, CreditCard, Lock } from 'lucide-react';
+// Lucide imports removed
 
 interface CheckoutFormProps {
   amount: number;
@@ -31,7 +31,6 @@ export default function CheckoutForm({
   description,
   onSuccess,
   onCancel,
-  metadata,
 }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();

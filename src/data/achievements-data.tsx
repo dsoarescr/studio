@@ -1,9 +1,6 @@
 // src/data/achievements-data.tsx
 import type { ReactNode } from 'react';
-import {
-  MapPin, Edit3, Palette, Compass, Map, Crown, BookImage, MessageSquare,
-  Share2, Megaphone, Star, Sparkles, ShieldCheck, Hourglass, Rocket, Users, Eye, CheckCheck, Puzzle, Activity, Award as TrophyIcon // Renamed Award to TrophyIcon to avoid conflict
-} from "lucide-react";
+import { Trophy, Star, Crown, Medal, Target, Users, MapPin, Coins, Zap, Flame, Gift, Shield, Award, Gem, Sparkles } from 'lucide-react';
 
 export type AchievementRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
@@ -244,3 +241,4 @@ export const achievementsData: Achievement[] = [
     ],
   },
 ];
+

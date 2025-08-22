@@ -17,19 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  User,
-  LogOut,
-  Settings,
-  Award,
-  CreditCard,
-  HelpCircle,
-  MessageSquare,
-  Crown,
-  Star,
-  Coins,
-  Gift,
-} from 'lucide-react';
+import { User, Settings, LogOut, Crown, Coins, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
@@ -199,3 +187,4 @@ export function UserMenu() {
     </motion.div>
   );
 }
+

@@ -3,7 +3,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -12,35 +12,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
   Heart, MessageSquare, Share2, Send, Users, MapPin, Calendar, 
-  Clock, Star, Crown, Gift, Zap, Eye, ThumbsUp, UserPlus, 
+  Clock, Star, Eye, ThumbsUp, UserPlus, 
   Play, Pause, X, ChevronLeft, ChevronRight, Camera,
-  Palette, Trophy, Target, Flame, TrendingUp, BookOpen, Video,
-  Music, Mic, Settings, Filter, Search, Plus, MoreHorizontal,
-  Bookmark, Flag, Volume2, VolumeX, Compass, Globe, Award,
-  Sparkles, Coins, Bell, Phone, MessageCircle, User, Edit,
-  Copy, ExternalLink, Info, CheckCircle, AlertTriangle, Lock,
-  Shield, UserCheck, Ban, AlertOctagon, TrendingDown, FileText,
-  BarChart4, PieChart, Gavel, Handshake, Megaphone, Lightbulb,
-  Hash, Sliders, Timer, RefreshCw, Trending, Activity, Layers,
-  Database, Robot, Brain, Wand2, Magic, Network, Link2,
-  Smile, AtSign, Download, Upload, RotateCcw, RotateCw, Volume,
-  VolumeOff, Vibrate, Wifi, WifiOff, Battery, Signal, Menu,
-  ChevronUp, ChevronDown, MoreVertical, Reply, Forward, Trash2,
-  Archive, Pin, PinOff, Maximize2, Minimize2, FileVideo,
-  Headphones, Smartphone, Laptop, Monitor, Watch, Gamepad2, EyeOff
+  Palette, Trophy, TrendingUp, BookOpen, Video,
+  Music, Mic, Settings, Search, Plus, MoreHorizontal,
+  Bookmark, Bell, MessageCircle, User, 
+  Copy, CheckCircle, Lock,
+  Shield, BarChart4, RefreshCw, ChevronUp, ChevronDown, EyeOff
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
@@ -48,14 +37,13 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetDescription,
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { useUserStore } from "@/lib/store";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { RequireAuth } from "@/components/auth/RequireAuth";
+
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
