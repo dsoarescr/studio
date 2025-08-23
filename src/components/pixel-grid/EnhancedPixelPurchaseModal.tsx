@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -11,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -38,9 +39,11 @@ import {
   Download, Share2, Heart, Star, Zap, Crown, Shield, Lock, Unlock,
   Eye, EyeOff, Settings, Trash2, Plus, Minus, Move, Crop, Filter, Smile,
   X, Undo, Redo, ZoomIn, ZoomOut, ShoppingCart, Upload, Shuffle, Leaf,
-  Cat, Gift
+  Cat, Gift, Hash, ExternalLink, Navigation, ThumbsUp, MessageSquare, User, UserPlus, Activity, Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
+
 
 interface SelectedPixelDetails {
   x: number;
@@ -298,6 +301,88 @@ export default function EnhancedPixelPurchaseModal({
     }
   }, [isOpen]);
 
+  // Função de flood fill (balde de tinta)
+  const floodFill = (ctx: CanvasRenderingContext2D, startX: number, startY: number, fillColor: string) => {
+    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    
+    const startPos = (startY * width + startX) * 4;
+    const startR = data[startPos];
+    const startG = data[startPos + 1];
+    const startB = data[startPos + 2];
+    const startA = data[startPos + 3];
+    
+    // Converter cor para RGB
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d')!;
+    tempCtx.fillStyle = fillColor;
+    tempCtx.fillRect(0, 0, 1, 1);
+    const fillData = tempCtx.getImageData(0, 0, 1, 1).data;
+    
+    const fillR = fillData[0];
+    const fillG = fillData[1];
+    const fillB = fillData[2];
+    const fillA = 255;
+    
+    if (startR === fillR && startG === fillG && startB === fillB && startA === fillA) {
+      return; // Mesma cor
+    }
+    
+    const stack = [[startX, startY]];
+    
+    while (stack.length > 0) {
+      const [x, y] = stack.pop()!;
+      
+      if (x < 0 || x >= width || y < 0 || y >= height) continue;
+      
+      const pos = (y * width + x) * 4;
+      
+      if (data[pos] === startR && data[pos + 1] === startG && 
+          data[pos + 2] === startB && data[pos + 3] === startA) {
+        
+        data[pos] = fillR;
+        data[pos + 1] = fillG;
+        data[pos + 2] = fillB;
+        data[pos + 3] = fillA;
+        
+        stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+      }
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+  };
+
+  // Aplicar simetria
+  const applySymmetry = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number) => {
+    const centerX = ctx.canvas.width / 2;
+    const centerY = ctx.canvas.height / 2;
+    
+    if (symmetryMode === 'horizontal' || symmetryMode === 'both') {
+      const mirrorX = centerX * 2 - x;
+      ctx.beginPath();
+      ctx.arc(mirrorX, y, brushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    if (symmetryMode === 'vertical' || symmetryMode === 'both') {
+      const mirrorY = centerY * 2 - y;
+      ctx.beginPath();
+      ctx.arc(x, mirrorY, brushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    if (symmetryMode === 'both') {
+      const mirrorX = centerX * 2 - x;
+      const mirrorY = centerY * 2 - y;
+      ctx.beginPath();
+      ctx.arc(mirrorX, mirrorY, brushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }, [brushSize, symmetryMode]);
+
+
   // Função de desenho principal
   const draw = useCallback((x: number, y: number, isStart: boolean = false) => {
     const canvas = canvasRef.current;
@@ -385,87 +470,6 @@ export default function EnhancedPixelPurchaseModal({
       setPlayDrawSound(true);
     }
   }, [selectedTool, selectedColor, brushSize, brushOpacity, lastPoint, symmetryMode, vibrate, applySymmetry]);
-
-  // Função de flood fill (balde de tinta)
-  const floodFill = (ctx: CanvasRenderingContext2D, startX: number, startY: number, fillColor: string) => {
-    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const data = imageData.data;
-    const width = imageData.width;
-    const height = imageData.height;
-    
-    const startPos = (startY * width + startX) * 4;
-    const startR = data[startPos];
-    const startG = data[startPos + 1];
-    const startB = data[startPos + 2];
-    const startA = data[startPos + 3];
-    
-    // Converter cor para RGB
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d')!;
-    tempCtx.fillStyle = fillColor;
-    tempCtx.fillRect(0, 0, 1, 1);
-    const fillData = tempCtx.getImageData(0, 0, 1, 1).data;
-    
-    const fillR = fillData[0];
-    const fillG = fillData[1];
-    const fillB = fillData[2];
-    const fillA = 255;
-    
-    if (startR === fillR && startG === fillG && startB === fillB && startA === fillA) {
-      return; // Mesma cor
-    }
-    
-    const stack = [[startX, startY]];
-    
-    while (stack.length > 0) {
-      const [x, y] = stack.pop()!;
-      
-      if (x < 0 || x >= width || y < 0 || y >= height) continue;
-      
-      const pos = (y * width + x) * 4;
-      
-      if (data[pos] === startR && data[pos + 1] === startG && 
-          data[pos + 2] === startB && data[pos + 3] === startA) {
-        
-        data[pos] = fillR;
-        data[pos + 1] = fillG;
-        data[pos + 2] = fillB;
-        data[pos + 3] = fillA;
-        
-        stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
-      }
-    }
-    
-    ctx.putImageData(imageData, 0, 0);
-  };
-
-  // Aplicar simetria
-  const applySymmetry = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    const centerX = ctx.canvas.width / 2;
-    const centerY = ctx.canvas.height / 2;
-    
-    if (symmetryMode === 'horizontal' || symmetryMode === 'both') {
-      const mirrorX = centerX * 2 - x;
-      ctx.beginPath();
-      ctx.arc(mirrorX, y, brushSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    
-    if (symmetryMode === 'vertical' || symmetryMode === 'both') {
-      const mirrorY = centerY * 2 - y;
-      ctx.beginPath();
-      ctx.arc(x, mirrorY, brushSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    
-    if (symmetryMode === 'both') {
-      const mirrorX = centerX * 2 - x;
-      const mirrorY = centerY * 2 - y;
-      ctx.beginPath();
-      ctx.arc(mirrorX, mirrorY, brushSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  };
 
   // Adicionar cor ao histórico
   const addToColorHistory = (color: string) => {
@@ -1051,7 +1055,7 @@ export default function EnhancedPixelPurchaseModal({
                       linear-gradient(to right, rgba(212, 167, 87, 0.3) 1px, transparent 1px),
                       linear-gradient(to bottom, rgba(212, 167, 87, 0.3) 1px, transparent 1px)
                     `,
-                    backgroundSize: `${280/gridSize}px ${280/gridSize}px`,
+                    backgroundSize: `${"280"}/${gridSize}px ${"280"}/${gridSize}px`,
                     transform: `scale(${canvasZoom / 100})`,
                     transformOrigin: 'center'
                   }}
@@ -1515,3 +1519,4 @@ export default function EnhancedPixelPurchaseModal({
     </Dialog>
   );
 }
+
