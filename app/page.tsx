@@ -67,7 +67,8 @@ export default function HomePage() {
           </div>
         </SidebarProvider>
       </main>
-      <BottomNavBar />
+      
     </div>
   );
 }
+
