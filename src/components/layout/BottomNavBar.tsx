@@ -9,15 +9,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/lib/auth-context';
 import { useUserStore } from '@/lib/store';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import MapSidebar from './MapSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import Link from 'next/link';
 import {
-  Home, Grid3X3, Users, Trophy, Bell, User, Settings, Plus, Search, Camera, Sparkles, Crown, Star, Zap, Heart, Coins, BarChart3, TrendingUp, Activity, Menu, X, ChevronUp, ChevronDown, ChevronRight, MessageSquare, Globe, Target, Video, Mic, Share2, Gamepad2, Palette, Brush, Layers, Compass, Award, Gift, Shield, Lock, Unlock, Eye, EyeOff, Volume2, VolumeX, Phone, PhoneOff, Send, Smile, Image, FileText, Link, Copy, Check, HelpCircle, BookOpen, Bot, Lightbulb, Wand2, RotateCcw, ZoomIn, ZoomOut, Download, Upload, Shuffle, Leaf, Cat, Edit, Trash2, Save, File, Folder, FolderOpen, Minus, Move, Crop, Filter, Type, Square, Circle, Triangle, Hexagon, Octagon, Diamond, Flame, Droplets, CloudRain, CloudSnow, CloudLightning, Sunrise, Sunset, Wind, Thermometer, Gauge, Map, Navigation, Navigation2, Flag, Medal, GraduationCap, Book, Library, School, University, Building, Building2, House, Store, ShoppingBag, ShoppingCart, CreditCard, Wallet, DollarSign, Euro, PoundSterling, Bitcoin, TrendingDown, BarChart, BarChart2, PieChart, LineChart, AreaChart, ScatterChart, Kanban, Timer, Hourglass, CalendarDays, CalendarCheck, CalendarX, CalendarPlus, CalendarMinus, CalendarRange, CalendarSearch, CalendarHeart, CalendarClock, CalendarOff, Clock, Calendar, MapPin, ChevronLeft, Maximize2, Minimize2, SortAsc, SortDesc, AlertCircle, LogIn, UserPlus, UserMinus, UserCheck, UserX, UserCog, UserSearch, Grid, List, Columns, Rows, ExternalLink, ThumbsUp, ThumbsDown, MessageCircle, Mail, Info, AlertTriangle, CheckCircle, XCircle, ShieldCheck, ShieldAlert, Wifi, WifiOff, Battery, BatteryCharging, Volume1, MicOff, Headphones, Gamepad, Mouse, Keyboard, Laptop, Server, Database, Cloud, CloudOff, Sun, Moon, Monitor, Smartphone, Tablet,
+  Home, Grid3X3, Users, Trophy, Bell, Settings, Plus, Search, Camera, Sparkles, Crown, Star, Zap, Heart, Coins, BarChart3, TrendingUp, Activity, Menu, X, ChevronUp,
 } from 'lucide-react';
 
 interface BottomNavBarProps {
@@ -128,18 +128,11 @@ export default function BottomNavBar({
   const [sidebarHeight, setSidebarHeight] = useState(0);
 
   const navItems = [
-    { id: 'home', label: 'Início', icon: <Home className="h-5 w-5" />, badge: null },
-    { id: 'pixels', label: 'Pixels', icon: <Grid3X3 className="h-5 w-5" />, badge: null },
-    { id: 'community', label: 'Comunidade', icon: <Users className="h-5 w-5" />, badge: null },
-    { id: 'achievements', label: 'Conquistas', icon: <Trophy className="h-5 w-5" />, badge: achievements > 0 ? achievements : null },
-    { id: 'notifications', label: 'Notificações', icon: <Bell className="h-5 w-5" />, badge: notifications > 0 ? notifications : null }
-  ];
-
-  const quickActions = [
-    { id: 'search', label: 'Pesquisar', icon: <Search className="h-4 w-4" />, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-    { id: 'ar', label: 'Realidade Aumentada', icon: <Camera className="h-4 w-4" />, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-    { id: 'collaboration', label: 'Colaboração', icon: <Users className="h-4 w-4" />, color: 'text-green-500', bgColor: 'bg-green-500/10' },
-    { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" />, color: 'text-orange-500', bgColor: 'bg-orange-500/10' }
+    { id: 'home', href: '/', label: 'Início', icon: <Home className="h-5 w-5" />, badge: null },
+    { id: 'pixels', href: '/pixels', label: 'Pixels', icon: <Grid3X3 className="h-5 w-5" />, badge: null },
+    { id: 'community', href: '/community', label: 'Comunidade', icon: <Users className="h-5 w-5" />, badge: null },
+    { id: 'achievements', href: '/achievements', label: 'Conquistas', icon: <Trophy className="h-5 w-5" />, badge: achievements > 0 ? achievements : null },
+    { id: 'notifications', href: '/notifications', label: 'Notificações', icon: <Bell className="h-5 w-5" />, badge: notifications > 0 ? notifications : null }
   ];
 
   const handleNavClick = (section: string) => {
@@ -358,23 +351,25 @@ export default function BottomNavBar({
             <TooltipProvider key={item.id} delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant={activeSection === item.id ? "default" : "ghost"} 
-                    size="sm" 
-                    className="relative flex flex-col items-center space-y-1 p-2 h-auto" 
-                    onClick={() => handleNavClick(item.id)} 
-                    onMouseEnter={() => setPlayHoverSound(true)}
-                  >
-                    <div className="relative">
-                      {item.icon}
-                      {item.badge && (
-                        <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </div>
-                    <span className="text-xs">{item.label}</span>
-                  </Button>
+                  <Link href={item.href} passHref>
+                    <Button 
+                      variant={activeSection === item.id ? "default" : "ghost"} 
+                      size="sm" 
+                      className="relative flex flex-col items-center space-y-1 p-2 h-auto" 
+                      onClick={() => handleNavClick(item.id)} 
+                      onMouseEnter={() => setPlayHoverSound(true)}
+                    >
+                      <div className="relative">
+                        {item.icon}
+                        {item.badge && (
+                          <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs">{item.label}</span>
+                    </Button>
+                  </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <p>{item.label}</p>
