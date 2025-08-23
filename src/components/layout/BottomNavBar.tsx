@@ -15,6 +15,7 @@ import { useUserStore } from '@/lib/store';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import MapSidebar from './MapSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import {
   Home, Grid3X3, Users, Trophy, Bell, User, Settings, Plus, Search, Camera, Sparkles, Crown, Star, Zap, Heart, Coins, BarChart3, TrendingUp, Activity, Menu, X, ChevronUp, ChevronDown, ChevronRight, MessageSquare, Globe, Target, Video, Mic, Share2, Gamepad2, Palette, Brush, Layers, Compass, Award, Gift, Shield, Lock, Unlock, Eye, EyeOff, Volume2, VolumeX, Phone, PhoneOff, Send, Smile, Image, FileText, Link, Copy, Check, HelpCircle, BookOpen, Bot, Lightbulb, Wand2, RotateCcw, ZoomIn, ZoomOut, Download, Upload, Shuffle, Leaf, Cat, Edit, Trash2, Save, File, Folder, FolderOpen, Minus, Move, Crop, Filter, Type, Square, Circle, Triangle, Hexagon, Octagon, Diamond, Flame, Droplets, CloudRain, CloudSnow, CloudLightning, Sunrise, Sunset, Wind, Thermometer, Gauge, Map, Navigation, Navigation2, Flag, Medal, GraduationCap, Book, Library, School, University, Building, Building2, House, Store, ShoppingBag, ShoppingCart, CreditCard, Wallet, DollarSign, Euro, PoundSterling, Bitcoin, TrendingDown, BarChart, BarChart2, PieChart, LineChart, AreaChart, ScatterChart, Kanban, Timer, Hourglass, CalendarDays, CalendarCheck, CalendarX, CalendarPlus, CalendarMinus, CalendarRange, CalendarSearch, CalendarHeart, CalendarClock, CalendarOff, Clock, Calendar, MapPin, ChevronLeft, Maximize2, Minimize2, SortAsc, SortDesc, AlertCircle, LogIn, UserPlus, UserMinus, UserCheck, UserX, UserCog, UserSearch, Grid, List, Columns, Rows, ExternalLink, ThumbsUp, ThumbsDown, MessageCircle, Mail, Info, AlertTriangle, CheckCircle, XCircle, ShieldCheck, ShieldAlert, Wifi, WifiOff, Battery, BatteryCharging, Volume1, MicOff, Headphones, Gamepad, Mouse, Keyboard, Laptop, Server, Database, Cloud, CloudOff, Sun, Moon, Monitor, Smartphone, Tablet,
 } from 'lucide-react';
@@ -180,7 +181,7 @@ export default function BottomNavBar({
       {/* Integrated Sidebar Overlay */}
       <AnimatePresence>
         {showSidebar && (
-          <>
+          <SidebarProvider>
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -301,7 +302,7 @@ export default function BottomNavBar({
                 </Tabs>
               </div>
             </motion.div>
-          </>
+          </SidebarProvider>
         )}
       </AnimatePresence>
 
@@ -412,4 +413,3 @@ export default function BottomNavBar({
     </>
   );
 }
-
