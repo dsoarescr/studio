@@ -45,7 +45,7 @@ import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
 import {
-    Brain, Crosshair, Crown, Grid3X3, Map, MapPin, Palette, Search, Sparkles, Star,
+    Brain, Crosshair, Crown, Grid3X3, Map as MapIcon, MapPin, Palette, Search, Sparkles, Star,
     Trophy, Users,
   } from 'lucide-react';
 
