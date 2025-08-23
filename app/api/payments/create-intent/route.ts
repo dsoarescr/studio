@@ -60,6 +60,7 @@ export async function POST(request: Request) {
       automatic_payment_methods: {
         enabled: true,
       },
+      capture_method: 'automatic', // Explicitly set capture method
     });
 
     await adminDb.collection('paymentIntents').doc(paymentIntent.id).set({

@@ -233,8 +233,6 @@ export function StripeProvider({ children }: StripeProviderProps) {
   };
 
   const options: StripeElementsOptions = {
-    mode: 'payment',
-    currency: 'eur',
     appearance: {
       theme: 'stripe',
       variables: {
