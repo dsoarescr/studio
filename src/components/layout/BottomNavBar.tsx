@@ -17,7 +17,7 @@ import MapSidebar from './MapSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import {
-  Home, Grid3X3, Users, Trophy, Bell, Settings, Plus, Search, Camera, Sparkles, Crown, Star, Zap, Heart, Coins, BarChart3, TrendingUp, Activity, Menu, X, ChevronUp,
+  Home, Grid3X3, Users, Trophy, Bell, Settings, Plus, Search, Camera, Sparkles, Crown, Star, Zap, Heart, Coins, BarChart3, TrendingUp, Activity, Menu, X, ChevronUp, Video, Mic, Globe, Target, ChevronRight,
 } from 'lucide-react';
 
 interface BottomNavBarProps {

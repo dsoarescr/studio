@@ -304,8 +304,7 @@ export default function StatisticsPage() {
       <SoundEffect 
         src={SOUND_EFFECTS.SUCCESS} 
         play={playRewardSound} 
-        onEnd={() => setPlayRewardSound(false)} 
-      />
+        onEnd={() => setPlayRewardSound(false)} />
       
       <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
         {/* Enhanced Header */}
