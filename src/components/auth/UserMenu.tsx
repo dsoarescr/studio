@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, LogOut, Crown, Coins, Bell } from 'lucide-react';
+import { User, Settings, LogOut, Crown, Coins, Bell, Award, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
@@ -114,7 +114,7 @@ export function UserMenu() {
           
           <div className="mt-2 p-2 bg-muted/20 rounded-lg">
             <div className="flex justify-between text-xs mb-1">
-              <span>XP: {xp}/{xpMax}</span>
+              <span>Progresso XP: {xp}/{xpMax}</span>
               <span>{Math.round(xpPercentage)}%</span>
             </div>
             <div className="w-full bg-muted/50 rounded-full h-1.5 overflow-hidden shadow-inner">
@@ -187,4 +187,3 @@ export function UserMenu() {
     </motion.div>
   );
 }
-
