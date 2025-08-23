@@ -1,6 +1,6 @@
 // src/data/achievements-data.tsx
 import type { ReactNode } from 'react';
-import { Trophy, Star, Crown, Medal, Target, Users, MapPin, Coins, Zap, Flame, Gift, Shield, Award, Gem, Sparkles } from 'lucide-react';
+import { Trophy, Star, Crown, Medal, Target, Users, MapPin, Coins, Zap, Flame, Gift, Shield, Award, Gem, Sparkles, Megaphone, Edit3, Palette, Compass, Map, BookImage, MessageSquare, Rocket, Hourglass, ShieldCheck } from 'lucide-react';
 
 export type AchievementRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
@@ -231,7 +231,7 @@ export const achievementsData: Achievement[] = [
     id: "universe_conqueror",
     name: "Universo Conquistado",
     overallDescription: "Atingiu o auge do domínio no Pixel Universe.",
-    icon: <TrophyIcon className="h-7 w-7 text-amber-400" />, // Using Award as TrophyIcon
+    icon: <Trophy className="h-7 w-7 text-amber-400" />,
     category: 'collection',
     rarity: 'legendary',
     tiers: [

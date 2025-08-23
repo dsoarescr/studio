@@ -15,7 +15,7 @@ import UserProfileHeader from '@/components/layout/UserProfileHeader';
 import BottomNavBar from '@/components/layout/BottomNavBar';
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { user } = useAuth();
   
   // Show welcome message for new visitors

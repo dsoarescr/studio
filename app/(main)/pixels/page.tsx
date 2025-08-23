@@ -1,22 +1,31 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Palette, Star, Eye, Heart, MessageSquare, Crown, Gem, Sparkles, TrendingUp, Siren as Fire, Zap, Award, Clock, Filter, Search, Grid3X3, List, ArrowUp, ArrowDown, Lightbulb, Brush, RefreshCw, Globe, MapPin } from "lucide-react";
+import { 
+  Palette, Star, Eye, Heart, MessageSquare, Crown, Gem, Sparkles, 
+  TrendingUp, Siren as Fire, Zap, Award, Clock, Filter, Search, 
+  Grid3X3, List, ArrowUp, ArrowDown, Lightbulb, Brush, RefreshCw, 
+  Globe, MapPin, Megaphone, Bookmark, Share2, ShoppingCart, Users, 
+  Rocket, CheckCircle, Target, Hash, BarChart3 
+} from "lucide-react";
 
 interface PixelArtwork {
   id: string;
@@ -386,7 +395,7 @@ export default function PixelsGalleryPage() {
   const { credits, specialCredits, addCredits, removeCredits, removeSpecialCredits, addXp } = useUserStore();
 
   // Filter and sort pixels
-  const filteredPixels = pixels
+  const filteredPixels = useMemo(() => pixels
     .filter(pixel => {
       // Search filter
       if (searchQuery && !pixel.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -447,9 +456,9 @@ export default function PixelsGalleryPage() {
         default:
           return 0;
       }
-    });
+    }), [pixels, searchQuery, selectedCategory, priceRange, rarityFilter, showOnlyForSale, showOnlyFeatured, sortBy]);
 
-  const handleLike = (pixelId: string, e: React.MouseEvent) => {
+  const handleLike = useCallback((pixelId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setPixels(prev => prev.map(pixel => {
       if (pixel.id === pixelId) {
@@ -476,12 +485,12 @@ export default function PixelsGalleryPage() {
       setPlaySound(true);
       toast({
         title: "❤️ Pixel Curtido!",
-        description: `Curtiu &quot;${pixel.title}&quot;. +5 XP, +2 créditos!`,
+        description: `Curtiu "${pixel.title}". +5 XP, +2 créditos!`,
       });
     }
-  };
+  }, [pixels, addXp, addCredits, toast]);
 
-  const handleBookmark = (pixelId: string, e: React.MouseEvent) => {
+  const handleBookmark = useCallback((pixelId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setPixels(prev => prev.map(pixel => {
       if (pixel.id === pixelId) {
@@ -507,12 +516,12 @@ export default function PixelsGalleryPage() {
       addCredits(1);
       toast({
         title: pixel.interactions.isBookmarked ? "🔖 Removido dos Favoritos" : "⭐ Adicionado aos Favoritos",
-        description: `&quot;${pixel.title}&quot; ${pixel.interactions.isBookmarked ? 'removido' : 'adicionado'}.`,
+        description: `"${pixel.title}" ${pixel.interactions.isBookmarked ? 'removido' : 'adicionado'}.`,
       });
     }
-  };
+  }, [pixels, addXp, addCredits, toast]);
 
-  const handleShare = async (pixel: PixelArtwork, e: React.MouseEvent) => {
+  const handleShare = useCallback(async (pixel: PixelArtwork, e: React.MouseEvent) => {
     e.stopPropagation();
     
     const shareData = {
@@ -533,7 +542,7 @@ export default function PixelsGalleryPage() {
         addCredits(3);
         toast({
           title: "📤 Pixel Partilhado!",
-          description: `&quot;${pixel.title}&quot; partilhado com sucesso. +8 XP, +3 créditos!`,
+          description: `"${pixel.title}" partilhado com sucesso. +8 XP, +3 créditos!`,
         });
       } catch (error) {
         // User cancelled
@@ -545,9 +554,9 @@ export default function PixelsGalleryPage() {
         description: "Link do pixel copiado para a área de transferência.",
       });
     }
-  };
+  }, [addXp, addCredits, toast]);
 
-  const handleFollow = (authorId: string, e: React.MouseEvent) => {
+  const handleFollow = useCallback((authorId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setPixels(prev => prev.map(pixel => {
       if (pixel.author.id === authorId) {
@@ -577,7 +586,7 @@ export default function PixelsGalleryPage() {
         description: `Agora segue ${pixel.author.name}. +15 XP, +8 créditos!`,
       });
     }
-  };
+  }, [pixels, addXp, addCredits, toast]);
 
   const handlePromotePixel = (pixel: PixelArtwork, promotion: PromotionPlan) => {
     const canAffordCredits = credits >= promotion.cost;

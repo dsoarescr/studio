@@ -129,7 +129,7 @@ interface NotificationCenterProps {
 
 export default function NotificationCenter({ children }: NotificationCenterProps) {
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const [filter, setFilter] = useState<'all' | 'unread' | 'important'>('all');
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();

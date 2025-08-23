@@ -20,7 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User, X, LogIn, UserPlus, Info, Facebook, MessageSquare } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, X, LogIn, UserPlus, Info, Facebook, MessageSquare, AlertTriangle, Loader2 } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
 
 interface AuthModalProps {
@@ -42,7 +42,7 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   
-  const { signIn, signUp, signInWithGoogle, signInWithFacebook, signInWithMessageSquare, signInWithGithub, resetPassword } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithFacebook, signInWithMessageSquare, resetPassword } = useAuth();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -120,7 +120,7 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'MessageSquare' | 'github') => {
+  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'MessageSquare') => {
     setIsLoading(true);
     try {
       switch (provider) {
@@ -133,9 +133,7 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
         case 'MessageSquare':
           await signInWithMessageSquare();
           break;
-        case 'github':
-          await signInWithGithub();
-          break;
+
       }
       setPlaySuccessSound(true);
       setIsOpen(false);
@@ -393,16 +391,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
                   <MessageSquare className="h-4 w-4 text-blue-400" />
                   <span>MessageSquare</span>
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleSocialLogin('github')}
-                  disabled={true}
-                  className="flex items-center justify-center gap-2 opacity-50"
-                >
-                  <Github className="h-4 w-4" />
-                  <span>GitHub</span>
-                </Button>
               </div>
             </TabsContent>
             
@@ -568,16 +556,6 @@ export function AuthModal({ children, defaultTab = 'login' }: AuthModalProps) {
                 >
                   <MessageSquare className="h-4 w-4 text-blue-400" />
                   <span>MessageSquare</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleSocialLogin('github')}
-                  disabled={true}
-                  className="flex items-center justify-center gap-2 opacity-50"
-                >
-                  <Github className="h-4 w-4" />
-                  <span>GitHub</span>
                 </Button>
               </div>
             </TabsContent>

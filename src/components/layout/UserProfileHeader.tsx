@@ -72,7 +72,7 @@ export default function UserProfileHeader() {
   } = useUserStore();
   
   const pathname = usePathname();
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { user } = useAuth();
   const { isOnline, lastSync } = useAppStore();
 

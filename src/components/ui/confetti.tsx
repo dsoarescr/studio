@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
+import { useWindowSize } from '@/hooks/use-window-size';
 
 interface ConfettiProps {
   active: boolean;

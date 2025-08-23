@@ -1,7 +1,7 @@
 
 import type {Metadata} from 'next';
 import './globals.css';
-import '@/lib/i18n'; // Initialize i18n
+// import '@/lib/i18n'; // Initialize i18n
 import { Toaster } from "@/components/ui/toaster";
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { AuthProvider } from '@/lib/auth-context';

@@ -19,7 +19,7 @@ import { useUserStore } from "@/lib/store";
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
-// Lucide imports removed
+import { Send, MessageSquare, ClipboardList, MapIcon, Bug, Lightbulb, Zap, HelpCircle, Heart, Upload, Paperclip, Trash2, RefreshCw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

@@ -21,7 +21,7 @@ export function LanguageSwitcher({
   size = 'default',
   showText = true
 }: LanguageSwitcherProps) {
-  const { i18n } = useTranslation();
+  // const { i18n } = useTranslation();
   const { setLanguage } = useSettingsStore();
   
   const languages = [
@@ -30,10 +30,11 @@ export function LanguageSwitcher({
     { code: 'es-ES', name: 'Español', flag: '🇪🇸' },
   ];
   
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  // Use default language since i18n is commented out
+  const currentLanguage = languages[0];
   
   const changeLanguage = (code: string) => {
-    i18n.changeLanguage(code);
+    // i18n.changeLanguage(code);
     setLanguage(code as 'pt-PT' | 'en-US' | 'es-ES');
     localStorage.setItem('pixel-universe-locale', code);
   };
@@ -55,7 +56,7 @@ export function LanguageSwitcher({
           <DropdownMenuItem
             key={language.code}
             onClick={() => changeLanguage(language.code)}
-            className={i18n.language === language.code ? 'bg-primary/10 font-medium' : ''}
+            className={currentLanguage.code === language.code ? 'bg-primary/10 font-medium' : ''}
           >
             <span className="mr-2">{language.flag}</span>
             {language.name}

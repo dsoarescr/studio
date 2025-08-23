@@ -297,7 +297,7 @@ const menuCategories = [
 ];
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { user } = useAuth();
   const { isPremium, credits, xp, level, achievements } = useUserStore();
   const { toast } = useToast();

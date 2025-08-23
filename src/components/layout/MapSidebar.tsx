@@ -42,12 +42,26 @@ type ActivityItem = {
   region?: string;
 };
 
-const initialActivities: ActivityItem[] = [
-  { id: '1', type: 'login', user: { name: 'PixelAdventurer', dataAiHint: "avatar user" }, timestamp: new Date(Date.now() - 1000 * 60 * 5) },
-  { id: '2', type: 'purchase', user: { name: 'ArtCollector7', dataAiHint: "avatar user" }, timestamp: new Date(Date.now() - 1000 * 60 * 12), details: 'Pixel (12,34) em Lisboa', region: 'Lisboa' },
-  { id: '3', type: 'color_change', user: { name: 'ColorMaster', dataAiHint: "avatar user" }, timestamp: new Date(Date.now() - 1000 * 60 * 25), details: 'Pixel (5,8) para #FF0000', region: 'Porto' },
-  { id: '4', type: 'achievement', user: { name: 'PixelAdventurer', dataAiHint: "avatar user" }, timestamp: new Date(Date.now() - 1000 * 60 * 40), details: 'Conquista: Primeiro Pixel!' },
-];
+// Use static dates to avoid hydration mismatch
+const getInitialActivities = (): ActivityItem[] => {
+  if (typeof window === 'undefined') {
+    // Return static dates for SSR
+    return [
+      { id: '1', type: 'login', user: { name: 'PixelAdventurer', dataAiHint: "avatar user" }, timestamp: new Date('2024-01-01T12:00:00Z') },
+      { id: '2', type: 'purchase', user: { name: 'ArtCollector7', dataAiHint: "avatar user" }, timestamp: new Date('2024-01-01T11:48:00Z'), details: 'Pixel (12,34) em Lisboa', region: 'Lisboa' },
+      { id: '3', type: 'color_change', user: { name: 'ColorMaster', dataAiHint: "avatar user" }, timestamp: new Date('2024-01-01T11:35:00Z'), details: 'Pixel (5,8) para #FF0000', region: 'Porto' },
+      { id: '4', type: 'achievement', user: { name: 'PixelAdventurer', dataAiHint: "avatar user" }, timestamp: new Date('2024-01-01T11:20:00Z'), details: 'Conquista: Primeiro Pixel!' },
+    ];
+  }
+  // Use dynamic dates for client
+  const now = Date.now();
+  return [
+    { id: '1', type: 'login', user: { name: 'PixelAdventurer', dataAiHint: "avatar user" }, timestamp: new Date(now - 1000 * 60 * 5) },
+    { id: '2', type: 'purchase', user: { name: 'ArtCollector7', dataAiHint: "avatar user" }, timestamp: new Date(now - 1000 * 60 * 12), details: 'Pixel (12,34) em Lisboa', region: 'Lisboa' },
+    { id: '3', type: 'color_change', user: { name: 'ColorMaster', dataAiHint: "avatar user" }, timestamp: new Date(now - 1000 * 60 * 25), details: 'Pixel (5,8) para #FF0000', region: 'Porto' },
+    { id: '4', type: 'achievement', user: { name: 'PixelAdventurer', dataAiHint: "avatar user" }, timestamp: new Date(now - 1000 * 60 * 40), details: 'Conquista: Primeiro Pixel!' },
+  ];
+};
 
 const activityIcons = {
   login: <LogIn className="h-3.5 w-3.5 text-green-400" />,
@@ -89,30 +103,46 @@ const initialStats: StatItem[] = [
 
 // Helper Components
 const FormattedTimestamp: React.FC<{ timestamp: Date }> = ({ timestamp }) => {
-  const [timeString, setTimeString] = useState<string>('');
+  const [timeString, setTimeString] = useState<string>('--:--');
+  const [isClient, setIsClient] = useState(false);
+  
   useEffect(() => {
-    setTimeString(timestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }));
+    setIsClient(true);
+    if (typeof window !== 'undefined') {
+      setTimeString(timestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }));
+    }
   }, [timestamp]);
 
-  if (!timeString) return null;
-  return <p className="text-xs text-muted-foreground/80 font-code">{timeString}</p>;
+  return <p className="text-xs text-muted-foreground/80 font-code">{isClient ? timeString : '--:--'}</p>;
 };
 
 const FormattedStatValue: React.FC<{ value: number | string }> = ({ value }) => {
-  const [displayValue, setDisplayValue] = useState<string | number | null>(null);
+  const [displayValue, setDisplayValue] = useState<string | number>('--');
+  const [isClient, setIsClient] = useState(false);
+  
   useEffect(() => {
-    setDisplayValue(typeof value === 'number' ? value.toLocaleString('pt-PT') : value);
+    setIsClient(true);
+    if (typeof window !== 'undefined') {
+      setDisplayValue(typeof value === 'number' ? value.toLocaleString('pt-PT') : value);
+    }
   }, [value]);
-  if (displayValue === null) return <span className="font-mono text-sm font-semibold">...</span>;
-  return <>{displayValue}</>;
+  
+  return <span className="font-mono text-sm font-semibold">{isClient ? displayValue : '--'}</span>;
 };
 
 export default function MapSidebar() {
-  const [activities, setActivities] = useState<ActivityItem[]>(initialActivities);
+  const [activities, setActivities] = useState<ActivityItem[]>(getInitialActivities());
   // const { t } = useTranslation();
   const [stats, setStats] = useState<StatItem[]>(initialStats);
   const [playHoverSound, setPlayHoverSound] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Update activities with real dates on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setActivities(getInitialActivities());
+    }
+  }, []);
 
   useEffect(() => {
     const activityInterval = setInterval(() => {
