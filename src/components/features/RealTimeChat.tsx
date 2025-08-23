@@ -17,7 +17,7 @@ import { useUserStore } from '@/lib/store';
 import { 
   MessageSquare, Send, Mic, MicOff, Phone, PhoneOff, Video, VideoOff,
   MoreVertical, Settings, Users, Crown, Star, Shield, Eye, EyeOff,
-  Volume2, VolumeX, Smile, Image, FileText, Link, Copy, Check,
+  Volume2, VolumeX, Smile, Image, FileText, Link as LinkIcon, Copy, Check,
   X, Plus, Minus, Search, Filter, SortAsc, SortDesc, Clock,
   Calendar, MapPin, TrendingUp, Activity, Home, User, LogOut,
   Sun, Moon, Monitor, Smartphone, Tablet, Wifi, WifiOff, Battery,
@@ -25,7 +25,8 @@ import {
   Gamepad, Mouse, Keyboard, Laptop, Server, Database, Cloud,
   CloudOff, Lock, Unlock, Eye as EyeIcon, EyeOff as EyeOffIcon,
   ShieldCheck, ShieldAlert, AlertTriangle, CheckCircle, XCircle,
-  Info, ExternalLink, ThumbsUp, ThumbsDown, MessageCircle, Mail
+  Info, ExternalLink, ThumbsUp, ThumbsDown, MessageCircle, Mail,
+  Maximize, Minimize
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -461,7 +462,7 @@ export const RealTimeChat: React.FC = () => {
                     size="sm"
                     onClick={() => setShowChat(false)}
                   >
-                    ×
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -489,7 +490,7 @@ export const RealTimeChat: React.FC = () => {
                       size="sm"
                       onClick={() => setShowChat(false)}
                     >
-                      ×
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -816,4 +817,3 @@ function extractMentions(text: string): string[] {
   
   return mentions;
 }
-
