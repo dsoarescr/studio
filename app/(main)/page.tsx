@@ -209,6 +209,7 @@ import {
   CalendarClock,
   CalendarOff,
 } from 'lucide-react';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 // Menu Categories
 const menuCategories = [
@@ -297,7 +298,6 @@ const menuCategories = [
 ];
 
 export default function HomePage() {
-  // const { t } = useTranslation();
   const { user } = useAuth();
   const { isPremium, credits, xp, level, achievements } = useUserStore();
   const { toast } = useToast();
@@ -554,21 +554,33 @@ export default function HomePage() {
           {/* Main Content Area */}
           <div className="flex-1 h-full relative">
             <PixelGrid />
+             {/* Welcome overlay for non-authenticated users */}
+             {!user && (
+                <div className="absolute bottom-24 right-6 z-30 max-w-sm">
+                  <div className="bg-card/90 backdrop-blur-md p-4 rounded-lg shadow-lg border border-primary/30 animate-fade-in">
+                    <h3 className="text-lg font-semibold mb-2 text-primary">Bem-vindo ao Pixel Universe!</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Explore o mapa livremente. Para comprar pixels e desbloquear todas as funcionalidades, crie uma conta ou inicie sessão.
+                    </p>
+                    <div className="flex gap-2">
+                      <AuthModal defaultTab="login">
+                        <Button variant="outline" size="sm" className="flex-1">
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Entrar
+                        </Button>
+                      </AuthModal>
+                      <AuthModal defaultTab="register">
+                        <Button size="sm" className="flex-1">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Registar
+                        </Button>
+                      </AuthModal>
+                    </div>
+                  </div>
+                </div>
+              )}
           </div>
         </div>
-
-        {/* Enhanced Mobile Bottom Navigation with Integrated Sidebar */}
-        {/* {isMobile && (
-          <BottomNavBar
-            onNavigate={handleNavigate}
-            activeSection={activeSection}
-            notifications={3}
-            achievements={achievements || 0}
-            credits={credits}
-            xp={xp}
-            level={level}
-          />
-        )} */}
 
         {/* Performance Monitor */}
         <PerformanceMonitor />
@@ -591,4 +603,3 @@ export default function HomePage() {
     </SidebarProvider>
   );
 }
-
