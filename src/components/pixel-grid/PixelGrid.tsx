@@ -44,6 +44,10 @@ import PixelSocialFeatures from './PixelSocialFeatures';
 import SwipeGestures from '../mobile/SwipeGestures';
 import MobileOptimizations from '../mobile/MobileOptimizations';
 import { useHapticFeedback } from '../mobile/HapticFeedback';
+import {
+    Brain, Crosshair, Crown, Grid3X3, Map, MapPin, Palette, Search, Sparkles, Star,
+    Trophy, Users,
+  } from 'lucide-react';
 
 // Performance optimization constants
 const VIRTUALIZATION_THRESHOLD = 10000;
@@ -400,7 +404,7 @@ export default function PixelGrid() {
     }
     
     vibrate([30]);
-  }, [soldPixels, user?.uid, vibrate]);
+  }, [soldPixels, user?.uid, vibrate, toast]);
 
   // Save bookmarks
   const saveBookmark = useCallback((name: string, x: number, y: number, zoom: number) => {
@@ -506,6 +510,34 @@ export default function PixelGrid() {
     };
   }
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (didDragRef.current) {
+          didDragRef.current = false;
+          return;
+      }
+      
+      if (!containerRef.current) return;
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      // Convert click coordinates to map coordinates
+      const mapX = (clickX - position.x) / zoom;
+      const mapY = (clickY - position.y) / zoom;
+
+      // Convert map coordinates to logical grid coordinates
+      const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
+      const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / (SVG_VIEWBOX_WIDTH / logicalGridCols));
+      
+      const logicalX = Math.floor(mapX / (SVG_VIEWBOX_WIDTH / logicalGridCols));
+      const logicalY = Math.floor(mapY / (SVG_VIEWBOX_WIDTH / logicalGridCols));
+
+      if (logicalX >= 0 && logicalX < logicalGridCols && logicalY >= 0 && logicalY < logicalGridRows) {
+        handlePixelClick(logicalX, logicalY);
+      }
+  };
+
   if (!isClient) {
     return <div className="flex items-center justify-center h-full">A carregar...</div>;
   }
@@ -553,6 +585,7 @@ export default function PixelGrid() {
         onMouseLeave={() => {
           setIsDragging(false);
         }}
+        onClick={handleClick}
       >
         {/* SVG Map */}
         <div 
@@ -663,6 +696,3 @@ export default function PixelGrid() {
     </div>
   );
 }
-
-
-
