@@ -132,7 +132,7 @@ export default function BottomNavBar({
     { id: 'pixels', href: '/pixels', label: 'Pixels', icon: <Grid3X3 className="h-5 w-5" />, badge: null },
     { id: 'community', href: '/community', label: 'Comunidade', icon: <Users className="h-5 w-5" />, badge: null },
     { id: 'achievements', href: '/achievements', label: 'Conquistas', icon: <Trophy className="h-5 w-5" />, badge: achievements > 0 ? achievements : null },
-    { id: 'notifications', href: '/notifications', label: 'Notificações', icon: <Bell className="h-5 w-5" />, badge: notifications > 0 ? notifications : null }
+    { id: 'settings', href: '/settings', label: 'Ajustes', icon: <Settings className="h-5 w-5" />, badge: notifications > 0 ? notifications : null }
   ];
 
   const handleNavClick = (section: string) => {
@@ -141,22 +141,16 @@ export default function BottomNavBar({
     onNavigate(section);
   };
 
-  const handleQuickAction = (action: string) => {
+  const handleFeatureClick = (feature: any) => {
     vibrate('light');
     setPlayHoverSound(true);
-    // Implementar ações rápidas
+    // Implementar funcionalidades
   };
 
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
     vibrate('light');
     setPlayHoverSound(true);
-  };
-
-  const handleFeatureClick = (feature: any) => {
-    vibrate('light');
-    setPlayHoverSound(true);
-    // Implementar funcionalidades
   };
 
   useEffect(() => {

@@ -1,14 +1,15 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-// Lucide imports removed
+import { Brush, Eraser, PaintBucket, Hand, Undo, Redo, Save, Play, Pause, MessageSquare, Send, Users, UserPlus, TextCursor, Eye, Mic, MicOff, PhoneOff, Settings, Share2, Video, VideoOff, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -21,6 +22,14 @@ interface CollaborativeUser {
   cursor: { x: number; y: number };
   tool: string;
   isActive: boolean;
+}
+
+interface ChatMessage {
+  id: string;
+  user: string;
+  message: string;
+  timestamp: string;
+  type: 'text' | 'emoji' | 'system';
 }
 
 interface PixelCollaborativeEditorProps {
@@ -197,7 +206,7 @@ export default function PixelCollaborativeEditor({ children, pixelData }: PixelC
               </div>
               
               <Button variant="outline" size="sm" onClick={inviteCollaborator}>
-                <Users className="h-4 w-4 mr-2" />
+                <UserPlus className="h-4 w-4 mr-2" />
                 Convidar
               </Button>
             </div>
@@ -393,7 +402,7 @@ export default function PixelCollaborativeEditor({ children, pixelData }: PixelC
                     className="text-sm"
                   />
                   <Button size="icon" onClick={sendMessage}>
-                    <MessageSquare className="h-4 w-4" />
+                    <Send className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-// Lucide imports removed
+import { Wifi, Signal, Battery, Zap, Download, Upload, Gauge, EyeOff, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettingsStore } from '@/lib/store';
 
@@ -121,7 +122,7 @@ export default function MobileOptimizations({ children }: MobileOptimizationsPro
         description: "Otimizações aplicadas para poupar bateria e dados.",
       });
     }
-  }, [batteryInfo, networkInfo, isLowPowerMode]);
+  }, [batteryInfo, networkInfo, isLowPowerMode, toast]);
 
   // Simular uso de dados
   useEffect(() => {
@@ -379,7 +380,7 @@ export function useMobileOptimizations() {
     );
 
     // Verificar recursos do dispositivo
-    const hasLowMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory && (navigator as Navigator & { deviceMemory?: number }).deviceMemory < 4;
+    const hasLowMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory && (navigator as Navigator & { deviceMemory?: number }).deviceMemory! < 4;
     const hasSlowCPU = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
 
     if (isMobile && (hasLowMemory || hasSlowCPU) && !performanceMode) {

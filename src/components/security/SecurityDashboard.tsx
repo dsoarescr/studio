@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,9 +14,9 @@ import { useAuth } from '@/lib/auth-context';
 import TwoFactorAuth from './TwoFactorAuth';
 import { 
   Shield, Lock, Smartphone, AlertTriangle, CheckCircle, 
-  Eye, EyeOff, LogOut, RefreshCw, Laptop, Smartphone as SmartphoneIcon,
+  LogOut, RefreshCw, Laptop,
   Globe, Clock, Info, Settings, User, Mail, CreditCard, FileText,
-  Key, Bell, Wifi, Battery, Signal
+  Key, Bell, Wifi, Battery, Signal, Download, Trash2, Eye, EyeOff
 } from 'lucide-react';
 
 export default function SecurityDashboard() {
@@ -314,7 +315,7 @@ export default function SecurityDashboard() {
                     {session.device.includes('Windows') ? (
                       <Laptop className="h-4 w-4 mr-2 text-blue-500" />
                     ) : (
-                      <SmartphoneIcon className="h-4 w-4 mr-2 text-green-500" />
+                      <Smartphone className="h-4 w-4 mr-2 text-green-500" />
                     )}
                     <span className="font-medium">{session.device}</span>
                   </div>
@@ -391,7 +392,7 @@ export default function SecurityDashboard() {
                       {activity.device.includes('Windows') ? (
                         <Laptop className="h-3 w-3 mr-1" />
                       ) : activity.device.includes('iPhone') ? (
-                        <SmartphoneIcon className="h-3 w-3 mr-1" />
+                        <Smartphone className="h-3 w-3 mr-1" />
                       ) : (
                         <Globe className="h-3 w-3 mr-1" />
                       )}

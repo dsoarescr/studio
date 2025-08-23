@@ -18,8 +18,8 @@ import {
   TrendingUp, ArrowUp, ArrowDown, Map, Clock, Trophy, Medal, Info, Crown,
   Star, Flame, Zap, Activity, Calendar, Filter, Search, SortAsc, Download,
   Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
-  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins, MapPinIcon,
-  Lightbulb, Play, Pause, Square, Sword, Shield
+  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins,
+  Lightbulb, Play, Pause, Sword, Shield
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';

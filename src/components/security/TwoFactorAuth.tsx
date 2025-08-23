@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -10,15 +11,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-import { Shield, Smartphone, Key, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { Shield, Smartphone, Key, Copy, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { QRCodeSVG } from 'qrcode.react';
 
 interface TwoFactorAuthProps {
   children: React.ReactNode;
+  onSuccess: () => void;
 }
 
-export default function TwoFactorAuth({ children }: TwoFactorAuthProps) {
+export default function TwoFactorAuth({ children, onSuccess }: TwoFactorAuthProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'intro' | 'setup' | 'verify' | 'success'>('intro');
   const [secret, setSecret] = useState<string | null>(null);
@@ -110,6 +112,7 @@ export default function TwoFactorAuth({ children }: TwoFactorAuthProps) {
         setStep('success');
         setShowConfetti(true);
         setPlaySuccessSound(true);
+        onSuccess();
       } else {
         throw new Error('Código inválido');
       }

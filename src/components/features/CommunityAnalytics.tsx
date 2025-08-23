@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-// Lucide imports removed
+import { Users, User, TrendingUp, Zap, MessageSquare, Heart, Share2, BarChart4, Activity, Target, Clock, Network } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CommunityStats {
@@ -125,7 +126,6 @@ const mockPersonalAnalytics: PersonalAnalytics = {
 export function CommunityAnalytics() {
   const [communityStats] = useState<CommunityStats>(mockCommunityStats);
   const [personalAnalytics] = useState<PersonalAnalytics>(mockPersonalAnalytics);
-  const [timeframe, setTimeframe] = useState<'week' | 'month' | 'year'>('month');
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -293,7 +293,7 @@ export function CommunityAnalytics() {
             </Card>
             <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
               <CardContent className="p-6 text-center">
-                <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <User className="h-8 w-8 text-green-600 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-green-700">{personalAnalytics.followersGained}</div>
                 <div className="text-sm text-green-600">Novos Seguidores</div>
               </CardContent>
@@ -349,8 +349,8 @@ export function CommunityAnalytics() {
               <CardDescription>Quando você é mais ativo na comunidade</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-24 gap-1 mb-4">
-                {personalAnalytics.activeHours.map((activity, hour) => (
+              <div className="grid grid-cols-12 gap-1 mb-4">
+                {personalAnalytics.activeHours.slice(0, 12).map((activity, hour) => (
                   <div
                     key={hour}
                     className={cn(
@@ -490,4 +490,3 @@ export function CommunityAnalytics() {
     </div>
   );
 }
-

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -91,7 +92,6 @@ export function CommunityModeration() {
   const [reports, setReports] = useState<ModerationReport[]>(mockReports);
   const [actions, setActions] = useState<ModerationAction[]>(mockActions);
   const [showReportDialog, setShowReportDialog] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<ModerationReport | null>(null);
   const { toast } = useToast();
 
   const handleResolveReport = (reportId: string, action: string) => {
@@ -361,4 +361,3 @@ export function CommunityModeration() {
     </div>
   );
 }
-

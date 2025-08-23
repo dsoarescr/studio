@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,21 +12,13 @@ import SearchSystem from './SearchSystem';
 import { 
   Award, Sparkles, Gift, Bell, Settings, Menu,
   Search, Plus, Crown, Star, LogOut, HelpCircle,
-  BarChart3, Users2, Palette, Coins, Home, ShoppingCart, Users as UsersIcon, 
-  BarChart3 as AnalyticsIcon, RefreshCw, Shield
+  BarChart3, Users, Palette, Coins, Home, ShoppingCart, 
+  RefreshCw, Shield
 } from 'lucide-react'; 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { motion } from 'framer-motion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -35,11 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import { LanguageSwitcher } from '@/components/ui/language-switcher';
-import { useTranslation } from 'react-i18next';
 import HelpCenter from '@/components/features/HelpCenter';
-import TwoFactorAuth from '@/components/security/TwoFactorAuth';
-import FeedbackSystem from '@/components/features/FeedbackSystem';
 import { useAuth } from '@/lib/auth-context';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { EnhancedTooltip } from '@/components/ui/enhanced-tooltip';
@@ -49,9 +38,9 @@ const navLinks = [
   { href: "/", label: "Universo", icon: Home, color: "text-blue-500", description: "Explorar o mapa" },
   { href: "/marketplace", label: "Market", icon: ShoppingCart, color: "text-green-500", description: "Comprar píxeis" },
   { href: "/pixels", label: "Galeria", icon: Palette, color: "text-purple-500", badge: 12, description: "Ver píxeis" },
-  { href: "/member", label: "Perfil", icon: UsersIcon, color: "text-orange-500", description: "Seu perfil" },
-  { href: "/ranking", label: "Ranking", icon: AnalyticsIcon, color: "text-amber-500", badge: 2, description: "Classificações" },
-  { href: "/community", label: "Comunidade", icon: Users2, color: "text-pink-500", description: "Interagir com a comunidade" },
+  { href: "/member", label: "Perfil", icon: Users, color: "text-orange-500", description: "Seu perfil" },
+  { href: "/ranking", label: "Ranking", icon: BarChart3, color: "text-amber-500", badge: 2, description: "Classificações" },
+  { href: "/community", label: "Comunidade", icon: Users, color: "text-pink-500", description: "Interagir com a comunidade" },
   { href: "/settings", label: "Ajustes", icon: Settings, color: "text-gray-500", description: "Configurações" },
   { href: "/achievements", label: "Conquistas", icon: Award, color: "text-yellow-500", description: "Suas conquistas" },
 ];
@@ -72,7 +61,6 @@ export default function UserProfileHeader() {
   } = useUserStore();
   
   const pathname = usePathname();
-  // const { t } = useTranslation();
   const { user } = useAuth();
   const { isOnline, lastSync } = useAppStore();
 
@@ -314,9 +302,6 @@ export default function UserProfileHeader() {
             </Button>
           </SearchSystem>
 
-          {/* Language Switcher */}
-          <LanguageSwitcher variant="ghost" size="icon" showText={false} />
-
           {/* Quick Add */}
           <Button
             variant="ghost" 
@@ -423,4 +408,3 @@ export default function UserProfileHeader() {
     </div>
   );
 }
-

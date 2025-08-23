@@ -1,3 +1,4 @@
+
 // src/components/features/AdvancedAnalytics.tsx
 'use client';
 
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// Lucide imports removed
+import { DollarSign, MapPin, Activity, Eye, Heart, RefreshCw, Download, ArrowUpRight, ArrowDownRight, Minus, TrendingUp, TrendingDown, Target, Zap, LineChart, Star } from "lucide-react";
 
 interface AnalyticsData {
   views: { total: number; change: number; trend: 'up' | 'down' };
@@ -146,7 +147,7 @@ export default function AdvancedAnalytics() {
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <Share2 className="h-5 w-5 text-green-500" />
+              <Activity className="h-5 w-5 text-green-500" />
               <Badge variant="outline" className={getTrendColor(analyticsData.shares.trend)}>
                 {analyticsData.shares.trend === 'up' ? '+' : ''}{analyticsData.shares.change}%
               </Badge>
