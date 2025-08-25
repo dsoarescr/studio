@@ -18,7 +18,7 @@ const db = admin.firestore();
  * @summary Atribui créditos e XP de boas-vindas a um novo utilizador.
  */
 export const onnewusercreate = functions
-  .region("europe-west1")
+  .region("eur3") // Corrigido para a região principal do projeto
   .auth.user()
   .onCreate(async (user: UserRecord) => {
     const { uid, email, displayName, photoURL } = user;
