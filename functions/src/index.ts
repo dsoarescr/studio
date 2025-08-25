@@ -2,9 +2,9 @@
  * Importa os módulos necessários.
  */
 "use strict";
-import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {UserRecord} from "firebase-admin/auth";
+import {onUserCreate} from "firebase-functions/v2/auth";
 
 // Inicializa a app de admin para poder aceder aos serviços Firebase.
 admin.initializeApp();
@@ -17,10 +17,10 @@ const db = admin.firestore();
  *
  * @summary Atribui créditos e XP de boas-vindas a um novo utilizador.
  */
-export const onnewusercreate = functions
-  .region("eur3") // Corrigido para a região principal do projeto
-  .auth.user()
-  .onCreate(async (user: UserRecord) => {
+export const onnewusercreate = onUserCreate(
+  {region: "eur3"},
+  async (event: {data: UserRecord}) => {
+    const user = event.data;
     const {uid, email, displayName, photoURL} = user;
 
     // Cria um novo documento na coleção 'users' com os dados do utilizador.
@@ -45,8 +45,9 @@ export const onnewusercreate = functions
         isVerified: false,
       });
 
-    functions.logger.log(
+    console.log(
       `Novo utilizador ${displayName || email} (${uid}) criado com sucesso.`
     );
     return null;
-  });
+  }
+);
