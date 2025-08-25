@@ -65,7 +65,31 @@ A sua aplicação já está configurada para usar Firebase. Ative estas funciona
 - **Ideia para o Pixel Universe:**
   - **Avatares de Perfil:** Deixe os utilizadores carregarem a sua própria imagem de perfil.
   - **Imagens de Píxeis:** Permita que um utilizador que comprou um pixel lhe associe uma imagem, que poderá ser vista por outros ao clicar no pixel.
-- **Como começar:** Vá para a secção **Storage** na consola, clique em "Get Started" e siga o assistente de configuração.
+- **Como começar:**
+  1.  **Aceda ao Storage**: Na consola Firebase, no menu "Build", clique em **Storage**.
+  2.  **Inicie**: Clique em **"Get started"**.
+  3.  **Modo de Produção**: Selecione a opção "Começar em modo de produção" e clique em **Avançar**.
+  4.  **Localização**: Escolha a localização (pode deixar a predefinida) e clique em **Concluído**.
+  5.  **Aceda às Regras**: No topo da página, clique no separador **"Regras"**.
+  6.  **Cole as Novas Regras**: Substitua o conteúdo existente por estas regras de segurança. Elas garantem que apenas um utilizador autenticado pode escrever na sua própria pasta:
+      ```
+      rules_version = '2';
+      service firebase.storage {
+        match /b/{bucket}/o {
+          // Permite que qualquer pessoa veja os ficheiros
+          match /{allPaths=**} {
+            allow read: if true;
+          }
+
+          // Apenas utilizadores autenticados podem escrever na sua própria pasta
+          // Exemplo: /users/USER_ID/profile.jpg
+          match /users/{userId}/{allPaths=**} {
+            allow write: if request.auth != null && request.auth.uid == userId;
+          }
+        }
+      }
+      ```
+  7.  **Publique**: Clique em **"Publicar"**.
 
 ### 🤖 **Cloud Functions for Firebase (Lógica de Backend Automatizada)**
 - **O quê:** Execute código de backend em resposta a eventos (ex: um novo utilizador a registar-se, uma escrita na base de dados) sem precisar de gerir um servidor.
@@ -73,7 +97,73 @@ A sua aplicação já está configurada para usar Firebase. Ative estas funciona
   - **Conquistas Automáticas:** Crie uma função que é acionada quando um utilizador compra um pixel. Se for o 10º pixel dele, a função pode atribuir-lhe automaticamente a conquista "Colecionador".
   - **Moderação de Conteúdo:** Analise automaticamente as imagens carregadas para os píxeis para detetar conteúdo impróprio.
   - **Atualizações de Ranking:** Atualize um ranking global sempre que uma transação importante ocorrer no marketplace.
-- **Como começar:** Instale a Firebase CLI, inicializa as funções no seu projeto local e faça deploy.
+- **Como começar:**
+  1.  **Instale a Firebase CLI**: Se ainda não tiver, instale as ferramentas de linha de comando do Firebase. Abra um terminal e execute:
+      ```bash
+      npm install -g firebase-tools
+      ```
+  2.  **Login no Firebase**: No terminal, faça login na sua conta Google:
+      ```bash
+      firebase login
+      ```
+  3.  **Inicialize as Funções**: Na raiz do seu projeto (na mesma pasta que o `package.json`), execute o seguinte comando:
+      ```bash
+      firebase init functions
+      ```
+      - **Escolha o projeto**: Selecione "Use an existing project" e escolha o seu projeto "Pixel Universe" na lista.
+      - **Linguagem**: Selecione "TypeScript".
+      - **ESLint**: Responda "Yes" para usar o ESLint para encontrar bugs.
+      - **Dependências**: Responda "Yes" para instalar as dependências com o npm.
+  4.  **Escreva a sua Primeira Função**: O comando anterior criou uma pasta `functions`. Abra o ficheiro `functions/src/index.ts` e substitua o conteúdo pelo exemplo abaixo. Esta função atribui créditos de boas-vindas a cada novo utilizador:
+      ```typescript
+      /**
+       * Importa os módulos necessários.
+       */
+      import * as functions from "firebase-functions";
+      import * as admin from "firebase-admin";
+
+      // Inicializa a app de admin para poder aceder aos serviços Firebase.
+      admin.initializeApp();
+
+      // Obtém uma referência à base de dados Firestore.
+      const db = admin.firestore();
+
+      /**
+       * Função acionada quando um novo utilizador é criado na Autenticação Firebase.
+       *
+       * @summary Atribui créditos e XP de boas-vindas a um novo utilizador.
+       */
+      export const onNewUserCreate = functions
+          .region("europe-west1") // Recomenda-se escolher a região mais próxima
+          .auth.user().onCreate(async (user) => {
+            const { uid, email, displayName, photoURL } = user;
+
+            // Cria um novo documento na coleção 'users' com os dados do utilizador.
+            await db.collection("users").doc(uid).set({
+              uid,
+              email,
+              displayName: displayName || "Novo Explorador",
+              photoURL: photoURL || "https://placehold.co/96x96.png",
+              level: 1,
+              xp: 0,
+              xpMax: 1000,
+              credits: 500, // <-- Créditos de boas-vindas!
+              specialCredits: 50,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+              isPremium: false,
+              isVerified: false,
+            });
+
+            functions.logger.log(`Novo utilizador ${displayName} (${uid}) criado com sucesso.`);
+            return null;
+          });
+      ```
+  5.  **Faça o Deploy**: Para publicar a sua função para o Firebase, execute no terminal:
+      ```bash
+      firebase deploy --only functions
+      ```
+      Após alguns instantes, a sua função estará ativa!
 
 ### 📈 **Google Analytics for Firebase (Análise de Comportamento)**
 - **O quê:** Uma ferramenta poderosa e gratuita para perceber como os utilizadores interagem com a sua aplicação.
