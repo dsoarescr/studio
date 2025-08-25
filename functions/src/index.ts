@@ -4,7 +4,7 @@
 "use strict";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { UserRecord } from "firebase-admin/auth";
+import {UserRecord} from "firebase-admin/auth";
 
 // Inicializa a app de admin para poder aceder aos serviços Firebase.
 admin.initializeApp();
@@ -21,7 +21,7 @@ export const onnewusercreate = functions
   .region("eur3") // Corrigido para a região principal do projeto
   .auth.user()
   .onCreate(async (user: UserRecord) => {
-    const { uid, email, displayName, photoURL } = user;
+    const {uid, email, displayName, photoURL} = user;
 
     // Cria um novo documento na coleção 'users' com os dados do utilizador.
     await db
