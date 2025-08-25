@@ -4,7 +4,7 @@ import {genkit, z} from "genkit";
 // Cloud Functions for Firebase supports Genkit natively. The onCallGenkit
 // function creates a callable function from a Genkit action. It automatically
 // implements streaming if your flow does.
-import {onCallGenkit} from "firebase-functions/v2/https";
+import {onCallGenkit} from "firebase-functions/v2/genkit";
 
 // Import models from the Vertex AI plugin. The Vertex AI API provides access to
 // several generative models. Here, we import Gemini 2.0 Flash and the Vertex
@@ -12,11 +12,10 @@ import {onCallGenkit} from "firebase-functions/v2/https";
 import {vertexAI, gemini20Flash} from "@genkit-ai/vertexai";
 
 // Genkit models generally depend on an API key. APIs should be stored in Cloud
-// Secret Manager so that
-// access to these sensitive values can be controlled. defineSecret does this
-// for you automatically.
+// Secret Manager so that access to these sensitive values can be controlled.
+// defineSecret does this for you automatically.
 // If you are using Google generative AI you can get an API key at
-// https://aistudio.google.com/app/apikey
+// https://aistudio.google.com/app/apikeyimport { defineSecret } from "firebase-functions/params";
 import {defineSecret} from "firebase-functions/params";
 const apiKey = defineSecret("GOOGLE_GENAI_API_KEY");
 
@@ -84,7 +83,8 @@ export const pixelDescriptionFlow = genkit.defineFlow(
     outputSchema: z.string(),
   },
   async (subject) => {
-    const prompt = `Generate a creative and engaging description for a pixel art image based on the following input: ${subject}`;
+    const prompt = `Generate a creative and engaging description for a pixel 
+      art image based on the following input: ${subject}`;
     const response = await genkit.generate({
       model: gemini20Flash,
       prompt: prompt,
