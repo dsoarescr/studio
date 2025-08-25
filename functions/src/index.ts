@@ -18,12 +18,12 @@ const db = admin.firestore();
  * @summary Atribui créditos e XP de boas-vindas a um novo utilizador.
  */
 export const onnewusercreate = onUserCreated(
-  {region: "eur3"}, // Define a região aqui
+  {region: "eur3"},
   async (event: {data: UserRecord}) => {
     const user = event.data;
     const {uid, email, displayName, photoURL} = user;
 
-    // Cria um novo documento na coleção 'users' com os dados do utilizador.
+    // Cria um novo documento na coleção "users" com os dados do utilizador.
     await db
       .collection("users")
       .doc(uid)
