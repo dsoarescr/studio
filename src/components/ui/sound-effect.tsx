@@ -28,7 +28,8 @@ export function SoundEffect({
 
       // Add error handling for missing audio files
       audioRef.current.addEventListener('error', (e) => {
-        console.warn(`Audio file not found or cannot be loaded: ${src}`);
+        // Silently handle audio errors to avoid console spam
+        // console.warn(`Audio file not found or cannot be loaded: ${src}`);
       });
     }
 
@@ -62,7 +63,7 @@ export function SoundEffect({
       if (playPromise !== undefined) {
         playPromise.catch(err => {
           // Silently handle audio play errors (common in browsers with autoplay restrictions)
-          console.warn('Audio play prevented by browser policy or missing file:', src);
+          // console.warn('Audio play prevented by browser policy or missing file:', src);
         });
       }
     } else {

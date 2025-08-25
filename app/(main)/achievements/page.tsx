@@ -15,7 +15,7 @@ import {
   TrendingUp, Calendar, Clock, Megaphone, Trophy, CheckCircle2, 
   Gift, PieChart, Download, BarChart3, Medal, Search, Share2, 
   Sparkles, Coins, Zap, Palette, Map, BookImage, MessageSquare, 
-  Rocket, Hourglass, Shield, Crown
+  Rocket, Hourglass, Shield, Crown, Target, Lightbulb
 } from "lucide-react";
 import { achievementsData, type Achievement, type AchievementCategory, type AchievementRarity } from '@/data/achievements-data';
 import { useToast } from '@/hooks/use-toast';

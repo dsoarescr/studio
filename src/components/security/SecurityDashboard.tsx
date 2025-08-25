@@ -10,13 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/lib/auth-context';
-import TwoFactorAuth from './TwoFactorAuth';
 import { 
   Shield, Lock, Smartphone, AlertTriangle, CheckCircle, 
   LogOut, RefreshCw, Laptop,
   Globe, Clock, Info, Settings, User, Mail, CreditCard, FileText,
-  Key, Bell, Wifi, Battery, Signal, Download, Trash2, Eye, EyeOff
+  Key, Bell, Wifi, Battery, Signal, Download, Trash2, Eye, EyeOff,
+  HelpCircle
 } from 'lucide-react';
 
 export default function SecurityDashboard() {
@@ -88,14 +87,7 @@ export default function SecurityDashboard() {
     });
   };
 
-  const handle2FASuccess = () => {
-    setIs2FAEnabled(true);
-    setSecurityScore(Math.min(100, securityScore + 30));
-    toast({
-      title: 'Autenticação de Dois Fatores Ativada',
-      description: 'A sua conta está agora mais segura.',
-    });
-  };
+
 
   const handleToggleActivityAlerts = (enabled: boolean) => {
     setIsActivityAlertsEnabled(enabled);
@@ -219,9 +211,7 @@ export default function SecurityDashboard() {
                     Adicione uma camada extra de segurança à sua conta
                   </p>
                 </div>
-                <TwoFactorAuth onSuccess={handle2FASuccess}>
-                  <Switch checked={is2FAEnabled} onCheckedChange={handleToggle2FA} />
-                </TwoFactorAuth>
+                <Switch checked={is2FAEnabled} onCheckedChange={handleToggle2FA} />
               </div>
               
               <Separator />
@@ -457,6 +447,73 @@ export default function SecurityDashboard() {
             </div>
           </CardContent>
         </Card>
+
+                 {/* Two Factor Authentication - Simplified */}
+         <Card>
+           <CardHeader>
+             <CardTitle className="text-xl flex items-center">
+               <Shield className="h-5 w-5 mr-2 text-primary" />
+               Autenticação de Dois Fatores
+             </CardTitle>
+             <CardDescription>
+               Proteja a sua conta com uma camada adicional de segurança
+             </CardDescription>
+           </CardHeader>
+           <CardContent className="space-y-4">
+             <div className="bg-muted/30 p-4 rounded-lg space-y-4">
+               <div className="flex items-start gap-3">
+                 <div className="bg-primary/20 p-2 rounded-full">
+                   <Lock className="h-5 w-5 text-primary" />
+                 </div>
+                 <div>
+                   <h3 className="font-medium">Segurança Reforçada</h3>
+                   <p className="text-sm text-muted-foreground">
+                     Mesmo que alguém descubra a sua password, não conseguirá aceder à sua conta sem o código de autenticação.
+                   </p>
+                 </div>
+               </div>
+               
+               <div className="flex items-start gap-3">
+                 <div className="bg-primary/20 p-2 rounded-full">
+                   <Smartphone className="h-5 w-5 text-primary" />
+                 </div>
+                 <div>
+                   <h3 className="font-medium">Código no Seu Telemóvel</h3>
+                   <p className="text-sm text-muted-foreground">
+                     Use uma aplicação de autenticação como Google Authenticator, Microsoft Authenticator ou Authy.
+                   </p>
+                 </div>
+               </div>
+               
+               <div className="flex items-start gap-3">
+                 <div className="bg-primary/20 p-2 rounded-full">
+                   <Key className="h-5 w-5 text-primary" />
+                 </div>
+                 <div>
+                   <h3 className="font-medium">Chaves de Recuperação</h3>
+                   <p className="text-sm text-muted-foreground">
+                     Receberá chaves de recuperação para aceder à sua conta caso perca o seu dispositivo.
+                   </p>
+                 </div>
+               </div>
+             </div>
+             
+             <Button 
+               className="w-full" 
+               onClick={() => {
+                 setIs2FAEnabled(true);
+                 setSecurityScore(Math.min(100, securityScore + 30));
+                 toast({
+                   title: 'Autenticação de Dois Fatores Ativada',
+                   description: 'A sua conta está agora mais segura com 2FA.',
+                 });
+               }}
+             >
+               <Shield className="h-4 w-4 mr-2" />
+               Configurar 2FA
+             </Button>
+           </CardContent>
+         </Card>
       </div>
     </div>
   );

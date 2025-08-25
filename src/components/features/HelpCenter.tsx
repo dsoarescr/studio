@@ -5,10 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +23,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-
-// Lucide imports removed
+import { 
+  HelpCircle, Search, MessageSquare, FileText, 
+  BookOpen, Star, ThumbsUp, ThumbsDown, 
+  Clock, User, AlertCircle, CheckCircle,
+  ChevronRight, Plus, Filter, X, Book, Play, Mail, Phone, Send
+} from "lucide-react";
 
 interface FAQItem {
   id: string;
@@ -427,10 +430,10 @@ export default function HelpCenter({ children }: HelpCenterProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <Input placeholder="Assunto do ticket..." />
-                      <textarea 
-                        className="w-full p-3 border rounded-md resize-none h-24"
-                        placeholder="Descreva seu problema em detalhes..."
-                      />
+                                             <Textarea 
+                         placeholder="Descreva seu problema em detalhes..."
+                         className="h-24 resize-none"
+                       />
                       <Button onClick={handleContactSupport} className="w-full">
                         <Send className="h-4 w-4 mr-2" />
                         Enviar Ticket

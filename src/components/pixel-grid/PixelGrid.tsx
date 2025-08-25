@@ -34,6 +34,7 @@ import { Separator } from '../ui/separator';
 import { mapPixelToApproxGps, cn } from '@/lib/utils';
 import EnhancedPixelPurchaseModal from './EnhancedPixelPurchaseModal';
 import PixelInfoModal from './PixelInfoModal';
+import DetailedPixelModal from './DetailedPixelModal';
 import PixelAR from './PixelAR';
 import PixelStories from './PixelStories';
 import PixelLiveStream from './PixelLiveStream';
@@ -121,7 +122,7 @@ interface SelectedPixelDetails {
   owner?: string;
   price: number;
   region: string;
-  rarity: 'Comum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
+  rarity: 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Marco Histórico';
   color?: string;
   title?: string;
   description?: string;
@@ -129,8 +130,8 @@ interface SelectedPixelDetails {
   isForSaleBySystem?: boolean;
   specialCreditsPrice?: number;
   history: Array<{ owner: string; date: string; price?: number }>;
-  views?: number;
-  likes?: number;
+  views: number;
+  likes: number;
   isProtected?: boolean;
 }
 
@@ -167,6 +168,7 @@ export default function PixelGrid() {
   
   const [showPixelInfoModal, setShowPixelInfoModal] = useState(false);
   const [showPixelEditModal, setShowPixelEditModal] = useState(false);
+  const [showDetailedPixelModal, setShowDetailedPixelModal] = useState(false);
   const { user } = useAuth();
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -345,7 +347,7 @@ export default function PixelGrid() {
 
       toast({
         title: "Pixel comprado!",
-        description: `Adquiriu o pixel (${pixelData.x}, ${pixelData.y}) com sucesso!`,
+        description: `Adquiriu o pixel (${String(pixelData.x)}, ${String(pixelData.y)}) com sucesso!`,
       });
 
       return true;
@@ -365,11 +367,21 @@ export default function PixelGrid() {
     const existingPixel = soldPixels.find(p => p.x === x && p.y === y);
     
     if (existingPixel) {
-      // Show pixel info
-      setSelectedPixelDetails({
+      // Show detailed pixel info
+      const detailedPixelData = {
         x,
         y,
-        owner: existingPixel.owner,
+        owner: existingPixel.owner ? {
+          id: existingPixel.owner,
+          name: existingPixel.owner,
+          avatar: 'https://placehold.co/40x40.png',
+          level: Math.floor(Math.random() * 20) + 1,
+          verified: false,
+          joinDate: '2024-01-01',
+          totalPixels: Math.floor(Math.random() * 100) + 1,
+          totalValue: Math.floor(Math.random() * 1000) + 100,
+          badges: ['Investidor', 'Colecionador']
+        } : undefined,
         price: existingPixel.price,
         region: 'Portugal',
         rarity: 'Comum',
@@ -378,15 +390,23 @@ export default function PixelGrid() {
         description: existingPixel.description,
         isOwnedByCurrentUser: existingPixel.owner === user?.uid,
         history: [
-          { owner: existingPixel.owner, date: existingPixel.timestamp.toISOString(), price: existingPixel.price }
+          { action: 'Vendido', user: existingPixel.owner, date: existingPixel.timestamp.toISOString(), price: existingPixel.price, details: 'Pixel vendido' }
         ],
         views: Math.floor(Math.random() * 100) + 1,
         likes: Math.floor(Math.random() * 50),
-      });
-      setShowPixelInfoModal(true);
+        tags: ['Portugal', 'Digital'],
+        gpsCoords: { lat: 38.7223, lon: -9.1393 },
+        features: ['Localização Premium'],
+        rating: 4.5,
+        totalRatings: Math.floor(Math.random() * 50) + 10,
+        userRating: 0
+      };
+      
+      setSelectedPixelDetails(detailedPixelData as any);
+      setShowDetailedPixelModal(true);
     } else {
-      // Show purchase modal
-      const mockPixelData: SelectedPixelDetails = {
+      // Show purchase modal for unsold pixels
+      const detailedPixelData = {
         x,
         y,
         price: PIXEL_BASE_PRICE,
@@ -397,10 +417,16 @@ export default function PixelGrid() {
         history: [],
         views: 0,
         likes: 0,
+        tags: ['Portugal', 'Disponível'],
+        gpsCoords: { lat: 38.7223, lon: -9.1393 },
+        features: ['Localização Premium'],
+        rating: 0,
+        totalRatings: 0,
+        userRating: 0
       };
       
-      setSelectedPixelDetails(mockPixelData);
-      setShowPixelEditModal(true);
+      setSelectedPixelDetails(detailedPixelData as any);
+      setShowDetailedPixelModal(true);
     }
     
     vibrate([30]);
@@ -661,6 +687,22 @@ export default function PixelGrid() {
       </div>
 
       {/* Modals */}
+      {showDetailedPixelModal && selectedPixelDetails && (
+        <DetailedPixelModal
+          isOpen={showDetailedPixelModal}
+          onClose={() => setShowDetailedPixelModal(false)}
+          pixelData={selectedPixelDetails as any}
+          onPurchase={() => {
+            setShowDetailedPixelModal(false);
+            setShowPixelEditModal(true);
+          }}
+          onEdit={() => {
+            setShowDetailedPixelModal(false);
+            setShowPixelEditModal(true);
+          }}
+        />
+      )}
+
       {showPixelEditModal && selectedPixelDetails && (
         <EnhancedPixelPurchaseModal
           isOpen={showPixelEditModal}
@@ -677,6 +719,10 @@ export default function PixelGrid() {
           onClose={() => setShowPixelInfoModal(false)}
           pixelData={selectedPixelDetails}
           onEdit={() => {
+            setShowPixelInfoModal(false);
+            setShowPixelEditModal(true);
+          }}
+          onPurchase={() => {
             setShowPixelInfoModal(false);
             setShowPixelEditModal(true);
           }}

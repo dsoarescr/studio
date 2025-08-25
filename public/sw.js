@@ -182,7 +182,7 @@ async function handleNavigation(request) {
 async function handleDefaultRequest(request) {
   try {
     const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
+    if (networkResponse.ok && networkResponse.status !== 206) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
