@@ -1,3 +1,4 @@
+
 // src/components/pixel-grid/PixelGrid.tsx
 'use client';
 
@@ -669,21 +670,6 @@ export default function PixelGrid() {
         >
           Reset
         </Button>
-      </div>
-
-      {/* Search */}
-      <div className="absolute top-4 right-4">
-        <Input
-          placeholder="Procurar localização..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSearch(searchQuery);
-            }
-          }}
-          className="w-64"
-        />
       </div>
 
       {/* Modals */}
