@@ -238,6 +238,7 @@ export const useUserStore = create<UserState>()(
 // Pixel store for managing pixel data
 interface PixelState {
   soldPixels: Array<{
+    id?: number; // ID contínuo dentro da máscara (opcional enquanto migramos)
     x: number;
     y: number;
     owner: string;
@@ -250,6 +251,7 @@ interface PixelState {
   addSoldPixel: (pixel: Omit<PixelState['soldPixels'][0], 'timestamp'>) => void;
   removeSoldPixel: (x: number, y: number) => void;
   getPixelAt: (x: number, y: number) => PixelState['soldPixels'][0] | undefined;
+  getPixelById: (id: number) => PixelState['soldPixels'][0] | undefined;
   clearPixels: () => void;
 }
 
@@ -275,6 +277,10 @@ export const usePixelStore = create<PixelState>()(
       
       getPixelAt: (x, y) => {
         return get().soldPixels.find(p => p.x === x && p.y === y);
+      },
+      
+      getPixelById: (id) => {
+        return get().soldPixels.find(p => p.id === id);
       },
       
       clearPixels: () => {

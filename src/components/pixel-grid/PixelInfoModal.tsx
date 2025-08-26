@@ -422,7 +422,7 @@ export default function PixelInfoModal({
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center text-2xl font-headline">
               <MapPin className="h-5 w-5 mr-2 text-primary" />
-              Pixel ({pixelData.x}, {pixelData.y})
+              {pixelData.id ? `Pixel #${pixelData.id}` : `Pixel (${pixelData.x}, ${pixelData.y})`}
             </DialogTitle>
           </div>
           

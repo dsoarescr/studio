@@ -190,7 +190,7 @@ export default function PixelCollaborativeEditor({ children, pixelData }: PixelC
               Editor Colaborativo
               {pixelData && (
                 <Badge variant="outline" className="ml-2">
-                  Pixel ({pixelData.x}, {pixelData.y})
+                  {pixelData.id ? `Pixel #${pixelData.id}` : `Pixel (${pixelData.x}, ${pixelData.y})`}
                 </Badge>
               )}
             </DialogTitle>

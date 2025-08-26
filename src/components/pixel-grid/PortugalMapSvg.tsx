@@ -25,6 +25,7 @@ import React, { useEffect, useRef } from 'react';
 
 export interface MapData {
   pathStrings: string[];
+  pathEntries: Array<{ d: string; transform?: { tx: number; ty: number; sx: number; sy: number } }>;
   svgElement: SVGSVGElement | null;
 }
 
@@ -39,21 +40,50 @@ export default function PortugalMapSvg({ onMapDataLoaded, className }: PortugalM
   const landmassPathsRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    if (landmassPathsRef.current && svgRef.current && typeof onMapDataLoaded === 'function') {
-      const pathStrings: string[] = [];
-      const pathElements = landmassPathsRef.current.querySelectorAll('path');
-      
-      pathElements.forEach((pathEl) => {
-        const d = pathEl.getAttribute('d');
-        if (d) {
-          pathStrings.push(d);
+    if (svgRef.current && typeof onMapDataLoaded === 'function') {
+      const svg = svgRef.current;
+      const entries: Array<{ d: string; transform?: { tx: number; ty: number; sx: number; sy: number } }> = [];
+      const allPaths = svg.querySelectorAll('path');
+
+      const parseTransform = (elStart: Element | null): { tx: number; ty: number; sx: number; sy: number } | undefined => {
+        // Compose transforms from child up to svg: parent ∘ child
+        let tx = 0, ty = 0, sx = 1, sy = 1;
+        const parse = (t: string | null) => {
+          let ptx = 0, pty = 0, psx = 1, psy = 1;
+          if (!t) return { tx: ptx, ty: pty, sx: psx, sy: psy };
+          const tr = /translate\(([-\d.]+)\s*,?\s*([\-\d.]+)?\)/.exec(t);
+          if (tr) { ptx = parseFloat(tr[1]); pty = parseFloat(tr[2] || '0'); }
+          const sc = /scale\(([-\d.]+)\s*,?\s*([\-\d.]+)?\)/.exec(t);
+          if (sc) { const s1 = parseFloat(sc[1]); const s2 = sc[2] ? parseFloat(sc[2]) : s1; psx = s1; psy = s2; }
+          return { tx: ptx, ty: pty, sx: psx, sy: psy };
+        };
+        let el: Element | null = elStart;
+        while (el && el !== svg) {
+          const { tx: ptx, ty: pty, sx: psx, sy: psy } = parse(el.getAttribute('transform'));
+          // compose: parent ∘ current
+          tx = ptx + psx * tx;
+          ty = pty + psy * ty;
+          sx = psx * sx;
+          sy = psy * sy;
+          el = el.parentElement;
         }
+        if (tx !== 0 || ty !== 0 || sx !== 1 || sy !== 1) return { tx, ty, sx, sy };
+        return undefined;
+      };
+
+      allPaths.forEach((p) => {
+        const d = p.getAttribute('d');
+        if (!d) return;
+        // include path's own transform too
+        const t = parseTransform(p) ;
+        entries.push({ d, transform: t });
       });
 
-      if (pathStrings.length > 0) {
-        onMapDataLoaded({ pathStrings, svgElement: svgRef.current });
+      const pathStrings = entries.map(e => e.d);
+      if (entries.length > 0) {
+        onMapDataLoaded({ pathStrings, pathEntries: entries, svgElement: svgRef.current });
       } else {
-        console.warn("PortugalMapSvg: No valid path strings found.");
+        console.warn("PortugalMapSvg: No valid path entries found.");
       }
     }
   }, [onMapDataLoaded]);
@@ -192,6 +222,25 @@ export default function PortugalMapSvg({ onMapDataLoaded, className }: PortugalM
             <path data-z="271" className="z z271" d="M6496 12941l66 98 99 65 33 98 65 97 -33 293 -65 98 -66 -32 -66 -98 -99 -65 -99 -33 -99 -65c-33,98 -66,195 -99,293l-98 65 -33 131 -99 32 -99 -65 0 -261 -99 -65 0 -97 33 -98 -66 -98 66 -98 33 -97 -33 -98 66 -98 0 -130 33 -98 0 -97 132 -33 99 65 98 -32c83,122 66,68 66,228l0 130 264 65z"/>
             <path data-z="270" className="z z270" d="M4816 12941l-99 65 -32 -104 32 -124 -99 -32 -99 65 -198 -65 0 -224 99 -102 132 0 99 -65 33 -163 197 0 99 195 99 -65 103 190 -70 103 33 98 -66 293 -263 -65z"/>
             <path data-z="269" className="z z269" d="M3500 13590l-200 -193 0 -195 -66 -98 66 -98 99 -32 99 -196 -198 -130 33 -98 -33 -97 33 -98 198 -65 98 32 198 -65 66 -98 198 -97 66 97 33 228 32 98 99 37 0 126 0 98 -66 0 -107 -27 -90 59 -33 98 -33 98 -132 260 -99 33 -66 130 -195 193z"/>
+          </g>
+          {/* Islands inset (Madeira and Azores) */}
+          <g id="A-Islands" transform="translate(-8000, 14500) scale(0.7)">
+            <g id="A01-Madeira">
+              <path data-z="377" className="z z377" d="M2678 2423c-32,21 -75,48 -106,44 -37,45 -118,-59 -159,-60 -173,-7 -314,-106 -466,-172 -81,23 -118,-34 -180,-82 -96,-84 -218,-128 -323,-197 -106,-105 -154,-244 -210,-379 -48,-92 130,-140 176,-222 86,-155 261,-66 324,63 29,89 136,54 155,101 58,41 144,37 213,67 92,-18 151,-32 263,-101 129,28 202,-2 302,-15 99,-39 247,134 258,161 17,65 87,80 133,136 15,86 334,75 391,147 398,-5 42,46 -76,107 -20,62 -65,116 -96,181 -74,5 -132,69 -130,138 -30,29 -75,68 -109,98 -43,24 -120,31 -173,-4 -58,-11 -130,-34 -187,-11z"/>
+              <path data-z="378" className="z z378" d="M4249 1032c56,-15 107,-100 119,-176 -9,-97 66,-86 134,-161 61,-47 303,-141 335,-14 -45,78 22,117 -14,206 -17,30 -170,4 -254,60 -151,100 -130,296 -320,85z"/>
+              <path data-z="379" className="z z379" d="M4229 2710c49,29 92,79 135,124 12,70 67,128 64,212 13,27 34,148 -8,140 -26,-59 -77,-118 -121,-175 13,-69 -65,-99 -75,-136 18,-59 -2,-109 5,-165zm203 549c66,64 28,159 98,216 37,70 30,111 -76,70 -27,-94 -62,-187 -22,-286z"/>
+            </g>
+            <g id="A02-Acores" transform="translate(-400, 0)">
+              <path data-z="388" className="z z388" d="M5564 8291c45,46 188,22 116,-65 -76,-25 -36,-111 -98,-105 -73,-12 -130,16 -195,11 -61,44 -17,122 31,155 47,12 114,-64 146,4z"/>
+              <path data-z="387" className="z z387" d="M5020 7715c-81,11 -165,-4 -239,18 -79,2 -107,-89 -191,-81 -80,-46 -153,62 -232,19 -46,-34 -88,-62 -137,-106 -43,-46 -102,-56 -139,-110 -73,-54 -44,-129 13,-177 51,-32 118,-57 171,-11 74,21 80,87 133,139 51,41 125,9 175,53 75,6 154,-1 209,-60 61,40 114,41 186,30 59,-23 140,-48 196,-85 79,-5 157,19 233,5 53,-8 143,-7 144,63 13,56 4,135 -6,181 -28,51 -124,86 -177,49 -73,-26 -121,37 -184,48 -59,-16 -100,47 -155,25z"/>
+              <path data-z="386" className="z z386" d="M4073 5640c88,13 179,15 269,43 85,0 131,53 164,122 -32,38 22,79 7,136 -60,65 -67,148 -180,115 -72,-2 -138,-36 -208,-9 -50,-22 -134,-6 -183,-37 -81,-44 -179,-86 -175,-195 -18,-91 61,-161 144,-161 54,-20 106,-24 162,-14z"/>
+              <path data-z="385" className="z z385" d="M1883 6878c-12,-51 -90,-100 -64,-164 7,-105 132,-178 229,-140 111,-30 203,35 296,81 36,69 112,95 186,96 49,40 89,81 145,109 67,8 128,23 194,39 52,3 126,35 135,91 -36,32 -128,50 -177,31 -58,-8 -149,-41 -195,2 -56,53 -153,59 -181,-28 -102,-3 -202,4 -297,-30 -57,-27 -122,11 -182,-39 -16,-20 -62,-38 -89,-48zm0 0l0 0 0 0z"/>
+              <path data-z="384" className="z z384" d="M2493 6072c95,56 221,75 322,137 74,28 147,51 224,76 65,37 119,88 195,107 44,56 128,62 188,105 68,46 177,60 211,140 -87,44 -203,38 -272,-32 -101,-34 -173,-127 -286,-127 -95,-1 -150,-95 -243,-104 -76,-21 -136,-72 -208,-102 -68,-18 -63,-105 -140,-112 -51,-36 -110,-78 -133,-134 45,5 105,14 142,46z"/>
+              <path data-z="383" className="z z383" d="M3070 5486c83,37 99,-9 59,-77 34,-62 -40,-52 -86,-120 -59,-47 -122,-36 -152,26 -15,40 42,125 88,128 31,16 61,28 91,43z"/>
+              <path data-z="382" className="z z382" d="M1350 6407c30,-84 122,-80 182,-37 40,59 139,51 146,124 -31,43 10,116 -38,137 0,82 -62,40 -126,55 -67,-13 -148,28 -199,-24 22,-78 -22,-115 -93,-135 -64,-32 -115,-100 -6,-101 41,-11 103,9 134,-19zm49 -63l-8 11 -8 12 0 0 16 -23zm-16 23l-9 10 -7 9 16 -19zm-16 19c-23,29 -24,29 0,0z"/>
+              <path data-z="381" className="z z381" d="M753 5518c-33,-55 -75,-128 -95,-176 -95,46 -108,-70 -157,-81 -86,-10 -49,92 -121,110 28,77 -45,130 -4,184 -17,61 28,125 11,177 1,87 101,54 163,68 72,0 111,-31 133,-99 7,-75 47,-85 46,-154 7,-11 30,-11 25,-28l-1 -1zm0 0l-1 -3 1 3z"/>
+              <path data-z="380" className="z z380" d="M732 4922c-3,-90 110,-89 112,-5 43,61 -93,180 -93,105 25,-48 -58,-57 -19,-100z"/>
+            </g>
           </g>
           <g id="D11-Leiria">
             <path data-z="268" className="z z268" d="M1323 15254l-99 -131 0 -130 33 -98 -33 -97 -99 -51 33 -80 99 -65 99 33 66 97 99 -65 132 0 0 65 33 98 -99 65 -66 196 -66 65 -132 98z"/>

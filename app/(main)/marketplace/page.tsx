@@ -731,7 +731,7 @@ export default function MarketplacePage() {
                       <div>
                         <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{pixel.title}</h3>
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                          ({pixel.x}, {pixel.y}) • {pixel.region}
+                          {pixel.id ? `#${pixel.id}` : `(${pixel.x}, ${pixel.y})`} • {pixel.region}
                         </p>
                       </div>
                       
@@ -857,7 +857,7 @@ export default function MarketplacePage() {
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-2">{pixel.title}</h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      ({pixel.x}, {pixel.y}) • {pixel.region}
+                      {pixel.id ? `#${pixel.id}` : `(${pixel.x}, ${pixel.y})`} • {pixel.region}
                     </p>
                     
                     <div className="space-y-3">
@@ -1229,7 +1229,7 @@ export default function MarketplacePage() {
               {selectedPixel?.title}
             </DialogTitle>
             <DialogDescription>
-              ({selectedPixel?.x}, {selectedPixel?.y}) • {selectedPixel?.region}
+              {selectedPixel?.id ? `#${selectedPixel?.id}` : `(${selectedPixel?.x}, ${selectedPixel?.y})`} • {selectedPixel?.region}
             </DialogDescription>
           </DialogHeader>
           

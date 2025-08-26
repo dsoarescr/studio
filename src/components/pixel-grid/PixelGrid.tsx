@@ -63,6 +63,7 @@ const SVG_VIEWBOX_WIDTH = 12969;
 const SVG_VIEWBOX_HEIGHT = 26674;
 const LOGICAL_GRID_COLS_CONFIG = 640;
 const RENDERED_PIXEL_SIZE_CONFIG = 1;
+const DESIRED_POPULATION = 10411834;
 
 // Navigation and visualization constants
 const ZOOM_BOOKMARKS_KEY = 'pixel-universe-zoom-bookmarks';
@@ -118,6 +119,7 @@ interface ZoomBookmark {
 }
 
 interface SelectedPixelDetails {
+  id?: number;
   x: number;
   y: number;
   owner?: string;
@@ -186,9 +188,12 @@ export default function PixelGrid() {
   // Mask limiting pixels to Portugal landmass
   const [maskBitmap, setMaskBitmap] = useState<Uint8Array | null>(null);
   const [maskDimensions, setMaskDimensions] = useState<{ cols: number; rows: number } | null>(null);
+  const maskWorkerRef = useRef<Worker | null>(null);
+  const [maskRowCounts, setMaskRowCounts] = useState<Uint32Array | null>(null);
+  const [idPermutation, setIdPermutation] = useState<{ n: number; a: number; b: number; aInv: number } | null>(null);
   
   const { isOnline } = useAppStore();
-  const { soldPixels, addSoldPixel } = usePixelStore();
+  const { soldPixels, addSoldPixel, getPixelById } = usePixelStore();
   const { credits, addCredits, addXp, addPixel } = useUserStore();
   
   const autoResetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -197,6 +202,9 @@ export default function PixelGrid() {
   const [strokeColor, setStrokeColor] = useState('');
   const [resolvedUnsoldColor, setResolvedUnsoldColor] = useState<string>('#ddd');
   const [resolvedStrokeColor, setResolvedStrokeColor] = useState<string>('#bbb');
+  const mapPathsRef = useRef<Path2D[] | null>(null);
+  const mapPathTransformsRef = useRef<Array<{ tx: number; ty: number; sx: number; sy: number }> | null>(null);
+  const lod0TilesRef = useRef<{ ready: boolean; images: HTMLImageElement[]; cols: number; rows: number; tileW: number; tileH: number } | null>(null);
 
   const [loadedPixelImages, setLoadedPixelImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
@@ -205,6 +213,8 @@ export default function PixelGrid() {
 
   // Enhanced loading state with better UX
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [logicalCols, setLogicalCols] = useState<number>(LOGICAL_GRID_COLS_CONFIG);
+  const [rescaleDone, setRescaleDone] = useState<boolean>(false);
 
   // Load saved bookmarks
   useEffect(() => {
@@ -312,10 +322,107 @@ export default function PixelGrid() {
       const cs = getComputedStyle(root);
       const muted = cs.getPropertyValue('--muted').trim();
       const border = cs.getPropertyValue('--border').trim();
-      if (muted) setResolvedUnsoldColor(`hsl(${muted})`);
+      // Mantemos os não vendidos a branco para o caso base (visual desejado)
+      setResolvedUnsoldColor('#ffffff');
       if (border) setResolvedStrokeColor(`hsl(${border})`);
     } catch {}
   }, [unsoldColor, strokeColor]);
+
+  // Preparar Path2D do mapa para preenchimento rápido em LOD baixo (com transforms)
+  useEffect(() => {
+    if (mapData) {
+      try {
+        if ((mapData as any).pathEntries && (mapData as any).pathEntries.length > 0) {
+          const entries = (mapData as any).pathEntries as Array<{ d: string; transform?: { tx: number; ty: number; sx: number; sy: number } }>;
+          mapPathsRef.current = entries.map(e => new Path2D(e.d));
+          mapPathTransformsRef.current = entries.map(e => e.transform || { tx: 0, ty: 0, sx: 1, sy: 1 });
+        } else if (mapData.pathStrings && mapData.pathStrings.length > 0) {
+          mapPathsRef.current = mapData.pathStrings.map((d) => new Path2D(d));
+          mapPathTransformsRef.current = mapPathsRef.current.map(() => ({ tx: 0, ty: 0, sx: 1, sy: 1 }));
+        } else {
+          mapPathsRef.current = null;
+          mapPathTransformsRef.current = null;
+        }
+      } catch {
+        mapPathsRef.current = null;
+        mapPathTransformsRef.current = null;
+      }
+    }
+  }, [mapData]);
+
+  // Fallback geométrico: testa ponto dentro do mapa usando Path2D + transforms
+  const isPointInsideMap = useCallback((mapX: number, mapY: number): boolean => {
+    if (!mapPathsRef.current || mapPathsRef.current.length === 0) return false;
+    const canvas = pixelCanvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!ctx) return false;
+    const tfs = mapPathTransformsRef.current;
+    let inside = false;
+    ctx.save();
+    for (let i = 0; i < mapPathsRef.current.length; i++) {
+      const tf = tfs?.[i] || { tx: 0, ty: 0, sx: 1, sy: 1 };
+      ctx.save();
+      ctx.transform(tf.sx, 0, 0, tf.sy, tf.tx, tf.ty);
+      if (ctx.isPointInPath(mapPathsRef.current[i], mapX, mapY)) {
+        inside = true;
+        ctx.restore();
+        break;
+      }
+      ctx.restore();
+    }
+    ctx.restore();
+    return inside;
+  }, []);
+
+  // Helpers para permutação afim (ID aleatório mas determinístico)
+  function egcd(a: number, b: number): { g: number; x: number; y: number } {
+    if (b === 0) return { g: Math.abs(a), x: a < 0 ? -1 : 1, y: 0 };
+    const { g, x, y } = egcd(b, a % b);
+    return { g, x: y, y: x - Math.floor(a / b) * y };
+  }
+  function modInv(a: number, n: number): number {
+    const { g, x } = egcd(a, n);
+    if (g !== 1) return 1; // fallback
+    const inv = ((x % n) + n) % n;
+    return inv;
+  }
+  function gcd(a: number, b: number): number { return b === 0 ? Math.abs(a) : gcd(b, a % b); }
+
+  // Carregar tiles LOD0 se existirem (manifest)
+  useEffect(() => {
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await fetch('/tiles/lod0/manifest.json', { cache: 'force-cache' });
+        if (!res.ok) return;
+        const list = await res.json();
+        if (!Array.isArray(list) || list.length === 0) return;
+
+        // Inferir grelha de tiles por convenção: {cols}x{rows}-{tileW}x{tileH}-{x}-{y}.webp
+        // Ex.: 8x16-512x512-3-10.webp
+        const metaMatch = String(list[0]).match(/(\d+)x(\d+)-(\d+)x(\d+)-/);
+        const cols = metaMatch ? parseInt(metaMatch[1], 10) : 1;
+        const rows = metaMatch ? parseInt(metaMatch[2], 10) : 1;
+        const tileW = metaMatch ? parseInt(metaMatch[3], 10) : 512;
+        const tileH = metaMatch ? parseInt(metaMatch[4], 10) : 512;
+
+        const images: HTMLImageElement[] = [];
+        for (const rel of list) {
+          const img = new Image();
+          img.decoding = 'async';
+          img.loading = 'eager';
+          img.src = `/tiles/lod0/${rel}`;
+          await img.decode().catch(() => {});
+          if (aborted) return;
+          images.push(img);
+        }
+        lod0TilesRef.current = { ready: true, images, cols, rows, tileW, tileH };
+      } catch {}
+    })();
+    return () => {
+      aborted = true;
+    };
+  }, []);
 
   // Draw visible pixels inside mask on canvas (screen coordinates)
   useEffect(() => {
@@ -366,31 +473,92 @@ export default function PixelGrid() {
       soldColorByKey.set(`${p.x},${p.y}`, (p as any).color || '#D4A757');
     }
 
-    const drawStroke = zoom >= 8;
+    const screenCellSize = cellSize * baseScale * zoom;
+    const drawStroke = screenCellSize >= 8; // só em zoom alto
     ctx.lineWidth = Math.max(1, Math.floor(zoom >= 12 ? 1.0 : 0.5));
 
-    for (let y = startY; y < endY; y++) {
-      for (let x = startX; x < endX; x++) {
-        const idx = y * maskDimensions.cols + x;
-        if (maskBitmap[idx] !== 1) continue; // outside landmass
+    // LOD: em zoom baixo
+    if (screenCellSize < 1) {
+      // Se houver LOD0 tiles, desenhá-los escalados ao viewBox
+      if (lod0TilesRef.current && lod0TilesRef.current.ready) {
+        const { images, cols, rows } = lod0TilesRef.current;
+        // Assumimos ordem por lista, index = y*cols + x
+        const drawTile = (tileImg: HTMLImageElement, tx: number, ty: number, tw: number, th: number) => {
+          const sx = offsetX + position.x + (tx / cols) * SVG_VIEWBOX_WIDTH * baseScale * zoom;
+          const sy = offsetY + position.y + (ty / rows) * SVG_VIEWBOX_HEIGHT * baseScale * zoom;
+          const sw = (SVG_VIEWBOX_WIDTH / cols) * baseScale * zoom;
+          const sh = (SVG_VIEWBOX_HEIGHT / rows) * baseScale * zoom;
+          ctx.drawImage(tileImg, sx, sy, sw, sh);
+        };
+        for (let ty = 0; ty < rows; ty++) {
+          for (let tx = 0; tx < cols; tx++) {
+            const idx = ty * cols + tx;
+            const img = images[idx];
+            if (!img) continue;
+            drawTile(img, tx, ty, 0, 0);
+          }
+        }
+      } else if (mapPathsRef.current) {
+        // Fundo branco recortado ao mapa com transforms por path (inclui ilhas)
+        ctx.save();
+        ctx.translate(offsetX + position.x, offsetY + position.y);
+        ctx.scale(baseScale * zoom, baseScale * zoom);
+        ctx.fillStyle = '#ffffff';
+        const tfs = mapPathTransformsRef.current;
+        for (let i = 0; i < mapPathsRef.current.length; i++) {
+          const path = mapPathsRef.current[i];
+          const tf = tfs?.[i] || { tx: 0, ty: 0, sx: 1, sy: 1 };
+          ctx.save();
+          ctx.transform(tf.sx, 0, 0, tf.sy, tf.tx, tf.ty);
+          ctx.fill(path);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
 
-        const mapX = x * cellSize;
-        const mapY = y * cellSize;
+      // Desenhar apenas os vendidos visíveis por cima
+      // Fundo branco recortado ao mapa
+      for (const [key, color] of soldColorByKey) {
+        const [sx, sy] = key.split(',').map((v) => parseInt(v, 10));
+        if (sx < startX || sx >= endX || sy < startY || sy >= endY) continue;
+        const idx = sy * maskDimensions.cols + sx;
+        if (maskBitmap[idx] !== 1) continue;
+
+        const mapX = sx * cellSize;
+        const mapY = sy * cellSize;
         const screenX = offsetX + position.x + mapX * baseScale * zoom;
         const screenY = offsetY + position.y + mapY * baseScale * zoom;
         const screenW = cellSize * baseScale * zoom;
         const screenH = cellSize * baseScale * zoom;
 
-        const key = `${x},${y}`;
-        const isSold = soldColorByKey.has(key);
-        const fill = isSold ? soldColorByKey.get(key)! : resolvedUnsoldColor;
-
-        ctx.fillStyle = fill;
+        ctx.fillStyle = color;
         ctx.fillRect(screenX, screenY, screenW, screenH);
+      }
+    } else {
+      // Zoom médio/alto: desenhar célula a célula
+      for (let y = startY; y < endY; y++) {
+        for (let x = startX; x < endX; x++) {
+          const idx = y * maskDimensions.cols + x;
+          if (maskBitmap[idx] !== 1) continue; // fora do território
 
-        if (drawStroke) {
-          ctx.strokeStyle = resolvedStrokeColor;
-          ctx.strokeRect(screenX + 0.25, screenY + 0.25, screenW - 0.5, screenH - 0.5);
+          const mapX = x * cellSize;
+          const mapY = y * cellSize;
+          const screenX = offsetX + position.x + mapX * baseScale * zoom;
+          const screenY = offsetY + position.y + mapY * baseScale * zoom;
+          const screenW = cellSize * baseScale * zoom;
+          const screenH = cellSize * baseScale * zoom;
+
+          const key = `${x},${y}`;
+          const isSold = soldColorByKey.has(key);
+          const fill = isSold ? soldColorByKey.get(key)! : resolvedUnsoldColor;
+
+          ctx.fillStyle = fill;
+          ctx.fillRect(screenX, screenY, screenW, screenH);
+
+          if (drawStroke) {
+            ctx.strokeStyle = resolvedStrokeColor;
+            ctx.strokeRect(screenX + 0.25, screenY + 0.25, screenW - 0.5, screenH - 0.5);
+          }
         }
       }
     }
@@ -406,49 +574,127 @@ export default function PixelGrid() {
   // Build mask bitmap from SVG paths (Portugal landmass)
   const generateMaskFromPaths = useCallback(async (paths: string[]) => {
     try {
-      const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
-      const cellSize = SVG_VIEWBOX_WIDTH / logicalGridCols;
-      const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / cellSize);
-
-      const offscreen = document.createElement('canvas');
-      offscreen.width = logicalGridCols;
-      offscreen.height = logicalGridRows;
-      const ctx = offscreen.getContext('2d');
-      if (!ctx) return;
-
-      // Scale SVG viewBox coordinates into bitmap grid space (cols x rows)
-      ctx.save();
-      ctx.scale(logicalGridCols / SVG_VIEWBOX_WIDTH, logicalGridRows / SVG_VIEWBOX_HEIGHT);
-      ctx.fillStyle = '#000';
-      for (const d of paths) {
-        try {
-          const p = new Path2D(d);
-          ctx.fill(p);
-        } catch (e) {
-          // Ignore malformed path
-        }
+      // Inicializar worker se necessário
+      if (!maskWorkerRef.current) {
+        maskWorkerRef.current = new Worker('/workers/mask-worker.js');
       }
-      ctx.restore();
 
-      const imageData = ctx.getImageData(0, 0, logicalGridCols, logicalGridRows);
-      const data = imageData.data;
-      const bitmap = new Uint8Array(logicalGridCols * logicalGridRows);
-      let insideCount = 0;
-      for (let y = 0; y < logicalGridRows; y++) {
-        for (let x = 0; x < logicalGridCols; x++) {
-          const i = (y * logicalGridCols + x) * 4;
-          const alpha = data[i + 3];
-          if (alpha > 0) {
-            bitmap[y * logicalGridCols + x] = 1;
-            insideCount++;
+      const worker = maskWorkerRef.current;
+      const requestId = Math.random().toString(36).slice(2);
+
+      const result: { bitmap?: ArrayBuffer; rowCounts?: ArrayBuffer; cols?: number; rows?: number; insideCount?: number; error?: string } = await new Promise((resolve) => {
+        const onMessage = (ev: MessageEvent) => {
+          const msg = ev.data || {};
+          if (msg.type === 'mask-result' && msg.requestId === requestId) {
+            worker.removeEventListener('message', onMessage);
+            resolve(msg);
           }
-        }
+        };
+        worker.addEventListener('message', onMessage);
+        worker.postMessage({
+          type: 'mask-generate',
+          requestId,
+          paths,
+          logicalGridCols: LOGICAL_GRID_COLS_CONFIG,
+          viewWidth: SVG_VIEWBOX_WIDTH,
+          viewHeight: SVG_VIEWBOX_HEIGHT,
+        });
+      });
+
+      if (result.error) {
+        throw new Error(result.error);
       }
+      if (!result.bitmap || !result.rowCounts || !result.cols || !result.rows || typeof result.insideCount !== 'number') {
+        throw new Error('Resposta inválida do worker');
+      }
+
+      const bitmap = new Uint8Array(result.bitmap);
+      const rowCounts = new Uint32Array(result.rowCounts);
       setMaskBitmap(bitmap);
-      setMaskDimensions({ cols: logicalGridCols, rows: logicalGridRows });
-      setActivePixelsInMap(insideCount);
+      setMaskDimensions({ cols: result.cols, rows: result.rows });
+      setActivePixelsInMap(result.insideCount);
+      setMaskRowCounts(rowCounts);
+
+      // Criar permutação afim para IDs aleatórios
+      if (result.insideCount > 0) {
+        const n = result.insideCount;
+        // semente fixa (pode vir de env/config). Usamos uma constante grande.
+        const seed = 2654435761 >>> 0;
+        // escolher 'a' ímpar e coprimo com n
+        let a = (seed | 1) % n; if (a === 0) a = 1;
+        while (gcd(a, n) !== 1) { a = (a + 2) % n; if (a === 0) a = 1; }
+        const b = (seed * 48271) % n;
+        const aInv = modInv(a, n);
+        setIdPermutation({ n, a, b, aInv });
+      }
     } catch (error) {
-      console.error('Erro ao gerar máscara do mapa:', error);
+      // Silenciar ruído do worker em ambientes sem suporte a Path2D/OffscreenCanvas
+      console.debug('Mask worker unavailable, using main-thread fallback');
+      // Fallback: gerar no main thread
+      try {
+        const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
+        const cellSize = SVG_VIEWBOX_WIDTH / logicalGridCols;
+        const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / cellSize);
+
+        const offscreen = document.createElement('canvas');
+        offscreen.width = logicalGridCols;
+        offscreen.height = logicalGridRows;
+        const ctx = offscreen.getContext('2d');
+        if (!ctx) return;
+
+        ctx.save();
+        ctx.scale(logicalGridCols / SVG_VIEWBOX_WIDTH, logicalGridRows / SVG_VIEWBOX_HEIGHT);
+        ctx.fillStyle = '#000';
+        const tfs = mapPathTransformsRef.current;
+        for (let i = 0; i < paths.length; i++) {
+          const d = paths[i];
+          try {
+            ctx.save();
+            const tf = tfs?.[i] || { tx: 0, ty: 0, sx: 1, sy: 1 };
+            ctx.transform(tf.sx, 0, 0, tf.sy, tf.tx, tf.ty);
+            const p = new Path2D(d);
+            ctx.fill(p);
+            ctx.restore();
+          } catch {}
+        }
+        ctx.restore();
+
+        const imageData = ctx.getImageData(0, 0, logicalGridCols, logicalGridRows);
+        const data = imageData.data;
+        const bitmap = new Uint8Array(logicalGridCols * logicalGridRows);
+        const rowCounts = new Uint32Array(logicalGridRows);
+        let insideCount = 0;
+        for (let y = 0; y < logicalGridRows; y++) {
+          let rowInside = 0;
+          const rowOffset = y * logicalGridCols;
+          for (let x = 0; x < logicalGridCols; x++) {
+            const i = (rowOffset + x) * 4;
+            if (data[i + 3] > 0) {
+              bitmap[rowOffset + x] = 1;
+              rowInside++;
+            }
+          }
+          rowCounts[y] = rowInside;
+          insideCount += rowInside;
+        }
+
+        setMaskBitmap(bitmap);
+        setMaskDimensions({ cols: logicalGridCols, rows: logicalGridRows });
+        setActivePixelsInMap(insideCount);
+        setMaskRowCounts(rowCounts);
+
+        if (insideCount > 0) {
+          const n = insideCount;
+          const seed = 2654435761 >>> 0;
+          let a = (seed | 1) % n; if (a === 0) a = 1;
+          while (gcd(a, n) !== 1) { a = (a + 2) % n; if (a === 0) a = 1; }
+          const b = (seed * 48271) % n;
+          const aInv = modInv(a, n);
+          setIdPermutation({ n, a, b, aInv });
+        }
+      } catch (e) {
+        console.error('Fallback main-thread mask generation failed:', e);
+      }
     }
   }, []);
 
@@ -458,6 +704,16 @@ export default function PixelGrid() {
       generateMaskFromPaths(mapData.pathStrings);
     }
   }, [mapData, maskBitmap, generateMaskFromPaths]);
+
+  // Limpeza do worker ao desmontar
+  useEffect(() => {
+    return () => {
+      if (maskWorkerRef.current) {
+        maskWorkerRef.current.terminate();
+        maskWorkerRef.current = null;
+      }
+    };
+  }, []);
 
   // Handle pixel purchase
   const handlePixelPurchase = useCallback(async (
@@ -489,6 +745,7 @@ export default function PixelGrid() {
 
       // Add pixel to store
       addSoldPixel({
+        id: pixelData.id,
         x: pixelData.x,
         y: pixelData.y,
         owner: user.uid,
@@ -524,12 +781,13 @@ export default function PixelGrid() {
   }, [user, credits, addSoldPixel, addCredits, addXp, addPixel, vibrate, toast]);
 
   // Handle pixel selection
-  const handlePixelClick = useCallback((x: number, y: number) => {
+  const handlePixelClick = useCallback((x: number, y: number, id?: number) => {
     const existingPixel = soldPixels.find(p => p.x === x && p.y === y);
     
     if (existingPixel) {
       // Show detailed pixel info
       const detailedPixelData = {
+        id,
         x,
         y,
         owner: existingPixel.owner ? {
@@ -568,6 +826,7 @@ export default function PixelGrid() {
     } else {
       // Show purchase modal for unsold pixels
       const detailedPixelData = {
+        id,
         x,
         y,
         price: PIXEL_BASE_PRICE,
@@ -719,22 +978,48 @@ export default function PixelGrid() {
       const mapX = (clickX - offsetX - position.x) / (baseScale * zoom);
       const mapY = (clickY - offsetY - position.y) / (baseScale * zoom);
 
-      // Convert map coordinates to logical grid coordinates
+      // Debug + validação geométrica antes das bounds
+      const insideByPath = isPointInsideMap(mapX, mapY);
+      let insideByMask: boolean | null = null;
+      // Convert map coordinates to logical grid coordinates (clamped ao viewBox)
       const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
       const cellSize = SVG_VIEWBOX_WIDTH / logicalGridCols;
       const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / cellSize);
-      
-      const logicalX = Math.floor(mapX / cellSize);
-      const logicalY = Math.floor(mapY / cellSize);
+      const mapXClamped = Math.min(Math.max(mapX, 0), SVG_VIEWBOX_WIDTH - 1);
+      const mapYClamped = Math.min(Math.max(mapY, 0), SVG_VIEWBOX_HEIGHT - 1);
+      const logicalX = Math.floor(mapXClamped / cellSize);
+      const logicalY = Math.floor(mapYClamped / cellSize);
 
-      if (logicalX >= 0 && logicalX < logicalGridCols && logicalY >= 0 && logicalY < logicalGridRows) {
-        // If mask exists, only allow clicks inside Portugal landmass
-        if (maskBitmap && maskDimensions) {
-          const idx = logicalY * maskDimensions.cols + logicalX;
-          if (maskBitmap[idx] !== 1) return; // outside map: ignore
-        }
-        handlePixelClick(logicalX, logicalY);
+      if (maskBitmap && maskDimensions && logicalX >= 0 && logicalX < maskDimensions.cols && logicalY >= 0 && logicalY < maskDimensions.rows) {
+        const debugIdx = logicalY * maskDimensions.cols + logicalX;
+        insideByMask = maskBitmap[debugIdx] === 1;
       }
+      try { console.debug('PIXEL-CLICK-DEBUG', { mapX: Math.round(mapX), mapY: Math.round(mapY), logicalX, logicalY, insideByMask, insideByPath }); } catch {}
+
+      // Se não está dentro por máscara nem por geometria, ignorar
+      if ((insideByMask === false || insideByMask === null) && !insideByPath) return;
+
+      // Mapear para ID contínuo (se disponível)
+      let pixelId: number | null = null;
+      if (maskRowCounts && maskBitmap && maskDimensions && logicalX >= 0 && logicalX < maskDimensions.cols && logicalY >= 0 && logicalY < maskDimensions.rows) {
+        let acc = 0;
+        for (let r = 0; r < logicalY; r++) acc += maskRowCounts[r];
+        const rowStart = logicalY * maskDimensions.cols;
+        let inRow = 0;
+        for (let x = 0; x <= logicalX; x++) {
+          if (maskBitmap[rowStart + x] === 1) inRow++;
+        }
+        const rank = acc + inRow;
+        if (idPermutation && rank > 0) {
+          const { n, a, b } = idPermutation;
+          const mapped = (a * ((rank - 1) % n) + b) % n;
+          pixelId = mapped + 1;
+        } else {
+          pixelId = rank;
+        }
+      }
+
+      handlePixelClick(logicalX, logicalY, pixelId ?? undefined);
   };
 
   if (!isClient) {

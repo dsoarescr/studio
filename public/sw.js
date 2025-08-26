@@ -1,6 +1,6 @@
-const CACHE_NAME = 'pixel-universe-v1.0.0';
-const STATIC_CACHE = 'pixel-universe-static-v1.0.0';
-const DYNAMIC_CACHE = 'pixel-universe-dynamic-v1.0.0';
+const CACHE_NAME = 'pixel-universe-v1.0.2';
+const STATIC_CACHE = 'pixel-universe-static-v1.0.2';
+const DYNAMIC_CACHE = 'pixel-universe-dynamic-v1.0.2';
 
 const STATIC_ASSETS = [
   '/',
@@ -12,19 +12,35 @@ const STATIC_ASSETS = [
   '/sounds/error.mp3',
   '/sounds/notification.mp3',
   '/sounds/purchase.mp3',
-  '/sounds/success.mp3'
+  '/sounds/success.mp3',
+  // Pré-cache do worker de máscara e futuros tiles base LOD0
+  '/workers/mask-worker.js'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => self.skipWaiting())
+    (async () => {
+      const cache = await caches.open(STATIC_CACHE);
+      console.log('Service Worker: Caching static assets');
+      await cache.addAll(STATIC_ASSETS);
+      // Pré-cache de tiles LOD0 se existir manifest
+      try {
+        const res = await fetch('/tiles/lod0/manifest.json', { cache: 'no-cache' });
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && list.length > 0) {
+            const tileUrls = list.map((p) => `/tiles/lod0/${p}`);
+            await cache.addAll(tileUrls);
+            console.log('Service Worker: LOD0 tiles precached:', tileUrls.length);
+          }
+        }
+      } catch (e) {
+        console.log('Service Worker: No LOD0 tiles manifest or failed to precache', e);
+      }
+      await self.skipWaiting();
+    })()
   );
 });
 

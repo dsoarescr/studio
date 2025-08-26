@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build:lod0": "node scripts/build-lod0-tiles.js --tile 512 --out public/tiles/lod0",
     "dev": "next dev -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
@@ -81,6 +82,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "canvas": "^3.2.0",
     "eslint": "9.33.0",
     "eslint-config-next": "15.5.0",
     "genkit-cli": "^1.8.0",

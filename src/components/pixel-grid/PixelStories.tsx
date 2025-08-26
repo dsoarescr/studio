@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 // Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
@@ -283,6 +283,9 @@ export default function PixelStories({ children, initialStories = mockStories }:
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-md h-[90vh] p-0 bg-black border-none">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Stories de Pixels</DialogTitle>
+        </DialogHeader>
         <div className="relative h-full overflow-hidden">
           {/* Progress bars */}
           <div className="absolute top-2 left-2 right-2 z-50 flex gap-1">

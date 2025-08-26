@@ -1564,7 +1564,7 @@ export default function EnhancedPixelPurchaseModal({
               </Button>
               <div>
                 <DialogTitle className="text-lg font-bold">
-                  Pixel ({pixelData.x}, {pixelData.y})
+                  {pixelData.id ? `Pixel #${pixelData.id}` : `Pixel (${pixelData.x}, ${pixelData.y})`}
                 </DialogTitle>
                 <p className="text-sm text-muted-foreground">{pixelData.region}</p>
               </div>

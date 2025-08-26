@@ -84,6 +84,7 @@ interface PixelOwner {
 }
 
 interface DetailedPixelData {
+  id?: number;
   x: number;
   y: number;
   owner?: PixelOwner;
@@ -571,7 +572,7 @@ export default function DetailedPixelModal({
               </Button>
               <div>
                 <h2 className="text-lg font-semibold">
-                  {pixelData.title || `Pixel (${pixelData.x}, ${pixelData.y})`}
+                  {pixelData.title || (pixelData.id ? `Pixel #${pixelData.id}` : `Pixel (${pixelData.x}, ${pixelData.y})`)}
                 </h2>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
@@ -619,8 +620,8 @@ export default function DetailedPixelModal({
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Coordenadas</label>
-                      <p className="text-lg font-semibold">({pixelData.x}, {pixelData.y})</p>
+                      <label className="text-sm font-medium text-muted-foreground">Identificador</label>
+                      <p className="text-lg font-semibold">{pixelData.id ? `#${pixelData.id}` : `(${pixelData.x}, ${pixelData.y})`}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Preço</label>
