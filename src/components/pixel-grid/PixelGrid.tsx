@@ -61,7 +61,7 @@ const DEBOUNCE_DELAY = 16; // ~60fps
 // Configuration constants
 const SVG_VIEWBOX_WIDTH = 12969;
 const SVG_VIEWBOX_HEIGHT = 26674;
-const LOGICAL_GRID_COLS_CONFIG = 1273;
+const LOGICAL_GRID_COLS_CONFIG = 640;
 const RENDERED_PIXEL_SIZE_CONFIG = 1;
 
 // Navigation and visualization constants
@@ -183,6 +183,10 @@ export default function PixelGrid() {
   const [isLoadingMap, setIsLoadingMap] = useState(true);
   const [progressMessage, setProgressMessage] = useState("Aguardando cliente...");
   
+  // Mask limiting pixels to Portugal landmass
+  const [maskBitmap, setMaskBitmap] = useState<Uint8Array | null>(null);
+  const [maskDimensions, setMaskDimensions] = useState<{ cols: number; rows: number } | null>(null);
+  
   const { isOnline } = useAppStore();
   const { soldPixels, addSoldPixel } = usePixelStore();
   const { credits, addCredits, addXp, addPixel } = useUserStore();
@@ -191,6 +195,8 @@ export default function PixelGrid() {
 
   const [unsoldColor, setUnsoldColor] = useState('');
   const [strokeColor, setStrokeColor] = useState('');
+  const [resolvedUnsoldColor, setResolvedUnsoldColor] = useState<string>('#ddd');
+  const [resolvedStrokeColor, setResolvedStrokeColor] = useState<string>('#bbb');
 
   const [loadedPixelImages, setLoadedPixelImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
@@ -298,6 +304,160 @@ export default function PixelGrid() {
     
     loadMapData();
   }, [toast]);
+
+  // Resolve CSS variables to concrete colors for canvas painting
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      const cs = getComputedStyle(root);
+      const muted = cs.getPropertyValue('--muted').trim();
+      const border = cs.getPropertyValue('--border').trim();
+      if (muted) setResolvedUnsoldColor(`hsl(${muted})`);
+      if (border) setResolvedStrokeColor(`hsl(${border})`);
+    } catch {}
+  }, [unsoldColor, strokeColor]);
+
+  // Draw visible pixels inside mask on canvas (screen coordinates)
+  useEffect(() => {
+    const canvas = pixelCanvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container || !maskBitmap || !maskDimensions) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    // Base scale and letterboxing offsets from SVG viewBox -> screen at zoom=1
+    const baseScale = Math.min(containerWidth / SVG_VIEWBOX_WIDTH, containerHeight / SVG_VIEWBOX_HEIGHT);
+    const offsetX = (containerWidth - SVG_VIEWBOX_WIDTH * baseScale) / 2;
+    const offsetY = (containerHeight - SVG_VIEWBOX_HEIGHT * baseScale) / 2;
+    const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+    if (canvas.width !== Math.floor(containerWidth * dpr) || canvas.height !== Math.floor(containerHeight * dpr)) {
+      canvas.width = Math.floor(containerWidth * dpr);
+      canvas.height = Math.floor(containerHeight * dpr);
+      canvas.style.width = `${containerWidth}px`;
+      canvas.style.height = `${containerHeight}px`;
+    }
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, containerWidth, containerHeight);
+
+    const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
+    const cellSize = SVG_VIEWBOX_WIDTH / logicalGridCols;
+    const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / cellSize);
+
+    // Viewport bounds in map coords
+    const mapMinX = (-position.x - offsetX) / (baseScale * zoom);
+    const mapMinY = (-position.y - offsetY) / (baseScale * zoom);
+    const mapMaxX = (containerWidth - position.x - offsetX) / (baseScale * zoom);
+    const mapMaxY = (containerHeight - position.y - offsetY) / (baseScale * zoom);
+
+    // Visible logical cells
+    const startX = Math.max(0, Math.floor(mapMinX / cellSize));
+    const endX = Math.min(logicalGridCols, Math.ceil(mapMaxX / cellSize));
+    const startY = Math.max(0, Math.floor(mapMinY / cellSize));
+    const endY = Math.min(logicalGridRows, Math.ceil(mapMaxY / cellSize));
+
+    // Fast lookup for sold pixels
+    const soldColorByKey = new Map<string, string>();
+    for (const p of soldPixels) {
+      soldColorByKey.set(`${p.x},${p.y}`, (p as any).color || '#D4A757');
+    }
+
+    const drawStroke = zoom >= 8;
+    ctx.lineWidth = Math.max(1, Math.floor(zoom >= 12 ? 1.0 : 0.5));
+
+    for (let y = startY; y < endY; y++) {
+      for (let x = startX; x < endX; x++) {
+        const idx = y * maskDimensions.cols + x;
+        if (maskBitmap[idx] !== 1) continue; // outside landmass
+
+        const mapX = x * cellSize;
+        const mapY = y * cellSize;
+        const screenX = offsetX + position.x + mapX * baseScale * zoom;
+        const screenY = offsetY + position.y + mapY * baseScale * zoom;
+        const screenW = cellSize * baseScale * zoom;
+        const screenH = cellSize * baseScale * zoom;
+
+        const key = `${x},${y}`;
+        const isSold = soldColorByKey.has(key);
+        const fill = isSold ? soldColorByKey.get(key)! : resolvedUnsoldColor;
+
+        ctx.fillStyle = fill;
+        ctx.fillRect(screenX, screenY, screenW, screenH);
+
+        if (drawStroke) {
+          ctx.strokeStyle = resolvedStrokeColor;
+          ctx.strokeRect(screenX + 0.25, screenY + 0.25, screenW - 0.5, screenH - 0.5);
+        }
+      }
+    }
+
+    ctx.restore();
+  }, [maskBitmap, maskDimensions, position.x, position.y, zoom, soldPixels, resolvedUnsoldColor, resolvedStrokeColor]);
+
+  // Stable handler to avoid re-running child effect on each render
+  const handleMapDataLoaded = useCallback((data: MapData) => {
+    setMapData(data);
+  }, []);
+
+  // Build mask bitmap from SVG paths (Portugal landmass)
+  const generateMaskFromPaths = useCallback(async (paths: string[]) => {
+    try {
+      const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
+      const cellSize = SVG_VIEWBOX_WIDTH / logicalGridCols;
+      const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / cellSize);
+
+      const offscreen = document.createElement('canvas');
+      offscreen.width = logicalGridCols;
+      offscreen.height = logicalGridRows;
+      const ctx = offscreen.getContext('2d');
+      if (!ctx) return;
+
+      // Scale SVG viewBox coordinates into bitmap grid space (cols x rows)
+      ctx.save();
+      ctx.scale(logicalGridCols / SVG_VIEWBOX_WIDTH, logicalGridRows / SVG_VIEWBOX_HEIGHT);
+      ctx.fillStyle = '#000';
+      for (const d of paths) {
+        try {
+          const p = new Path2D(d);
+          ctx.fill(p);
+        } catch (e) {
+          // Ignore malformed path
+        }
+      }
+      ctx.restore();
+
+      const imageData = ctx.getImageData(0, 0, logicalGridCols, logicalGridRows);
+      const data = imageData.data;
+      const bitmap = new Uint8Array(logicalGridCols * logicalGridRows);
+      let insideCount = 0;
+      for (let y = 0; y < logicalGridRows; y++) {
+        for (let x = 0; x < logicalGridCols; x++) {
+          const i = (y * logicalGridCols + x) * 4;
+          const alpha = data[i + 3];
+          if (alpha > 0) {
+            bitmap[y * logicalGridCols + x] = 1;
+            insideCount++;
+          }
+        }
+      }
+      setMaskBitmap(bitmap);
+      setMaskDimensions({ cols: logicalGridCols, rows: logicalGridRows });
+      setActivePixelsInMap(insideCount);
+    } catch (error) {
+      console.error('Erro ao gerar máscara do mapa:', error);
+    }
+  }, []);
+
+  // Trigger mask generation once mapData is available
+  useEffect(() => {
+    if (mapData?.pathStrings && mapData.pathStrings.length > 0 && !maskBitmap) {
+      generateMaskFromPaths(mapData.pathStrings);
+    }
+  }, [mapData, maskBitmap, generateMaskFromPaths]);
 
   // Handle pixel purchase
   const handlePixelPurchase = useCallback(async (
@@ -549,18 +709,30 @@ export default function PixelGrid() {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // Convert click coordinates to map coordinates
-      const mapX = (clickX - position.x) / zoom;
-      const mapY = (clickY - position.y) / zoom;
+      // Account for base scale and letterboxing to convert screen -> map(viewBox) coordinates
+      const containerWidth = rect.width;
+      const containerHeight = rect.height;
+      const baseScale = Math.min(containerWidth / SVG_VIEWBOX_WIDTH, containerHeight / SVG_VIEWBOX_HEIGHT);
+      const offsetX = (containerWidth - SVG_VIEWBOX_WIDTH * baseScale) / 2;
+      const offsetY = (containerHeight - SVG_VIEWBOX_HEIGHT * baseScale) / 2;
+
+      const mapX = (clickX - offsetX - position.x) / (baseScale * zoom);
+      const mapY = (clickY - offsetY - position.y) / (baseScale * zoom);
 
       // Convert map coordinates to logical grid coordinates
       const logicalGridCols = LOGICAL_GRID_COLS_CONFIG;
-      const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / (SVG_VIEWBOX_WIDTH / logicalGridCols));
+      const cellSize = SVG_VIEWBOX_WIDTH / logicalGridCols;
+      const logicalGridRows = Math.ceil(SVG_VIEWBOX_HEIGHT / cellSize);
       
-      const logicalX = Math.floor(mapX / (SVG_VIEWBOX_WIDTH / logicalGridCols));
-      const logicalY = Math.floor(mapY / (SVG_VIEWBOX_WIDTH / logicalGridCols));
+      const logicalX = Math.floor(mapX / cellSize);
+      const logicalY = Math.floor(mapY / cellSize);
 
       if (logicalX >= 0 && logicalX < logicalGridCols && logicalY >= 0 && logicalY < logicalGridRows) {
+        // If mask exists, only allow clicks inside Portugal landmass
+        if (maskBitmap && maskDimensions) {
+          const idx = logicalY * maskDimensions.cols + logicalX;
+          if (maskBitmap[idx] !== 1) return; // outside map: ignore
+        }
         handlePixelClick(logicalX, logicalY);
       }
   };
@@ -622,25 +794,17 @@ export default function PixelGrid() {
             transformOrigin: '0 0',
           }}
         >
-                   <PortugalMapSvg onMapDataLoaded={() => {}} />
+                   <PortugalMapSvg onMapDataLoaded={handleMapDataLoaded} />
         </div>
 
         {/* Canvas overlays */}
         <canvas
           ref={pixelCanvasRef}
           className="absolute inset-0 pointer-events-none"
-          style={{
-            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
-          }}
         />
         <canvas
           ref={outlineCanvasRef}
           className="absolute inset-0 pointer-events-none"
-          style={{
-            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
-          }}
         />
       </div>
 
