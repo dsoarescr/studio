@@ -1,700 +1,314 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Trophy, Crown, Medal, Star, Flame, Award, Zap, Sparkles,
-  Target, Users, MapPin, Calendar, Activity, BarChart3,
-  Gift, Coins, Gem, Shield, ShoppingCart
+import { useToast } from '@/hooks/use-toast';
+import { useUserStore } from '@/lib/store';
+import {
+  Gift, Star, Crown, Palette, Brush, Sparkles,
+  Gem, Coins, Clock, Calendar, Trophy, Medal,
+  Shield, Wand2, Rocket, Zap, Box
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 interface Reward {
   id: string;
   name: string;
   description: string;
+  type: 'item' | 'cosmetic' | 'boost' | 'special';
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  cost: number;
   icon: React.ReactNode;
-  type: 'daily' | 'weekly' | 'achievement' | 'position' | 'streak' | 'special';
-  value: number;
-  currency: 'credits' | 'xp' | 'special_credits';
-  isClaimed: boolean;
-  isAvailable: boolean;
-  expiresAt?: string;
-  requirements?: string[];
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  effects?: string[];
+  duration?: number; // em horas
+  preview?: string;
 }
 
-interface PositionReward {
-  position: number;
-  credits: number;
-  xp: number;
-  specialRewards: string[];
-  isClaimed: boolean;
-}
-
-interface StreakReward {
-  days: number;
-  credits: number;
-  xp: number;
-  bonus: number;
-  isClaimed: boolean;
-}
-
-interface UserStats {
-  totalCredits: number;
-  totalXP: number;
-  specialCredits: number;
-  currentStreak: number;
-  longestStreak: number;
-  totalRewards: number;
-  currentPosition: number;
-  level: number;
-}
-
-const dailyRewards: Reward[] = [
+const rewards: Reward[] = [
   {
-    id: 'daily-1',
-    name: 'Recompensa Diária',
-    description: 'Faça login diariamente para receber recompensas',
-    icon: <Calendar className="h-5 w-5" />,
-    type: 'daily',
-    value: 50,
-    currency: 'credits',
-    isClaimed: false,
-    isAvailable: true,
-    rarity: 'common'
+    id: 'palette_pro',
+    name: 'Paleta Profissional',
+    description: 'Desbloqueie uma paleta de cores exclusiva com tons premium',
+    type: 'item',
+    rarity: 'rare',
+    cost: 500,
+    icon: <Palette className="h-6 w-6" />,
+    effects: ['20 novas cores', 'Gradientes especiais', 'Efeitos de transição']
   },
   {
-    id: 'daily-2',
-    name: 'Bônus de Atividade',
-    description: 'Complete 5 ações hoje',
-    icon: <Activity className="h-5 w-5" />,
-    type: 'daily',
-    value: 25,
-    currency: 'credits',
-    isClaimed: false,
-    isAvailable: false,
-    requirements: ['5 ações completadas'],
-    rarity: 'uncommon'
+    id: 'pixel_brush',
+    name: 'Pincel Mágico',
+    description: 'Um pincel especial que permite criar efeitos únicos',
+    type: 'item',
+    rarity: 'epic',
+    cost: 1000,
+    icon: <Brush className="h-6 w-6" />,
+    effects: ['Efeito de brilho', 'Traços suaves', 'Padrões automáticos']
   },
   {
-    id: 'daily-3',
-    name: 'Pixel Master',
-    description: 'Compre 3 pixels hoje',
-    icon: <MapPin className="h-5 w-5" />,
-    type: 'daily',
-    value: 100,
-    currency: 'credits',
-    isClaimed: false,
-    isAvailable: false,
-    requirements: ['3 pixels comprados'],
-    rarity: 'rare'
+    id: 'golden_frame',
+    name: 'Moldura Dourada',
+    description: 'Uma moldura exclusiva para seus pixels mais especiais',
+    type: 'cosmetic',
+    rarity: 'legendary',
+    cost: 2000,
+    icon: <Crown className="h-6 w-6" />,
+    preview: 'URL_DA_PREVIEW'
+  },
+  {
+    id: 'xp_boost',
+    name: 'Impulso de XP',
+    description: 'Ganhe o dobro de XP por 24 horas',
+    type: 'boost',
+    rarity: 'rare',
+    cost: 300,
+    icon: <Zap className="h-6 w-6" />,
+    duration: 24
   }
 ];
 
-const weeklyRewards: Reward[] = [
-  {
-    id: 'weekly-1',
-    name: 'Recompensa Semanal',
-    description: 'Faça login 7 dias seguidos',
-    icon: <Calendar className="h-5 w-5" />,
-    type: 'weekly',
-    value: 500,
-    currency: 'credits',
-    isClaimed: false,
-    isAvailable: true,
-    rarity: 'uncommon'
+const rarityStyles = {
+  common: {
+    bg: 'bg-slate-500/10',
+    border: 'border-slate-500/30',
+    text: 'text-slate-500',
+    label: 'Comum'
   },
-  {
-    id: 'weekly-2',
-    name: 'Colecionador Semanal',
-    description: 'Colecione 20 pixels únicos esta semana',
-    icon: <Target className="h-5 w-5" />,
-    type: 'weekly',
-    value: 250,
-    currency: 'credits',
-    isClaimed: false,
-    isAvailable: false,
-    requirements: ['20 pixels únicos'],
-    rarity: 'rare'
+  rare: {
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/30',
+    text: 'text-blue-500',
+    label: 'Raro'
   },
-  {
-    id: 'weekly-3',
-    name: 'Artista da Semana',
-    description: 'Crie 10 pixels artísticos esta semana',
-    icon: <Star className="h-5 w-5" />,
-    type: 'weekly',
-    value: 750,
-    currency: 'credits',
-    isClaimed: false,
-    isAvailable: false,
-    requirements: ['10 pixels artísticos'],
-    rarity: 'epic'
-  }
-];
-
-const positionRewards: PositionReward[] = [
-  {
-    position: 1,
-    credits: 10000,
-    xp: 5000,
-    specialRewards: ['Título de Campeão', 'Pixel Dourado', 'Badge Especial'],
-    isClaimed: false
+  epic: {
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/30',
+    text: 'text-purple-500',
+    label: 'Épico'
   },
-  {
-    position: 2,
-    credits: 5000,
-    xp: 2500,
-    specialRewards: ['Título de Vice-Campeão', 'Pixel Prateado'],
-    isClaimed: false
-  },
-  {
-    position: 3,
-    credits: 2500,
-    xp: 1250,
-    specialRewards: ['Título de Terceiro Lugar', 'Pixel de Bronze'],
-    isClaimed: false
-  },
-  {
-    position: 10,
-    credits: 1000,
-    xp: 500,
-    specialRewards: ['Badge Top 10'],
-    isClaimed: false
-  },
-  {
-    position: 50,
-    credits: 500,
-    xp: 250,
-    specialRewards: ['Badge Top 50'],
-    isClaimed: false
-  },
-  {
-    position: 100,
-    credits: 250,
-    xp: 125,
-    specialRewards: ['Badge Top 100'],
-    isClaimed: false
-  }
-];
-
-const streakRewards: StreakReward[] = [
-  {
-    days: 7,
-    credits: 100,
-    xp: 50,
-    bonus: 10,
-    isClaimed: false
-  },
-  {
-    days: 14,
-    credits: 250,
-    xp: 125,
-    bonus: 15,
-    isClaimed: false
-  },
-  {
-    days: 30,
-    credits: 750,
-    xp: 375,
-    bonus: 25,
-    isClaimed: false
-  },
-  {
-    days: 60,
-    credits: 1500,
-    xp: 750,
-    bonus: 50,
-    isClaimed: false
-  },
-  {
-    days: 100,
-    credits: 3000,
-    xp: 1500,
-    bonus: 100,
-    isClaimed: false
-  }
-];
-
-const userStats: UserStats = {
-  totalCredits: 12500,
-  totalXP: 8500,
-  specialCredits: 250,
-  currentStreak: 12,
-  longestStreak: 45,
-  totalRewards: 23,
-  currentPosition: 15,
-  level: 18
-};
-
-const getRarityColor = (rarity: string) => {
-  switch (rarity) {
-    case 'common': return 'text-gray-500';
-    case 'uncommon': return 'text-green-500';
-    case 'rare': return 'text-blue-500';
-    case 'epic': return 'text-purple-500';
-    case 'legendary': return 'text-yellow-500';
-    default: return 'text-gray-500';
+  legendary: {
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/30',
+    text: 'text-amber-500',
+    label: 'Lendário'
   }
 };
 
-const getRarityBorder = (rarity: string) => {
-  switch (rarity) {
-    case 'common': return 'border-gray-500/20';
-    case 'uncommon': return 'border-green-500/20';
-    case 'rare': return 'border-blue-500/20';
-    case 'epic': return 'border-purple-500/20';
-    case 'legendary': return 'border-yellow-500/20';
-    default: return 'border-gray-500/20';
-  }
-};
+export function RewardSystem() {
+  const [activeTab, setActiveTab] = useState<'store' | 'inventory' | 'boosts'>('store');
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
+  const { toast } = useToast();
+  const { credits, removeCredits, addInventoryItem } = useUserStore();
 
-export const RewardSystem: React.FC = () => {
-  const [selectedTab, setSelectedTab] = useState('daily');
-  const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
-
-  const handleClaimReward = (rewardId: string) => {
-    if (!claimedRewards.includes(rewardId)) {
-      setClaimedRewards([...claimedRewards, rewardId]);
+  const handlePurchase = (reward: Reward) => {
+    if (credits < reward.cost) {
+      toast({
+        title: "Créditos Insuficientes",
+        description: "Você não tem créditos suficientes para esta recompensa.",
+        variant: "destructive"
+      });
+      return;
     }
-  };
 
-  const getAvailablePositionRewards = () => {
-    return positionRewards.filter(reward => 
-      userStats.currentPosition <= reward.position && !reward.isClaimed
-    );
-  };
+    removeCredits(reward.cost);
+    addInventoryItem(reward.id);
 
-  const getAvailableStreakRewards = () => {
-    return streakRewards.filter(reward => 
-      userStats.currentStreak >= reward.days && !reward.isClaimed
-    );
+    toast({
+      title: "Compra Realizada!",
+      description: `Você adquiriu ${reward.name}!`,
+      variant: "success"
+    });
   };
 
   return (
     <div className="space-y-6">
-      {/* User Stats Overview */}
-      <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
+      <Card className="border-2 border-primary/20">
         <CardHeader>
-          <CardTitle className="flex items-center text-primary">
-            <Gift className="h-5 w-5 mr-2" />
-            Sistema de Recompensas
+          <CardTitle className="flex items-center gap-2">
+            <Gift className="h-6 w-6 text-primary" />
+            Central de Recompensas
           </CardTitle>
+          <CardDescription>
+            Use seus créditos para adquirir itens especiais e melhorar sua experiência
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{userStats.totalCredits.toLocaleString('pt-PT')}</div>
-              <div className="text-sm text-muted-foreground">Créditos Totais</div>
-            </div>
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-accent">{userStats.totalXP.toLocaleString('pt-PT')}</div>
-              <div className="text-sm text-muted-foreground">XP Total</div>
-            </div>
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-green-500">{userStats.currentStreak}</div>
-              <div className="text-sm text-muted-foreground">Sequência Atual</div>
-            </div>
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-500">{userStats.totalRewards}</div>
-              <div className="text-sm text-muted-foreground">Recompensas</div>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <Badge variant="outline" className="px-4 py-2">
+                <Coins className="h-4 w-4 mr-2 text-primary" />
+                {credits} Créditos
+              </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Reward Tabs */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-primary">
-            <Award className="h-5 w-5 mr-2" />
-            Recompensas Disponíveis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="daily" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span className="hidden md:inline">Diárias</span>
+          <Tabs value={activeTab} onValueChange={(value: string) => setActiveTab(value as any)}>
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="store" className="flex items-center gap-2">
+                <Box className="h-4 w-4" />
+                Loja
               </TabsTrigger>
-              <TabsTrigger value="weekly" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden md:inline">Semanais</span>
+              <TabsTrigger value="inventory" className="flex items-center gap-2">
+                <Gem className="h-4 w-4" />
+                Inventário
               </TabsTrigger>
-              <TabsTrigger value="position" className="flex items-center gap-2">
-                <Trophy className="h-4 w-4" />
-                <span className="hidden md:inline">Posição</span>
-              </TabsTrigger>
-              <TabsTrigger value="streak" className="flex items-center gap-2">
-                <Flame className="h-4 w-4" />
-                <span className="hidden md:inline">Sequência</span>
+              <TabsTrigger value="boosts" className="flex items-center gap-2">
+                <Rocket className="h-4 w-4" />
+                Impulsos
               </TabsTrigger>
             </TabsList>
-            
-            {/* Daily Rewards */}
-            <TabsContent value="daily" className="mt-4">
-              <div className="space-y-4">
-                <AnimatePresence>
-                  {dailyRewards.map((reward, index) => (
+
+            <TabsContent value="store" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {rewards.map((reward) => {
+                  const style = rarityStyles[reward.rarity];
+                  
+                  return (
                     <motion.div
                       key={reward.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ scale: 1.02 }}
+                      className={`rounded-lg border-2 ${style.border} p-4 cursor-pointer`}
+                      onClick={() => setSelectedReward(reward)}
                     >
-                      <Card className={cn(
-                        "transition-all duration-300 hover:shadow-lg",
-                        claimedRewards.includes(reward.id) ? "ring-2 ring-green-500/20 bg-green-500/5" : "",
-                        getRarityBorder(reward.rarity)
-                      )}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className={cn("p-3 rounded-lg", getRarityColor(reward.rarity))}>
-                                {reward.icon}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <h3 className="font-semibold">{reward.name}</h3>
-                                  <Badge variant="outline" className={cn("text-xs", getRarityColor(reward.rarity))}>
-                                    {reward.rarity.toUpperCase()}
-                                  </Badge>
-                                  {claimedRewards.includes(reward.id) && (
-                                    <Badge variant="default" className="bg-green-500 text-xs">
-                                      Reclamado
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground">{reward.description}</p>
-                                {reward.requirements && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {reward.requirements.map((req, idx) => (
-                                      <Badge key={idx} variant="outline" className="text-xs">
-                                        {req}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="text-right">
-                              <div className="flex items-center gap-2 mb-2">
-                                {reward.currency === 'credits' && <Coins className="h-4 w-4 text-yellow-500" />}
-                                {reward.currency === 'xp' && <Zap className="h-4 w-4 text-blue-500" />}
-                                {reward.currency === 'special_credits' && <Gem className="h-4 w-4 text-purple-500" />}
-                                <span className="font-bold">{reward.value}</span>
-                              </div>
-                              <Button 
-                                variant="default" 
-                                size="sm"
-                                onClick={() => handleClaimReward(reward.id)}
-                                disabled={!reward.isAvailable || claimedRewards.includes(reward.id)}
-                              >
-                                {claimedRewards.includes(reward.id) ? 'Reclamado' : 'Reclamar'}
-                              </Button>
-                            </div>
+                      <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-lg ${style.bg}`}>
+                          {React.cloneElement(reward.icon as any, { className: `h-6 w-6 ${style.text}` })}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-semibold">{reward.name}</h3>
+                            <Badge className={`${style.bg} ${style.text}`}>
+                              {style.label}
+                            </Badge>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {reward.description}
+                          </p>
+                          {reward.effects && (
+                            <div className="space-y-1 mb-3">
+                              {reward.effects.map((effect, index) => (
+                                <div key={index} className="flex items-center gap-2 text-sm">
+                                  <Star className="h-3 w-3 text-primary" />
+                                  <span>{effect}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {reward.duration && (
+                            <div className="flex items-center gap-2 text-sm mb-3">
+                              <Clock className="h-3 w-3 text-primary" />
+                              <span>Duração: {reward.duration}h</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <Coins className="h-3 w-3" />
+                              {reward.cost}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePurchase(reward);
+                              }}
+                              disabled={credits < reward.cost}
+                              className={credits < reward.cost ? 'opacity-50 cursor-not-allowed' : ''}
+                            >
+                              Comprar
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
-                  ))}
-                </AnimatePresence>
+                  );
+                })}
               </div>
             </TabsContent>
 
-            {/* Weekly Rewards */}
-            <TabsContent value="weekly" className="mt-4">
-              <div className="space-y-4">
-                <AnimatePresence>
-                  {weeklyRewards.map((reward, index) => (
-                    <motion.div
-                      key={reward.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className={cn(
-                        "transition-all duration-300 hover:shadow-lg",
-                        claimedRewards.includes(reward.id) ? "ring-2 ring-green-500/20 bg-green-500/5" : "",
-                        getRarityBorder(reward.rarity)
-                      )}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className={cn("p-3 rounded-lg", getRarityColor(reward.rarity))}>
-                                {reward.icon}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <h3 className="font-semibold">{reward.name}</h3>
-                                  <Badge variant="outline" className={cn("text-xs", getRarityColor(reward.rarity))}>
-                                    {reward.rarity.toUpperCase()}
-                                  </Badge>
-                                  {claimedRewards.includes(reward.id) && (
-                                    <Badge variant="default" className="bg-green-500 text-xs">
-                                      Reclamado
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground">{reward.description}</p>
-                                {reward.requirements && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {reward.requirements.map((req, idx) => (
-                                      <Badge key={idx} variant="outline" className="text-xs">
-                                        {req}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="text-right">
-                              <div className="flex items-center gap-2 mb-2">
-                                {reward.currency === 'credits' && <Coins className="h-4 w-4 text-yellow-500" />}
-                                {reward.currency === 'xp' && <Zap className="h-4 w-4 text-blue-500" />}
-                                {reward.currency === 'special_credits' && <Gem className="h-4 w-4 text-purple-500" />}
-                                <span className="font-bold">{reward.value}</span>
-                              </div>
-                              <Button 
-                                variant="default" 
-                                size="sm"
-                                onClick={() => handleClaimReward(reward.id)}
-                                disabled={!reward.isAvailable || claimedRewards.includes(reward.id)}
-                              >
-                                {claimedRewards.includes(reward.id) ? 'Reclamado' : 'Reclamar'}
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+            <TabsContent value="inventory" className="min-h-[400px] flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <Box className="h-16 w-16 text-muted-foreground mx-auto" />
+                <h3 className="text-lg font-semibold">Seu Inventário</h3>
+                <p className="text-muted-foreground">
+                  Aqui você encontrará todos os seus itens adquiridos
+                </p>
               </div>
             </TabsContent>
 
-            {/* Position Rewards */}
-            <TabsContent value="position" className="mt-4">
-              <div className="space-y-4">
-                <div className="mb-4 p-4 bg-muted/50 rounded-lg">
-                  <h3 className="font-semibold mb-2">Sua Posição Atual: #{userStats.currentPosition}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Recompensas baseadas na sua posição no ranking geral
-                  </p>
-                </div>
-                
-                <AnimatePresence>
-                  {getAvailablePositionRewards().map((reward, index) => (
-                    <motion.div
-                      key={reward.position}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="transition-all duration-300 hover:shadow-lg">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="p-3 rounded-lg bg-primary/10">
-                                {reward.position === 1 && <Crown className="h-5 w-5 text-yellow-500" />}
-                                {reward.position === 2 && <Medal className="h-5 w-5 text-gray-400" />}
-                                {reward.position === 3 && <Medal className="h-5 w-5 text-orange-400" />}
-                                {reward.position > 3 && <Trophy className="h-5 w-5 text-primary" />}
-                              </div>
-                              <div>
-                                <h3 className="font-semibold">Top {reward.position}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Recompensa por estar no top {reward.position} do ranking
-                                </p>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {reward.specialRewards.map((special, idx) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {special}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="text-right">
-                              <div className="space-y-1 mb-2">
-                                <div className="flex items-center gap-1">
-                                  <Coins className="h-4 w-4 text-yellow-500" />
-                                  <span className="font-bold">{reward.credits}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Zap className="h-4 w-4 text-blue-500" />
-                                  <span className="font-bold">{reward.xp} XP</span>
-                                </div>
-                              </div>
-                              <Button 
-                                variant="default" 
-                                size="sm"
-                                disabled={reward.isClaimed}
-                              >
-                                {reward.isClaimed ? 'Reclamado' : 'Reclamar'}
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </TabsContent>
-
-            {/* Streak Rewards */}
-            <TabsContent value="streak" className="mt-4">
-              <div className="space-y-4">
-                <div className="mb-4 p-4 bg-muted/50 rounded-lg">
-                  <h3 className="font-semibold mb-2">Sequência Atual: {userStats.currentStreak} dias</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Mantenha a sequência para desbloquear recompensas especiais
-                  </p>
-                  <Progress value={(userStats.currentStreak / 100) * 100} className="mt-2" />
-                </div>
-                
-                <AnimatePresence>
-                  {getAvailableStreakRewards().map((reward, index) => (
-                    <motion.div
-                      key={reward.days}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="transition-all duration-300 hover:shadow-lg">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="p-3 rounded-lg bg-orange-500/10">
-                                <Flame className="h-5 w-5 text-orange-500" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold">{reward.days} Dias de Sequência</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Recompensa por manter {reward.days} dias de atividade
-                                </p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    +{reward.bonus}% Bônus
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="text-right">
-                              <div className="space-y-1 mb-2">
-                                <div className="flex items-center gap-1">
-                                  <Coins className="h-4 w-4 text-yellow-500" />
-                                  <span className="font-bold">{reward.credits}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Zap className="h-4 w-4 text-blue-500" />
-                                  <span className="font-bold">{reward.xp} XP</span>
-                                </div>
-                              </div>
-                              <Button 
-                                variant="default" 
-                                size="sm"
-                                disabled={reward.isClaimed}
-                              >
-                                {reward.isClaimed ? 'Reclamado' : 'Reclamar'}
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+            <TabsContent value="boosts" className="min-h-[400px] flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <Rocket className="h-16 w-16 text-muted-foreground mx-auto" />
+                <h3 className="text-lg font-semibold">Impulsos Ativos</h3>
+                <p className="text-muted-foreground">
+                  Visualize e ative seus impulsos especiais
+                </p>
               </div>
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
 
-      {/* Special Advantages */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-primary">
-            <Shield className="h-5 w-5 mr-2" />
-            Vantagens Especiais
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg border border-green-500/20">
-              <div className="flex items-center gap-3 mb-3">
-                <TrendingUp className="h-5 w-5 text-green-500" />
-                <h3 className="font-semibold">Bônus de XP</h3>
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {selectedReward && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => setSelectedReward(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-background p-6 rounded-lg max-w-md w-full m-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center space-y-4">
+                <div className={`p-6 rounded-full mx-auto w-fit ${rarityStyles[selectedReward.rarity].bg}`}>
+                  {React.cloneElement(selectedReward.icon as any, { 
+                    className: `h-12 w-12 ${rarityStyles[selectedReward.rarity].text}` 
+                  })}
+                </div>
+                <h2 className="text-2xl font-bold">{selectedReward.name}</h2>
+                <p className="text-muted-foreground">{selectedReward.description}</p>
+                
+                {selectedReward.effects && (
+                  <div className="space-y-2 text-left">
+                    <h3 className="font-semibold">Efeitos:</h3>
+                    {selectedReward.effects.map((effect, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Wand2 className="h-4 w-4 text-primary" />
+                        <span>{effect}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="pt-4 space-x-2">
+                  <Button
+                    onClick={() => handlePurchase(selectedReward)}
+                    disabled={credits < selectedReward.cost}
+                  >
+                    <Coins className="h-4 w-4 mr-2" />
+                    Comprar por {selectedReward.cost} créditos
+                  </Button>
+                  <Button variant="outline" onClick={() => setSelectedReward(null)}>
+                    Fechar
+                  </Button>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                +15% XP ganho devido ao seu nível e posição no ranking
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-green-500">Ativo</Badge>
-                <span className="text-sm text-green-500">+15% XP</span>
-              </div>
-            </div>
-            
-            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg border border-blue-500/20">
-              <div className="flex items-center gap-3 mb-3">
-                <Coins className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold">Bônus de Créditos</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                +10% créditos ganhos devido às suas conquistas
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-blue-500">Ativo</Badge>
-                <span className="text-sm text-blue-500">+10% Créditos</span>
-              </div>
-            </div>
-            
-            <div className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg border border-purple-500/20">
-              <div className="flex items-center gap-3 mb-3">
-                <ShoppingCart className="h-5 w-5 text-purple-500" />
-                <h3 className="font-semibold">Desconto no Marketplace</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                -5% em todas as compras devido ao seu status premium
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-purple-500">Ativo</Badge>
-                <span className="text-sm text-purple-500">-5% Compras</span>
-              </div>
-            </div>
-            
-            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-lg border border-orange-500/20">
-              <div className="flex items-center gap-3 mb-3">
-                <Gift className="h-5 w-5 text-orange-500" />
-                <h3 className="font-semibold">Recompensas Extras</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Recompensas especiais desbloqueadas devido à sua sequência
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-orange-500">Ativo</Badge>
-                <span className="text-sm text-orange-500">Recompensas +</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
-
+}

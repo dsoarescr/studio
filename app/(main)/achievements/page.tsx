@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { achievementsData, type Achievement, type AchievementCategory, type AchievementRarity } from '@/data/achievements-data';
 import { useToast } from '@/hooks/use-toast';
+import { AchievementNotification } from '@/components/features/AchievementNotification';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
@@ -113,6 +114,16 @@ const userProgress = {
   nextMilestone: { target: 10, current: 8, reward: '500 XP + Badge Especial' }
 };
 
+// Exemplo de refatoração para criar um componente reutilizável para o Card de Progresso
+function ProgressCard({ value, label, color }) {
+  return (
+    <Card className="bg-background/50 p-4 text-center min-w-[120px]">
+      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </Card>
+  );
+}
+
 export default function AchievementsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
   const [sortBy, setSortBy] = useState<SortValue>('name');
@@ -132,8 +143,24 @@ export default function AchievementsPage() {
     });
   };
 
-  const handleClaimReward = (id: string, tier: number) => {
-    if (recentlyClaimedIds.includes(`${id}-${tier}`)) {
+  const showAchievementNotification = React.useCallback((achievement: Achievement, tier: number) => {
+    toast({
+      id: `achievement-${achievement.id}-${tier}`,
+      duration: 5000,
+      render: ({ onClose }) => (
+        <AchievementNotification
+          achievement={achievement}
+          tier={tier}
+          onClose={onClose}
+        />
+      ),
+    });
+  }, [toast]);
+
+  const handleClaimReward = (achievement: Achievement, tier: number) => {
+    const achievementKey = `${achievement.id}-${tier}`;
+    
+    if (recentlyClaimedIds.includes(achievementKey)) {
       toast({
         title: "Já Reclamado",
         description: "Esta recompensa já foi reclamada.",
@@ -142,19 +169,16 @@ export default function AchievementsPage() {
       return;
     }
     
-    setShowConfetti(true);
-    setPlayRewardSound(true);
-    setRecentlyClaimedIds(prev => [...prev, `${id}-${tier}`]);
+    setRecentlyClaimedIds(prev => [...prev, achievementKey]);
     
-    toast({
-      title: "Conquista Desbloqueada!",
-      description: "Você desbloqueou a conquista &apos;Personalizador de Perfil&apos;!",
-    });
+    // Mostrar notificação animada
+    showAchievementNotification(achievement, tier);
     
-    // Reward the user
-    addCredits(25);
-    addXp(50);
-    unlockAchievement();
+    // Recompensar o usuário
+    const { xpReward, creditsReward } = achievement.tiers[tier - 1];
+    addCredits(creditsReward);
+    addXp(xpReward);
+    unlockAchievement(achievement.id, tier);
   };
 
   // Filter and sort achievements
@@ -185,7 +209,7 @@ export default function AchievementsPage() {
           return bProgress - aProgress;
         case 'recent':
           // Mock recent sorting - in real app would use unlock timestamps
-          return Math.random() - 0.5;
+          return new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime();
         default:
           return 0;
       }
@@ -219,18 +243,9 @@ export default function AchievementsPage() {
               
               {/* Enhanced Progress Overview */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <Card className="bg-background/50 p-4 text-center min-w-[120px]">
-                  <p className="text-2xl font-bold text-primary">{userProgress.unlockedAchievements}</p>
-                  <p className="text-xs text-muted-foreground">Desbloqueadas</p>
-                </Card>
-                <Card className="bg-background/50 p-4 text-center min-w-[120px]">
-                  <p className="text-2xl font-bold text-accent">{userProgress.completionPercentage}%</p>
-                  <p className="text-xs text-muted-foreground">Progresso</p>
-                </Card>
-                <Card className="bg-background/50 p-4 text-center min-w-[120px]">
-                  <p className="text-2xl font-bold text-green-500">{userProgress.streakDays}</p>
-                  <p className="text-xs text-muted-foreground">Sequência</p>
-                </Card>
+                <ProgressCard value={userProgress.unlockedAchievements} label="Desbloqueadas" color="text-primary" />
+                <ProgressCard value={`${userProgress.completionPercentage}%`} label="Progresso" color="text-accent" />
+                <ProgressCard value={userProgress.streakDays} label="Sequência" color="text-green-500" />
               </div>
             </div>
           </CardHeader>
@@ -387,15 +402,10 @@ export default function AchievementsPage() {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
-                                    size="icon" 
-                                    className="h-8 w-8 text-muted-foreground hover:text-primary transition-all duration-200 hover:scale-110" 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleShareAchievement(ach.name);
-                                    }}
-                                  >
+                                  <Button aria-label="Partilhar conquista" variant="outline" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary transition-all duration-200 hover:scale-110" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleShareAchievement(ach.name);
+                                  }}>
                                     <Share2 className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
@@ -407,15 +417,10 @@ export default function AchievementsPage() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button 
-                                      variant="outline" 
-                                      size="icon" 
-                                      className="h-8 w-8 text-muted-foreground hover:text-accent transition-all duration-200 hover:scale-110"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleClaimReward(ach.id, unlockedTiers);
-                                      }}
-                                    >
+                                    <Button aria-label="Reclamar recompensa" variant="outline" size="icon" className="h-8 w-8 text-muted-foreground hover:text-accent transition-all duration-200 hover:scale-110" onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleClaimReward(ach, unlockedTiers);
+                                    }}>
                                       <Gift className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
@@ -505,7 +510,7 @@ export default function AchievementsPage() {
                                 className="h-6 text-xs hover:bg-primary/10 hover:scale-105 transition-transform"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleClaimReward(`${ach.id}-${tier.level}`, tier.level);
+                                  handleClaimReward(ach, tier.level);
                                 }}
                               >
                                 <Gift className="h-3 w-3 mr-1" />
