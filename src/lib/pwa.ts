@@ -3,7 +3,7 @@ export const registerServiceWorker = async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
       console.log('Service Worker registered successfully:', registration);
-      
+
       // Handle updates
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
@@ -19,7 +19,7 @@ export const registerServiceWorker = async () => {
           });
         }
       });
-      
+
       return registration;
     } catch (error) {
       console.error('Service Worker registration failed:', error);
@@ -39,7 +39,11 @@ export const requestNotificationPermission = async () => {
 };
 
 export const showNotification = (title: string, options?: NotificationOptions) => {
-  if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+  if (
+    typeof window !== 'undefined' &&
+    'Notification' in window &&
+    Notification.permission === 'granted'
+  ) {
     new Notification(title, options);
   }
 };
@@ -47,9 +51,10 @@ export const showNotification = (title: string, options?: NotificationOptions) =
 export const installPWA = () => {
   if (typeof window !== 'undefined') {
     // Check if PWA is installable
-    const isInstallable = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
-    
+    const isInstallable =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+
     if (!isInstallable) {
       // Show install prompt
       const installEvent = (window as any).deferredPrompt;

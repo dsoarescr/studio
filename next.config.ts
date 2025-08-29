@@ -1,10 +1,17 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const { withSentryConfig } = require('@sentry/nextjs');
+const { withAxiom } = require('next-axiom');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   images: {
     remotePatterns: [
@@ -19,4 +26,8 @@ const nextConfig = {
   serverExternalPackages: ['@genkit-ai/ai', 'genkit'],
 };
 
-module.exports = nextConfig;
+const sentryWebpackPluginOptions = {
+  silent: true,
+};
+
+module.exports = withSentryConfig(withAxiom(withBundleAnalyzer(nextConfig)), sentryWebpackPluginOptions);

@@ -2,33 +2,39 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Wand2, 
-  Palette, 
-  TrendingUp, 
-  Sparkles, 
-  Eye, 
-  MessageSquare, 
-  Zap, 
-  Lightbulb, 
-  Star, 
-  RotateCcw, 
-  Crown, 
-  CheckCircle, 
-  Heart, 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import {
+  Wand2,
+  Palette,
+  TrendingUp,
+  Sparkles,
+  Eye,
+  MessageSquare,
+  Zap,
+  Lightbulb,
+  Star,
+  RotateCcw,
+  Crown,
+  CheckCircle,
+  Heart,
   Download,
-  Bot
+  Bot,
 } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AIAssistantProps {
   children: React.ReactNode;
@@ -42,7 +48,7 @@ const aiFeatures = [
     icon: <Wand2 className="h-6 w-6" />,
     category: 'Criação',
     premium: true,
-    examples: ['Van Gogh', 'Picasso', 'Monet', 'Arte Digital']
+    examples: ['Van Gogh', 'Picasso', 'Monet', 'Arte Digital'],
   },
   {
     id: 'color-harmony',
@@ -51,7 +57,7 @@ const aiFeatures = [
     icon: <Palette className="h-6 w-6" />,
     category: 'Cores',
     premium: false,
-    examples: ['Complementares', 'Análogas', 'Triádicas', 'Monocromáticas']
+    examples: ['Complementares', 'Análogas', 'Triádicas', 'Monocromáticas'],
   },
   {
     id: 'trend-analysis',
@@ -60,7 +66,7 @@ const aiFeatures = [
     icon: <TrendingUp className="h-6 w-6" />,
     category: 'Mercado',
     premium: true,
-    examples: ['Cores Populares', 'Estilos Trending', 'Regiões Valorizadas']
+    examples: ['Cores Populares', 'Estilos Trending', 'Regiões Valorizadas'],
   },
   {
     id: 'auto-enhance',
@@ -69,7 +75,7 @@ const aiFeatures = [
     icon: <Sparkles className="h-6 w-6" />,
     category: 'Edição',
     premium: false,
-    examples: ['Nitidez', 'Contraste', 'Saturação', 'Iluminação']
+    examples: ['Nitidez', 'Contraste', 'Saturação', 'Iluminação'],
   },
   {
     id: 'composition',
@@ -78,7 +84,7 @@ const aiFeatures = [
     icon: <Eye className="h-6 w-6" />,
     category: 'Composição',
     premium: true,
-    examples: ['Regra dos Terços', 'Pontos Focais', 'Equilíbrio', 'Movimento']
+    examples: ['Regra dos Terços', 'Pontos Focais', 'Equilíbrio', 'Movimento'],
   },
   {
     id: 'description-gen',
@@ -87,8 +93,8 @@ const aiFeatures = [
     icon: <MessageSquare className="h-6 w-6" />,
     category: 'Marketing',
     premium: false,
-    examples: ['Storytelling', 'SEO Otimizado', 'Emocional', 'Técnico']
-  }
+    examples: ['Storytelling', 'SEO Otimizado', 'Emocional', 'Técnico'],
+  },
 ];
 
 export default function AIPixelAssistant({ children }: AIAssistantProps) {
@@ -99,50 +105,62 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
   const [result, setResult] = useState<string | null>(null);
   const [userPrompt, setUserPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('');
-  
+
   const { toast } = useToast();
 
   const handleAIProcess = async (featureId: string) => {
     setIsProcessing(true);
     setProgress(0);
     setSelectedFeature(featureId);
-    
+
     // Simulate AI processing with progress
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsProcessing(false);
-          
+
           // Generate result based on feature
           switch (featureId) {
             case 'style-transfer':
-              setResult('Estilo Van Gogh aplicado com sucesso! Seu pixel agora tem pinceladas expressivas e cores vibrantes.');
+              setResult(
+                'Estilo Van Gogh aplicado com sucesso! Seu pixel agora tem pinceladas expressivas e cores vibrantes.'
+              );
               break;
             case 'color-harmony':
-              setResult('Paleta complementar sugerida: #FF6B6B (coral), #4ECDC4 (turquesa), #45B7D1 (azul céu). Harmonia perfeita garantida!');
+              setResult(
+                'Paleta complementar sugerida: #FF6B6B (coral), #4ECDC4 (turquesa), #45B7D1 (azul céu). Harmonia perfeita garantida!'
+              );
               break;
             case 'trend-analysis':
-              setResult('Tendência atual: Pixels com temas naturais estão 34% mais valorizados. Cores terrosas e verdes são populares.');
+              setResult(
+                'Tendência atual: Pixels com temas naturais estão 34% mais valorizados. Cores terrosas e verdes são populares.'
+              );
               break;
             case 'auto-enhance':
-              setResult('Pixel melhorado automaticamente: +15% contraste, +10% saturação, nitidez otimizada. Qualidade profissional!');
+              setResult(
+                'Pixel melhorado automaticamente: +15% contraste, +10% saturação, nitidez otimizada. Qualidade profissional!'
+              );
               break;
             case 'composition':
-              setResult('Sugestão: Mova o elemento principal 20% para a direita para seguir a regra dos terços. Adicione um ponto focal no canto inferior esquerdo.');
+              setResult(
+                'Sugestão: Mova o elemento principal 20% para a direita para seguir a regra dos terços. Adicione um ponto focal no canto inferior esquerdo.'
+              );
               break;
             case 'description-gen':
-              setResult('Descrição gerada: "Este pixel único captura a essência vibrante de Portugal, combinando tradição e modernidade numa obra digital exclusiva que conta uma história única."');
+              setResult(
+                'Descrição gerada: "Este pixel único captura a essência vibrante de Portugal, combinando tradição e modernidade numa obra digital exclusiva que conta uma história única."'
+              );
               break;
             default:
               setResult('Processamento IA concluído com sucesso!');
           }
-          
+
           toast({
-            title: "IA Concluída! 🤖",
-            description: "Resultado gerado com sucesso.",
+            title: 'IA Concluída! 🤖',
+            description: 'Resultado gerado com sucesso.',
           });
-          
+
           return 100;
         }
         return prev + 2;
@@ -152,16 +170,18 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
 
   const handleCustomPrompt = async () => {
     if (!userPrompt.trim()) return;
-    
+
     setIsProcessing(true);
     setProgress(0);
-    
+
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsProcessing(false);
-          setResult(`Baseado no seu pedido "${userPrompt}", a IA sugere: Foque em elementos que criem contraste visual e harmonia cromática. Considere adicionar detalhes que contem uma história única.`);
+          setResult(
+            `Baseado no seu pedido "${userPrompt}", a IA sugere: Foque em elementos que criem contraste visual e harmonia cromática. Considere adicionar detalhes que contem uma história única.`
+          );
           return 100;
         }
         return prev + 3;
@@ -171,77 +191,71 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      
-      <DialogContent className="max-w-5xl h-[90vh] p-0">
-        <DialogHeader className="p-6 border-b bg-gradient-to-r from-purple-500/10 to-blue-500/10">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+
+      <DialogContent className="h-[90vh] max-w-5xl p-0">
+        <DialogHeader className="border-b bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-6">
           <DialogTitle className="flex items-center">
-                            <Bot className="h-6 w-6 mr-3 text-purple-500" />
+            <Bot className="mr-3 h-6 w-6 text-purple-500" />
             Assistente IA para Pixels
             <Badge className="ml-3 bg-gradient-to-r from-purple-500 to-blue-500">
-              <Sparkles className="h-3 w-3 mr-1" />
+              <Sparkles className="mr-1 h-3 w-3" />
               Powered by AI
             </Badge>
           </DialogTitle>
         </DialogHeader>
-        
-        <Tabs defaultValue="features" className="flex-1 flex flex-col">
-          <TabsList className="px-6 pt-4 bg-transparent justify-start border-b rounded-none">
+
+        <Tabs defaultValue="features" className="flex flex-1 flex-col">
+          <TabsList className="justify-start rounded-none border-b bg-transparent px-6 pt-4">
             <TabsTrigger value="features">
-              <Zap className="h-4 w-4 mr-2" />
+              <Zap className="mr-2 h-4 w-4" />
               Funcionalidades IA
             </TabsTrigger>
             <TabsTrigger value="custom">
-              <Lightbulb className="h-4 w-4 mr-2" />
+              <Lightbulb className="mr-2 h-4 w-4" />
               Prompt Personalizado
             </TabsTrigger>
             <TabsTrigger value="templates">
-              <Star className="h-4 w-4 mr-2" />
+              <Star className="mr-2 h-4 w-4" />
               Templates IA
             </TabsTrigger>
             <TabsTrigger value="history">
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="mr-2 h-4 w-4" />
               Histórico
             </TabsTrigger>
           </TabsList>
-          
+
           <div className="flex-1 overflow-hidden p-6">
             {/* AI Features */}
             <TabsContent value="features" className="h-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {aiFeatures.map(feature => (
-                  <Card 
+                  <Card
                     key={feature.id}
-                    className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
+                    className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
                     onClick={() => handleAIProcess(feature.id)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-purple-500/20 rounded-lg">
-                          {feature.icon}
-                        </div>
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className="rounded-lg bg-purple-500/20 p-2">{feature.icon}</div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">{feature.name}</h3>
                             {feature.premium && (
                               <Badge className="bg-amber-500 text-xs">
-                                <Crown className="h-3 w-3 mr-1" />
+                                <Crown className="mr-1 h-3 w-3" />
                                 Pro
                               </Badge>
                             )}
                           </div>
-                          <Badge variant="outline" className="text-xs mt-1">
+                          <Badge variant="outline" className="mt-1 text-xs">
                             {feature.category}
                           </Badge>
                         </div>
                       </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {feature.description}
-                      </p>
-                      
+
+                      <p className="mb-3 text-sm text-muted-foreground">{feature.description}</p>
+
                       <div className="space-y-2">
                         <p className="text-xs font-medium">Exemplos:</p>
                         <div className="flex flex-wrap gap-1">
@@ -252,20 +266,20 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                           ))}
                         </div>
                       </div>
-                      
-                      <Button 
-                        className="w-full mt-3" 
+
+                      <Button
+                        className="mt-3 w-full"
                         size="sm"
                         disabled={isProcessing && selectedFeature === feature.id}
                       >
                         {isProcessing && selectedFeature === feature.id ? (
                           <>
-                            <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
+                            <RotateCcw className="mr-2 h-4 w-4 animate-spin" />
                             Processando...
                           </>
                         ) : (
                           <>
-                            <Sparkles className="h-4 w-4 mr-2" />
+                            <Sparkles className="mr-2 h-4 w-4" />
                             Executar IA
                           </>
                         )}
@@ -274,7 +288,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                   </Card>
                 ))}
               </div>
-              
+
               {/* Processing Status */}
               {isProcessing && (
                 <motion.div
@@ -282,10 +296,10 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-6"
                 >
-                  <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30">
+                  <Card className="border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
                     <CardContent className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <Bot className="h-6 w-6 text-purple-500 animate-pulse" />
+                      <div className="mb-3 flex items-center gap-3">
+                        <Bot className="h-6 w-6 animate-pulse text-purple-500" />
                         <div>
                           <h3 className="font-semibold">IA Processando...</h3>
                           <p className="text-sm text-muted-foreground">
@@ -299,7 +313,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                   </Card>
                 </motion.div>
               )}
-              
+
               {/* AI Result */}
               {result && !isProcessing && (
                 <motion.div
@@ -307,30 +321,30 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-6"
                 >
-                  <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/30">
+                  <Card className="border-green-500/30 bg-gradient-to-r from-green-500/10 to-blue-500/10">
                     <CardHeader>
                       <CardTitle className="flex items-center text-green-500">
-                        <CheckCircle className="h-5 w-5 mr-2" />
+                        <CheckCircle className="mr-2 h-5 w-5" />
                         Resultado da IA
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-foreground leading-relaxed mb-4">{result}</p>
+                      <p className="mb-4 leading-relaxed text-foreground">{result}</p>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm">
-                          <Heart className="h-4 w-4 mr-2" />
+                          <Heart className="mr-2 h-4 w-4" />
                           Útil
                         </Button>
                         <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-2" />
+                          <Download className="mr-2 h-4 w-4" />
                           Salvar
                         </Button>
                         <Button variant="outline" size="sm">
-                          <MessageSquare className="h-4 w-4 mr-2" />
+                          <MessageSquare className="mr-2 h-4 w-4" />
                           Partilhar
                         </Button>
                         <Button variant="outline" size="sm">
-                          <RotateCcw className="h-4 w-4 mr-2" />
+                          <RotateCcw className="mr-2 h-4 w-4" />
                           Regenerar
                         </Button>
                       </div>
@@ -339,37 +353,37 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                 </motion.div>
               )}
             </TabsContent>
-            
+
             {/* Custom Prompt */}
             <TabsContent value="custom" className="h-full">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
+                    <Lightbulb className="mr-2 h-5 w-5 text-yellow-500" />
                     Consulta Personalizada
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium mb-2 block">
+                    <label className="mb-2 block text-sm font-medium">
                       Descreva o que precisa:
                     </label>
                     <Textarea
                       placeholder="Ex: Crie uma paleta de cores inspirada no pôr do sol português, ou: Como posso melhorar a composição do meu pixel para ser mais atrativo?"
                       value={userPrompt}
-                      onChange={(e) => setUserPrompt(e.target.value)}
+                      onChange={e => setUserPrompt(e.target.value)}
                       rows={4}
                       className="resize-none"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Estilo Preferido:</label>
-                      <select 
+                      <label className="mb-2 block text-sm font-medium">Estilo Preferido:</label>
+                      <select
                         value={selectedStyle}
-                        onChange={(e) => setSelectedStyle(e.target.value)}
-                        className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                        onChange={e => setSelectedStyle(e.target.value)}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       >
                         <option value="">Selecionar estilo...</option>
                         <option value="realistic">Realista</option>
@@ -380,10 +394,10 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                         <option value="artistic">Artístico</option>
                       </select>
                     </div>
-                    
+
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Complexidade:</label>
-                      <select className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm">
+                      <label className="mb-2 block text-sm font-medium">Complexidade:</label>
+                      <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                         <option value="simple">Simples</option>
                         <option value="medium">Médio</option>
                         <option value="complex">Complexo</option>
@@ -391,45 +405,45 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                       </select>
                     </div>
                   </div>
-                  
-                  <Button 
+
+                  <Button
                     onClick={handleCustomPrompt}
                     disabled={isProcessing || !userPrompt.trim()}
                     className="w-full"
                   >
                     {isProcessing ? (
                       <>
-                        <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
+                        <RotateCcw className="mr-2 h-4 w-4 animate-spin" />
                         IA a processar...
                       </>
                     ) : (
                       <>
-                        <Bot className="h-4 w-4 mr-2" />
+                        <Bot className="mr-2 h-4 w-4" />
                         Consultar IA
                       </>
                     )}
                   </Button>
-                  
+
                   {/* Quick Prompts */}
                   <div className="mt-6">
-                    <h4 className="font-medium mb-3">Prompts Rápidos:</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <h4 className="mb-3 font-medium">Prompts Rápidos:</h4>
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                       {[
-                        "Criar paleta inspirada na natureza portuguesa",
-                        "Sugerir melhorias para pixel de paisagem",
-                        "Analisar tendências de cores atuais",
-                        "Gerar descrição épica para pixel raro",
-                        "Otimizar composição para máximo impacto",
-                        "Criar variações de estilo artístico"
+                        'Criar paleta inspirada na natureza portuguesa',
+                        'Sugerir melhorias para pixel de paisagem',
+                        'Analisar tendências de cores atuais',
+                        'Gerar descrição épica para pixel raro',
+                        'Otimizar composição para máximo impacto',
+                        'Criar variações de estilo artístico',
                       ].map((prompt, index) => (
                         <Button
                           key={index}
                           variant="outline"
                           size="sm"
-                          className="text-left justify-start h-auto p-3"
+                          className="h-auto justify-start p-3 text-left"
                           onClick={() => setUserPrompt(prompt)}
                         >
-                          <Lightbulb className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <Lightbulb className="mr-2 h-4 w-4 flex-shrink-0" />
                           <span className="text-xs">{prompt}</span>
                         </Button>
                       ))}
@@ -438,10 +452,10 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             {/* AI Templates */}
             <TabsContent value="templates" className="h-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {[
                   {
                     name: 'Paisagem Portuguesa',
@@ -449,7 +463,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                     preview: '🏞️',
                     category: 'Natureza',
                     difficulty: 'Médio',
-                    uses: 234
+                    uses: 234,
                   },
                   {
                     name: 'Arte Urbana',
@@ -457,7 +471,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                     preview: '🏙️',
                     category: 'Urbano',
                     difficulty: 'Avançado',
-                    uses: 156
+                    uses: 156,
                   },
                   {
                     name: 'Minimalista Zen',
@@ -465,7 +479,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                     preview: '⚪',
                     category: 'Minimalista',
                     difficulty: 'Fácil',
-                    uses: 89
+                    uses: 89,
                   },
                   {
                     name: 'Retro Gaming',
@@ -473,7 +487,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                     preview: '🎮',
                     category: 'Gaming',
                     difficulty: 'Médio',
-                    uses: 312
+                    uses: 312,
                   },
                   {
                     name: 'Arte Abstrata',
@@ -481,7 +495,7 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                     preview: '🎨',
                     category: 'Abstrato',
                     difficulty: 'Avançado',
-                    uses: 78
+                    uses: 78,
                   },
                   {
                     name: 'Fotorrealismo',
@@ -489,38 +503,47 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                     preview: '📸',
                     category: 'Realista',
                     difficulty: 'Extremo',
-                    uses: 45
-                  }
+                    uses: 45,
+                  },
                 ].map((template, index) => (
-                  <Card key={index} className="cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <Card
+                    key={index}
+                    className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+                  >
                     <CardContent className="p-4">
-                      <div className="text-center mb-3">
-                        <div className="text-4xl mb-2">{template.preview}</div>
+                      <div className="mb-3 text-center">
+                        <div className="mb-2 text-4xl">{template.preview}</div>
                         <h3 className="font-semibold">{template.name}</h3>
                         <p className="text-sm text-muted-foreground">{template.description}</p>
                       </div>
-                      
-                      <div className="flex justify-between items-center mb-3">
+
+                      <div className="mb-3 flex items-center justify-between">
                         <Badge variant="outline">{template.category}</Badge>
-                        <Badge variant={
-                          template.difficulty === 'Fácil' ? 'secondary' :
-                          template.difficulty === 'Médio' ? 'default' :
-                          template.difficulty === 'Avançado' ? 'destructive' : 'destructive'
-                        }>
+                        <Badge
+                          variant={
+                            template.difficulty === 'Fácil'
+                              ? 'secondary'
+                              : template.difficulty === 'Médio'
+                                ? 'default'
+                                : template.difficulty === 'Avançado'
+                                  ? 'destructive'
+                                  : 'destructive'
+                          }
+                        >
                           {template.difficulty}
                         </Badge>
                       </div>
-                      
-                      <div className="flex justify-between items-center text-sm text-muted-foreground mb-3">
+
+                      <div className="mb-3 flex items-center justify-between text-sm text-muted-foreground">
                         <span>{template.uses} usos</span>
                         <div className="flex items-center gap-1">
                           <Star className="h-3 w-3 fill-current text-yellow-500" />
                           <span>4.{Math.floor(Math.random() * 9)}</span>
                         </div>
                       </div>
-                      
+
                       <Button className="w-full" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
+                        <Download className="mr-2 h-4 w-4" />
                         Usar Template
                       </Button>
                     </CardContent>
@@ -528,13 +551,13 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                 ))}
               </div>
             </TabsContent>
-            
+
             {/* History */}
             <TabsContent value="history" className="h-full">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <RotateCcw className="h-5 w-5 mr-2" />
+                    <RotateCcw className="mr-2 h-5 w-5" />
                     Histórico de IA
                   </CardTitle>
                 </CardHeader>
@@ -546,48 +569,51 @@ export default function AIPixelAssistant({ children }: AIAssistantProps) {
                         prompt: 'Cores inspiradas no pôr do sol',
                         result: 'Paleta laranja-rosa gerada',
                         time: '2h atrás',
-                        rating: 5
+                        rating: 5,
                       },
                       {
                         type: 'Melhoria Automática',
                         prompt: 'Otimizar pixel de paisagem',
                         result: 'Contraste e saturação melhorados',
                         time: '1d atrás',
-                        rating: 4
+                        rating: 4,
                       },
                       {
                         type: 'Análise de Tendências',
                         prompt: 'Tendências atuais do mercado',
                         result: 'Arte natural em alta (+34%)',
                         time: '3d atrás',
-                        rating: 5
-                      }
+                        rating: 5,
+                      },
                     ].map((item, index) => (
-                      <div key={index} className="p-4 border rounded-lg hover:bg-muted/20 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
+                      <div
+                        key={index}
+                        className="rounded-lg border p-4 transition-colors hover:bg-muted/20"
+                      >
+                        <div className="mb-2 flex items-start justify-between">
                           <div>
                             <h4 className="font-medium">{item.type}</h4>
                             <p className="text-sm text-muted-foreground">{item.prompt}</p>
                           </div>
                           <div className="flex items-center gap-1">
                             {Array.from({ length: 5 }).map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`h-3 w-3 ${i < item.rating ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`} 
+                              <Star
+                                key={i}
+                                className={`h-3 w-3 ${i < item.rating ? 'fill-current text-yellow-500' : 'text-muted-foreground'}`}
                               />
                             ))}
                           </div>
                         </div>
-                        <p className="text-sm mb-2">{item.result}</p>
-                        <div className="flex justify-between items-center">
+                        <p className="mb-2 text-sm">{item.result}</p>
+                        <div className="flex items-center justify-between">
                           <span className="text-xs text-muted-foreground">{item.time}</span>
                           <div className="flex gap-2">
                             <Button variant="ghost" size="sm">
-                              <RotateCcw className="h-3 w-3 mr-1" />
+                              <RotateCcw className="mr-1 h-3 w-3" />
                               Repetir
                             </Button>
                             <Button variant="ghost" size="sm">
-                              <MessageSquare className="h-3 w-3 mr-1" />
+                              <MessageSquare className="mr-1 h-3 w-3" />
                               Partilhar
                             </Button>
                           </div>

@@ -1,26 +1,79 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUserStore, useSettingsStore } from '@/lib/store';
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
-import { 
-  BarChartHorizontalBig, RefreshCw, Globe, MapPin, Target, Users, Eye, Heart, 
-  TrendingUp, ArrowUp, ArrowDown, Map, Clock, Trophy, Medal, Info, Crown,
-  Star, Flame, Zap, Activity, Calendar, Filter, Search, SortAsc, Download,
-  Share2, Award, Gem, Sparkles, LineChart, PieChart, BarChart3, TrendingDown,
-  ChevronUp, ChevronDown, ExternalLink, Bell, Settings, Gift, Coins,
-  Lightbulb, Play, Pause, Sword, Shield
-} from "lucide-react";
+import {
+  BarChartHorizontalBig,
+  RefreshCw,
+  Globe,
+  MapPin,
+  Target,
+  Users,
+  Eye,
+  Heart,
+  TrendingUp,
+  ArrowUp,
+  ArrowDown,
+  Map,
+  Clock,
+  Trophy,
+  Medal,
+  Info,
+  Crown,
+  Star,
+  Flame,
+  Zap,
+  Activity,
+  Calendar,
+  Filter,
+  Search,
+  SortAsc,
+  Download,
+  Share2,
+  Award,
+  Gem,
+  Sparkles,
+  LineChart,
+  PieChart,
+  BarChart3,
+  TrendingDown,
+  ChevronUp,
+  ChevronDown,
+  ExternalLink,
+  Bell,
+  Settings,
+  Gift,
+  Coins,
+  Lightbulb,
+  Play,
+  Pause,
+  Sword,
+  Shield,
+} from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +91,7 @@ interface StatCardData {
   trend?: {
     direction: 'up' | 'down' | 'neutral';
     value: string;
-    colorClass: string; 
+    colorClass: string;
   };
   footer?: string;
   change24h?: number;
@@ -71,136 +124,257 @@ interface RegionData {
 }
 
 const globalStatsData: StatCardData[] = [
-  { 
-    title: 'Total de Pixels no Mapa', 
-    value: '10,3M', 
-    icon: <MapPin className="h-6 w-6" />, 
-    tooltip: "Número total de pixels disponíveis no mapa de Portugal.",
-    change24h: 0
+  {
+    title: 'Total de Pixels no Mapa',
+    value: '10,3M',
+    icon: <MapPin className="h-6 w-6" />,
+    tooltip: 'Número total de pixels disponíveis no mapa de Portugal.',
+    change24h: 0,
   },
-  { 
-    title: 'Pixels Adquiridos', 
-    value: '2.573K', 
-    icon: <Target className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+12.3%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Pixels que já foram comprados por utilizadores.",
-    change24h: 156
+  {
+    title: 'Pixels Adquiridos',
+    value: '2.573K',
+    icon: <Target className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+12.3%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Pixels que já foram comprados por utilizadores.',
+    change24h: 156,
   },
-  { 
-    title: 'Utilizadores Ativos (24h)', 
-    value: '1.247', 
-    icon: <Users className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+8.7%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Utilizadores que estiveram ativos nas últimas 24 horas.",
-    change24h: 98
+  {
+    title: 'Utilizadores Ativos (24h)',
+    value: '1.247',
+    icon: <Users className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+8.7%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Utilizadores que estiveram ativos nas últimas 24 horas.',
+    change24h: 98,
   },
-  { 
-    title: 'Visualizações de Perfil (Hoje)', 
-    value: '5.892', 
-    icon: <Eye className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+15.2%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Número de vezes que perfis de utilizador foram visualizados hoje.",
-    change24h: 782
+  {
+    title: 'Visualizações de Perfil (Hoje)',
+    value: '5.892',
+    icon: <Eye className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+15.2%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Número de vezes que perfis de utilizador foram visualizados hoje.',
+    change24h: 782,
   },
-  { 
-    title: 'Interações Totais', 
-    value: '127K', 
-    icon: <Heart className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+23.8%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Soma de todas as interações (gostos, comentários, etc.).",
-    change24h: 2456
+  {
+    title: 'Interações Totais',
+    value: '127K',
+    icon: <Heart className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+23.8%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Soma de todas as interações (gostos, comentários, etc.).',
+    change24h: 2456,
   },
-  { 
-    title: 'Valor Médio do Pixel', 
-    value: '42,35€', 
-    icon: <TrendingUp className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+5.4%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Preço médio atual de um pixel no mercado.",
-    change24h: 2.18
+  {
+    title: 'Valor Médio do Pixel',
+    value: '42,35€',
+    icon: <TrendingUp className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+5.4%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Preço médio atual de um pixel no mercado.',
+    change24h: 2.18,
   },
-  { 
-    title: 'Volume de Transações (24h)', 
-    value: '89.2K€', 
-    icon: <Activity className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+18.9%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Volume total de transações nas últimas 24 horas.",
-    change24h: 14200
+  {
+    title: 'Volume de Transações (24h)',
+    value: '89.2K€',
+    icon: <Activity className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+18.9%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Volume total de transações nas últimas 24 horas.',
+    change24h: 14200,
   },
-  { 
-    title: 'Novos Registos (Hoje)', 
-    value: '234', 
-    icon: <Star className="h-6 w-6" />, 
-    trend: { direction: 'up', value: '+7.2%', colorClass: 'text-green-500 border-green-500/50' }, 
-    tooltip: "Novos utilizadores registados hoje.",
-    change24h: 16
+  {
+    title: 'Novos Registos (Hoje)',
+    value: '234',
+    icon: <Star className="h-6 w-6" />,
+    trend: { direction: 'up', value: '+7.2%', colorClass: 'text-green-500 border-green-500/50' },
+    tooltip: 'Novos utilizadores registados hoje.',
+    change24h: 16,
   },
 ];
 
 const regionalDistributionData: RegionData[] = [
-  { name: 'Norte', percentage: 35, color: 'hsl(var(--chart-1))', pixels: 3589, activeUsers: 456, avgPrice: 38.50, trend: 'up' },
-  { name: 'Centro', percentage: 28, color: 'hsl(var(--chart-2))', pixels: 2867, activeUsers: 342, avgPrice: 41.20, trend: 'up' },
-  { name: 'Lisboa e Vale do Tejo', percentage: 22, color: 'hsl(var(--chart-3))', pixels: 2256, activeUsers: 523, avgPrice: 52.80, trend: 'up' },
-  { name: 'Alentejo', percentage: 8, color: 'hsl(var(--chart-4))', pixels: 820, activeUsers: 89, avgPrice: 35.90, trend: 'neutral' },
-  { name: 'Algarve', percentage: 5, color: 'hsl(var(--chart-5))', pixels: 513, activeUsers: 167, avgPrice: 48.30, trend: 'up' },
-  { name: 'Açores', percentage: 1, color: 'hsl(var(--muted))', pixels: 102, activeUsers: 23, avgPrice: 29.40, trend: 'down' },
-  { name: 'Madeira', percentage: 1, color: 'hsl(var(--muted))', pixels: 98, activeUsers: 31, avgPrice: 33.70, trend: 'neutral' },
+  {
+    name: 'Norte',
+    percentage: 35,
+    color: 'hsl(var(--chart-1))',
+    pixels: 3589,
+    activeUsers: 456,
+    avgPrice: 38.5,
+    trend: 'up',
+  },
+  {
+    name: 'Centro',
+    percentage: 28,
+    color: 'hsl(var(--chart-2))',
+    pixels: 2867,
+    activeUsers: 342,
+    avgPrice: 41.2,
+    trend: 'up',
+  },
+  {
+    name: 'Lisboa e Vale do Tejo',
+    percentage: 22,
+    color: 'hsl(var(--chart-3))',
+    pixels: 2256,
+    activeUsers: 523,
+    avgPrice: 52.8,
+    trend: 'up',
+  },
+  {
+    name: 'Alentejo',
+    percentage: 8,
+    color: 'hsl(var(--chart-4))',
+    pixels: 820,
+    activeUsers: 89,
+    avgPrice: 35.9,
+    trend: 'neutral',
+  },
+  {
+    name: 'Algarve',
+    percentage: 5,
+    color: 'hsl(var(--chart-5))',
+    pixels: 513,
+    activeUsers: 167,
+    avgPrice: 48.3,
+    trend: 'up',
+  },
+  {
+    name: 'Açores',
+    percentage: 1,
+    color: 'hsl(var(--muted))',
+    pixels: 102,
+    activeUsers: 23,
+    avgPrice: 29.4,
+    trend: 'down',
+  },
+  {
+    name: 'Madeira',
+    percentage: 1,
+    color: 'hsl(var(--muted))',
+    pixels: 98,
+    activeUsers: 31,
+    avgPrice: 33.7,
+    trend: 'neutral',
+  },
 ];
 
 const userRankingData: LeaderboardEntry[] = [
-  { 
-    rank: 1, user: "PixelGod", pixels: 5032, score: 125000, avatar: "https://placehold.co/40x40.png", 
-    dataAiHint: "avatar user", level: 25, region: "Lisboa", streak: 89, change: 2, 
-    badges: ["legendary", "verified"], isVerified: true, isPremium: true 
+  {
+    rank: 1,
+    user: 'PixelGod',
+    pixels: 5032,
+    score: 125000,
+    avatar: 'https://placehold.co/40x40.png',
+    dataAiHint: 'avatar user',
+    level: 25,
+    region: 'Lisboa',
+    streak: 89,
+    change: 2,
+    badges: ['legendary', 'verified'],
+    isVerified: true,
+    isPremium: true,
   },
-  { 
-    rank: 2, user: "ArtMaster", pixels: 4500, score: 110000, avatar: "https://placehold.co/40x40.png", 
-    dataAiHint: "avatar user", level: 23, region: "Porto", streak: 67, change: 0, 
-    badges: ["epic", "premium"], isVerified: true, isPremium: true 
+  {
+    rank: 2,
+    user: 'ArtMaster',
+    pixels: 4500,
+    score: 110000,
+    avatar: 'https://placehold.co/40x40.png',
+    dataAiHint: 'avatar user',
+    level: 23,
+    region: 'Porto',
+    streak: 67,
+    change: 0,
+    badges: ['epic', 'premium'],
+    isVerified: true,
+    isPremium: true,
   },
-  { 
-    rank: 3, user: "ColorQueen", pixels: 3800, score: 95000, avatar: "https://placehold.co/40x40.png", 
-    dataAiHint: "avatar user", level: 21, region: "Coimbra", streak: 45, change: -1, 
-    badges: ["rare"], isVerified: false, isPremium: true 
+  {
+    rank: 3,
+    user: 'ColorQueen',
+    pixels: 3800,
+    score: 95000,
+    avatar: 'https://placehold.co/40x40.png',
+    dataAiHint: 'avatar user',
+    level: 21,
+    region: 'Coimbra',
+    streak: 45,
+    change: -1,
+    badges: ['rare'],
+    isVerified: false,
+    isPremium: true,
   },
-  { 
-    rank: 4, user: "PixelPioneer", pixels: 3200, score: 80000, avatar: "https://placehold.co/40x40.png", 
-    dataAiHint: "avatar user", level: 19, region: "Braga", streak: 34, change: 1, 
-    badges: ["uncommon"], isVerified: true, isPremium: false 
+  {
+    rank: 4,
+    user: 'PixelPioneer',
+    pixels: 3200,
+    score: 80000,
+    avatar: 'https://placehold.co/40x40.png',
+    dataAiHint: 'avatar user',
+    level: 19,
+    region: 'Braga',
+    streak: 34,
+    change: 1,
+    badges: ['uncommon'],
+    isVerified: true,
+    isPremium: false,
   },
-  { 
-    rank: 5, user: "GridGuardian", pixels: 2800, score: 70000, avatar: "https://placehold.co/40x40.png", 
-    dataAiHint: "avatar user", level: 18, region: "Faro", streak: 28, change: -2, 
-    badges: ["common"], isVerified: false, isPremium: false 
+  {
+    rank: 5,
+    user: 'GridGuardian',
+    pixels: 2800,
+    score: 70000,
+    avatar: 'https://placehold.co/40x40.png',
+    dataAiHint: 'avatar user',
+    level: 18,
+    region: 'Faro',
+    streak: 28,
+    change: -2,
+    badges: ['common'],
+    isVerified: false,
+    isPremium: false,
   },
 ];
 
-const StatDisplayCard: React.FC<StatCardData> = ({ title, value, icon, trend, footer, tooltip, change24h }) => (
-  <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card via-card/95 to-primary/5 relative group overflow-hidden card-hover-glow">
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-    <CardContent className="p-6 relative z-10">
-      <div className="flex items-center justify-between mb-4">
-        <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform duration-300">
+const StatDisplayCard: React.FC<StatCardData> = ({
+  title,
+  value,
+  icon,
+  trend,
+  footer,
+  tooltip,
+  change24h,
+}) => (
+  <Card className="card-hover-glow group relative overflow-hidden bg-gradient-to-br from-card via-card/95 to-primary/5 shadow-lg transition-all duration-300 hover:shadow-xl">
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+    <CardContent className="relative z-10 p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-xl bg-primary/10 p-3 text-primary transition-transform duration-300 group-hover:scale-110">
           {icon}
         </div>
         {trend && (
-          <Badge variant="outline" className={`text-xs ${trend.colorClass} border-current animate-pulse`}>
-            {trend.direction === 'up' && <ArrowUp className="h-3 w-3 mr-0.5" />}
-            {trend.direction === 'down' && <ArrowDown className="h-3 w-3 mr-0.5" />}
+          <Badge
+            variant="outline"
+            className={`text-xs ${trend.colorClass} animate-pulse border-current`}
+          >
+            {trend.direction === 'up' && <ArrowUp className="mr-0.5 h-3 w-3" />}
+            {trend.direction === 'down' && <ArrowDown className="mr-0.5 h-3 w-3" />}
             {trend.value}
           </Badge>
         )}
       </div>
-      <p className="text-3xl font-bold font-headline mt-2 text-gradient-gold">{value}</p>
-      <p className="text-sm text-muted-foreground mt-1">{title}</p>
+      <p className="text-gradient-gold mt-2 font-headline text-3xl font-bold">{value}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{title}</p>
       {change24h !== undefined && (
-        <p className="text-xs text-accent mt-2">+{change24h.toLocaleString('pt-PT')} hoje</p>
+        <p className="mt-2 text-xs text-accent">+{change24h.toLocaleString('pt-PT')} hoje</p>
       )}
-      {footer && <p className="text-xs text-muted-foreground/70 mt-1">{footer}</p>}
+      {footer && <p className="mt-1 text-xs text-muted-foreground/70">{footer}</p>}
       {tooltip && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 opacity-50 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-2 h-6 w-6 opacity-50 transition-opacity group-hover:opacity-100"
+              >
                 <Info className="h-4 w-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
@@ -242,13 +416,17 @@ export default function StatisticsPage() {
       const now = new Date();
       setLastUpdated(now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }));
     };
-    updateTime(); 
-    const intervalId = setInterval(updateTime, 60000); 
+    updateTime();
+    const intervalId = setInterval(updateTime, 60000);
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, []);
 
-  const timeRanges: { id: 'day' | 'week' | 'month' | 'year'; label: string; icon: React.ReactNode }[] = [
+  const timeRanges: {
+    id: 'day' | 'week' | 'month' | 'year';
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
     { id: 'day', label: 'Hoje', icon: <Clock className="h-4 w-4" /> },
     { id: 'week', label: 'Semana', icon: <Calendar className="h-4 w-4" /> },
     { id: 'month', label: 'Mês', icon: <BarChart3 className="h-4 w-4" /> },
@@ -258,10 +436,11 @@ export default function StatisticsPage() {
   const handleExportData = () => {
     setPlayRewardSound(true);
     toast({
-      title: "Dados Exportados",
-      description: "Os dados estatísticos foram exportados com sucesso. Recebeu 25 créditos como recompensa!",
+      title: 'Dados Exportados',
+      description:
+        'Os dados estatísticos foram exportados com sucesso. Recebeu 25 créditos como recompensa!',
     });
-    
+
     // Reward the user for exporting data
     addCredits(25);
     addXp(10);
@@ -270,10 +449,11 @@ export default function StatisticsPage() {
   const handleShareStats = () => {
     setPlayRewardSound(true);
     toast({
-      title: "Estatísticas Partilhadas",
-      description: "Link das estatísticas copiado para a área de transferência. Recebeu 50 créditos como recompensa!",
+      title: 'Estatísticas Partilhadas',
+      description:
+        'Link das estatísticas copiado para a área de transferência. Recebeu 50 créditos como recompensa!',
     });
-    
+
     // Reward the user for sharing stats
     addCredits(50);
     addXp(25);
@@ -291,70 +471,92 @@ export default function StatisticsPage() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'pixels': return b.pixels - a.pixels;
-        case 'score': return b.score - a.score;
-        case 'level': return b.level - a.level;
-        case 'streak': return b.streak - a.streak;
-        default: return a.rank - b.rank;
+        case 'pixels':
+          return b.pixels - a.pixels;
+        case 'score':
+          return b.score - a.score;
+        case 'level':
+          return b.level - a.level;
+        case 'streak':
+          return b.streak - a.streak;
+        default:
+          return a.rank - b.rank;
       }
     });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect 
-        src={SOUND_EFFECTS.SUCCESS} 
-        play={playRewardSound} 
-        onEnd={() => setPlayRewardSound(false)} />
-      
-      <div className="container mx-auto py-6 px-4 space-y-6 mb-20 max-w-7xl"> 
+      <SoundEffect
+        src={SOUND_EFFECTS.SUCCESS}
+        play={playRewardSound}
+        onEnd={() => setPlayRewardSound(false)}
+      />
+
+      <div className="container mx-auto mb-20 max-w-7xl space-y-6 px-4 py-6">
         {/* Enhanced Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-               style={{ backgroundSize: '200% 200%' }} />
+        <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-card via-card/95 to-primary/10 shadow-2xl">
+          <div
+            className="animate-shimmer absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"
+            style={{ backgroundSize: '200% 200%' }}
+          />
           <CardHeader className="relative">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <CardTitle className="font-headline text-3xl text-gradient-gold-animated flex items-center">
-                  <BarChartHorizontalBig className="h-8 w-8 mr-3 animate-glow" />
+                <CardTitle className="text-gradient-gold-animated flex items-center font-headline text-3xl">
+                  <BarChartHorizontalBig className="animate-glow mr-3 h-8 w-8" />
                   Ranking & Gamificação
                 </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2">
+                <CardDescription className="mt-2 text-muted-foreground">
                   Sistema completo de rankings, torneios, conquistas e recompensas
                 </CardDescription>
               </div>
-              
-              <div className="flex items-center gap-3 animate-fade-in">
+
+              <div className="animate-fade-in flex items-center gap-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-muted-foreground font-code">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+                  <span className="font-code text-muted-foreground">
                     Atualizado: {lastUpdated || '--:--'}
                   </span>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleExportData} className="button-hover-lift">
-                  <Download className="h-4 w-4 mr-2 text-green-500" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportData}
+                  className="button-hover-lift"
+                >
+                  <Download className="mr-2 h-4 w-4 text-green-500" />
                   Exportar
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleShareStats} className="button-hover-lift">
-                  <Share2 className="h-4 w-4 mr-2 text-blue-500" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleShareStats}
+                  className="button-hover-lift"
+                >
+                  <Share2 className="mr-2 h-4 w-4 text-blue-500" />
                   Partilhar
                 </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors button-hover-lift">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="button-hover-lift h-9 w-9 text-muted-foreground transition-colors hover:text-primary"
+                >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            
+
             {/* Time Range Selector */}
-            <div className="flex flex-wrap gap-2 mt-4 animate-fade-in animation-delay-200">
+            <div className="animate-fade-in animation-delay-200 mt-4 flex flex-wrap gap-2">
               {timeRanges.map(range => (
-                <Button 
-                  key={range.id} 
-                  variant={activeTimeRange === range.id ? "default" : "outline"} 
+                <Button
+                  key={range.id}
+                  variant={activeTimeRange === range.id ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setActiveTimeRange(range.id)}
                   className={cn(
-                    "font-code text-xs sm:text-sm px-3 py-2 transition-all duration-200 hover:shadow-md",
-                    activeTimeRange === range.id ? "shadow-lg scale-105" : "hover:scale-105"
+                    'px-3 py-2 font-code text-xs transition-all duration-200 hover:shadow-md sm:text-sm',
+                    activeTimeRange === range.id ? 'scale-105 shadow-lg' : 'hover:scale-105'
                   )}
                 >
                   {range.icon}
@@ -367,29 +569,29 @@ export default function StatisticsPage() {
 
         {/* Enhanced Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 h-12 bg-card/50 backdrop-blur-sm shadow-md">
+          <TabsList className="grid h-12 w-full grid-cols-2 bg-card/50 shadow-md backdrop-blur-sm sm:grid-cols-4 lg:grid-cols-6">
             <TabsTrigger value="overview" className="font-headline">
-              <Globe className="h-4 w-4 mr-2"/>
+              <Globe className="mr-2 h-4 w-4" />
               Visão Geral
             </TabsTrigger>
             <TabsTrigger value="rankings" className="font-headline">
-              <Trophy className="h-4 w-4 mr-2"/>
+              <Trophy className="mr-2 h-4 w-4" />
               Rankings
             </TabsTrigger>
             <TabsTrigger value="tournaments" className="font-headline">
-              <Sword className="h-4 w-4 mr-2"/>
+              <Sword className="mr-2 h-4 w-4" />
               Torneios
             </TabsTrigger>
             <TabsTrigger value="achievements" className="font-headline">
-              <Award className="h-4 w-4 mr-2"/>
+              <Award className="mr-2 h-4 w-4" />
               Conquistas
             </TabsTrigger>
             <TabsTrigger value="rewards" className="font-headline">
-              <Gift className="h-4 w-4 mr-2"/>
+              <Gift className="mr-2 h-4 w-4" />
               Recompensas
             </TabsTrigger>
             <TabsTrigger value="analytics" className="font-headline">
-              <LineChart className="h-4 w-4 mr-2"/>
+              <LineChart className="mr-2 h-4 w-4" />
               Análise
             </TabsTrigger>
           </TabsList>
@@ -397,42 +599,49 @@ export default function StatisticsPage() {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Global Metrics Grid */}
-            <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" layout>
-              {globalStatsData.map(stat => <StatDisplayCard key={stat.title} {...stat} />)}
+            <motion.div
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              layout
+            >
+              {globalStatsData.map(stat => (
+                <StatDisplayCard key={stat.title} {...stat} />
+              ))}
             </motion.div>
 
             {/* Quick Insights */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
-                    <TrendingUp className="h-5 w-5 mr-2" />
+                    <TrendingUp className="mr-2 h-5 w-5" />
                     Tendências de Crescimento
-                    <Badge variant="outline" className="ml-2 text-xs">Últimos 7 dias</Badge>
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Últimos 7 dias
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
+                    <div className="flex items-center justify-between rounded-lg bg-green-500/10 p-3">
                       <div className="flex items-center gap-3">
                         <ArrowUp className="h-5 w-5 text-green-500" />
                         <span className="font-medium">Utilizadores Ativos</span>
                       </div>
-                      <span className="text-green-500 font-bold">+23.4%</span>
+                      <span className="font-bold text-green-500">+23.4%</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
+                    <div className="flex items-center justify-between rounded-lg bg-blue-500/10 p-3">
                       <div className="flex items-center gap-3">
                         <ArrowUp className="h-5 w-5 text-blue-500" />
                         <span className="font-medium">Volume de Transações</span>
                       </div>
-                      <span className="text-blue-500 font-bold">+18.9%</span>
+                      <span className="font-bold text-blue-500">+18.9%</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10">
+                    <div className="flex items-center justify-between rounded-lg bg-purple-500/10 p-3">
                       <div className="flex items-center gap-3">
                         <ArrowUp className="h-5 w-5 text-purple-500" />
                         <span className="font-medium">Novos Registos</span>
                       </div>
-                      <span className="text-purple-500 font-bold">+15.2%</span>
+                      <span className="font-bold text-purple-500">+15.2%</span>
                     </div>
                   </div>
                 </CardContent>
@@ -441,9 +650,11 @@ export default function StatisticsPage() {
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
-                    <Activity className="h-5 w-5 mr-2" />
+                    <Activity className="mr-2 h-5 w-5" />
                     Atividade em Tempo Real
-                    <Badge variant="outline" className="ml-2 text-xs">Ao vivo</Badge>
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Ao vivo
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -492,20 +703,24 @@ export default function StatisticsPage() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Market Trends */}
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
-                    <LineChart className="h-5 w-5 mr-2" />
+                    <LineChart className="mr-2 h-5 w-5" />
                     Tendências de Mercado
-                    <Badge variant="outline" className="ml-2 text-xs">Análise de Preços</Badge>
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Análise de Preços
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center justify-center h-64">
+                <CardContent className="flex h-64 items-center justify-center">
                   <div className="text-center">
-                    <LineChart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Gráficos de tendências em desenvolvimento</p>
+                    <LineChart className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      Gráficos de tendências em desenvolvimento
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -514,27 +729,29 @@ export default function StatisticsPage() {
               <Card className="card-hover-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary">
-                    <Activity className="h-5 w-5 mr-2" />
+                    <Activity className="mr-2 h-5 w-5" />
                     Engagement dos Utilizadores
-                    <Badge variant="outline" className="ml-2 text-xs">Métricas de Uso</Badge>
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Métricas de Uso
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-blue-500/10">
+                  <div className="flex items-center justify-between rounded-lg bg-blue-500/10 p-3">
                     <span className="font-medium">Taxa de Retenção (7 dias)</span>
-                    <span className="text-blue-500 font-bold">78.4%</span>
+                    <span className="font-bold text-blue-500">78.4%</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-green-500/10">
+                  <div className="flex items-center justify-between rounded-lg bg-green-500/10 p-3">
                     <span className="font-medium">Sessões por Utilizador</span>
-                    <span className="text-green-500 font-bold">4.2</span>
+                    <span className="font-bold text-green-500">4.2</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-purple-500/10">
+                  <div className="flex items-center justify-between rounded-lg bg-purple-500/10 p-3">
                     <span className="font-medium">Tempo Médio de Sessão</span>
-                    <span className="text-purple-500 font-bold">12m 34s</span>
+                    <span className="font-bold text-purple-500">12m 34s</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-orange-500/10">
+                  <div className="flex items-center justify-between rounded-lg bg-orange-500/10 p-3">
                     <span className="font-medium">Taxa de Conversão</span>
-                    <span className="text-orange-500 font-bold">23.7%</span>
+                    <span className="font-bold text-orange-500">23.7%</span>
                   </div>
                 </CardContent>
               </Card>
@@ -544,22 +761,24 @@ export default function StatisticsPage() {
             <Card className="card-hover-glow">
               <CardHeader>
                 <CardTitle className="flex items-center text-primary">
-                  <BarChart3 className="h-5 w-5 mr-2" />
+                  <BarChart3 className="mr-2 h-5 w-5" />
                   Análise Detalhada
-                  <Badge variant="outline" className="ml-2 text-xs">Insights Avançados</Badge>
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    Insights Avançados
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
                   Métricas avançadas e insights do comportamento dos utilizadores.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex items-center justify-center h-64">
+              <CardContent className="flex h-64 items-center justify-center">
                 <div className="text-center">
-                  <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-4">
+                  <BarChart3 className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+                  <p className="mb-4 text-muted-foreground">
                     Dashboard de análise avançada em desenvolvimento.
                   </p>
                   <Button variant="outline" disabled>
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <ExternalLink className="mr-2 h-4 w-4" />
                     Ver Relatório Completo
                   </Button>
                 </div>
@@ -567,12 +786,12 @@ export default function StatisticsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-        
+
         {/* New Section: Data Insights */}
-        <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20 shadow-lg">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/10 to-accent/5 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center text-primary">
-              <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
+              <Lightbulb className="mr-2 h-5 w-5 text-yellow-500" />
               Insights e Recomendações
             </CardTitle>
             <CardDescription>
@@ -580,39 +799,42 @@ export default function StatisticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
-                <h3 className="font-semibold flex items-center mb-2">
-                  <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-lg bg-card/50 p-4 shadow-inner">
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <TrendingUp className="mr-2 h-4 w-4 text-green-500" />
                   Oportunidades de Investimento
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  A região do Algarve está mostrando um crescimento de 23% no valor dos pixels nas últimas semanas. Considere investir nesta área.
+                  A região do Algarve está mostrando um crescimento de 23% no valor dos pixels nas
+                  últimas semanas. Considere investir nesta área.
                 </p>
               </div>
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
-                <h3 className="font-semibold flex items-center mb-2">
-                  <Users className="h-4 w-4 mr-2 text-blue-500" />
+              <div className="rounded-lg bg-card/50 p-4 shadow-inner">
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Users className="mr-2 h-4 w-4 text-blue-500" />
                   Tendências de Comunidade
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Projetos colaborativos estão ganhando popularidade, com um aumento de 45% na participação. Considere iniciar ou juntar-se a um.
+                  Projetos colaborativos estão ganhando popularidade, com um aumento de 45% na
+                  participação. Considere iniciar ou juntar-se a um.
                 </p>
               </div>
-              <div className="p-4 bg-card/50 rounded-lg shadow-inner">
-                <h3 className="font-semibold flex items-center mb-2">
-                  <Calendar className="h-4 w-4 mr-2 text-purple-500" />
+              <div className="rounded-lg bg-card/50 p-4 shadow-inner">
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Calendar className="mr-2 h-4 w-4 text-purple-500" />
                   Eventos Próximos
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Um grande concurso de pixel art está programado para o próximo mês. Prepare-se para participar e aumentar sua visibilidade.
+                  Um grande concurso de pixel art está programado para o próximo mês. Prepare-se
+                  para participar e aumentar sua visibilidade.
                 </p>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-center border-t border-primary/10 pt-4">
             <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportData}>
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="mr-2 h-4 w-4" />
               Exportar Relatório Completo
             </Button>
           </CardFooter>

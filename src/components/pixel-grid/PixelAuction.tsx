@@ -7,10 +7,26 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 // Lucide imports removed
 import { useToast } from '@/hooks/use-toast';
+import {
+  Gavel,
+  Eye,
+  Flame,
+  Share2,
+  TrendingUp,
+  Crown,
+  Star,
+  Zap,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -68,15 +84,15 @@ const mockAuctions: AuctionPixel[] = [
     seller: {
       name: 'PixelCollector',
       avatar: 'https://placehold.co/40x40.png',
-      verified: true
+      verified: true,
     },
     highestBidder: {
       name: 'ArtInvestor',
-      avatar: 'https://placehold.co/40x40.png'
+      avatar: 'https://placehold.co/40x40.png',
     },
     description: 'Pixel raro no coração histórico de Lisboa com vista para o Tejo',
     imageUrl: 'https://placehold.co/300x300/D4A757/FFFFFF?text=Lisboa+Premium',
-    features: ['Vista para o Rio', 'Centro Histórico', 'Alta Visibilidade']
+    features: ['Vista para o Rio', 'Centro Histórico', 'Alta Visibilidade'],
   },
   {
     id: '2',
@@ -92,12 +108,12 @@ const mockAuctions: AuctionPixel[] = [
     seller: {
       name: 'PortoArtist',
       avatar: 'https://placehold.co/40x40.png',
-      verified: false
+      verified: false,
     },
     description: 'Pixel artístico na zona ribeirinha do Porto',
     imageUrl: 'https://placehold.co/300x300/7DF9FF/000000?text=Porto+Art',
-    features: ['Zona Ribeirinha', 'Património UNESCO']
-  }
+    features: ['Zona Ribeirinha', 'Património UNESCO'],
+  },
 ];
 
 const mockBids: Bid[] = [
@@ -106,22 +122,22 @@ const mockBids: Bid[] = [
     bidder: 'ArtInvestor',
     amount: 450,
     timestamp: '14:23',
-    isWinning: true
+    isWinning: true,
   },
   {
     id: '2',
     bidder: 'PixelHunter',
     amount: 420,
     timestamp: '14:20',
-    isWinning: false
+    isWinning: false,
   },
   {
     id: '3',
     bidder: 'CollectorPro',
     amount: 380,
     timestamp: '14:15',
-    isWinning: false
-  }
+    isWinning: false,
+  },
 ];
 
 export default function PixelAuction({ children }: PixelAuctionProps) {
@@ -131,16 +147,18 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
   const [bidAmount, setBidAmount] = useState('');
   const [bids, setBids] = useState(mockBids);
   const [isWatching, setIsWatching] = useState(false);
-  
+
   const { toast } = useToast();
 
   // Countdown timer
   useEffect(() => {
     const interval = setInterval(() => {
-      setAuctions(prev => prev.map(auction => ({
-        ...auction,
-        timeLeft: Math.max(0, auction.timeLeft - 1)
-      })));
+      setAuctions(prev =>
+        prev.map(auction => ({
+          ...auction,
+          timeLeft: Math.max(0, auction.timeLeft - 1),
+        }))
+      );
     }, 1000);
 
     return () => clearInterval(interval);
@@ -150,7 +168,7 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m ${secs}s`;
     } else if (minutes > 0) {
@@ -162,11 +180,16 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'Comum': return 'text-gray-500 border-gray-500/50';
-      case 'Raro': return 'text-blue-500 border-blue-500/50';
-      case 'Épico': return 'text-purple-500 border-purple-500/50';
-      case 'Lendário': return 'text-amber-500 border-amber-500/50';
-      default: return 'text-gray-500 border-gray-500/50';
+      case 'Comum':
+        return 'text-gray-500 border-gray-500/50';
+      case 'Raro':
+        return 'text-blue-500 border-blue-500/50';
+      case 'Épico':
+        return 'text-purple-500 border-purple-500/50';
+      case 'Lendário':
+        return 'text-amber-500 border-amber-500/50';
+      default:
+        return 'text-gray-500 border-gray-500/50';
     }
   };
 
@@ -174,9 +197,9 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
     const amount = parseFloat(bidAmount);
     if (!selectedAuction || !amount || amount <= selectedAuction.currentBid) {
       toast({
-        title: "Lance Inválido",
-        description: "O lance deve ser superior ao lance atual.",
-        variant: "destructive"
+        title: 'Lance Inválido',
+        description: 'O lance deve ser superior ao lance atual.',
+        variant: 'destructive',
       });
       return;
     }
@@ -186,144 +209,148 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
       bidder: 'Você',
       amount,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
-      isWinning: true
+      isWinning: true,
     };
 
     setBids(prev => [newBid, ...prev.map(bid => ({ ...bid, isWinning: false }))]);
-    
-    setAuctions(prev => prev.map(auction => 
-      auction.id === selectedAuction.id 
-        ? { 
-            ...auction, 
-            currentBid: amount, 
-            bidCount: auction.bidCount + 1,
-            highestBidder: { name: 'Você', avatar: 'https://placehold.co/40x40.png' }
-          }
-        : auction
-    ));
 
-    setSelectedAuction(prev => prev ? {
-      ...prev,
-      currentBid: amount,
-      bidCount: prev.bidCount + 1,
-      highestBidder: { name: 'Você', avatar: 'https://placehold.co/40x40.png' }
-    } : null);
+    setAuctions(prev =>
+      prev.map(auction =>
+        auction.id === selectedAuction.id
+          ? {
+              ...auction,
+              currentBid: amount,
+              bidCount: auction.bidCount + 1,
+              highestBidder: { name: 'Você', avatar: 'https://placehold.co/40x40.png' },
+            }
+          : auction
+      )
+    );
+
+    setSelectedAuction(prev =>
+      prev
+        ? {
+            ...prev,
+            currentBid: amount,
+            bidCount: prev.bidCount + 1,
+            highestBidder: { name: 'Você', avatar: 'https://placehold.co/40x40.png' },
+          }
+        : null
+    );
 
     setBidAmount('');
-    
+
     toast({
-      title: "Lance Colocado!",
+      title: 'Lance Colocado!',
       description: `Seu lance de €${amount} foi registado com sucesso.`,
     });
   };
 
   const buyNow = () => {
     if (!selectedAuction?.buyNowPrice) return;
-    
+
     toast({
-      title: "Compra Imediata!",
+      title: 'Compra Imediata!',
       description: `Pixel adquirido por €${selectedAuction.buyNowPrice}!`,
     });
-    
+
     setIsOpen(false);
   };
 
   const toggleWatch = () => {
     setIsWatching(!isWatching);
-    
+
     if (selectedAuction) {
-      setAuctions(prev => prev.map(auction => 
-        auction.id === selectedAuction.id 
-          ? { ...auction, watchers: auction.watchers + (isWatching ? -1 : 1) }
-          : auction
-      ));
+      setAuctions(prev =>
+        prev.map(auction =>
+          auction.id === selectedAuction.id
+            ? { ...auction, watchers: auction.watchers + (isWatching ? -1 : 1) }
+            : auction
+        )
+      );
     }
-    
+
     toast({
-      title: isWatching ? "Deixou de Seguir" : "A Seguir Leilão",
-      description: isWatching ? "Não receberá mais notificações." : "Receberá notificações sobre este leilão.",
+      title: isWatching ? 'Deixou de Seguir' : 'A Seguir Leilão',
+      description: isWatching
+        ? 'Não receberá mais notificações.'
+        : 'Receberá notificações sobre este leilão.',
     });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      
-      <DialogContent className="max-w-6xl h-[90vh] p-0">
-        <DialogHeader className="p-4 border-b bg-gradient-to-r from-orange-500/10 to-red-500/10">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+
+      <DialogContent className="h-[90vh] max-w-6xl p-0">
+        <DialogHeader className="border-b bg-gradient-to-r from-orange-500/10 to-red-500/10 p-4">
           <DialogTitle className="flex items-center">
-            <Gavel className="h-5 w-5 mr-2 text-orange-500" />
+            <Gavel className="mr-2 h-5 w-5 text-orange-500" />
             Leilões de Pixels
-            <Badge className="ml-2 bg-red-500 animate-pulse">
-              AO VIVO
-            </Badge>
+            <Badge className="ml-2 animate-pulse bg-red-500">AO VIVO</Badge>
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="flex-1 flex overflow-hidden">
+
+        <div className="flex flex-1 overflow-hidden">
           {!selectedAuction ? (
             // Lista de leilões
             <div className="flex-1 p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {auctions.map(auction => (
-                  <Card 
+                  <Card
                     key={auction.id}
-                    className="cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
+                    className="cursor-pointer overflow-hidden transition-shadow hover:shadow-lg"
                     onClick={() => setSelectedAuction(auction)}
                   >
                     <div className="relative">
-                      <img 
-                        src={auction.imageUrl} 
+                      <img
+                        src={auction.imageUrl}
                         alt={`Pixel ${auction.x}, ${auction.y}`}
-                        className="w-full h-48 object-cover"
+                        className="h-48 w-full object-cover"
                       />
-                      
-                      <Badge className={cn("absolute top-2 left-2", getRarityColor(auction.rarity))}>
+
+                      <Badge
+                        className={cn('absolute left-2 top-2', getRarityColor(auction.rarity))}
+                      >
                         {auction.rarity}
                       </Badge>
-                      
-                      <div className="absolute top-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
+
+                      <div className="absolute right-2 top-2 rounded bg-black/80 px-2 py-1 text-sm text-white">
                         {formatTimeLeft(auction.timeLeft)}
                       </div>
-                      
+
                       {auction.timeLeft < 300 && (
-                        <div className="absolute inset-0 border-4 border-red-500 animate-pulse" />
+                        <div className="absolute inset-0 animate-pulse border-4 border-red-500" />
                       )}
                     </div>
-                    
+
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="mb-2 flex items-center justify-between">
                         <h3 className="font-semibold">
                           Pixel ({auction.x}, {auction.y})
                         </h3>
-                        <Badge variant="outline">
-                          {auction.region}
-                        </Badge>
+                        <Badge variant="outline">{auction.region}</Badge>
                       </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {auction.description}
-                      </p>
-                      
+
+                      <p className="mb-3 text-sm text-muted-foreground">{auction.description}</p>
+
                       <div className="space-y-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">Lance Atual:</span>
                           <span className="text-lg font-bold text-primary">
                             €{auction.currentBid}
                           </span>
                         </div>
-                        
+
                         {auction.buyNowPrice && (
-                          <div className="flex justify-between items-center">
+                          <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Comprar Já:</span>
                             <span className="text-sm font-medium text-green-500">
                               €{auction.buyNowPrice}
                             </span>
                           </div>
                         )}
-                        
+
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Gavel className="h-3 w-3" />
@@ -335,7 +362,7 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                           </span>
                         </div>
                       </div>
-                      
+
                       {auction.features.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-1">
                           {auction.features.map(feature => (
@@ -352,26 +379,26 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
             </div>
           ) : (
             // Visualizador de leilão específico
-            <div className="flex-1 flex">
+            <div className="flex flex-1">
               {/* Área principal */}
-              <div className="flex-1 flex flex-col">
+              <div className="flex flex-1 flex-col">
                 <div className="relative">
-                  <img 
-                    src={selectedAuction.imageUrl} 
+                  <img
+                    src={selectedAuction.imageUrl}
                     alt={`Pixel ${selectedAuction.x}, ${selectedAuction.y}`}
-                    className="w-full h-64 object-cover"
+                    className="h-64 w-full object-cover"
                   />
-                  
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  
+
                   <div className="absolute bottom-4 left-4 text-white">
                     <h2 className="text-2xl font-bold">
                       Pixel ({selectedAuction.x}, {selectedAuction.y})
                     </h2>
                     <p className="text-white/80">{selectedAuction.region}</p>
                   </div>
-                  
-                  <div className="absolute top-4 right-4 flex gap-2">
+
+                  <div className="absolute right-4 top-4 flex gap-2">
                     <Badge className={getRarityColor(selectedAuction.rarity)}>
                       {selectedAuction.rarity}
                     </Badge>
@@ -379,69 +406,75 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => setSelectedAuction(null)}
-                      className="bg-black/60 text-white border-white/30"
+                      className="border-white/30 bg-black/60 text-white"
                     >
                       Voltar
                     </Button>
                   </div>
                 </div>
-                
+
                 {/* Informações do leilão */}
-                <div className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-6 p-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     {/* Lance atual */}
                     <Card className="text-center">
                       <CardContent className="p-4">
-                        <div className="text-3xl font-bold text-primary mb-2">
+                        <div className="mb-2 text-3xl font-bold text-primary">
                           €{selectedAuction.currentBid}
                         </div>
                         <p className="text-sm text-muted-foreground">Lance Atual</p>
                         {selectedAuction.highestBidder && (
-                          <div className="flex items-center justify-center gap-2 mt-2">
+                          <div className="mt-2 flex items-center justify-center gap-2">
                             <Avatar className="h-6 w-6">
                               <AvatarImage src={selectedAuction.highestBidder.avatar} />
-                              <AvatarFallback>{selectedAuction.highestBidder.name[0]}</AvatarFallback>
+                              <AvatarFallback>
+                                {selectedAuction.highestBidder.name[0]}
+                              </AvatarFallback>
                             </Avatar>
                             <span className="text-xs">{selectedAuction.highestBidder.name}</span>
                           </div>
                         )}
                       </CardContent>
                     </Card>
-                    
+
                     {/* Tempo restante */}
                     <Card className="text-center">
                       <CardContent className="p-4">
-                        <div className={cn(
-                          "text-3xl font-bold mb-2",
-                          selectedAuction.timeLeft < 300 ? "text-red-500 animate-pulse" : "text-foreground"
-                        )}>
+                        <div
+                          className={cn(
+                            'mb-2 text-3xl font-bold',
+                            selectedAuction.timeLeft < 300
+                              ? 'animate-pulse text-red-500'
+                              : 'text-foreground'
+                          )}
+                        >
                           {formatTimeLeft(selectedAuction.timeLeft)}
                         </div>
                         <p className="text-sm text-muted-foreground">Tempo Restante</p>
                         {selectedAuction.timeLeft < 300 && (
                           <Badge variant="destructive" className="mt-2 animate-pulse">
-                            <Flame className="h-3 w-3 mr-1" />
+                            <Flame className="mr-1 h-3 w-3" />
                             Últimos Minutos!
                           </Badge>
                         )}
                       </CardContent>
                     </Card>
-                    
+
                     {/* Estatísticas */}
                     <Card className="text-center">
                       <CardContent className="p-4">
-                        <div className="text-3xl font-bold text-accent mb-2">
+                        <div className="mb-2 text-3xl font-bold text-accent">
                           {selectedAuction.bidCount}
                         </div>
                         <p className="text-sm text-muted-foreground">Lances</p>
-                        <div className="flex items-center justify-center gap-2 mt-2 text-xs">
+                        <div className="mt-2 flex items-center justify-center gap-2 text-xs">
                           <Eye className="h-3 w-3" />
                           <span>{selectedAuction.watchers} a seguir</span>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   {/* Ações de lance */}
                   <Card>
                     <CardContent className="p-4">
@@ -451,38 +484,35 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                             type="number"
                             placeholder={`Mínimo: €${selectedAuction.currentBid + 1}`}
                             value={bidAmount}
-                            onChange={(e) => setBidAmount(e.target.value)}
+                            onChange={e => setBidAmount(e.target.value)}
                             min={selectedAuction.currentBid + 1}
                           />
                         </div>
                         <Button onClick={placeBid} className="px-8">
-                          <Gavel className="h-4 w-4 mr-2" />
+                          <Gavel className="mr-2 h-4 w-4" />
                           Licitar
                         </Button>
-                        
+
                         {selectedAuction.buyNowPrice && (
-                          <Button 
-                            onClick={buyNow}
-                            className="px-8 bg-green-600 hover:bg-green-700"
-                          >
-                            <Zap className="h-4 w-4 mr-2" />
+                          <Button onClick={buyNow} className="bg-green-600 px-8 hover:bg-green-700">
+                            <Zap className="mr-2 h-4 w-4" />
                             Comprar €{selectedAuction.buyNowPrice}
                           </Button>
                         )}
                       </div>
-                      
-                      <div className="flex justify-between items-center mt-4">
+
+                      <div className="mt-4 flex items-center justify-between">
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={toggleWatch}>
-                            <Eye className="h-4 w-4 mr-2" />
+                            <Eye className="mr-2 h-4 w-4" />
                             {isWatching ? 'Deixar de Seguir' : 'Seguir'}
                           </Button>
                           <Button variant="outline" size="sm">
-                            <Share2 className="h-4 w-4 mr-2" />
+                            <Share2 className="mr-2 h-4 w-4" />
                             Partilhar
                           </Button>
                         </div>
-                        
+
                         <div className="text-sm text-muted-foreground">
                           Lance mínimo: €{selectedAuction.currentBid + 1}
                         </div>
@@ -491,27 +521,27 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                   </Card>
                 </div>
               </div>
-              
+
               {/* Painel lateral - Histórico de lances */}
               <div className="w-80 border-l">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold flex items-center">
-                    <TrendingUp className="h-4 w-4 mr-2" />
+                <div className="border-b p-4">
+                  <h3 className="flex items-center font-semibold">
+                    <TrendingUp className="mr-2 h-4 w-4" />
                     Histórico de Lances
                   </h3>
                 </div>
-                
+
                 <ScrollArea className="h-96">
-                  <div className="p-4 space-y-3">
+                  <div className="space-y-3 p-4">
                     {bids.map(bid => (
-                      <div 
-                        key={bid.id} 
+                      <div
+                        key={bid.id}
                         className={cn(
-                          "p-3 rounded-lg border",
-                          bid.isWinning ? "bg-green-500/10 border-green-500/30" : "bg-muted/20"
+                          'rounded-lg border p-3',
+                          bid.isWinning ? 'border-green-500/30 bg-green-500/10' : 'bg-muted/20'
                         )}
                       >
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="mb-2 flex items-center justify-between">
                           <span className="font-medium">{bid.bidder}</span>
                           <span className="text-sm text-muted-foreground">{bid.timestamp}</span>
                         </div>
@@ -519,7 +549,7 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                           <span className="text-lg font-bold text-primary">€{bid.amount}</span>
                           {bid.isWinning && (
                             <Badge className="bg-green-500">
-                              <Crown className="h-3 w-3 mr-1" />
+                              <Crown className="mr-1 h-3 w-3" />
                               Vencedor
                             </Badge>
                           )}
@@ -528,10 +558,10 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                     ))}
                   </div>
                 </ScrollArea>
-                
+
                 {/* Informações do vendedor */}
-                <div className="p-4 border-t">
-                  <h4 className="font-semibold mb-3">Vendedor</h4>
+                <div className="border-t p-4">
+                  <h4 className="mb-3 font-semibold">Vendedor</h4>
                   <div className="flex items-center gap-3">
                     <Avatar>
                       <AvatarImage src={selectedAuction.seller.avatar} />
@@ -541,7 +571,7 @@ export default function PixelAuction({ children }: PixelAuctionProps) {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{selectedAuction.seller.name}</span>
                         {selectedAuction.seller.verified && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          <Star className="h-4 w-4 fill-current text-yellow-500" />
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">Vendedor verificado</p>

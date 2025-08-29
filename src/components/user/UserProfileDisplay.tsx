@@ -10,7 +10,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MapPin, Calendar, Trophy, Star, Users, Eye, Heart, Award, Crown, Zap } from 'lucide-react';
+import {
+  MapPin as MapPinIcon,
+  Calendar,
+  Trophy,
+  Star,
+  Users,
+  Eye,
+  Heart,
+  Award,
+  Crown,
+  Zap,
+  Gem,
+  BookImage,
+  Link as LinkIcon,
+  Coins,
+  Gift,
+} from 'lucide-react';
 import type { Achievement } from '@/data/achievements-data'; // Corrected import
 import { achievementsData } from '@/data/achievements-data'; // Corrected import
 
@@ -134,7 +150,7 @@ export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {
             <span className="font-semibold">Progresso de Nível</span>
             <span className="font-code">{userData.xp.toLocaleString('pt-PT')} / {userData.xpMax.toLocaleString('pt-PT')} XP</span>
           </div>
-          <Progress value={xpPercentage} className=&quot;h-2.5 [&>div]:bg-primary shadow-inner" />
+          <Progress value={xpPercentage} className="h-2.5 [&>div]:bg-primary shadow-inner" />
           <p className="text-xs text-muted-foreground text-right font-code">
             {nextLevelXp > 0 ? `Faltam ${nextLevelXp.toLocaleString('pt-PT')} XP para o próximo nível` : 'Nível Máximo!'}
           </p>
@@ -173,7 +189,7 @@ export function UserProfileDisplay({ userData }: UserProfileDisplayProps) {
                     Álbuns de Píxeis
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 space-y-2 max-h-40 overflow-y-auto&quot;>
+            <CardContent className="p-0 space-y-2 max-h-40 overflow-y-auto">
                 {userData.albums && userData.albums.length > 0 ? (
                     userData.albums.map(album => (
                         <div key={album.id} className="flex items-center space-x-2 p-2 bg-muted/30 rounded-md border border-border hover:border-primary/30 transition-colors">

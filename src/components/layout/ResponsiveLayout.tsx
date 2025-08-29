@@ -25,20 +25,20 @@ const breakpoints: Record<string, BreakpointConfig> = {
     sidebar: false,
     navigation: 'bottom',
     maxContentWidth: '100%',
-    columns: 1
+    columns: 1,
   },
   tablet: {
     sidebar: true,
     navigation: 'sidebar',
     maxContentWidth: '768px',
-    columns: 2
+    columns: 2,
   },
   desktop: {
     sidebar: true,
     navigation: 'sidebar',
     maxContentWidth: '1200px',
-    columns: 3
-  }
+    columns: 3,
+  },
 };
 
 export function ResponsiveLayout({
@@ -46,7 +46,7 @@ export function ResponsiveLayout({
   className,
   sidebarContent,
   navigationContent,
-  showSidebar = true
+  showSidebar = true,
 }: ResponsiveLayoutProps) {
   const isMobile = useMediaQuery('(max-width: 640px)');
   const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
@@ -66,22 +66,20 @@ export function ResponsiveLayout({
   };
 
   return (
-    <div className={cn("min-h-screen bg-background", className)}>
+    <div className={cn('min-h-screen bg-background', className)}>
       {/* Layout Principal */}
-      <div className="flex relative">
+      <div className="relative flex">
         {/* Sidebar */}
         {showSidebar && config.sidebar && (
           <motion.div
             initial={false}
             animate={{
               width: isSidebarOpen ? '240px' : '0px',
-              opacity: isSidebarOpen ? 1 : 0
+              opacity: isSidebarOpen ? 1 : 0,
             }}
-            className="fixed left-0 top-0 h-screen bg-card border-r border-border overflow-hidden"
+            className="fixed left-0 top-0 h-screen overflow-hidden border-r border-border bg-card"
           >
-            <div className="w-60 p-4">
-              {sidebarContent}
-            </div>
+            <div className="w-60 p-4">{sidebarContent}</div>
           </motion.div>
         )}
 
@@ -89,27 +87,26 @@ export function ResponsiveLayout({
         <motion.main
           className="flex-1"
           animate={{
-            marginLeft: (showSidebar && config.sidebar && isSidebarOpen) ? '240px' : '0px'
+            marginLeft: showSidebar && config.sidebar && isSidebarOpen ? '240px' : '0px',
           }}
         >
           {/* Navegação Superior */}
           {config.navigation === 'top' && (
-            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
+            <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
               {navigationContent}
             </div>
           )}
 
           {/* Container de Conteúdo */}
-          <div
-            className="mx-auto px-4"
-            style={{ maxWidth: config.maxContentWidth }}
-          >
+          <div className="mx-auto px-4" style={{ maxWidth: config.maxContentWidth }}>
             <div
               className={cn(
-                "grid gap-4",
-                config.columns === 1 ? "grid-cols-1" :
-                config.columns === 2 ? "grid-cols-1 md:grid-cols-2" :
-                "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                'grid gap-4',
+                config.columns === 1
+                  ? 'grid-cols-1'
+                  : config.columns === 2
+                    ? 'grid-cols-1 md:grid-cols-2'
+                    : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
               )}
             >
               {children}
@@ -118,7 +115,7 @@ export function ResponsiveLayout({
 
           {/* Navegação Inferior */}
           {config.navigation === 'bottom' && (
-            <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-t border-border">
+            <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background/80 backdrop-blur-sm">
               {navigationContent}
             </div>
           )}
@@ -128,7 +125,7 @@ export function ResponsiveLayout({
         {showSidebar && config.sidebar && (
           <button
             onClick={toggleSidebar}
-            className="fixed left-4 top-4 z-20 p-2 rounded-full bg-primary text-primary-foreground shadow-lg"
+            className="fixed left-4 top-4 z-20 rounded-full bg-primary p-2 text-primary-foreground shadow-lg"
           >
             <motion.div
               animate={{ rotate: isSidebarOpen ? 180 : 0 }}
@@ -160,14 +157,14 @@ export function ResponsiveGrid({
   columns = {
     mobile: 1,
     tablet: 2,
-    desktop: 3
+    desktop: 3,
   },
-  gap = 4
+  gap = 4,
 }: ResponsiveGridProps) {
   return (
     <div
       className={cn(
-        "grid gap-4",
+        'grid gap-4',
         `grid-cols-${columns.mobile}`,
         `md:grid-cols-${columns.tablet}`,
         `lg:grid-cols-${columns.desktop}`,
@@ -191,17 +188,14 @@ export function ResponsiveContainer({
   children,
   className,
   maxWidth = '1200px',
-  padding = 4
+  padding = 4,
 }: ResponsiveContainerProps) {
   return (
     <div
-      className={cn(
-        "mx-auto w-full",
-        className
-      )}
+      className={cn('mx-auto w-full', className)}
       style={{
         maxWidth,
-        padding: `0 ${padding * 0.25}rem`
+        padding: `0 ${padding * 0.25}rem`,
       }}
     >
       {children}
@@ -228,16 +222,16 @@ export function ResponsiveStack({
   direction = {
     mobile: 'column',
     tablet: 'row',
-    desktop: 'row'
+    desktop: 'row',
   },
   spacing = 4,
   align = 'stretch',
-  justify = 'start'
+  justify = 'start',
 }: ResponsiveStackProps) {
   return (
     <div
       className={cn(
-        "flex",
+        'flex',
         direction.mobile === 'column' ? 'flex-col' : 'flex-row',
         `md:flex-${direction.tablet}`,
         `lg:flex-${direction.desktop}`,
@@ -256,7 +250,7 @@ export const ResponsiveComponents = {
   Layout: ResponsiveLayout,
   Grid: ResponsiveGrid,
   Container: ResponsiveContainer,
-  Stack: ResponsiveStack
+  Stack: ResponsiveStack,
 };
 
 export default ResponsiveComponents;

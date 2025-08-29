@@ -10,13 +10,13 @@ interface SoundEffectProps {
   rate?: number;
 }
 
-export function SoundEffect({ 
-  src, 
-  play, 
-  volume = 0.5, 
-  loop = false, 
+export function SoundEffect({
+  src,
+  play,
+  volume = 0.5,
+  loop = false,
   onEnd,
-  rate = 1.0
+  rate = 1.0,
 }: SoundEffectProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { soundEffects } = useSettingsStore();
@@ -27,7 +27,7 @@ export function SoundEffect({
       audioRef.current.preload = 'auto';
 
       // Add error handling for missing audio files
-      audioRef.current.addEventListener('error', (e) => {
+      audioRef.current.addEventListener('error', e => {
         // Silently handle audio errors to avoid console spam
         // console.warn(`Audio file not found or cannot be loaded: ${src}`);
       });
@@ -37,14 +37,14 @@ export function SoundEffect({
     audioRef.current.volume = volume;
     audioRef.current.loop = loop;
     if ('playbackRate' in audioRef.current) {
-        audioRef.current.playbackRate = rate;
+      audioRef.current.playbackRate = rate;
     }
 
     const currentAudio = audioRef.current; // Capture for cleanup
 
     if (onEnd) {
       currentAudio.addEventListener('ended', onEnd);
-    } 
+    }
 
     return () => {
       if (onEnd) {
@@ -58,7 +58,7 @@ export function SoundEffect({
 
     if (play && soundEffects) {
       audioRef.current.currentTime = 0;
-      const playPromise = audioRef.current.play(); 
+      const playPromise = audioRef.current.play();
 
       if (playPromise !== undefined) {
         playPromise.catch(err => {
@@ -81,9 +81,9 @@ export const SOUND_EFFECTS = {
   PURCHASE: '/sounds/purchase.mp3',
   ACHIEVEMENT: '/sounds/achievement.mp3',
   NOTIFICATION: '/sounds/notification.mp3',
-  CLICK: '/sounds/click.mp3', 
+  CLICK: '/sounds/click.mp3',
   ERROR: '/sounds/error.mp3',
-  SUCCESS: '/sounds/success.mp3', 
+  SUCCESS: '/sounds/success.mp3',
   HOVER: '/sounds/click.mp3',
   DRAW: '/sounds/click.mp3',
   ERASE: '/sounds/error.mp3',

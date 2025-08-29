@@ -16,29 +16,29 @@ interface LanguageSwitcherProps {
   showText?: boolean;
 }
 
-export function LanguageSwitcher({ 
-  variant = 'outline', 
+export function LanguageSwitcher({
+  variant = 'outline',
   size = 'default',
-  showText = true
+  showText = true,
 }: LanguageSwitcherProps) {
   // const { i18n } = useTranslation();
   const { setLanguage } = useSettingsStore();
-  
+
   const languages = [
     { code: 'pt-PT', name: 'Português', flag: '🇵🇹' },
     { code: 'en-US', name: 'English', flag: '🇬🇧' },
     { code: 'es-ES', name: 'Español', flag: '🇪🇸' },
   ];
-  
+
   // Use default language since i18n is commented out
   const currentLanguage = languages[0];
-  
+
   const changeLanguage = (code: string) => {
     // i18n.changeLanguage(code);
     setLanguage(code as 'pt-PT' | 'en-US' | 'es-ES');
     localStorage.setItem('pixel-universe-locale', code);
   };
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -52,7 +52,7 @@ export function LanguageSwitcher({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {languages.map((language) => (
+        {languages.map(language => (
           <DropdownMenuItem
             key={language.code}
             onClick={() => changeLanguage(language.code)}

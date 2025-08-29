@@ -39,17 +39,17 @@ const themes: Theme[] = [
       background: '#1A1A1A',
       foreground: '#FFFFFF',
       muted: '#666666',
-      border: '#333333'
+      border: '#333333',
     },
     effects: {
       blur: '8px',
       glow: '0 0 20px',
-      shadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+      shadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
     },
     animations: {
       duration: 300,
-      easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-    }
+      easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    },
   },
   {
     id: 'retro',
@@ -62,17 +62,17 @@ const themes: Theme[] = [
       background: '#111111',
       foreground: '#DDDDDD',
       muted: '#555555',
-      border: '#222222'
+      border: '#222222',
     },
     effects: {
       blur: '0px',
       glow: '0 0 10px',
-      shadow: '4px 4px 0px rgba(0, 0, 0, 0.8)'
+      shadow: '4px 4px 0px rgba(0, 0, 0, 0.8)',
     },
     animations: {
       duration: 100,
-      easing: 'steps(4)'
-    }
+      easing: 'steps(4)',
+    },
   },
   {
     id: 'neon',
@@ -85,17 +85,17 @@ const themes: Theme[] = [
       background: '#000000',
       foreground: '#FFFFFF',
       muted: '#444444',
-      border: '#333333'
+      border: '#333333',
     },
     effects: {
       blur: '12px',
       glow: '0 0 30px',
-      shadow: '0 0 20px rgba(255, 0, 255, 0.5)'
+      shadow: '0 0 20px rgba(255, 0, 255, 0.5)',
     },
     animations: {
       duration: 500,
-      easing: 'cubic-bezier(0.4, 0, 0.6, 1)'
-    }
+      easing: 'cubic-bezier(0.4, 0, 0.6, 1)',
+    },
   },
   {
     id: 'minimal',
@@ -108,18 +108,18 @@ const themes: Theme[] = [
       background: '#FFFFFF',
       foreground: '#000000',
       muted: '#999999',
-      border: '#EEEEEE'
+      border: '#EEEEEE',
     },
     effects: {
       blur: '4px',
       glow: 'none',
-      shadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+      shadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
     },
     animations: {
       duration: 200,
-      easing: 'ease-in-out'
-    }
-  }
+      easing: 'ease-in-out',
+    },
+  },
 ];
 
 interface ThemeContextType {
@@ -131,7 +131,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({
   currentTheme: themes[0],
   setTheme: () => {},
-  themes: themes
+  themes: themes,
 });
 
 export function useTheme() {
@@ -148,7 +148,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const setTheme = (themeId: string) => {
     const theme = themes.find(t => t.id === themeId) || themes[0];
     setCurrentTheme(theme);
-    
+
     // Atualizar variáveis CSS
     const root = document.documentElement;
     Object.entries(theme.colors).forEach(([key, value]) => {
@@ -176,7 +176,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         animate={{ opacity: 1 }}
         transition={{
           duration: currentTheme.animations.duration / 1000,
-          ease: currentTheme.animations.easing
+          ease: (currentTheme as any).animations?.easing as any,
         }}
       >
         {children}
@@ -195,10 +195,10 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   return (
     <div className={className}>
       <div className="grid grid-cols-2 gap-4">
-        {themes.map((theme) => (
+        {themes.map(theme => (
           <motion.button
             key={theme.id}
-            className={`p-4 rounded-lg border-2 transition-colors ${
+            className={`rounded-lg border-2 p-4 transition-colors ${
               currentTheme.id === theme.id
                 ? 'border-primary bg-primary/10'
                 : 'border-border hover:border-primary/50'
@@ -209,18 +209,18 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
           >
             <div className="text-left">
               <h3 className="font-semibold">{theme.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {theme.description}
-              </p>
+              <p className="text-sm text-muted-foreground">{theme.description}</p>
             </div>
             <div className="mt-4 flex gap-2">
-              {Object.values(theme.colors).slice(0, 4).map((color, index) => (
-                <div
-                  key={index}
-                  className="w-6 h-6 rounded-full"
-                  style={{ backgroundColor: color }}
-                />
-              ))}
+              {Object.values(theme.colors)
+                .slice(0, 4)
+                .map((color, index) => (
+                  <div
+                    key={index}
+                    className="h-6 w-6 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
             </div>
           </motion.button>
         ))}

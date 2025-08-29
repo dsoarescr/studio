@@ -24,7 +24,7 @@
     --input: 220 15% 20%;
     --ring: 45 100% 51%;
     --radius: 0.5rem;
-    
+
     /* Pixel Universe specific variables */
     --bottom-nav-height: 80px;
     --font-body: 'Space Grotesk', sans-serif;
@@ -37,7 +37,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 }
 
@@ -45,13 +47,13 @@
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90;
   }
-  
+
   .btn-secondary {
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
   }
-  
+
   .card {
-    @apply bg-card text-card-foreground border border-border rounded-lg;
+    @apply rounded-lg border border-border bg-card text-card-foreground;
   }
 }
 
@@ -59,22 +61,26 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   /* Essential utility classes */
   .font-body {
     font-family: var(--font-body);
   }
-  
+
   .font-mono {
     font-family: var(--font-mono);
   }
-  
+
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
-  
+
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }

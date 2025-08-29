@@ -44,7 +44,7 @@ export function FadeIn({
   duration = 300,
   delay = 0,
   direction,
-  distance = 20
+  distance = 20,
 }: FadeInProps) {
   const getDirectionOffset = () => {
     switch (direction) {
@@ -63,20 +63,20 @@ export function FadeIn({
 
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       initial={{
         opacity: 0,
-        ...getDirectionOffset()
+        ...getDirectionOffset(),
       }}
       animate={{
         opacity: 1,
         x: 0,
-        y: 0
+        y: 0,
       }}
       transition={{
         duration: duration / 1000,
         delay: delay / 1000,
-        ease: 'easeOut'
+        ease: 'easeOut',
       }}
     >
       {children}
@@ -90,7 +90,7 @@ export function Slide({
   duration = 300,
   delay = 0,
   direction = 'right',
-  distance = 100
+  distance = 100,
 }: SlideProps) {
   const getDirectionOffset = () => {
     switch (direction) {
@@ -109,16 +109,16 @@ export function Slide({
 
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       initial={getDirectionOffset()}
       animate={{
         x: 0,
-        y: 0
+        y: 0,
       }}
       transition={{
         duration: duration / 1000,
         delay: delay / 1000,
-        ease: 'easeOut'
+        ease: 'easeOut',
       }}
     >
       {children}
@@ -126,28 +126,22 @@ export function Slide({
   );
 }
 
-export function Scale({
-  children,
-  className,
-  duration = 300,
-  delay = 0,
-  scale = 0.8
-}: ScaleProps) {
+export function Scale({ children, className, duration = 300, delay = 0, scale = 0.8 }: ScaleProps) {
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       initial={{
         scale: scale,
-        opacity: 0
+        opacity: 0,
       }}
       animate={{
         scale: 1,
-        opacity: 1
+        opacity: 1,
       }}
       transition={{
         duration: duration / 1000,
         delay: delay / 1000,
-        ease: 'easeOut'
+        ease: 'easeOut',
       }}
     >
       {children}
@@ -160,23 +154,23 @@ export function Rotate({
   className,
   duration = 300,
   delay = 0,
-  degrees = 180
+  degrees = 180,
 }: RotateProps) {
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       initial={{
         rotate: degrees,
-        opacity: 0
+        opacity: 0,
       }}
       animate={{
         rotate: 0,
-        opacity: 1
+        opacity: 1,
       }}
       transition={{
         duration: duration / 1000,
         delay: delay / 1000,
-        ease: 'easeOut'
+        ease: 'easeOut',
       }}
     >
       {children}
@@ -195,27 +189,27 @@ export function StaggerContainer({
   children,
   className,
   staggerDelay = 100,
-  initialDelay = 0
+  initialDelay = 0,
 }: StaggerContainerProps) {
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       initial="hidden"
       animate="visible"
       variants={{
         visible: {
           transition: {
             delayChildren: initialDelay / 1000,
-            staggerChildren: staggerDelay / 1000
-          }
-        }
+            staggerChildren: staggerDelay / 1000,
+          },
+        },
       }}
     >
-      {React.Children.map(children, (child) => (
+      {React.Children.map(children, child => (
         <motion.div
           variants={{
             hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0 }
+            visible: { opacity: 1, y: 0 },
           }}
         >
           {child}
@@ -233,13 +227,13 @@ interface PageTransitionProps {
 export function PageTransition({ children, className }: PageTransitionProps) {
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{
         duration: 0.3,
-        ease: 'easeInOut'
+        ease: 'easeInOut',
       }}
     >
       {children}
@@ -256,14 +250,14 @@ interface ListItemProps {
 export function ListItem({ children, className, index = 0 }: ListItemProps) {
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       variants={{
         hidden: { opacity: 0, x: -20 },
-        visible: { opacity: 1, x: 0 }
+        visible: { opacity: 1, x: 0 },
       }}
       transition={{
         duration: 0.3,
-        delay: index * 0.1
+        delay: index * 0.1,
       }}
     >
       {children}
@@ -278,22 +272,17 @@ interface AnimatedButtonProps {
   disabled?: boolean;
 }
 
-export function AnimatedButton({
-  children,
-  className,
-  onClick,
-  disabled
-}: AnimatedButtonProps) {
+export function AnimatedButton({ children, className, onClick, disabled }: AnimatedButtonProps) {
   return (
     <motion.button
-      className={cn("", className)}
+      className={cn('', className)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       disabled={disabled}
       transition={{
         duration: 0.2,
-        ease: 'easeInOut'
+        ease: 'easeInOut',
       }}
     >
       {children}
@@ -307,23 +296,19 @@ interface AnimatedCardProps {
   onClick?: () => void;
 }
 
-export function AnimatedCard({
-  children,
-  className,
-  onClick
-}: AnimatedCardProps) {
+export function AnimatedCard({ children, className, onClick }: AnimatedCardProps) {
   return (
     <motion.div
-      className={cn("", className)}
+      className={cn('', className)}
       whileHover={{
         scale: 1.02,
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)'
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
       }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       transition={{
         duration: 0.2,
-        ease: 'easeInOut'
+        ease: 'easeInOut',
       }}
     >
       {children}
@@ -340,7 +325,7 @@ export const Animations = {
   PageTransition,
   ListItem,
   AnimatedButton,
-  AnimatedCard
+  AnimatedCard,
 };
 
 export default Animations;

@@ -1,25 +1,46 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { useUserStore } from '@/lib/store';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { motion } from 'framer-motion';
-import { Send, MessageSquare, ClipboardList, MapIcon, Bug, Lightbulb, Zap, HelpCircle, Heart, Upload, Paperclip, Trash2, RefreshCw } from 'lucide-react';
+import {
+  Send,
+  MessageSquare,
+  ClipboardList,
+  MapIcon,
+  Bug,
+  Lightbulb,
+  Zap,
+  HelpCircle,
+  Heart,
+  Upload,
+  Paperclip,
+  Trash2,
+  RefreshCw,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -34,7 +55,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 // Types
 type FeedbackCategory = 'bug' | 'feature' | 'improvement' | 'question' | 'praise' | 'other';
@@ -95,7 +116,8 @@ const mockFeedbackItems: FeedbackItem[] = [
   {
     id: '1',
     title: 'Melhorar a performance do mapa em dispositivos móveis',
-    description: 'O mapa fica lento em smartphones mais antigos. Seria bom ter uma opção de "modo de baixa performance" para dispositivos com menos recursos.',
+    description:
+      'O mapa fica lento em smartphones mais antigos. Seria bom ter uma opção de "modo de baixa performance" para dispositivos com menos recursos.',
     category: 'improvement',
     status: 'in_progress',
     priority: 'medium',
@@ -107,38 +129,40 @@ const mockFeedbackItems: FeedbackItem[] = [
     comments: [
       {
         id: 'c1',
-        content: 'Estamos trabalhando nisso! Já implementamos algumas otimizações e estamos testando um novo modo de renderização para dispositivos de baixo desempenho.',
+        content:
+          'Estamos trabalhando nisso! Já implementamos algumas otimizações e estamos testando um novo modo de renderização para dispositivos de baixo desempenho.',
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         author: {
           name: 'DevTeam',
           avatar: 'https://placehold.co/40x40.png',
           dataAiHint: 'staff avatar',
-          isStaff: true
-        }
+          isStaff: true,
+        },
       },
       {
         id: 'c2',
-        content: 'Ótimo! Mal posso esperar para ver as melhorias. Meu smartphone é um pouco antigo e realmente fica lento ao navegar pelo mapa.',
+        content:
+          'Ótimo! Mal posso esperar para ver as melhorias. Meu smartphone é um pouco antigo e realmente fica lento ao navegar pelo mapa.',
         createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
         author: {
           name: 'PixelFan123',
           avatar: 'https://placehold.co/40x40.png',
-          dataAiHint: 'user avatar'
-        }
-      }
+          dataAiHint: 'user avatar',
+        },
+      },
     ],
     author: {
       name: 'MobileUser',
       avatar: 'https://placehold.co/40x40.png',
       dataAiHint: 'user avatar',
-      role: 'Utilizador'
+      role: 'Utilizador',
     },
     assignee: {
       name: 'DevTeam',
       avatar: 'https://placehold.co/40x40.png',
       dataAiHint: 'staff avatar',
-      role: 'Desenvolvedor'
-    }
+      role: 'Desenvolvedor',
+    },
   },
   // ... more mock data
 ];
@@ -147,18 +171,10 @@ const surveyQuestions: SurveyQuestion[] = [
   // ... survey questions
 ];
 
-
 // Helper Components
 
-
-
-
-
-
-
-
 interface FeedbackSystemProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export default function FeedbackSystem({ children }: FeedbackSystemProps) {
@@ -169,23 +185,19 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>('improvement');
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>(mockFeedbackItems);
 
-
   const [attachments, setAttachments] = useState<File[]>([]);
-
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [playRewardSound, setPlayRewardSound] = useState(false);
   const { toast } = useToast();
   const { addCredits, addXp } = useUserStore();
 
-
-
   const handleSubmitFeedback = () => {
     if (!feedbackTitle.trim() || !feedbackDescription.trim()) {
       toast({
-        title: "Campos Obrigatórios",
-        description: "Por favor, preencha o título e a descrição do feedback.",
-        variant: "destructive"
+        title: 'Campos Obrigatórios',
+        description: 'Por favor, preencha o título e a descrição do feedback.',
+        variant: 'destructive',
       });
       return;
     }
@@ -208,32 +220,28 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
         name: 'Você',
         avatar: 'https://placehold.co/40x40.png',
         dataAiHint: 'user avatar',
-        role: 'Utilizador'
-      }
+        role: 'Utilizador',
+      },
     };
 
     setFeedbackItems(prev => [newFeedback, ...prev]);
     setFeedbackTitle('');
     setFeedbackDescription('');
     setAttachments([]);
-    
+
     // Show success message
     setShowConfetti(true);
     setPlayRewardSound(true);
-    
+
     // Reward user
     addCredits(25);
     addXp(10);
-    
+
     toast({
-      title: "Feedback Enviado",
-      description: "Obrigado pelo seu feedback! Recebeu 25 créditos como recompensa.",
+      title: 'Feedback Enviado',
+      description: 'Obrigado pelo seu feedback! Recebeu 25 créditos como recompensa.',
     });
   };
-
-
-
-
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -246,232 +254,240 @@ export default function FeedbackSystem({ children }: FeedbackSystemProps) {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
-
-
-
-
-
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-            {children}
-        </DialogTrigger>
-        <DialogContent className="max-w-6xl max-h-[95vh] p-0 gap-0">
-        <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playRewardSound} onEnd={() => setPlayRewardSound(false)} />
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-h-[95vh] max-w-6xl gap-0 p-0">
+        <SoundEffect
+          src={SOUND_EFFECTS.SUCCESS}
+          play={playRewardSound}
+          onEnd={() => setPlayRewardSound(false)}
+        />
         <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
-        <DialogHeader className="p-6 border-b bg-gradient-to-br from-card via-card/95 to-primary/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-shimmer" 
-               style={{ backgroundSize: '200% 200%' }} />
-            <div className="relative">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <DialogTitle className="font-headline text-3xl text-gradient-gold flex items-center">
-                    <MessageSquare className="h-8 w-8 mr-3 animate-glow" />
-                    Feedback e Sugestões
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground mt-2">
-                    Ajude-nos a melhorar o Pixel Universe partilhando as suas ideias, reportando problemas ou respondendo a pesquisas
-                    </DialogDescription>
-                </div>
-                </div>
+        <DialogHeader className="relative overflow-hidden border-b bg-gradient-to-br from-card via-card/95 to-primary/10 p-6">
+          <div
+            className="animate-shimmer absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"
+            style={{ backgroundSize: '200% 200%' }}
+          />
+          <div className="relative">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <DialogTitle className="text-gradient-gold flex items-center font-headline text-3xl">
+                  <MessageSquare className="animate-glow mr-3 h-8 w-8" />
+                  Feedback e Sugestões
+                </DialogTitle>
+                <DialogDescription className="mt-2 text-muted-foreground">
+                  Ajude-nos a melhorar o Pixel Universe partilhando as suas ideias, reportando
+                  problemas ou respondendo a pesquisas
+                </DialogDescription>
+              </div>
             </div>
-            </DialogHeader>
+          </div>
+        </DialogHeader>
 
-        <div className="flex flex-col h-[calc(95vh-110px)]">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-12 bg-card/50 backdrop-blur-sm shadow-md m-4">
-                <TabsTrigger value="submit" className="font-headline">
-                <Send className="h-4 w-4 mr-2"/>
+        <div className="flex h-[calc(95vh-110px)] flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col">
+            <TabsList className="m-4 grid h-12 w-full grid-cols-2 bg-card/50 shadow-md backdrop-blur-sm md:grid-cols-4">
+              <TabsTrigger value="submit" className="font-headline">
+                <Send className="mr-2 h-4 w-4" />
                 Enviar Feedback
-                </TabsTrigger>
-                <TabsTrigger value="browse" className="font-headline">
-                <MessageSquare className="h-4 w-4 mr-2"/>
+              </TabsTrigger>
+              <TabsTrigger value="browse" className="font-headline">
+                <MessageSquare className="mr-2 h-4 w-4" />
                 Feedback da Comunidade
-                </TabsTrigger>
-                <TabsTrigger value="survey" className="font-headline">
-                <ClipboardList className="h-4 w-4 mr-2"/>
+              </TabsTrigger>
+              <TabsTrigger value="survey" className="font-headline">
+                <ClipboardList className="mr-2 h-4 w-4" />
                 Pesquisas
-                </TabsTrigger>
-                <TabsTrigger value="roadmap" className="font-headline">
-                <MapIcon className="h-4 w-4 mr-2"/>
+              </TabsTrigger>
+              <TabsTrigger value="roadmap" className="font-headline">
+                <MapIcon className="mr-2 h-4 w-4" />
                 Roadmap
-                </TabsTrigger>
+              </TabsTrigger>
             </TabsList>
             <ScrollArea className="flex-1">
-                <div className="p-4">
+              <div className="p-4">
                 {/* Submit Feedback Tab */}
                 <TabsContent value="submit" className="mt-0 space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Feedback Form */}
-                        <Card className="lg:col-span-2">
-                            <CardHeader>
-                            <CardTitle className="text-xl flex items-center">
-                                <Send className="h-5 w-5 mr-2 text-primary" />
-                                Enviar Novo Feedback
-                            </CardTitle>
-                            <CardDescription>
-                                Partilhe as suas ideias, reporte problemas ou sugira melhorias
-                            </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="feedback-title">Título</Label>
-                                <Input 
-                                id="feedback-title" 
-                                placeholder="Resumo do seu feedback em poucas palavras" 
-                                value={feedbackTitle}
-                                onChange={(e) => setFeedbackTitle(e.target.value)}
-                                />
-                            </div>
-                            
-                            <div className="space-y-2">
-                                <Label htmlFor="feedback-category">Categoria</Label>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                <Button
-                                    variant={feedbackCategory === 'bug' ? 'default' : 'outline'}
-                                    className="justify-start"
-                                    onClick={() => setFeedbackCategory('bug')}
-                                >
-                                    <Bug className="h-4 w-4 mr-2 text-red-500" />
-                                    Bug
-                                </Button>
-                                <Button
-                                    variant={feedbackCategory === 'feature' ? 'default' : 'outline'}
-                                    className="justify-start"
-                                    onClick={() => setFeedbackCategory('feature')}
-                                >
-                                    <Lightbulb className="h-4 w-4 mr-2 text-yellow-500" />
-                                    Nova Funcionalidade
-                                </Button>
-                                <Button
-                                    variant={feedbackCategory === 'improvement' ? 'default' : 'outline'}
-                                    className="justify-start"
-                                    onClick={() => setFeedbackCategory('improvement')}
-                                >
-                                    <Zap className="h-4 w-4 mr-2 text-blue-500" />
-                                    Melhoria
-                                </Button>
-                                <Button
-                                    variant={feedbackCategory === 'question' ? 'default' : 'outline'}
-                                    className="justify-start"
-                                    onClick={() => setFeedbackCategory('question')}
-                                >
-                                    <HelpCircle className="h-4 w-4 mr-2 text-purple-500" />
-                                    Questão
-                                </Button>
-                                <Button
-                                    variant={feedbackCategory === 'praise' ? 'default' : 'outline'}
-                                    className="justify-start"
-                                    onClick={() => setFeedbackCategory('praise')}
-                                >
-                                    <Heart className="h-4 w-4 mr-2 text-pink-500" />
-                                    Elogio
-                                </Button>
-                                <Button
-                                    variant={feedbackCategory === 'other' ? 'default' : 'outline'}
-                                    className="justify-start"
-                                    onClick={() => setFeedbackCategory('other')}
-                                >
-                                    <MessageSquare className="h-4 w-4 mr-2 text-gray-500" />
-                                    Outro
-                                </Button>
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                                <Label htmlFor="feedback-description">Descrição Detalhada</Label>
-                                <Textarea 
-                                id="feedback-description" 
-                                placeholder="Descreva em detalhe o seu feedback, incluindo passos para reproduzir bugs ou exemplos de uso para novas funcionalidades. Use #tags para categorizar (ex: #mapa #mobile)." 
-                                rows={8}
-                                value={feedbackDescription}
-                                onChange={(e) => setFeedbackDescription(e.target.value)}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                Dica: Use #tags no seu texto para categorizar o feedback (ex: #mapa #mobile #desempenho)
-                                </p>
-                            </div>
-                            
-                            <div className="space-y-2">
-                                <Label htmlFor="feedback-attachments">Anexos (opcional)</Label>
-                                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:bg-muted/20 transition-colors cursor-pointer">
-                                <Input
-                                    id="feedback-attachments"
-                                    type="file"
-                                    multiple
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-                                <Label htmlFor="feedback-attachments" className="cursor-pointer">
-                                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                                    <p className="text-sm text-muted-foreground">
-                                    Arraste ficheiros ou clique para selecionar
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                    Suporta imagens, vídeos e documentos até 10MB
-                                    </p>
-                                </Label>
-                                </div>
-                                
-                                {attachments.length > 0 && (
-                                <div className="space-y-2 mt-2">
-                                    <p className="text-sm font-medium">Ficheiros Anexados:</p>
-                                    <div className="space-y-2">
-                                    {attachments.map((file, index) => (
-                                        <div key={index} className="flex items-center justify-between p-2 bg-muted/20 rounded-lg">
-                                        <div className="flex items-center">
-                                            <Paperclip className="h-4 w-4 mr-2 text-muted-foreground" />
-                                            <span className="text-sm truncate max-w-[200px]">{file.name}</span>
-                                            <Badge variant="outline" className="ml-2 text-xs">
-                                            {(file.size / 1024).toFixed(0)} KB
-                                            </Badge>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeAttachment(index)}
-                                            className="h-8 w-8 p-0"
-                                        >
-                                            <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                        </div>
-                                    ))}
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {/* Feedback Form */}
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle className="flex items-center text-xl">
+                          <Send className="mr-2 h-5 w-5 text-primary" />
+                          Enviar Novo Feedback
+                        </CardTitle>
+                        <CardDescription>
+                          Partilhe as suas ideias, reporte problemas ou sugira melhorias
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="feedback-title">Título</Label>
+                          <Input
+                            id="feedback-title"
+                            placeholder="Resumo do seu feedback em poucas palavras"
+                            value={feedbackTitle}
+                            onChange={e => setFeedbackTitle(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="feedback-category">Categoria</Label>
+                          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+                            <Button
+                              variant={feedbackCategory === 'bug' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => setFeedbackCategory('bug')}
+                            >
+                              <Bug className="mr-2 h-4 w-4 text-red-500" />
+                              Bug
+                            </Button>
+                            <Button
+                              variant={feedbackCategory === 'feature' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => setFeedbackCategory('feature')}
+                            >
+                              <Lightbulb className="mr-2 h-4 w-4 text-yellow-500" />
+                              Nova Funcionalidade
+                            </Button>
+                            <Button
+                              variant={feedbackCategory === 'improvement' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => setFeedbackCategory('improvement')}
+                            >
+                              <Zap className="mr-2 h-4 w-4 text-blue-500" />
+                              Melhoria
+                            </Button>
+                            <Button
+                              variant={feedbackCategory === 'question' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => setFeedbackCategory('question')}
+                            >
+                              <HelpCircle className="mr-2 h-4 w-4 text-purple-500" />
+                              Questão
+                            </Button>
+                            <Button
+                              variant={feedbackCategory === 'praise' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => setFeedbackCategory('praise')}
+                            >
+                              <Heart className="mr-2 h-4 w-4 text-pink-500" />
+                              Elogio
+                            </Button>
+                            <Button
+                              variant={feedbackCategory === 'other' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => setFeedbackCategory('other')}
+                            >
+                              <MessageSquare className="mr-2 h-4 w-4 text-gray-500" />
+                              Outro
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="feedback-description">Descrição Detalhada</Label>
+                          <Textarea
+                            id="feedback-description"
+                            placeholder="Descreva em detalhe o seu feedback, incluindo passos para reproduzir bugs ou exemplos de uso para novas funcionalidades. Use #tags para categorizar (ex: #mapa #mobile)."
+                            rows={8}
+                            value={feedbackDescription}
+                            onChange={e => setFeedbackDescription(e.target.value)}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Dica: Use #tags no seu texto para categorizar o feedback (ex: #mapa
+                            #mobile #desempenho)
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="feedback-attachments">Anexos (opcional)</Label>
+                          <div className="cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center transition-colors hover:bg-muted/20">
+                            <Input
+                              id="feedback-attachments"
+                              type="file"
+                              multiple
+                              className="hidden"
+                              onChange={handleFileChange}
+                            />
+                            <Label htmlFor="feedback-attachments" className="cursor-pointer">
+                              <Upload className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">
+                                Arraste ficheiros ou clique para selecionar
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                Suporta imagens, vídeos e documentos até 10MB
+                              </p>
+                            </Label>
+                          </div>
+
+                          {attachments.length > 0 && (
+                            <div className="mt-2 space-y-2">
+                              <p className="text-sm font-medium">Ficheiros Anexados:</p>
+                              <div className="space-y-2">
+                                {attachments.map((file, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between rounded-lg bg-muted/20 p-2"
+                                  >
+                                    <div className="flex items-center">
+                                      <Paperclip className="mr-2 h-4 w-4 text-muted-foreground" />
+                                      <span className="max-w-[200px] truncate text-sm">
+                                        {file.name}
+                                      </span>
+                                      <Badge variant="outline" className="ml-2 text-xs">
+                                        {(file.size / 1024).toFixed(0)} KB
+                                      </Badge>
                                     </div>
-                                </div>
-                                )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeAttachment(index)}
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            
-                            <div className="flex items-center space-x-2 pt-2">
-                                <Checkbox id="feedback-anonymous" />
-                                <Label htmlFor="feedback-anonymous" className="text-sm">
-                                Enviar anonimamente (não receberá créditos de recompensa)
-                                </Label>
-                            </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-between border-t pt-4">
-                            <Button variant="outline" onClick={() => {
-                                setFeedbackTitle('');
-                                setFeedbackDescription('');
-                                setAttachments([]);
-                            }}>
-                                <RefreshCw className="h-4 w-4 mr-2" />
-                                Limpar
-                            </Button>
-                            <Button onClick={handleSubmitFeedback}>
-                                <Send className="h-4 w-4 mr-2" />
-                                Enviar Feedback
-                            </Button>
-                            </CardFooter>
-                        </Card>
-                    </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center space-x-2 pt-2">
+                          <Checkbox id="feedback-anonymous" />
+                          <Label htmlFor="feedback-anonymous" className="text-sm">
+                            Enviar anonimamente (não receberá créditos de recompensa)
+                          </Label>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between border-t pt-4">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setFeedbackTitle('');
+                            setFeedbackDescription('');
+                            setAttachments([]);
+                          }}
+                        >
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Limpar
+                        </Button>
+                        <Button onClick={handleSubmitFeedback}>
+                          <Send className="mr-2 h-4 w-4" />
+                          Enviar Feedback
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </div>
                 </TabsContent>
                 {/* Other tabs content */}
-                </div>
+              </div>
             </ScrollArea>
-            </Tabs>
+          </Tabs>
         </div>
-        </DialogContent>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -1,14 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion } from "framer-motion";
-// Lucide imports removed
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
+import {
+  Trophy,
+  Star,
+  Award,
+  Crown,
+  Coins,
+  Flame,
+  TrendingUp,
+  Gift,
+  Target,
+  CheckCircle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface UserReputation {
@@ -70,8 +81,8 @@ const mockReputation: UserReputation = {
   streaks: {
     daily: 7,
     weekly: 3,
-    monthly: 1
-  }
+    monthly: 1,
+  },
 };
 
 const mockBadges: Badge[] = [
@@ -82,7 +93,7 @@ const mockBadges: Badge[] = [
     icon: '📝',
     rarity: 'common',
     category: 'Iniciante',
-    earnedAt: '2024-01-10T10:00:00Z'
+    earnedAt: '2024-01-10T10:00:00Z',
   },
   {
     id: '2',
@@ -91,7 +102,7 @@ const mockBadges: Badge[] = [
     icon: '🔥',
     rarity: 'rare',
     category: 'Social',
-    earnedAt: '2024-01-12T15:30:00Z'
+    earnedAt: '2024-01-12T15:30:00Z',
   },
   {
     id: '3',
@@ -100,7 +111,7 @@ const mockBadges: Badge[] = [
     icon: '🎓',
     rarity: 'epic',
     category: 'Comunidade',
-    earnedAt: '2024-01-14T09:20:00Z'
+    earnedAt: '2024-01-14T09:20:00Z',
   },
   {
     id: '4',
@@ -109,7 +120,7 @@ const mockBadges: Badge[] = [
     icon: '🎨',
     rarity: 'legendary',
     category: 'Arte',
-    earnedAt: '2024-01-15T18:45:00Z'
+    earnedAt: '2024-01-15T18:45:00Z',
   },
   {
     id: '5',
@@ -120,8 +131,8 @@ const mockBadges: Badge[] = [
     category: 'Dedicação',
     progress: 25,
     maxProgress: 30,
-    earnedAt: ''
-  }
+    earnedAt: '',
+  },
 ];
 
 const mockTitles: Title[] = [
@@ -132,7 +143,7 @@ const mockTitles: Title[] = [
     effect: '+10% XP em interações sociais',
     rarity: 'epic',
     isActive: true,
-    unlockedAt: '2024-01-12T10:00:00Z'
+    unlockedAt: '2024-01-12T10:00:00Z',
   },
   {
     id: '2',
@@ -141,7 +152,7 @@ const mockTitles: Title[] = [
     effect: 'Badge especial e reconhecimento',
     rarity: 'legendary',
     isActive: false,
-    unlockedAt: '2024-01-05T08:00:00Z'
+    unlockedAt: '2024-01-05T08:00:00Z',
   },
   {
     id: '3',
@@ -150,8 +161,8 @@ const mockTitles: Title[] = [
     effect: 'Acesso a ferramentas de mentoria',
     rarity: 'rare',
     isActive: false,
-    unlockedAt: '2024-01-14T16:30:00Z'
-  }
+    unlockedAt: '2024-01-14T16:30:00Z',
+  },
 ];
 
 const mockKarmaHistory: KarmaActivity[] = [
@@ -161,7 +172,7 @@ const mockKarmaHistory: KarmaActivity[] = [
     amount: 50,
     reason: 'Post popular (+100 likes)',
     timestamp: '2024-01-15T14:30:00Z',
-    category: 'Social'
+    category: 'Social',
   },
   {
     id: '2',
@@ -169,7 +180,7 @@ const mockKarmaHistory: KarmaActivity[] = [
     amount: 25,
     reason: 'Comentário útil marcado como melhor resposta',
     timestamp: '2024-01-15T12:15:00Z',
-    category: 'Ajuda'
+    category: 'Ajuda',
   },
   {
     id: '3',
@@ -177,8 +188,8 @@ const mockKarmaHistory: KarmaActivity[] = [
     amount: 100,
     reason: 'Destacar post no feed',
     timestamp: '2024-01-15T10:00:00Z',
-    category: 'Promoção'
-  }
+    category: 'Promoção',
+  },
 ];
 
 export function CommunityGamification() {
@@ -189,34 +200,46 @@ export function CommunityGamification() {
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'common': return 'text-gray-500 border-gray-200';
-      case 'rare': return 'text-blue-500 border-blue-200';
-      case 'epic': return 'text-purple-500 border-purple-200';
-      case 'legendary': return 'text-yellow-500 border-yellow-200';
-      default: return 'text-gray-500 border-gray-200';
+      case 'common':
+        return 'text-gray-500 border-gray-200';
+      case 'rare':
+        return 'text-blue-500 border-blue-200';
+      case 'epic':
+        return 'text-purple-500 border-purple-200';
+      case 'legendary':
+        return 'text-yellow-500 border-yellow-200';
+      default:
+        return 'text-gray-500 border-gray-200';
     }
   };
 
   const getRarityBg = (rarity: string) => {
     switch (rarity) {
-      case 'common': return 'bg-gray-50';
-      case 'rare': return 'bg-blue-50';
-      case 'epic': return 'bg-purple-50';
-      case 'legendary': return 'bg-yellow-50';
-      default: return 'bg-gray-50';
+      case 'common':
+        return 'bg-gray-50';
+      case 'rare':
+        return 'bg-blue-50';
+      case 'epic':
+        return 'bg-purple-50';
+      case 'legendary':
+        return 'bg-yellow-50';
+      default:
+        return 'bg-gray-50';
     }
   };
 
   const activateTitle = (titleId: string) => {
-    setTitles(prev => prev.map(title => ({
-      ...title,
-      isActive: title.id === titleId
-    })));
+    setTitles(prev =>
+      prev.map(title => ({
+        ...title,
+        isActive: title.id === titleId,
+      }))
+    );
   };
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
+      <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-blue-500/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-6 w-6 text-purple-500" />
@@ -248,27 +271,29 @@ export function CommunityGamification() {
                 {reputation.currentXp}/{reputation.currentXp + reputation.xpToNext} XP
               </span>
             </div>
-            <Progress 
-              value={(reputation.currentXp / (reputation.currentXp + reputation.xpToNext)) * 100} 
+            <Progress
+              value={(reputation.currentXp / (reputation.currentXp + reputation.xpToNext)) * 100}
               className="h-3"
             />
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-background/50 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="rounded-lg bg-background/50 p-3 text-center">
               <div className="text-2xl font-bold text-purple-500">{reputation.karma}</div>
               <div className="text-sm text-muted-foreground">Karma</div>
             </div>
-            <div className="text-center p-3 bg-background/50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-500">{badges.filter(b => b.earnedAt).length}</div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="text-2xl font-bold text-blue-500">
+                {badges.filter(b => b.earnedAt).length}
+              </div>
               <div className="text-sm text-muted-foreground">Badges</div>
             </div>
-            <div className="text-center p-3 bg-background/50 rounded-lg">
+            <div className="rounded-lg bg-background/50 p-3 text-center">
               <div className="text-2xl font-bold text-green-500">{titles.length}</div>
               <div className="text-sm text-muted-foreground">Títulos</div>
             </div>
-            <div className="text-center p-3 bg-background/50 rounded-lg">
+            <div className="rounded-lg bg-background/50 p-3 text-center">
               <div className="text-2xl font-bold text-orange-500">{reputation.streaks.daily}</div>
               <div className="text-sm text-muted-foreground">Série Diária</div>
             </div>
@@ -279,26 +304,26 @@ export function CommunityGamification() {
       <Tabs defaultValue="badges" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="badges">
-            <Award className="h-4 w-4 mr-2" />
+            <Award className="mr-2 h-4 w-4" />
             Badges
           </TabsTrigger>
           <TabsTrigger value="titles">
-            <Crown className="h-4 w-4 mr-2" />
+            <Crown className="mr-2 h-4 w-4" />
             Títulos
           </TabsTrigger>
           <TabsTrigger value="karma">
-            <Coins className="h-4 w-4 mr-2" />
+            <Coins className="mr-2 h-4 w-4" />
             Karma
           </TabsTrigger>
           <TabsTrigger value="streaks">
-            <Flame className="h-4 w-4 mr-2" />
+            <Flame className="mr-2 h-4 w-4" />
             Séries
           </TabsTrigger>
         </TabsList>
 
         {/* Badges Tab */}
         <TabsContent value="badges" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {badges.map((badge, index) => (
               <motion.div
                 key={badge.id}
@@ -306,20 +331,22 @@ export function CommunityGamification() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card className={cn(
-                  "relative overflow-hidden transition-all duration-300 hover:shadow-lg",
-                  getRarityColor(badge.rarity),
-                  !badge.earnedAt && "opacity-60"
-                )}>
-                  <CardContent className={cn("p-4", getRarityBg(badge.rarity))}>
-                    <div className="text-center space-y-3">
+                <Card
+                  className={cn(
+                    'relative overflow-hidden transition-all duration-300 hover:shadow-lg',
+                    getRarityColor(badge.rarity),
+                    !badge.earnedAt && 'opacity-60'
+                  )}
+                >
+                  <CardContent className={cn('p-4', getRarityBg(badge.rarity))}>
+                    <div className="space-y-3 text-center">
                       <div className="text-4xl">{badge.icon}</div>
                       <div>
                         <h3 className="font-semibold">{badge.name}</h3>
                         <p className="text-sm text-muted-foreground">{badge.description}</p>
                       </div>
                       <div className="flex items-center justify-between">
-                        <Badge variant="secondary" className="capitalize text-xs">
+                        <Badge variant="secondary" className="text-xs capitalize">
                           {badge.rarity}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
@@ -328,7 +355,10 @@ export function CommunityGamification() {
                       </div>
                       {badge.progress !== undefined && (
                         <div className="space-y-1">
-                          <Progress value={(badge.progress / badge.maxProgress!) * 100} className="h-2" />
+                          <Progress
+                            value={(badge.progress / badge.maxProgress!) * 100}
+                            className="h-2"
+                          />
                           <div className="text-xs text-muted-foreground">
                             {badge.progress}/{badge.maxProgress}
                           </div>
@@ -350,40 +380,39 @@ export function CommunityGamification() {
         {/* Titles Tab */}
         <TabsContent value="titles" className="space-y-4">
           <div className="space-y-3">
-            {titles.map((title) => (
-              <Card key={title.id} className={cn(
-                "transition-all duration-300",
-                title.isActive && "ring-2 ring-purple-500 bg-purple-50"
-              )}>
+            {titles.map(title => (
+              <Card
+                key={title.id}
+                className={cn(
+                  'transition-all duration-300',
+                  title.isActive && 'bg-purple-50 ring-2 ring-purple-500'
+                )}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        title.isActive ? "bg-purple-500 text-white" : "bg-gray-100"
-                      )}>
+                      <div
+                        className={cn(
+                          'rounded-full p-2',
+                          title.isActive ? 'bg-purple-500 text-white' : 'bg-gray-100'
+                        )}
+                      >
                         <Crown className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{title.name}</h3>
-                          <Badge className={cn("capitalize text-xs", getRarityColor(title.rarity))}>
+                          <Badge className={cn('text-xs capitalize', getRarityColor(title.rarity))}>
                             {title.rarity}
                           </Badge>
-                          {title.isActive && (
-                            <Badge className="bg-green-500 text-xs">Ativo</Badge>
-                          )}
+                          {title.isActive && <Badge className="bg-green-500 text-xs">Ativo</Badge>}
                         </div>
                         <p className="text-sm text-muted-foreground">{title.description}</p>
-                        <p className="text-xs text-blue-600 font-medium">{title.effect}</p>
+                        <p className="text-xs font-medium text-blue-600">{title.effect}</p>
                       </div>
                     </div>
                     {!title.isActive && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => activateTitle(title.id)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => activateTitle(title.id)}>
                         Ativar
                       </Button>
                     )}
@@ -407,7 +436,7 @@ export function CommunityGamification() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg">
+              <div className="rounded-lg bg-gradient-to-br from-yellow-50 to-orange-50 p-6 text-center">
                 <div className="text-4xl font-bold text-yellow-600">{reputation.karma}</div>
                 <div className="text-sm text-muted-foreground">Karma Total</div>
               </div>
@@ -416,16 +445,24 @@ export function CommunityGamification() {
 
           <div className="space-y-3">
             <h3 className="font-semibold">Histórico de Karma</h3>
-            {karmaHistory.map((activity) => (
+            {karmaHistory.map(activity => (
               <Card key={activity.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        activity.type === 'earned' ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
-                      )}>
-                        {activity.type === 'earned' ? <TrendingUp className="h-4 w-4" /> : <Gift className="h-4 w-4" />}
+                      <div
+                        className={cn(
+                          'rounded-full p-2',
+                          activity.type === 'earned'
+                            ? 'bg-green-100 text-green-600'
+                            : 'bg-red-100 text-red-600'
+                        )}
+                      >
+                        {activity.type === 'earned' ? (
+                          <TrendingUp className="h-4 w-4" />
+                        ) : (
+                          <Gift className="h-4 w-4" />
+                        )}
                       </div>
                       <div>
                         <div className="font-medium">{activity.reason}</div>
@@ -434,11 +471,14 @@ export function CommunityGamification() {
                         </div>
                       </div>
                     </div>
-                    <div className={cn(
-                      "font-bold",
-                      activity.type === 'earned' ? "text-green-600" : "text-red-600"
-                    )}>
-                      {activity.type === 'earned' ? '+' : '-'}{activity.amount}
+                    <div
+                      className={cn(
+                        'font-bold',
+                        activity.type === 'earned' ? 'text-green-600' : 'text-red-600'
+                      )}
+                    >
+                      {activity.type === 'earned' ? '+' : '-'}
+                      {activity.amount}
                     </div>
                   </div>
                 </CardContent>
@@ -449,34 +489,36 @@ export function CommunityGamification() {
 
         {/* Streaks Tab */}
         <TabsContent value="streaks" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-red-50">
               <CardContent className="p-6 text-center">
-                <Flame className="h-8 w-8 text-orange-500 mx-auto mb-3" />
+                <Flame className="mx-auto mb-3 h-8 w-8 text-orange-500" />
                 <div className="text-3xl font-bold text-orange-600">{reputation.streaks.daily}</div>
                 <div className="text-sm text-muted-foreground">Dias Consecutivos</div>
                 <Progress value={70} className="mt-3 h-2" />
-                <div className="text-xs text-muted-foreground mt-1">7/10 para próximo prêmio</div>
+                <div className="mt-1 text-xs text-muted-foreground">7/10 para próximo prêmio</div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+            <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
               <CardContent className="p-6 text-center">
-                <Target className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                <Target className="mx-auto mb-3 h-8 w-8 text-blue-500" />
                 <div className="text-3xl font-bold text-blue-600">{reputation.streaks.weekly}</div>
                 <div className="text-sm text-muted-foreground">Semanas Ativas</div>
                 <Progress value={75} className="mt-3 h-2" />
-                <div className="text-xs text-muted-foreground mt-1">3/4 para badge especial</div>
+                <div className="mt-1 text-xs text-muted-foreground">3/4 para badge especial</div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+            <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
               <CardContent className="p-6 text-center">
-                <Crown className="h-8 w-8 text-purple-500 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-purple-600">{reputation.streaks.monthly}</div>
+                <Crown className="mx-auto mb-3 h-8 w-8 text-purple-500" />
+                <div className="text-3xl font-bold text-purple-600">
+                  {reputation.streaks.monthly}
+                </div>
                 <div className="text-sm text-muted-foreground">Meses Ativos</div>
                 <Progress value={33} className="mt-3 h-2" />
-                <div className="text-xs text-muted-foreground mt-1">1/3 para título épico</div>
+                <div className="mt-1 text-xs text-muted-foreground">1/3 para título épico</div>
               </CardContent>
             </Card>
           </div>
@@ -490,7 +532,7 @@ export function CommunityGamification() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                     <div>
@@ -500,8 +542,8 @@ export function CommunityGamification() {
                   </div>
                   <Badge className="bg-green-500">Conquistado</Badge>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+
+                <div className="flex items-center justify-between rounded-lg bg-orange-50 p-3">
                   <div className="flex items-center gap-3">
                     <Target className="h-5 w-5 text-orange-500" />
                     <div>
@@ -519,4 +561,3 @@ export function CommunityGamification() {
     </div>
   );
 }
-

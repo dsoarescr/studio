@@ -2,7 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +19,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useUserStore } from '@/lib/store';
 import {
-  Paintbrush, Eraser, Palette, Move, ZoomIn,
-  ZoomOut, RotateCcw, Download, Share2, Eye,
-  Layers, Settings, Wand2, Sparkles, History,
-  Undo, Redo, Copy, Scissors, Grid, Lock,
-  Maximize2, Minimize2, Plus, Minus
+  Paintbrush,
+  Eraser,
+  Palette,
+  Move,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Download,
+  Share2,
+  Eye,
+  Layers,
+  Settings,
+  Wand2,
+  Sparkles,
+  History,
+  Undo,
+  Redo,
+  Copy,
+  Scissors,
+  Grid,
+  Lock,
+  Maximize2,
+  Minimize2,
+  Plus,
+  Minus,
 } from 'lucide-react';
 
 interface Tool {
@@ -42,28 +69,28 @@ const tools: Tool[] = [
     name: 'Pincel',
     icon: <Paintbrush className="h-5 w-5" />,
     description: 'Pinte pixels individualmente',
-    shortcut: 'B'
+    shortcut: 'B',
   },
   {
     id: 'eraser',
     name: 'Borracha',
     icon: <Eraser className="h-5 w-5" />,
     description: 'Apague pixels',
-    shortcut: 'E'
+    shortcut: 'E',
   },
   {
     id: 'eyedropper',
     name: 'Conta-gotas',
     icon: <Eye className="h-5 w-5" />,
     description: 'Selecione uma cor existente',
-    shortcut: 'I'
+    shortcut: 'I',
   },
   {
     id: 'move',
     name: 'Mover',
     icon: <Move className="h-5 w-5" />,
     description: 'Mova a área selecionada',
-    shortcut: 'M'
+    shortcut: 'M',
   },
   {
     id: 'magic-wand',
@@ -71,8 +98,8 @@ const tools: Tool[] = [
     icon: <Wand2 className="h-5 w-5" />,
     description: 'Selecione áreas por cor',
     shortcut: 'W',
-    isPremium: true
-  }
+    isPremium: true,
+  },
 ];
 
 const filters: Filter[] = [
@@ -80,20 +107,20 @@ const filters: Filter[] = [
     id: 'pixelate',
     name: 'Pixelizar',
     description: 'Aumente o efeito de pixelização',
-    intensity: 50
+    intensity: 50,
   },
   {
     id: 'smooth',
     name: 'Suavizar',
     description: 'Suavize as bordas dos pixels',
-    intensity: 30
+    intensity: 30,
   },
   {
     id: 'contrast',
     name: 'Contraste',
     description: 'Ajuste o contraste entre pixels',
-    intensity: 40
-  }
+    intensity: 40,
+  },
 ];
 
 export function EnhancedPixelInteractions() {
@@ -110,9 +137,9 @@ export function EnhancedPixelInteractions() {
     const tool = tools.find(t => t.id === toolId);
     if (tool?.isPremium) {
       toast({
-        title: "Recurso Premium",
-        description: "Esta ferramenta está disponível apenas para usuários premium.",
-        variant: "destructive"
+        title: 'Recurso Premium',
+        description: 'Esta ferramenta está disponível apenas para usuários premium.',
+        variant: 'destructive',
       });
       return;
     }
@@ -121,16 +148,14 @@ export function EnhancedPixelInteractions() {
 
   const handleFilterToggle = (filterId: string) => {
     setActiveFilters(prev =>
-      prev.includes(filterId)
-        ? prev.filter(id => id !== filterId)
-        : [...prev, filterId]
+      prev.includes(filterId) ? prev.filter(id => id !== filterId) : [...prev, filterId]
     );
   };
 
   const handleFilterIntensityChange = (filterId: string, value: number) => {
     setFilterIntensities(prev => ({
       ...prev,
-      [filterId]: value
+      [filterId]: value,
     }));
   };
 
@@ -141,35 +166,33 @@ export function EnhancedPixelInteractions() {
           <Paintbrush className="h-6 w-6 text-primary" />
           Ferramentas de Pixel Art
         </CardTitle>
-        <CardDescription>
-          Crie e edite pixel art com ferramentas avançadas
-        </CardDescription>
+        <CardDescription>Crie e edite pixel art com ferramentas avançadas</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="tools" className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="tools">
-              <Settings className="h-4 w-4 mr-2" />
+              <Settings className="mr-2 h-4 w-4" />
               Ferramentas
             </TabsTrigger>
             <TabsTrigger value="filters">
-              <Layers className="h-4 w-4 mr-2" />
+              <Layers className="mr-2 h-4 w-4" />
               Filtros
             </TabsTrigger>
             <TabsTrigger value="settings">
-              <Settings className="h-4 w-4 mr-2" />
+              <Settings className="mr-2 h-4 w-4" />
               Configurações
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="tools" className="space-y-4">
             {/* Tool Selection */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-              {tools.map((tool) => (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+              {tools.map(tool => (
                 <Button
                   key={tool.id}
                   variant={selectedTool === tool.id ? 'default' : 'outline'}
-                  className={`h-auto py-4 flex flex-col items-center gap-2 ${
+                  className={`flex h-auto flex-col items-center gap-2 py-4 ${
                     tool.isPremium ? 'opacity-50' : ''
                   }`}
                   onClick={() => handleToolSelect(tool.id)}
@@ -181,18 +204,16 @@ export function EnhancedPixelInteractions() {
                       Premium
                     </Badge>
                   )}
-                  <span className="text-xs text-muted-foreground">
-                    {tool.shortcut}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{tool.shortcut}</span>
                 </Button>
               ))}
             </div>
 
             {/* Tool Settings */}
             <Card className="border-dashed">
-              <CardContent className="pt-6 space-y-4">
+              <CardContent className="space-y-4 pt-6">
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <span>Tamanho do Pincel</span>
                     <span className="font-mono">{brushSize}px</span>
                   </div>
@@ -223,7 +244,7 @@ export function EnhancedPixelInteractions() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <span>Opacidade</span>
                     <span className="font-mono">{opacity}%</span>
                   </div>
@@ -238,11 +259,11 @@ export function EnhancedPixelInteractions() {
 
                 <div className="flex gap-4">
                   <Button variant="outline" size="sm">
-                    <Undo className="h-4 w-4 mr-2" />
+                    <Undo className="mr-2 h-4 w-4" />
                     Desfazer
                   </Button>
                   <Button variant="outline" size="sm">
-                    <Redo className="h-4 w-4 mr-2" />
+                    <Redo className="mr-2 h-4 w-4" />
                     Refazer
                   </Button>
                 </div>
@@ -251,7 +272,7 @@ export function EnhancedPixelInteractions() {
           </TabsContent>
 
           <TabsContent value="filters" className="space-y-4">
-            {filters.map((filter) => (
+            {filters.map(filter => (
               <Card key={filter.id} className="overflow-hidden">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -268,7 +289,7 @@ export function EnhancedPixelInteractions() {
                 {activeFilters.includes(filter.id) && (
                   <CardContent>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <span>Intensidade</span>
                         <span className="font-mono">
                           {filterIntensities[filter.id] || filter.intensity}%
@@ -279,9 +300,7 @@ export function EnhancedPixelInteractions() {
                         min={0}
                         max={100}
                         step={1}
-                        onValueChange={([value]) =>
-                          handleFilterIntensityChange(filter.id, value)
-                        }
+                        onValueChange={([value]) => handleFilterIntensityChange(filter.id, value)}
                       />
                     </div>
                   </CardContent>
@@ -292,7 +311,7 @@ export function EnhancedPixelInteractions() {
 
           <TabsContent value="settings" className="space-y-4">
             <Card>
-              <CardContent className="pt-6 space-y-6">
+              <CardContent className="space-y-6 pt-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <h4 className="font-medium">Mostrar Grade</h4>
@@ -300,10 +319,7 @@ export function EnhancedPixelInteractions() {
                       Exibe uma grade para auxiliar no posicionamento
                     </p>
                   </div>
-                  <Switch
-                    checked={showGrid}
-                    onCheckedChange={setShowGrid}
-                  />
+                  <Switch checked={showGrid} onCheckedChange={setShowGrid} />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -313,15 +329,12 @@ export function EnhancedPixelInteractions() {
                       Força o alinhamento dos pixels à grade
                     </p>
                   </div>
-                  <Switch
-                    checked={snapToGrid}
-                    onCheckedChange={setSnapToGrid}
-                  />
+                  <Switch checked={snapToGrid} onCheckedChange={setSnapToGrid} />
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="border-t pt-4">
                   <Button className="w-full">
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className="mr-2 h-4 w-4" />
                     Configurações Avançadas
                   </Button>
                 </div>
@@ -333,16 +346,16 @@ export function EnhancedPixelInteractions() {
       <CardFooter className="flex justify-between border-t pt-4">
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Exportar
           </Button>
           <Button variant="outline" size="sm">
-            <Share2 className="h-4 w-4 mr-2" />
+            <Share2 className="mr-2 h-4 w-4" />
             Compartilhar
           </Button>
         </div>
         <Button variant="default" size="sm">
-          <Sparkles className="h-4 w-4 mr-2" />
+          <Sparkles className="mr-2 h-4 w-4" />
           Aplicar Efeitos
         </Button>
       </CardFooter>

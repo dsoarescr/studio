@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   try {
     if (!endpointSecret) {
-      throw new Error("Stripe webhook secret is not set.");
+      throw new Error('Stripe webhook secret is not set.');
     }
     event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
   } catch (err: any) {
@@ -55,10 +55,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   } catch (error: any) {
     console.error(`Error handling webhook event: ${error.message}`);
-    return NextResponse.json(
-      { error: 'Error handling webhook event' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error handling webhook event' }, { status: 500 });
   }
 }
 
@@ -113,27 +110,37 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
-  const userSnapshot = await adminDb.collection('users').where('stripeCustomerId', '==', customerId).limit(1).get();
-  
+  const userSnapshot = await adminDb
+    .collection('users')
+    .where('stripeCustomerId', '==', customerId)
+    .limit(1)
+    .get();
+
   if (userSnapshot.empty) {
     console.error(`No user found for customer: ${customerId}`);
     return;
   }
-  
+
   const userId = userSnapshot.docs[0].id;
   const userRef = adminDb.collection('users').doc(userId);
 
-  await adminDb.collection('subscriptions').doc(subscription.id).set({
-    userId,
-    customerId,
-    status: subscription.status,
-    priceId: subscription.items.data[0].price.id,
-    currentPeriodStart: new Date(subscription.current_period_start * 1000),
-    currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-    createdAt: new Date(subscription.created * 1000),
-    updatedAt: FieldValue.serverTimestamp(),
-  }, { merge: true });
-  
+  await adminDb
+    .collection('subscriptions')
+    .doc(subscription.id)
+    .set(
+      {
+        userId,
+        customerId,
+        status: subscription.status,
+        priceId: subscription.items.data[0].price.id,
+        currentPeriodStart: new Date(subscription.current_period_start * 1000),
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        createdAt: new Date(subscription.created * 1000),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
   await userRef.update({
     subscriptionId: subscription.id,
     subscriptionStatus: subscription.status,
@@ -145,19 +152,19 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const subscriptionDoc = await adminDb.collection('subscriptions').doc(subscription.id).get();
-  
+
   if (!subscriptionDoc.exists) {
     console.error(`No subscription found with ID: ${subscription.id}`);
     return;
   }
-  
+
   const userId = subscriptionDoc.data()?.userId;
-  
+
   await adminDb.collection('subscriptions').doc(subscription.id).update({
     status: 'canceled',
     canceledAt: FieldValue.serverTimestamp(),
   });
-  
+
   await adminDb.collection('users').doc(userId).update({
     subscriptionStatus: 'canceled',
     isPremium: false,
@@ -166,11 +173,14 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return;
-  
-  const subscriptionDoc = await adminDb.collection('subscriptions').doc(invoice.subscription as string).get();
-  
+
+  const subscriptionDoc = await adminDb
+    .collection('subscriptions')
+    .doc(invoice.subscription as string)
+    .get();
+
   if (!subscriptionDoc.exists) return;
-  
+
   const userId = subscriptionDoc.data()?.userId;
   const userRef = adminDb.collection('users').doc(userId);
 
@@ -183,8 +193,11 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     status: 'completed',
     createdAt: FieldValue.serverTimestamp(),
   });
-  
-  if (invoice.billing_reason === 'subscription_cycle' || invoice.billing_reason === 'subscription_create') {
+
+  if (
+    invoice.billing_reason === 'subscription_cycle' ||
+    invoice.billing_reason === 'subscription_create'
+  ) {
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
     const priceId = subscription.items.data[0].price.id;
     const isAnnual = priceId.includes('annual') || priceId.includes('yearly');
@@ -193,7 +206,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     await userRef.update({
       specialCredits: FieldValue.increment(creditsToAdd),
     });
-    
+
     await userRef.collection('transactions').add({
       type: 'subscription_bonus',
       amount: creditsToAdd,
@@ -205,12 +218,15 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return;
-  
-  const subscriptionDoc = await adminDb.collection('subscriptions').doc(invoice.subscription as string).get();
+
+  const subscriptionDoc = await adminDb
+    .collection('subscriptions')
+    .doc(invoice.subscription as string)
+    .get();
   if (!subscriptionDoc.exists) return;
-  
+
   const userId = subscriptionDoc.data()?.userId;
-  
+
   await adminDb.collection('users').doc(userId).collection('transactions').add({
     type: 'subscription_payment',
     amount: invoice.amount_due,
@@ -220,7 +236,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     status: 'failed',
     createdAt: FieldValue.serverTimestamp(),
   });
-  
+
   await adminDb.collection('users').doc(userId).update({
     subscriptionStatus: 'past_due',
   });

@@ -1,4 +1,3 @@
-
 // src/components/user/UserProfileSheet.tsx
 'use client';
 
@@ -10,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetDescription,
-} from "@/components/ui/sheet";
+} from '@/components/ui/sheet';
 import { UserProfileDisplay, type UserProfileData } from './UserProfileDisplay';
 import type { Achievement } from '@/data/achievements-data'; // Corrected import
 import { ScrollArea } from '../ui/scroll-area';
@@ -39,4 +38,3 @@ export function UserProfileSheet({ children, userData }: UserProfileSheetProps) 
     </Sheet>
   );
 }
-

@@ -2,17 +2,38 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import {
-  Sparkles, Target, TrendingUp, Users,
-  Eye, Heart, Star, Clock, MapPin,
-  Palette, Zap, Crown, Diamond, Tag,
-  Filter, RefreshCw, Settings
+  Sparkles,
+  Target,
+  TrendingUp,
+  Users,
+  Eye,
+  Heart,
+  Star,
+  Clock,
+  MapPin,
+  Palette,
+  Zap,
+  Crown,
+  Diamond,
+  Tag,
+  Filter,
+  RefreshCw,
+  Settings,
 } from 'lucide-react';
 
 interface RecommendedItem {
@@ -51,12 +72,12 @@ const mockRecommendations: RecommendedItem[] = [
     stats: {
       views: 1200,
       likes: 350,
-      saves: 45
+      saves: 45,
     },
     creator: {
       name: 'João Silva',
-      rating: 4.9
-    }
+      rating: 4.9,
+    },
   },
   {
     id: '2',
@@ -67,8 +88,8 @@ const mockRecommendations: RecommendedItem[] = [
     tags: ['retro', 'gaming', 'nostalgia'],
     stats: {
       views: 800,
-      likes: 220
-    }
+      likes: 220,
+    },
   },
   {
     id: '3',
@@ -79,9 +100,9 @@ const mockRecommendations: RecommendedItem[] = [
     tags: ['minimalista', 'profissional', 'premiado'],
     stats: {
       views: 1500,
-      likes: 450
-    }
-  }
+      likes: 450,
+    },
+  },
 ];
 
 export function SmartRecommendations() {
@@ -94,33 +115,33 @@ export function SmartRecommendations() {
     setTimeout(() => {
       setRefreshing(false);
       toast({
-        title: "Recomendações Atualizadas",
-        description: "Novas sugestões baseadas nos seus interesses.",
+        title: 'Recomendações Atualizadas',
+        description: 'Novas sugestões baseadas nos seus interesses.',
       });
     }, 2000);
   };
 
   const handleFollow = (id: string) => {
     toast({
-      title: "Artista Seguido",
-      description: "Você receberá atualizações sobre este artista.",
+      title: 'Artista Seguido',
+      description: 'Você receberá atualizações sobre este artista.',
     });
   };
 
   const handleSave = (id: string) => {
     toast({
-      title: "Item Salvo",
-      description: "Item adicionado aos seus favoritos.",
+      title: 'Item Salvo',
+      description: 'Item adicionado aos seus favoritos.',
     });
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6 py-6">
       <Card className="border-2 border-primary/20">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-2xl">
                 <Sparkles className="h-6 w-6 text-primary" />
                 Recomendações Inteligentes
               </CardTitle>
@@ -129,16 +150,8 @@ export function SmartRecommendations() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleRefresh}
-                disabled={refreshing}
-              >
-                <RefreshCw className={cn(
-                  "h-4 w-4",
-                  refreshing && "animate-spin"
-                )} />
+              <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>
+                <RefreshCw className={cn('h-4 w-4', refreshing ? 'animate-spin' : '')} />
               </Button>
               <Button variant="outline" size="icon">
                 <Settings className="h-4 w-4" />
@@ -151,33 +164,33 @@ export function SmartRecommendations() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-4">
               <TabsTrigger value="foryou">
-                <Target className="h-4 w-4 mr-2" />
+                <Target className="mr-2 h-4 w-4" />
                 Para Você
               </TabsTrigger>
               <TabsTrigger value="trending">
-                <TrendingUp className="h-4 w-4 mr-2" />
+                <TrendingUp className="mr-2 h-4 w-4" />
                 Tendências
               </TabsTrigger>
               <TabsTrigger value="similar">
-                <Users className="h-4 w-4 mr-2" />
+                <Users className="mr-2 h-4 w-4" />
                 Similares
               </TabsTrigger>
               <TabsTrigger value="discover">
-                <Eye className="h-4 w-4 mr-2" />
+                <Eye className="mr-2 h-4 w-4" />
                 Descobrir
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="foryou" className="space-y-4">
-              {mockRecommendations.map((item) => (
+              {mockRecommendations.map(item => (
                 <Card
                   key={item.id}
-                  className="overflow-hidden hover:border-primary/50 transition-all duration-300"
+                  className="overflow-hidden transition-all duration-300 hover:border-primary/50"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       {/* Preview/Avatar */}
-                      <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center">
+                      <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-muted">
                         {item.type === 'artist' ? (
                           <Users className="h-8 w-8 text-muted-foreground" />
                         ) : (
@@ -189,25 +202,20 @@ export function SmartRecommendations() {
                       <div className="flex-1 space-y-2">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-semibold flex items-center gap-2">
+                            <h3 className="flex items-center gap-2 font-semibold">
                               {item.title}
-                              <Badge
-                                variant="secondary"
-                                className="text-xs"
-                              >
+                              <Badge variant="secondary" className="text-xs">
                                 {item.type}
                               </Badge>
                             </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {item.description}
-                            </p>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
                           </div>
                           <Badge
                             className={cn(
-                              "bg-gradient-to-r",
+                              'bg-gradient-to-r',
                               item.matchScore >= 90
-                                ? "from-green-500 to-emerald-500"
-                                : "from-blue-500 to-cyan-500"
+                                ? 'from-green-500 to-emerald-500'
+                                : 'from-blue-500 to-cyan-500'
                             )}
                           >
                             {item.matchScore}% match
@@ -217,11 +225,7 @@ export function SmartRecommendations() {
                         {/* Tags */}
                         <div className="flex flex-wrap gap-2">
                           {item.tags.map((tag, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
+                            <Badge key={index} variant="outline" className="text-xs">
                               #{tag}
                             </Badge>
                           ))}
@@ -248,17 +252,11 @@ export function SmartRecommendations() {
                         {/* Actions */}
                         <div className="flex items-center gap-2 pt-2">
                           {item.type === 'artist' ? (
-                            <Button
-                              size="sm"
-                              onClick={() => handleFollow(item.id)}
-                            >
+                            <Button size="sm" onClick={() => handleFollow(item.id)}>
                               Seguir Artista
                             </Button>
                           ) : (
-                            <Button
-                              size="sm"
-                              onClick={() => handleSave(item.id)}
-                            >
+                            <Button size="sm" onClick={() => handleSave(item.id)}>
                               Salvar Item
                             </Button>
                           )}
@@ -277,17 +275,15 @@ export function SmartRecommendations() {
               <Card>
                 <CardHeader>
                   <CardTitle>Tendências do Momento</CardTitle>
-                  <CardDescription>
-                    O que está em alta na comunidade
-                  </CardDescription>
+                  <CardDescription>O que está em alta na comunidade</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Card>
                         <CardContent className="p-4">
                           <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-full bg-red-500/10">
+                            <div className="rounded-full bg-red-500/10 p-2">
                               <TrendingUp className="h-6 w-6 text-red-500" />
                             </div>
                             <div>
@@ -303,7 +299,7 @@ export function SmartRecommendations() {
                       <Card>
                         <CardContent className="p-4">
                           <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-full bg-green-500/10">
+                            <div className="rounded-full bg-green-500/10 p-2">
                               <TrendingUp className="h-6 w-6 text-green-500" />
                             </div>
                             <div>
@@ -325,21 +321,17 @@ export function SmartRecommendations() {
               <Card>
                 <CardHeader>
                   <CardTitle>Baseado em Suas Interações</CardTitle>
-                  <CardDescription>
-                    Itens similares aos que você já interagiu
-                  </CardDescription>
+                  <CardDescription>Itens similares aos que você já interagiu</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {[1, 2, 3].map(i => (
                       <Card key={i}>
                         <CardContent className="p-4">
-                          <div className="aspect-square bg-muted rounded-lg mb-4" />
+                          <div className="mb-4 aspect-square rounded-lg bg-muted" />
                           <h4 className="font-semibold">Pixel Art Similar #{i}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            85% de similaridade
-                          </p>
-                          <Button className="w-full mt-4" size="sm">
+                          <p className="text-sm text-muted-foreground">85% de similaridade</p>
+                          <Button className="mt-4 w-full" size="sm">
                             Ver Mais
                           </Button>
                         </CardContent>
@@ -354,18 +346,16 @@ export function SmartRecommendations() {
               <Card>
                 <CardHeader>
                   <CardTitle>Descubra Novo Conteúdo</CardTitle>
-                  <CardDescription>
-                    Explore além das suas preferências usuais
-                  </CardDescription>
+                  <CardDescription>Explore além das suas preferências usuais</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {['Abstrato', 'Paisagens', 'Personagens', 'Animais'].map((category) => (
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {['Abstrato', 'Paisagens', 'Personagens', 'Animais'].map(category => (
                       <Card key={category}>
                         <CardContent className="p-4 text-center">
-                          <div className="aspect-square bg-muted rounded-lg mb-4" />
+                          <div className="mb-4 aspect-square rounded-lg bg-muted" />
                           <h4 className="font-semibold">{category}</h4>
-                          <Button className="w-full mt-2" size="sm">
+                          <Button className="mt-2 w-full" size="sm">
                             Explorar
                           </Button>
                         </CardContent>
@@ -383,7 +373,7 @@ export function SmartRecommendations() {
             Recomendações atualizadas em tempo real
           </div>
           <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
+            <Filter className="mr-2 h-4 w-4" />
             Ajustar Preferências
           </Button>
         </CardFooter>

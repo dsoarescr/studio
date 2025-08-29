@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
@@ -8,12 +7,20 @@ import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/hooks/use-toast';
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder'
+);
 
 interface StripeContextType {
   isLoading: boolean;
-  createPaymentIntent: (amount: number, currency: string, metadata?: Record<string, string>) => Promise<{ clientSecret: string }>;
-  createSubscription: (priceId: string) => Promise<{ subscriptionId: string; clientSecret: string } | null>;
+  createPaymentIntent: (
+    amount: number,
+    currency: string,
+    metadata?: Record<string, string>
+  ) => Promise<{ clientSecret: string }>;
+  createSubscription: (
+    priceId: string
+  ) => Promise<{ subscriptionId: string; clientSecret: string } | null>;
   confirmPayment: (paymentIntentId: string, paymentMethodId: string) => Promise<boolean>;
   cancelSubscription: (subscriptionId: string) => Promise<boolean>;
 }
@@ -37,15 +44,19 @@ export function StripeProvider({ children }: StripeProviderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const createPaymentIntent = async (amount: number, currency: string = 'eur', metadata?: Record<string, string>) => {
+  const createPaymentIntent = async (
+    amount: number,
+    currency: string = 'eur',
+    metadata?: Record<string, string>
+  ) => {
     if (!user) {
       throw new Error('User must be logged in to create a payment intent');
     }
-    
+
     if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
       throw new Error('Stripe publishable key is not configured');
     }
-    
+
     const token = await user.getIdToken();
 
     setIsLoading(true);
@@ -54,7 +65,7 @@ export function StripeProvider({ children }: StripeProviderProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           amount,
@@ -75,7 +86,8 @@ export function StripeProvider({ children }: StripeProviderProps) {
       const data = await response.json();
       return data;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao processar o pagamento.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Ocorreu um erro ao processar o pagamento.';
       toast({
         title: 'Erro no Pagamento',
         description: errorMessage,
@@ -91,27 +103,27 @@ export function StripeProvider({ children }: StripeProviderProps) {
     if (!user) {
       throw new Error('User must be logged in to create a subscription');
     }
-    
+
     if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
       throw new Error('Stripe publishable key is not configured');
     }
-    
+
     const token = await user.getIdToken();
-    
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/subscriptions/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           priceId,
           metadata: {
             userId: user.uid,
             userEmail: user.email || '',
-          }
+          },
         }),
       });
 
@@ -123,7 +135,8 @@ export function StripeProvider({ children }: StripeProviderProps) {
       const data = await response.json();
       return data;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao criar a subscrição.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Ocorreu um erro ao criar a subscrição.';
       toast({
         title: 'Erro na Subscrição',
         description: errorMessage,
@@ -135,20 +148,23 @@ export function StripeProvider({ children }: StripeProviderProps) {
     }
   };
 
-  const confirmPayment = async (paymentIntentId: string, paymentMethodId: string): Promise<boolean> => {
+  const confirmPayment = async (
+    paymentIntentId: string,
+    paymentMethodId: string
+  ): Promise<boolean> => {
     if (!user) {
       throw new Error('User must be logged in to confirm payment');
     }
-    
+
     const token = await user.getIdToken();
-    
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/payments/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           paymentIntentId,
@@ -162,7 +178,7 @@ export function StripeProvider({ children }: StripeProviderProps) {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         toast({
           title: 'Pagamento Confirmado',
@@ -173,7 +189,8 @@ export function StripeProvider({ children }: StripeProviderProps) {
         throw new Error(data.error || 'Payment confirmation failed');
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao confirmar o pagamento.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Ocorreu um erro ao confirmar o pagamento.';
       toast({
         title: 'Erro na Confirmação',
         description: errorMessage,
@@ -189,16 +206,16 @@ export function StripeProvider({ children }: StripeProviderProps) {
     if (!user) {
       throw new Error('User must be logged in to cancel subscription');
     }
-    
+
     const token = await user.getIdToken();
-    
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/subscriptions/cancel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ subscriptionId }),
       });
@@ -209,7 +226,7 @@ export function StripeProvider({ children }: StripeProviderProps) {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         toast({
           title: 'Subscrição Cancelada',
@@ -220,7 +237,8 @@ export function StripeProvider({ children }: StripeProviderProps) {
         throw new Error(data.error || 'Subscription cancellation failed');
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao cancelar a subscrição.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Ocorreu um erro ao cancelar a subscrição.';
       toast({
         title: 'Erro no Cancelamento',
         description: errorMessage,
@@ -292,4 +310,3 @@ export function StripePaymentElements({ clientSecret, children }: StripePaymentE
     </Elements>
   );
 }
-

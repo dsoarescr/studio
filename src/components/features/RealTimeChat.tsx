@@ -9,24 +9,100 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { useUserStore } from '@/lib/store';
-import { 
-  MessageSquare, Send, Mic, MicOff, Phone, PhoneOff, Video, VideoOff,
-  MoreVertical, Settings, Users, Crown, Star, Shield, Eye, EyeOff,
-  Volume2, VolumeX, Smile, Image, FileText, Link as LinkIcon, Copy, Check,
-  X, Plus, Minus, Search, Filter, SortAsc, SortDesc, Clock,
-  Calendar, MapPin, TrendingUp, Activity, Home, User, LogOut,
-  Sun, Moon, Monitor, Smartphone, Tablet, Wifi, WifiOff, Battery,
-  BatteryCharging, Volume1, MicOff as MicOffIcon, Headphones,
-  Gamepad, Mouse, Keyboard, Laptop, Server, Database, Cloud,
-  CloudOff, Lock, Unlock, Eye as EyeIcon, EyeOff as EyeOffIcon,
-  ShieldCheck, ShieldAlert, AlertTriangle, CheckCircle, XCircle,
-  Info, ExternalLink, ThumbsUp, ThumbsDown, MessageCircle, Mail,
-  Maximize, Minimize
+import {
+  MessageSquare,
+  Send,
+  Mic,
+  MicOff,
+  Phone,
+  PhoneOff,
+  Video,
+  VideoOff,
+  MoreVertical,
+  Settings,
+  Users,
+  Crown,
+  Star,
+  Shield,
+  Eye,
+  EyeOff,
+  Volume2,
+  VolumeX,
+  Smile,
+  Image,
+  FileText,
+  Link as LinkIcon,
+  Copy,
+  Check,
+  X,
+  Plus,
+  Minus,
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Clock,
+  Calendar,
+  MapPin,
+  TrendingUp,
+  Activity,
+  Home,
+  User,
+  LogOut,
+  Sun,
+  Moon,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Wifi,
+  WifiOff,
+  Battery,
+  BatteryCharging,
+  Volume1,
+  MicOff as MicOffIcon,
+  Headphones,
+  Gamepad,
+  Mouse,
+  Keyboard,
+  Laptop,
+  Server,
+  Database,
+  Cloud,
+  CloudOff,
+  Lock,
+  Unlock,
+  Eye as EyeIcon,
+  EyeOff as EyeOffIcon,
+  ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Info,
+  ExternalLink,
+  ThumbsUp,
+  ThumbsDown,
+  MessageCircle,
+  Mail,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -110,8 +186,8 @@ const mockRooms: ChatRoom[] = [
       allowFiles: true,
       allowVoice: false,
       slowMode: false,
-      moderationLevel: 'medium'
-    }
+      moderationLevel: 'medium',
+    },
   },
   {
     id: 'lisboa',
@@ -129,8 +205,8 @@ const mockRooms: ChatRoom[] = [
       allowFiles: false,
       allowVoice: false,
       slowMode: false,
-      moderationLevel: 'low'
-    }
+      moderationLevel: 'low',
+    },
   },
   {
     id: 'trading',
@@ -148,9 +224,9 @@ const mockRooms: ChatRoom[] = [
       allowFiles: true,
       allowVoice: true,
       slowMode: true,
-      moderationLevel: 'high'
-    }
-  }
+      moderationLevel: 'high',
+    },
+  },
 ];
 
 const mockMessages: ChatMessage[] = [
@@ -166,15 +242,15 @@ const mockMessages: ChatMessage[] = [
       isOnline: true,
       isPremium: true,
       isVerified: true,
-      level: 15
+      level: 15,
     },
     reactions: [
       { emoji: '👍', count: 3, users: ['user2', 'user3', 'user4'] },
-      { emoji: '❤️', count: 1, users: ['user5'] }
+      { emoji: '❤️', count: 1, users: ['user5'] },
     ],
     isEdited: false,
     isDeleted: false,
-    mentions: []
+    mentions: [],
   },
   {
     id: '2',
@@ -188,14 +264,12 @@ const mockMessages: ChatMessage[] = [
       isOnline: true,
       isPremium: false,
       isVerified: false,
-      level: 8
+      level: 8,
     },
-    reactions: [
-      { emoji: '🎉', count: 2, users: ['user1', 'user3'] }
-    ],
+    reactions: [{ emoji: '🎉', count: 2, users: ['user1', 'user3'] }],
     isEdited: false,
     isDeleted: false,
-    mentions: []
+    mentions: [],
   },
   {
     id: '3',
@@ -209,14 +283,14 @@ const mockMessages: ChatMessage[] = [
       isOnline: false,
       isPremium: true,
       isVerified: true,
-      level: 22
+      level: 22,
     },
     reactions: [],
     isEdited: false,
     isDeleted: false,
     mentions: ['user2'],
-    replyTo: '2'
-  }
+    replyTo: '2',
+  },
 ];
 
 const mockUsers: ChatUser[] = [
@@ -231,7 +305,7 @@ const mockUsers: ChatUser[] = [
     status: 'online',
     lastSeen: new Date(),
     typing: false,
-    currentRoom: 'global'
+    currentRoom: 'global',
   },
   {
     id: 'user2',
@@ -244,8 +318,8 @@ const mockUsers: ChatUser[] = [
     status: 'online',
     lastSeen: new Date(),
     typing: true,
-    currentRoom: 'global'
-  }
+    currentRoom: 'global',
+  },
 ];
 
 export const RealTimeChat: React.FC = () => {
@@ -285,12 +359,12 @@ export const RealTimeChat: React.FC = () => {
             isOnline: true,
             isPremium: Math.random() > 0.7,
             isVerified: Math.random() > 0.8,
-            level: Math.floor(Math.random() * 50) + 1
+            level: Math.floor(Math.random() * 50) + 1,
           },
           reactions: [],
           isEdited: false,
           isDeleted: false,
-          mentions: []
+          mentions: [],
         };
         setMessages(prev => [...prev, newMsg]);
       }
@@ -314,12 +388,12 @@ export const RealTimeChat: React.FC = () => {
         isOnline: true,
         isPremium: true, // Mock
         isVerified: true, // Mock
-        level: 15 // Mock
+        level: 15, // Mock
       },
       reactions: [],
       isEdited: false,
       isDeleted: false,
-      mentions: extractMentions(newMessage)
+      mentions: extractMentions(newMessage),
     };
 
     setMessages(prev => [...prev, message]);
@@ -328,73 +402,73 @@ export const RealTimeChat: React.FC = () => {
 
     // Clear typing indicator
     setTimeout(() => {
-      setUsers(prev => prev.map(u => 
-        u.id === user.uid ? { ...u, typing: false } : u
-      ));
+      setUsers(prev => prev.map(u => (u.id === user.uid ? { ...u, typing: false } : u)));
     }, 1000);
   }, [newMessage, user]);
 
-  const handleTyping = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewMessage(e.target.value);
-    
-    if (!isTyping) {
-      setIsTyping(true);
-      setUsers(prev => prev.map(u => 
-        u.id === user?.uid ? { ...u, typing: true } : u
-      ));
-    }
+  const handleTyping = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setNewMessage(e.target.value);
 
-    // Clear typing indicator after 3 seconds
-    setTimeout(() => {
-      setIsTyping(false);
-      setUsers(prev => prev.map(u => 
-        u.id === user?.uid ? { ...u, typing: false } : u
-      ));
-    }, 3000);
-  }, [isTyping, user]);
+      if (!isTyping) {
+        setIsTyping(true);
+        setUsers(prev => prev.map(u => (u.id === user?.uid ? { ...u, typing: true } : u)));
+      }
+
+      // Clear typing indicator after 3 seconds
+      setTimeout(() => {
+        setIsTyping(false);
+        setUsers(prev => prev.map(u => (u.id === user?.uid ? { ...u, typing: false } : u)));
+      }, 3000);
+    },
+    [isTyping, user]
+  );
 
   const handleRoomChange = useCallback((room: ChatRoom) => {
     setCurrentRoom(room);
     // Clear unread count
-    setRooms(prev => prev.map(r => 
-      r.id === room.id ? { ...r, unreadCount: 0 } : r
-    ));
+    setRooms(prev => prev.map(r => (r.id === room.id ? { ...r, unreadCount: 0 } : r)));
   }, []);
 
-  const handleReaction = useCallback((messageId: string, emoji: string) => {
-    setMessages(prev => prev.map(msg => {
-      if (msg.id === messageId) {
-        const existingReaction = msg.reactions.find(r => r.emoji === emoji);
-        if (existingReaction) {
-          return {
-            ...msg,
-            reactions: msg.reactions.map(r => 
-              r.emoji === emoji 
-                ? { ...r, count: r.count + 1, users: [...r.users, user?.uid || ''] }
-                : r
-            )
-          };
-        } else {
-          return {
-            ...msg,
-            reactions: [...msg.reactions, { emoji, count: 1, users: [user?.uid || ''] }]
-          };
-        }
-      }
-      return msg;
-    }));
-  }, [user]);
+  const handleReaction = useCallback(
+    (messageId: string, emoji: string) => {
+      setMessages(prev =>
+        prev.map(msg => {
+          if (msg.id === messageId) {
+            const existingReaction = msg.reactions.find(r => r.emoji === emoji);
+            if (existingReaction) {
+              return {
+                ...msg,
+                reactions: msg.reactions.map(r =>
+                  r.emoji === emoji
+                    ? { ...r, count: r.count + 1, users: [...r.users, user?.uid || ''] }
+                    : r
+                ),
+              };
+            } else {
+              return {
+                ...msg,
+                reactions: [...msg.reactions, { emoji, count: 1, users: [user?.uid || ''] }],
+              };
+            }
+          }
+          return msg;
+        })
+      );
+    },
+    [user]
+  );
 
   const toggleMute = useCallback((roomId: string) => {
-    setRooms(prev => prev.map(room => 
-      room.id === roomId ? { ...room, isMuted: !room.isMuted } : room
-    ));
+    setRooms(prev =>
+      prev.map(room => (room.id === roomId ? { ...room, isMuted: !room.isMuted } : room))
+    );
   }, []);
 
   const togglePin = useCallback((roomId: string) => {
-    setRooms(prev => prev.map(room => 
-      room.id === roomId ? { ...room, isPinned: !room.isPinned } : room
-    ));
+    setRooms(prev =>
+      prev.map(room => (room.id === roomId ? { ...room, isPinned: !room.isPinned } : room))
+    );
   }, []);
 
   const filteredRooms = rooms.filter(room => {
@@ -420,7 +494,7 @@ export const RealTimeChat: React.FC = () => {
       >
         <MessageSquare className="h-4 w-4" />
         {rooms.some(room => room.unreadCount > 0) && (
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs">
+          <Badge className="absolute -right-1 -top-1 h-5 w-5 p-0 text-xs">
             {rooms.reduce((sum, room) => sum + room.unreadCount, 0)}
           </Badge>
         )}
@@ -434,8 +508,8 @@ export const RealTimeChat: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className={cn(
-              "fixed bottom-20 right-4 z-50 bg-background border rounded-lg shadow-xl",
-              isMinimized ? "w-80 h-12" : "w-96 h-[500px]"
+              'fixed bottom-20 right-4 z-50 rounded-lg border bg-background shadow-xl',
+              isMinimized ? 'h-12 w-80' : 'h-[500px] w-96'
             )}
           >
             {isMinimized ? (
@@ -450,26 +524,18 @@ export const RealTimeChat: React.FC = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsMinimized(false)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setIsMinimized(false)}>
                     <Maximize className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowChat(false)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setShowChat(false)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col h-full">
+              <div className="flex h-full flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-3 border-b">
+                <div className="flex items-center justify-between border-b p-3">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
                     <span className="font-medium">Chat</span>
@@ -478,34 +544,26 @@ export const RealTimeChat: React.FC = () => {
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsMinimized(true)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setIsMinimized(true)}>
                       <Minimize className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowChat(false)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setShowChat(false)}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="chat" className="flex-1 flex flex-col">
+                <Tabs defaultValue="chat" className="flex flex-1 flex-col">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="chat">Chat</TabsTrigger>
                     <TabsTrigger value="rooms">Salas</TabsTrigger>
                     <TabsTrigger value="users">Utilizadores</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="chat" className="flex-1 flex flex-col">
+                  <TabsContent value="chat" className="flex flex-1 flex-col">
                     {/* Room Header */}
-                    <div className="flex items-center justify-between p-2 border-b bg-muted/50">
+                    <div className="flex items-center justify-between border-b bg-muted/50 p-2">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{currentRoom.icon}</span>
                         <div>
@@ -521,14 +579,19 @@ export const RealTimeChat: React.FC = () => {
                           size="sm"
                           onClick={() => toggleMute(currentRoom.id)}
                         >
-                          {currentRoom.isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                          {currentRoom.isMuted ? (
+                            <VolumeX className="h-4 w-4" />
+                          ) : (
+                            <Volume2 className="h-4 w-4" />
+                          )}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => togglePin(currentRoom.id)}
-                        >
-                          <Star className={cn("h-4 w-4", currentRoom.isPinned && "fill-yellow-400 text-yellow-400")} />
+                        <Button variant="ghost" size="sm" onClick={() => togglePin(currentRoom.id)}>
+                          <Star
+                            className={cn(
+                              'h-4 w-4',
+                              currentRoom.isPinned && 'fill-yellow-400 text-yellow-400'
+                            )}
+                          />
                         </Button>
                       </div>
                     </div>
@@ -536,7 +599,7 @@ export const RealTimeChat: React.FC = () => {
                     {/* Messages */}
                     <ScrollArea className="flex-1 p-2">
                       <div className="space-y-2">
-                        {messages.map((message) => (
+                        {messages.map(message => (
                           <MessageBubble
                             key={message.id}
                             message={message}
@@ -555,7 +618,7 @@ export const RealTimeChat: React.FC = () => {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
-                          className="px-2 py-1 text-xs text-muted-foreground italic"
+                          className="px-2 py-1 text-xs italic text-muted-foreground"
                         >
                           Alguém está a escrever...
                         </motion.div>
@@ -563,12 +626,12 @@ export const RealTimeChat: React.FC = () => {
                     </AnimatePresence>
 
                     {/* Message Input */}
-                    <div className="p-2 border-t">
+                    <div className="border-t p-2">
                       <div className="flex items-center gap-2">
                         <Input
                           value={newMessage}
                           onChange={handleTyping}
-                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                          onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
                           placeholder="Escreva uma mensagem..."
                           className="flex-1"
                         />
@@ -581,11 +644,11 @@ export const RealTimeChat: React.FC = () => {
 
                   <TabsContent value="rooms" className="flex-1">
                     <div className="p-2">
-                      <div className="flex gap-2 mb-2">
+                      <div className="mb-2 flex gap-2">
                         <Input
                           placeholder="Pesquisar salas..."
                           value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
+                          onChange={e => setSearchTerm(e.target.value)}
                           className="flex-1"
                         />
                         <Select value={filterType} onValueChange={setFilterType}>
@@ -600,9 +663,9 @@ export const RealTimeChat: React.FC = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div className="space-y-1">
-                        {sortedRooms.map((room) => (
+                        {sortedRooms.map(room => (
                           <RoomItem
                             key={room.id}
                             room={room}
@@ -619,7 +682,7 @@ export const RealTimeChat: React.FC = () => {
                   <TabsContent value="users" className="flex-1">
                     <div className="p-2">
                       <div className="space-y-1">
-                        {users.map((user) => (
+                        {users.map(user => (
                           <UserItem key={user.id} user={user} />
                         ))}
                       </div>
@@ -646,31 +709,33 @@ const MessageBubble: React.FC<{
   const isOwnMessage = message.sender.id === currentUserId;
 
   return (
-    <div className={cn("flex gap-2", isOwnMessage && "flex-row-reverse")}>
+    <div className={cn('flex gap-2', isOwnMessage && 'flex-row-reverse')}>
       <Avatar className="h-8 w-8">
         <AvatarImage src={message.sender.avatar} />
         <AvatarFallback>{message.sender.name[0]}</AvatarFallback>
       </Avatar>
-      
-      <div className={cn("flex-1 max-w-[80%]", isOwnMessage && "text-right")}>
-        <div className={cn(
-          "rounded-lg p-2",
-          isOwnMessage 
-            ? "bg-primary text-primary-foreground ml-auto" 
-            : "bg-muted"
-        )}>
-          <div className="flex items-center gap-1 mb-1">
-            <span className="font-medium text-sm">{message.sender.name}</span>
+
+      <div className={cn('max-w-[80%] flex-1', isOwnMessage && 'text-right')}>
+        <div
+          className={cn(
+            'rounded-lg p-2',
+            isOwnMessage ? 'ml-auto bg-primary text-primary-foreground' : 'bg-muted'
+          )}
+        >
+          <div className="mb-1 flex items-center gap-1">
+            <span className="text-sm font-medium">{message.sender.name}</span>
             {message.sender.isPremium && <Crown className="h-3 w-3 text-amber-400" />}
             {message.sender.isVerified && <CheckCircle className="h-3 w-3 text-blue-400" />}
-            <Badge variant="secondary" className="text-xs">Nv.{message.sender.level}</Badge>
+            <Badge variant="secondary" className="text-xs">
+              Nv.{message.sender.level}
+            </Badge>
           </div>
-          
+
           <div className="text-sm">{message.content}</div>
-          
+
           {message.reactions.length > 0 && (
-            <div className="flex gap-1 mt-1">
-              {message.reactions.map((reaction) => (
+            <div className="mt-1 flex gap-1">
+              {message.reactions.map(reaction => (
                 <Button
                   key={reaction.emoji}
                   variant="ghost"
@@ -684,8 +749,8 @@ const MessageBubble: React.FC<{
             </div>
           )}
         </div>
-        
-        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+
+        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
           <span>{message.timestamp.toLocaleTimeString()}</span>
           {message.isEdited && <span>(editado)</span>}
           <Button
@@ -697,10 +762,10 @@ const MessageBubble: React.FC<{
             <Smile className="h-3 w-3" />
           </Button>
         </div>
-        
+
         {showReactions && (
-          <div className="flex gap-1 mt-1">
-            {['👍', '❤️', '😂', '😮', '😢', '😡'].map((emoji) => (
+          <div className="mt-1 flex gap-1">
+            {['👍', '❤️', '😂', '😮', '😢', '😡'].map(emoji => (
               <Button
                 key={emoji}
                 variant="ghost"
@@ -731,21 +796,19 @@ const RoomItem: React.FC<{
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-muted/50",
-        isActive && "bg-primary/10"
+        'flex cursor-pointer items-center justify-between rounded-lg p-2 hover:bg-muted/50',
+        isActive && 'bg-primary/10'
       )}
       onClick={onSelect}
     >
       <div className="flex items-center gap-2">
         <span className="text-lg">{room.icon}</span>
         <div className="flex-1">
-          <div className="font-medium text-sm">{room.name}</div>
-          <div className="text-xs text-muted-foreground">
-            {room.memberCount} membros
-          </div>
+          <div className="text-sm font-medium">{room.name}</div>
+          <div className="text-xs text-muted-foreground">{room.memberCount} membros</div>
         </div>
       </div>
-      
+
       <div className="flex items-center gap-1">
         {room.unreadCount > 0 && (
           <Badge variant="destructive" className="h-5 w-5 p-0 text-xs">
@@ -761,27 +824,27 @@ const RoomItem: React.FC<{
 
 const UserItem: React.FC<{ user: ChatUser }> = ({ user }) => {
   return (
-    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+    <div className="flex items-center justify-between rounded-lg p-2 hover:bg-muted/50">
       <div className="flex items-center gap-2">
         <div className="relative">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar} />
             <AvatarFallback>{user.name[0]}</AvatarFallback>
           </Avatar>
-          <div className={cn(
-            "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background",
-            user.isOnline ? "bg-green-500" : "bg-gray-400"
-          )} />
+          <div
+            className={cn(
+              'absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background',
+              user.isOnline ? 'bg-green-500' : 'bg-gray-400'
+            )}
+          />
         </div>
-        
+
         <div className="flex-1">
-          <div className="font-medium text-sm">{user.name}</div>
-          <div className="text-xs text-muted-foreground">
-            Nível {user.level}
-          </div>
+          <div className="text-sm font-medium">{user.name}</div>
+          <div className="text-xs text-muted-foreground">Nível {user.level}</div>
         </div>
       </div>
-      
+
       <div className="flex items-center gap-1">
         {user.isPremium && <Crown className="h-3 w-3 text-amber-400" />}
         {user.isVerified && <CheckCircle className="h-3 w-3 text-blue-400" />}
@@ -801,7 +864,7 @@ function generateRandomMessage(): string {
     'Alguém quer trocar pixels?',
     'Que acham do novo sistema de coleções?',
     'Alguma previsão para os preços?',
-    'Vou fazer uma coleção de pixels históricos!'
+    'Vou fazer uma coleção de pixels históricos!',
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
@@ -810,10 +873,10 @@ function extractMentions(text: string): string[] {
   const mentionRegex = /@(\w+)/g;
   const mentions: string[] = [];
   let match;
-  
+
   while ((match = mentionRegex.exec(text)) !== null) {
     mentions.push(match[1]);
   }
-  
+
   return mentions;
 }

@@ -12,7 +12,7 @@ interface AchievementProgressProps {
   maxTier: number;
   progress: number;
   maxProgress: number;
-  rarity: string;
+  rarity: keyof typeof rarityGradients;
   isUnlocked: boolean;
 }
 
@@ -21,7 +21,7 @@ const rarityGradients = {
   uncommon: 'from-green-400 to-green-500',
   rare: 'from-blue-400 to-blue-500',
   epic: 'from-purple-400 to-purple-500',
-  legendary: 'from-amber-400 to-amber-500'
+  legendary: 'from-amber-400 to-amber-500',
 };
 
 export function AchievementProgress({
@@ -30,7 +30,7 @@ export function AchievementProgress({
   progress,
   maxProgress,
   rarity,
-  isUnlocked
+  isUnlocked,
 }: AchievementProgressProps) {
   const progressPercentage = (progress / maxProgress) * 100;
   const gradient = rarityGradients[rarity] || rarityGradients.common;
@@ -39,12 +39,9 @@ export function AchievementProgress({
     <div className="space-y-2">
       {/* Barra de Progresso Animada */}
       <div className="relative">
-        <Progress 
-          value={progressPercentage} 
-          className={cn(
-            "h-2 bg-background/50",
-            isUnlocked && "bg-gradient-to-r " + gradient
-          )}
+        <Progress
+          value={progressPercentage}
+          className={cn('h-2 bg-background/50', isUnlocked && 'bg-gradient-to-r ' + gradient)}
         />
         <motion.div
           initial={{ scale: 0 }}
@@ -57,12 +54,7 @@ export function AchievementProgress({
               animate={{ rotate: 360 }}
               transition={{ duration: 0.5 }}
             >
-              <Badge 
-                className={cn(
-                  "bg-gradient-to-r shadow-lg",
-                  gradient
-                )}
-              >
+              <Badge className={cn('bg-gradient-to-r shadow-lg', gradient)}>
                 {progress}/{maxProgress}
               </Badge>
             </motion.div>
@@ -71,7 +63,7 @@ export function AchievementProgress({
       </div>
 
       {/* Indicador de Tier */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         {Array.from({ length: maxTier }).map((_, index) => (
           <motion.div
             key={index}
@@ -79,19 +71,19 @@ export function AchievementProgress({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center",
+              'flex h-8 w-8 items-center justify-center rounded-full',
               index < currentTier
-                ? "bg-gradient-to-br " + gradient + " text-white"
-                : "bg-background/50 text-muted-foreground"
+                ? 'bg-gradient-to-br ' + gradient + ' text-white'
+                : 'bg-background/50 text-muted-foreground'
             )}
           >
             {index < currentTier ? (
               rarity === 'legendary' ? (
-                <Award className="w-4 h-4" />
+                <Award className="h-4 w-4" />
               ) : rarity === 'epic' || rarity === 'rare' ? (
-                <Star className="w-4 h-4" />
+                <Star className="h-4 w-4" />
               ) : (
-                <Trophy className="w-4 h-4" />
+                <Trophy className="h-4 w-4" />
               )
             ) : (
               <span className="text-sm">{index + 1}</span>

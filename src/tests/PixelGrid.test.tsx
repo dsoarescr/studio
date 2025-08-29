@@ -1,12 +1,31 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PixelGrid from '@/components/pixel-grid/PixelGrid';
-import { useUserStore, usePixelStore } from '@/lib/store';
+import { useUserStore, usePixelStore, useAppStore, useSettingsStore } from '@/lib/store';
 
 // Mock the stores
 jest.mock('@/lib/store', () => ({
   useUserStore: jest.fn(),
   usePixelStore: jest.fn(),
+  useAppStore: jest.fn(),
+  useSettingsStore: jest.fn(),
+}));
+
+// Mock do contexto de autenticação para evitar erro do hook durante os testes
+jest.mock('@/lib/auth-context', () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    signIn: jest.fn(),
+    signUp: jest.fn(),
+    logOut: jest.fn(),
+    signInWithGoogle: jest.fn(),
+    signInWithFacebook: jest.fn(),
+    signInWithTwitter: jest.fn(),
+    signInWithGithub: jest.fn(),
+    resetPassword: jest.fn(),
+    updateUserProfile: jest.fn(),
+  }),
 }));
 
 // Mock the AI function - temporarily disabled
@@ -31,6 +50,14 @@ describe('PixelGrid Component', () => {
       updatePixelColor: jest.fn(),
       loadSoldPixels: jest.fn().mockReturnValue([]),
     });
+
+    (useAppStore as jest.Mock).mockReturnValue({
+      isOnline: true,
+    });
+
+    (useSettingsStore as jest.Mock).mockReturnValue({
+      soundEffects: false,
+    });
     
     // Mock canvas methods
     HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
@@ -52,46 +79,59 @@ describe('PixelGrid Component', () => {
   
   it('renders loading state initially', () => {
     render(<PixelGrid />);
-    expect(screen.getByText(/A renderizar mapa de Portugal/i)).toBeInTheDocument();
+    expect(screen.getByText(/Carregando mapa.../i)).toBeInTheDocument();
   });
   
   it('renders zoom controls', async () => {
+    jest.useFakeTimers();
     render(<PixelGrid />);
+    // Avançar timers simulados para concluir os timeouts do loading
+    jest.advanceTimersByTime(1100);
     await waitFor(() => {
-      const zoomInButton = screen.getByLabelText('Zoom In');
-      const zoomOutButton = screen.getByLabelText('Zoom Out');
-      expect(zoomInButton).toBeInTheDocument();
-      expect(zoomOutButton).toBeInTheDocument();
+      const plusBtn = screen.getByText('+');
+      const minusBtn = screen.getByText('-');
+      const resetBtn = screen.getByText('Reset');
+      expect(plusBtn).toBeInTheDocument();
+      expect(minusBtn).toBeInTheDocument();
+      expect(resetBtn).toBeInTheDocument();
     });
+    jest.useRealTimers();
   });
   
   it('handles zoom in button click', async () => {
+    jest.useFakeTimers();
     render(<PixelGrid />);
+    jest.advanceTimersByTime(1100);
     await waitFor(() => {
-      const zoomInButton = screen.getByLabelText('Zoom In');
+      const zoomInButton = screen.getByText('+');
       fireEvent.click(zoomInButton);
-      // Would need to check if zoom state changed, but that's internal
-      // This is just checking if the click handler doesn't throw
       expect(zoomInButton).toBeInTheDocument();
     });
+    jest.useRealTimers();
   });
   
   it('handles zoom out button click', async () => {
+    jest.useFakeTimers();
     render(<PixelGrid />);
+    jest.advanceTimersByTime(1100);
     await waitFor(() => {
-      const zoomOutButton = screen.getByLabelText('Zoom Out');
+      const zoomOutButton = screen.getByText('-');
       fireEvent.click(zoomOutButton);
       expect(zoomOutButton).toBeInTheDocument();
     });
+    jest.useRealTimers();
   });
   
   it('handles reset view button click', async () => {
+    jest.useFakeTimers();
     render(<PixelGrid />);
+    jest.advanceTimersByTime(1100);
     await waitFor(() => {
-      const resetButton = screen.getByLabelText('Reset View');
+      const resetButton = screen.getByText('Reset');
       fireEvent.click(resetButton);
       expect(resetButton).toBeInTheDocument();
     });
+    jest.useRealTimers();
   });
   
   // More tests would be added for:

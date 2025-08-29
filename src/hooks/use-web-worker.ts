@@ -19,22 +19,22 @@ export const useWebWorker = (workerPath: string) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       workerRef.current = new Worker(workerPath);
-      
+
       workerRef.current.onmessage = (event: MessageEvent<WorkerResponse>) => {
         const { type, data, error } = event.data;
-        
+
         if (error) {
           console.error('Web Worker error:', error);
           return;
         }
-        
+
         const handler = messageHandlersRef.current.get(type);
         if (handler) {
           handler(data);
         }
       };
 
-      workerRef.current.onerror = (error) => {
+      workerRef.current.onerror = error => {
         console.error('Web Worker error:', error);
       };
     }
@@ -64,36 +64,48 @@ export const useWebWorker = (workerPath: string) => {
   }, []);
 
   // Calculate pixel statistics
-  const calculatePixelStats = useCallback((pixelData: any[]) => {
-    sendMessage({
-      type: 'CALCULATE_PIXEL_STATS',
-      data: pixelData
-    });
-  }, [sendMessage]);
+  const calculatePixelStats = useCallback(
+    (pixelData: any[]) => {
+      sendMessage({
+        type: 'CALCULATE_PIXEL_STATS',
+        data: pixelData,
+      });
+    },
+    [sendMessage]
+  );
 
   // Analyze pixel patterns
-  const analyzePixelPatterns = useCallback((pixelData: any[]) => {
-    sendMessage({
-      type: 'ANALYZE_PIXEL_PATTERNS',
-      data: pixelData
-    });
-  }, [sendMessage]);
+  const analyzePixelPatterns = useCallback(
+    (pixelData: any[]) => {
+      sendMessage({
+        type: 'ANALYZE_PIXEL_PATTERNS',
+        data: pixelData,
+      });
+    },
+    [sendMessage]
+  );
 
   // Generate recommendations
-  const generateRecommendations = useCallback((userData: any) => {
-    sendMessage({
-      type: 'GENERATE_RECOMMENDATIONS',
-      data: userData
-    });
-  }, [sendMessage]);
+  const generateRecommendations = useCallback(
+    (userData: any) => {
+      sendMessage({
+        type: 'GENERATE_RECOMMENDATIONS',
+        data: userData,
+      });
+    },
+    [sendMessage]
+  );
 
   // Process large dataset
-  const processLargeDataset = useCallback((dataset: any[]) => {
-    sendMessage({
-      type: 'PROCESS_LARGE_DATASET',
-      data: dataset
-    });
-  }, [sendMessage]);
+  const processLargeDataset = useCallback(
+    (dataset: any[]) => {
+      sendMessage({
+        type: 'PROCESS_LARGE_DATASET',
+        data: dataset,
+      });
+    },
+    [sendMessage]
+  );
 
   return {
     sendMessage,
@@ -103,6 +115,6 @@ export const useWebWorker = (workerPath: string) => {
     analyzePixelPatterns,
     generateRecommendations,
     processLargeDataset,
-    isSupported: typeof window !== 'undefined' && 'Worker' in window
+    isSupported: typeof window !== 'undefined' && 'Worker' in window,
   };
 };

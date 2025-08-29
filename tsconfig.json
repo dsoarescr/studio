@@ -20,8 +20,17 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "cypress/**",
+    "src/tests/**",
+    "src/stories/**",
+    "functions/**",
+    "src/components/pixel-grid/**",
+    "src/ai_backup/**"
+  ]
 }

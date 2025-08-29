@@ -3,7 +3,14 @@
 import React, { useEffect } from 'react';
 import { useSettingsStore } from '@/lib/store';
 
-export type HapticPattern = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection';
+export type HapticPattern =
+  | 'light'
+  | 'medium'
+  | 'heavy'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'selection';
 
 interface HapticFeedbackProps {
   pattern: HapticPattern;
@@ -18,7 +25,7 @@ const hapticPatterns: Record<HapticPattern, number | number[]> = {
   success: [50, 50, 100],
   warning: [100, 50, 100, 50, 100],
   error: [200, 100, 200],
-  selection: 25
+  selection: 25,
 };
 
 export function HapticFeedback({ pattern, trigger, onComplete }: HapticFeedbackProps) {
@@ -55,11 +62,11 @@ interface HapticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   children: React.ReactNode;
 }
 
-export function HapticButton({ 
-  hapticPattern = 'light', 
-  children, 
+export function HapticButton({
+  hapticPattern = 'light',
+  children,
   onClick,
-  ...props 
+  ...props
 }: HapticButtonProps) {
   const { vibrate } = useHapticFeedback();
 

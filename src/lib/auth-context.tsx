@@ -1,21 +1,27 @@
-
 // src/lib/auth-context.tsx
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
+import {
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   signInWithPopup,
   sendPasswordResetEmail,
   updateProfile,
-  AuthProvider as FirebaseAuthProvider // Renamed to avoid conflict with our component
+  AuthProvider as FirebaseAuthProvider, // Renamed to avoid conflict with our component
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider, facebookProvider, twitterProvider, githubProvider } from './firebase';
+import {
+  auth,
+  db,
+  googleProvider,
+  facebookProvider,
+  twitterProvider,
+  githubProvider,
+} from './firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useUserStore } from './store';
 
@@ -39,12 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { 
-    addCredits, 
-    addSpecialCredits, 
-    addXp, 
-    unlockAchievement 
-  } = useUserStore();
+  const { addCredits, addSpecialCredits, addXp, unlockAchievement } = useUserStore();
 
   useEffect(() => {
     // Check if we're on the client side and Firebase is available
@@ -52,22 +53,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       return;
     }
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+
+    const unsubscribe = onAuthStateChanged(auth, async user => {
       try {
         setUser(user);
-        
+
         if (user) {
           // Check if user exists in Firestore
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
-          
+
           if (userSnap.exists()) {
             // Update last login
             await updateDoc(userRef, {
-              lastLogin: serverTimestamp()
+              lastLogin: serverTimestamp(),
             });
-            
+
             // Initialize user store with Firestore data
             const userData = userSnap.data();
             if (userData) {
@@ -96,11 +97,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } catch (error) {
-        console.error("Error in auth state change:", error);
+        console.error('Error in auth state change:', error);
         toast({
-          title: "Erro de Autenticação",
-          description: "Ocorreu um erro ao verificar o estado da autenticação.",
-          variant: "destructive",
+          title: 'Erro de Autenticação',
+          description: 'Ocorreu um erro ao verificar o estado da autenticação.',
+          variant: 'destructive',
         });
       } finally {
         setLoading(false);
@@ -113,20 +114,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       if (!auth) {
-        throw new Error("Firebase Auth não está disponível");
+        throw new Error('Firebase Auth não está disponível');
       }
-      
+
       await signInWithEmailAndPassword(auth, email, password);
       toast({
-        title: "Login bem-sucedido",
-        description: "Bem-vindo de volta ao Pixel Universe!",
+        title: 'Login bem-sucedido',
+        description: 'Bem-vindo de volta ao Pixel Universe!',
       });
     } catch (error: any) {
-      console.error("Error signing in:", error);
+      console.error('Error signing in:', error);
       toast({
-        title: "Erro no login",
+        title: 'Erro no login',
         description: getAuthErrorMessage(error.code),
-        variant: "destructive",
+        variant: 'destructive',
       });
       throw error;
     }
@@ -135,15 +136,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, username: string) => {
     try {
       if (!auth || !db) {
-        throw new Error("Firebase não está disponível");
+        throw new Error('Firebase não está disponível');
       }
-      
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
       // Update the user's profile in Firebase Authentication
       await updateProfile(user, { displayName: username });
-      
+
       // Create user document in Firestore with all necessary initial data
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, {
@@ -165,15 +166,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       toast({
-        title: "Registo bem-sucedido",
-        description: "A sua conta foi criada com sucesso!",
+        title: 'Registo bem-sucedido',
+        description: 'A sua conta foi criada com sucesso!',
       });
     } catch (error: any) {
-      console.error("Error signing up:", error);
+      console.error('Error signing up:', error);
       toast({
-        title: "Erro no registo",
+        title: 'Erro no registo',
         description: getAuthErrorMessage(error.code),
-        variant: "destructive",
+        variant: 'destructive',
       });
       throw error;
     }
@@ -182,20 +183,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logOut = async () => {
     try {
       if (!auth) {
-        throw new Error("Firebase Auth não está disponível");
+        throw new Error('Firebase Auth não está disponível');
       }
-      
+
       await signOut(auth);
       toast({
-        title: "Sessão terminada",
-        description: "Esperamos vê-lo em breve!",
+        title: 'Sessão terminada',
+        description: 'Esperamos vê-lo em breve!',
       });
     } catch (error: any) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
       toast({
-        title: "Erro ao terminar sessão",
-        description: "Ocorreu um erro ao terminar a sessão. Tente novamente.",
-        variant: "destructive",
+        title: 'Erro ao terminar sessão',
+        description: 'Ocorreu um erro ao terminar a sessão. Tente novamente.',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -204,16 +205,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithSocialProvider = async (provider: FirebaseAuthProvider) => {
     try {
       if (!auth || !db) {
-        throw new Error("Firebase não está disponível");
+        throw new Error('Firebase não está disponível');
       }
-      
+
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      
+
       // Check if user document exists, create if not
       const userRef = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
-      
+
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           uid: user.uid,
@@ -229,26 +230,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           pixels: [],
           achievements: [],
           isPremium: false,
-          isVerified: user.emailVerified
+          isVerified: user.emailVerified,
         });
       } else {
         await updateDoc(userRef, {
           lastLogin: serverTimestamp(),
           photoURL: user.photoURL,
-          displayName: user.displayName
+          displayName: user.displayName,
         });
       }
-      
+
       toast({
-        title: "Login bem-sucedido",
-        description: "Bem-vindo ao Pixel Universe!",
+        title: 'Login bem-sucedido',
+        description: 'Bem-vindo ao Pixel Universe!',
       });
     } catch (error: any) {
-      console.error("Error signing in with social provider:", error);
+      console.error('Error signing in with social provider:', error);
       toast({
-        title: "Erro no login",
+        title: 'Erro no login',
         description: getAuthErrorMessage(error.code),
-        variant: "destructive",
+        variant: 'destructive',
       });
       throw error;
     }
@@ -262,20 +263,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     try {
       if (!auth) {
-        throw new Error("Firebase Auth não está disponível");
+        throw new Error('Firebase Auth não está disponível');
       }
-      
+
       await sendPasswordResetEmail(auth, email);
       toast({
-        title: "Email enviado",
-        description: "Verifique o seu email para redefinir a password.",
+        title: 'Email enviado',
+        description: 'Verifique o seu email para redefinir a password.',
       });
     } catch (error: any) {
-      console.error("Error resetting password:", error);
+      console.error('Error resetting password:', error);
       toast({
-        title: "Erro ao redefinir password",
+        title: 'Erro ao redefinir password',
         description: getAuthErrorMessage(error.code),
-        variant: "destructive",
+        variant: 'destructive',
       });
       throw error;
     }
@@ -283,31 +284,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUserProfile = async (displayName?: string, photoURL?: string) => {
     try {
-      if (!user) throw new Error("No user logged in");
+      if (!user) throw new Error('No user logged in');
       if (!auth || !db) {
-        throw new Error("Firebase não está disponível");
+        throw new Error('Firebase não está disponível');
       }
-      
+
       const updates: { displayName?: string; photoURL?: string } = {};
       if (displayName) updates.displayName = displayName;
       if (photoURL) updates.photoURL = photoURL;
-      
+
       await updateProfile(user, updates);
-      
+
       // Update Firestore
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, updates);
-      
+
       toast({
-        title: "Perfil atualizado",
-        description: "As suas informações foram atualizadas com sucesso.",
+        title: 'Perfil atualizado',
+        description: 'As suas informações foram atualizadas com sucesso.',
       });
     } catch (error: any) {
-      console.error("Error updating profile:", error);
+      console.error('Error updating profile:', error);
       toast({
-        title: "Erro ao atualizar perfil",
-        description: "Ocorreu um erro ao atualizar o seu perfil. Tente novamente.",
-        variant: "destructive",
+        title: 'Erro ao atualizar perfil',
+        description: 'Ocorreu um erro ao atualizar o seu perfil. Tente novamente.',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -357,7 +358,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithTwitter,
         signInWithGithub,
         resetPassword,
-        updateUserProfile
+        updateUserProfile,
       }}
     >
       {children}
@@ -372,4 +373,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

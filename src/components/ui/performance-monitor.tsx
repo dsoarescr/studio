@@ -37,7 +37,7 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
       const now = performance.now();
 
       if (now - lastTime >= 1000) {
-        setFps(Math.round(frameCount * 1000 / (now - lastTime)));
+        setFps(Math.round((frameCount * 1000) / (now - lastTime)));
         frameCount = 0;
         lastTime = now;
 
@@ -46,7 +46,7 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
           const memoryInfo = (performance as any).memory;
           const usedMemoryMB = Math.round(memoryInfo.usedJSHeapSize / (1024 * 1024));
           const totalMemoryMB = Math.round(memoryInfo.jsHeapSizeLimit / (1024 * 1024));
-          setMemoryUsage(usedMemoryMB / totalMemoryMB * 100);
+          setMemoryUsage((usedMemoryMB / totalMemoryMB) * 100);
         }
 
         // Show warning if FPS is consistently low
@@ -76,8 +76,8 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
     }
 
     toast({
-      title: "Modo de Desempenho Ativado",
-      description: "Otimizações aplicadas para melhorar a performance.",
+      title: 'Modo de Desempenho Ativado',
+      description: 'Otimizações aplicadas para melhorar a performance.',
     });
 
     setIsVisible(false);
@@ -86,8 +86,8 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
   if (!isVisible) return null;
 
   return (
-    <Card className="fixed bottom-20 right-4 z-40 w-64 bg-card/90 backdrop-blur-sm border-yellow-500/50 shadow-lg animate-pulse">
-      <CardContent className="p-3 space-y-2">
+    <Card className="fixed bottom-20 right-4 z-40 w-64 animate-pulse border-yellow-500/50 bg-card/90 shadow-lg backdrop-blur-sm">
+      <CardContent className="space-y-2 p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {fps < 30 ? (
@@ -97,21 +97,21 @@ export function PerformanceMonitor({ onOptimize }: PerformanceMonitorProps) {
             )}
             <span className="text-sm font-medium">Performance</span>
           </div>
-          <span className="text-xs font-code">{fps} FPS</span>
+          <span className="font-code text-xs">{fps} FPS</span>
         </div>
 
-        <Progress value={fps / 60 * 100} className="h-1.5" />
+        <Progress value={(fps / 60) * 100} className="h-1.5" />
 
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Dispositivo {isLowPerformance ? 'de baixo desempenho' : 'normal'}</span>
         </div>
 
-        <Button 
-          size="sm" 
-          className="w-full text-xs h-8 bg-gradient-to-r from-yellow-500 to-amber-500"
+        <Button
+          size="sm"
+          className="h-8 w-full bg-gradient-to-r from-yellow-500 to-amber-500 text-xs"
           onClick={handleOptimize}
         >
-          <Zap className="h-3 w-3 mr-1" />
+          <Zap className="mr-1 h-3 w-3" />
           Otimizar Desempenho
         </Button>
       </CardContent>

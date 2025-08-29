@@ -2,20 +2,56 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import {
-  ShoppingCart, Star, Sparkles, TrendingUp, Clock,
-  Award, Gift, Coins, Search, Filter, SortAsc,
-  Zap, Crown, Diamond, Tag, Megaphone, Auction,
-  Bookmark, Share2, Eye, DollarSign, BarChart
+  ShoppingCart,
+  Star,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  Award,
+  Gift,
+  Coins,
+  Search,
+  Filter,
+  SortAsc,
+  Zap,
+  Crown,
+  Diamond,
+  Tag,
+  Megaphone,
+  // Auction icon does not exist in lucide-react; remove or replace
+  Bookmark,
+  Share2,
+  Eye,
+  DollarSign,
+  BarChart,
+  Plus,
+  MapPin,
+  Heart,
+  Check,
+  MousePointer,
 } from 'lucide-react';
 
 interface PixelListing {
@@ -71,26 +107,26 @@ const mockListings: PixelListing[] = [
       id: 'seller1',
       name: 'João Silva',
       rating: 4.8,
-      verified: true
+      verified: true,
     },
     location: {
       x: 150,
       y: 200,
-      region: 'Porto'
+      region: 'Porto',
     },
     stats: {
       views: 245,
       likes: 42,
-      saves: 15
+      saves: 15,
     },
     features: {
       isFeatured: true,
       isPromoted: true,
-      hasAuction: false
+      hasAuction: false,
     },
     tags: ['vista-rio', 'centro-historico', 'premium'],
-    createdAt: '2024-03-20T14:30:00Z'
-  }
+    createdAt: '2024-03-20T14:30:00Z',
+  },
 ];
 
 const advertisingSlots: AdvertisingSlot[] = [
@@ -103,7 +139,7 @@ const advertisingSlots: AdvertisingSlot[] = [
     currentBid: 120,
     impressions: 1500,
     clicks: 75,
-    available: true
+    available: true,
   },
   {
     id: 'ad2',
@@ -113,11 +149,15 @@ const advertisingSlots: AdvertisingSlot[] = [
     pricePerDay: 50,
     impressions: 800,
     clicks: 40,
-    available: true
-  }
+    available: true,
+  },
 ];
 
-export function EnhancedMarketplace() {
+interface EnhancedMarketplaceProps {
+  onPixelClick?: (pixelId: string) => void;
+}
+
+export function EnhancedMarketplace({ onPixelClick }: EnhancedMarketplaceProps) {
   const [activeTab, setActiveTab] = useState('browse');
   const [sortBy, setSortBy] = useState('recent');
   const [priceRange, setPriceRange] = useState([0, 5000]);
@@ -126,35 +166,33 @@ export function EnhancedMarketplace() {
 
   const handlePromotePixel = (pixelId: string) => {
     toast({
-      title: "Promoção Ativada",
-      description: "Seu pixel será promovido por 7 dias!",
+      title: 'Promoção Ativada',
+      description: 'Seu pixel será promovido por 7 dias!',
     });
   };
 
   const handleBidAdvertising = (slotId: string, amount: number) => {
     toast({
-      title: "Lance Registrado",
+      title: 'Lance Registrado',
       description: `Seu lance de ${amount} créditos foi registrado.`,
     });
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6 py-6">
       {/* Marketplace Header */}
       <Card className="border-2 border-primary/20">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-2xl">
                 <ShoppingCart className="h-6 w-6 text-primary" />
                 Marketplace
               </CardTitle>
-              <CardDescription>
-                Compre, venda e promova seus pixels
-              </CardDescription>
+              <CardDescription>Compre, venda e promova seus pixels</CardDescription>
             </div>
             <Button>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Listar Pixel
             </Button>
           </div>
@@ -164,19 +202,19 @@ export function EnhancedMarketplace() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="browse">
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="mr-2 h-4 w-4" />
                 Explorar
               </TabsTrigger>
               <TabsTrigger value="featured">
-                <Star className="h-4 w-4 mr-2" />
+                <Star className="mr-2 h-4 w-4" />
                 Destaques
               </TabsTrigger>
               <TabsTrigger value="auctions">
-                <Auction className="h-4 w-4 mr-2" />
+                <Megaphone className="mr-2 h-4 w-4" />
                 Leilões
               </TabsTrigger>
               <TabsTrigger value="advertising">
-                <Megaphone className="h-4 w-4 mr-2" />
+                <Megaphone className="mr-2 h-4 w-4" />
                 Publicidade
               </TabsTrigger>
             </TabsList>
@@ -184,10 +222,7 @@ export function EnhancedMarketplace() {
             {/* Filtros */}
             <div className="mt-6 space-y-4">
               <div className="flex gap-4">
-                <Input
-                  placeholder="Pesquisar pixels..."
-                  className="flex-1"
-                />
+                <Input placeholder="Pesquisar pixels..." className="flex-1" />
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Ordenar por" />
@@ -215,19 +250,20 @@ export function EnhancedMarketplace() {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch
-                    checked={showFeaturedOnly}
-                    onCheckedChange={setShowFeaturedOnly}
-                  />
+                  <Switch checked={showFeaturedOnly} onCheckedChange={setShowFeaturedOnly} />
                   <span className="text-sm">Apenas Destaques</span>
                 </div>
               </div>
             </div>
 
             <TabsContent value="browse" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockListings.map((listing) => (
-                  <Card key={listing.id} className="overflow-hidden hover:border-primary/50 transition-colors">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {mockListings.map(listing => (
+                  <Card
+                    key={listing.id}
+                    className="cursor-pointer overflow-hidden transition-colors hover:border-primary/50"
+                    onClick={() => onPixelClick?.(listing.id)}
+                  >
                     <CardHeader>
                       <div className="flex justify-between">
                         <div>
@@ -235,7 +271,7 @@ export function EnhancedMarketplace() {
                             {listing.title}
                             {listing.features.isFeatured && (
                               <Badge variant="secondary">
-                                <Star className="h-3 w-3 mr-1" />
+                                <Star className="mr-1 h-3 w-3" />
                                 Destaque
                               </Badge>
                             )}
@@ -249,40 +285,38 @@ export function EnhancedMarketplace() {
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                      <div className="aspect-square rounded-lg bg-muted relative">
+                      <div className="relative aspect-square rounded-lg bg-muted">
                         {/* Preview do Pixel */}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <Eye className="h-8 w-8 text-muted-foreground" />
                         </div>
                         {listing.features.isPromoted && (
-                          <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-500 to-pink-500">
-                            <Sparkles className="h-3 w-3 mr-1" />
+                          <Badge className="absolute right-2 top-2 bg-gradient-to-r from-purple-500 to-pink-500">
+                            <Sparkles className="mr-1 h-3 w-3" />
                             Promovido
                           </Badge>
                         )}
                       </div>
 
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="flex items-center">
-                            <MapPin className="h-3 w-3 mr-1" />
+                            <MapPin className="mr-1 h-3 w-3" />
                             {listing.location.region}
                           </Badge>
                           <Badge variant="outline" className="flex items-center">
-                            <Star className="h-3 w-3 mr-1" />
+                            <Star className="mr-1 h-3 w-3" />
                             {listing.seller.rating}
                           </Badge>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-muted-foreground">Preço</p>
-                          <p className="text-lg font-bold text-primary">
-                            {listing.price} créditos
-                          </p>
+                          <p className="text-lg font-bold text-primary">{listing.price} créditos</p>
                         </div>
                       </div>
 
-                      <div className="flex gap-2 flex-wrap">
-                        {listing.tags.map((tag) => (
+                      <div className="flex flex-wrap gap-2">
+                        {listing.tags.map(tag => (
                           <Badge key={tag} variant="secondary">
                             #{tag}
                           </Badge>
@@ -302,7 +336,7 @@ export function EnhancedMarketplace() {
                         </span>
                       </div>
                       <Button>
-                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        <ShoppingCart className="mr-2 h-4 w-4" />
                         Comprar
                       </Button>
                     </CardFooter>
@@ -321,7 +355,7 @@ export function EnhancedMarketplace() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       {/* Pacote Básico */}
                       <Card>
                         <CardHeader>
@@ -329,14 +363,10 @@ export function EnhancedMarketplace() {
                             <Star className="h-5 w-5 text-primary" />
                             Básico
                           </CardTitle>
-                          <CardDescription>
-                            7 dias de destaque
-                          </CardDescription>
+                          <CardDescription>7 dias de destaque</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold text-primary mb-4">
-                            100 créditos
-                          </div>
+                          <div className="mb-4 text-2xl font-bold text-primary">100 créditos</div>
                           <ul className="space-y-2">
                             <li className="flex items-center gap-2">
                               <Check className="h-4 w-4 text-green-500" />
@@ -349,9 +379,7 @@ export function EnhancedMarketplace() {
                           </ul>
                         </CardContent>
                         <CardFooter>
-                          <Button className="w-full">
-                            Selecionar
-                          </Button>
+                          <Button className="w-full">Selecionar</Button>
                         </CardFooter>
                       </Card>
 
@@ -362,14 +390,10 @@ export function EnhancedMarketplace() {
                             <Crown className="h-5 w-5 text-primary" />
                             Premium
                           </CardTitle>
-                          <CardDescription>
-                            30 dias de destaque
-                          </CardDescription>
+                          <CardDescription>30 dias de destaque</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold text-primary mb-4">
-                            300 créditos
-                          </div>
+                          <div className="mb-4 text-2xl font-bold text-primary">300 créditos</div>
                           <ul className="space-y-2">
                             <li className="flex items-center gap-2">
                               <Check className="h-4 w-4 text-green-500" />
@@ -399,14 +423,10 @@ export function EnhancedMarketplace() {
                             <Diamond className="h-5 w-5 text-primary" />
                             Ultimate
                           </CardTitle>
-                          <CardDescription>
-                            90 dias de destaque
-                          </CardDescription>
+                          <CardDescription>90 dias de destaque</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold text-primary mb-4">
-                            700 créditos
-                          </div>
+                          <div className="mb-4 text-2xl font-bold text-primary">700 créditos</div>
                           <ul className="space-y-2">
                             <li className="flex items-center gap-2">
                               <Check className="h-4 w-4 text-green-500" />
@@ -423,9 +443,7 @@ export function EnhancedMarketplace() {
                           </ul>
                         </CardContent>
                         <CardFooter>
-                          <Button className="w-full">
-                            Selecionar
-                          </Button>
+                          <Button className="w-full">Selecionar</Button>
                         </CardFooter>
                       </Card>
                     </div>
@@ -439,9 +457,7 @@ export function EnhancedMarketplace() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Leilões Ativos</CardTitle>
-                    <CardDescription>
-                      Participe de leilões de pixels exclusivos
-                    </CardDescription>
+                    <CardDescription>Participe de leilões de pixels exclusivos</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -456,41 +472,29 @@ export function EnhancedMarketplace() {
                               </CardDescription>
                             </div>
                             <Badge variant="destructive" className="animate-pulse">
-                              <Clock className="h-3 w-3 mr-1" />
+                              <Clock className="mr-1 h-3 w-3" />
                               2h restantes
                             </Badge>
                           </div>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-between">
                               <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Lance Atual
-                                </p>
-                                <p className="text-2xl font-bold text-primary">
-                                  1500 créditos
-                                </p>
+                                <p className="text-sm text-muted-foreground">Lance Atual</p>
+                                <p className="text-2xl font-bold text-primary">1500 créditos</p>
                               </div>
                               <div>
                                 <p className="text-sm text-muted-foreground">
                                   Próximo Lance Mínimo
                                 </p>
-                                <p className="text-lg font-semibold">
-                                  1600 créditos
-                                </p>
+                                <p className="text-lg font-semibold">1600 créditos</p>
                               </div>
                             </div>
 
                             <div className="flex gap-2">
-                              <Input
-                                type="number"
-                                placeholder="Seu lance..."
-                                className="flex-1"
-                              />
-                              <Button>
-                                Dar Lance
-                              </Button>
+                              <Input type="number" placeholder="Seu lance..." className="flex-1" />
+                              <Button>Dar Lance</Button>
                             </div>
                           </div>
                         </CardContent>
@@ -511,33 +515,27 @@ export function EnhancedMarketplace() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {advertisingSlots.map((slot) => (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {advertisingSlots.map(slot => (
                         <Card key={slot.id}>
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               {slot.title}
-                              {slot.type === 'banner' && (
-                                <Badge variant="secondary">Premium</Badge>
-                              )}
+                              {slot.type === 'banner' && <Badge variant="secondary">Premium</Badge>}
                             </CardTitle>
                             <CardDescription>{slot.description}</CardDescription>
                           </CardHeader>
                           <CardContent className="space-y-4">
-                            <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-between">
                               <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Preço por Dia
-                                </p>
+                                <p className="text-sm text-muted-foreground">Preço por Dia</p>
                                 <p className="text-lg font-bold text-primary">
                                   {slot.pricePerDay} créditos
                                 </p>
                               </div>
                               {slot.currentBid && (
                                 <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Lance Atual
-                                  </p>
+                                  <p className="text-sm text-muted-foreground">Lance Atual</p>
                                   <p className="text-lg font-semibold">
                                     {slot.currentBid} créditos
                                   </p>
@@ -579,15 +577,13 @@ export function EnhancedMarketplace() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       <Card>
                         <CardContent className="pt-6">
                           <div className="text-center">
-                            <Eye className="h-8 w-8 text-primary mx-auto mb-2" />
+                            <Eye className="mx-auto mb-2 h-8 w-8 text-primary" />
                             <div className="text-2xl font-bold">2,500</div>
-                            <p className="text-sm text-muted-foreground">
-                              Impressões Totais
-                            </p>
+                            <p className="text-sm text-muted-foreground">Impressões Totais</p>
                           </div>
                         </CardContent>
                       </Card>
@@ -595,11 +591,9 @@ export function EnhancedMarketplace() {
                       <Card>
                         <CardContent className="pt-6">
                           <div className="text-center">
-                            <MousePointer className="h-8 w-8 text-primary mx-auto mb-2" />
+                            <MousePointer className="mx-auto mb-2 h-8 w-8 text-primary" />
                             <div className="text-2xl font-bold">150</div>
-                            <p className="text-sm text-muted-foreground">
-                              Cliques
-                            </p>
+                            <p className="text-sm text-muted-foreground">Cliques</p>
                           </div>
                         </CardContent>
                       </Card>
@@ -607,11 +601,9 @@ export function EnhancedMarketplace() {
                       <Card>
                         <CardContent className="pt-6">
                           <div className="text-center">
-                            <BarChart className="h-8 w-8 text-primary mx-auto mb-2" />
+                            <BarChart className="mx-auto mb-2 h-8 w-8 text-primary" />
                             <div className="text-2xl font-bold">6%</div>
-                            <p className="text-sm text-muted-foreground">
-                              Taxa de Conversão
-                            </p>
+                            <p className="text-sm text-muted-foreground">Taxa de Conversão</p>
                           </div>
                         </CardContent>
                       </Card>

@@ -15,7 +15,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Search, MapPin, User, Trophy, BookImage, Hash, Clock, TrendingUp, Globe, X, ArrowRight } from 'lucide-react';
+import {
+  Search,
+  MapPin,
+  User,
+  Trophy,
+  BookImage,
+  Hash,
+  Clock,
+  TrendingUp,
+  Globe,
+  X,
+  ArrowRight,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -70,7 +82,7 @@ const mockSearchResults: SearchResult[] = [
     avatar: 'https://placehold.co/40x40.png',
     dataAiHint: 'user avatar',
     metadata: { level: 15, followers: 1234, pixelCount: 456 },
-    relevanceScore: 95
+    relevanceScore: 95,
   },
   {
     id: '2',
@@ -78,14 +90,14 @@ const mockSearchResults: SearchResult[] = [
     title: 'Pixel Premium em Lisboa',
     subtitle: 'Coordenadas: (245, 156)',
     description: 'Pixel raro na zona histórica de Lisboa',
-    metadata: { 
-      coordinates: { x: 245, y: 156 }, 
-      region: 'Lisboa', 
-      price: 150, 
+    metadata: {
+      coordinates: { x: 245, y: 156 },
+      region: 'Lisboa',
+      price: 150,
       owner: 'PixelCollector',
-      rarity: 'Épico'
+      rarity: 'Épico',
     },
-    relevanceScore: 88
+    relevanceScore: 88,
   },
   {
     id: '3',
@@ -96,7 +108,7 @@ const mockSearchResults: SearchResult[] = [
     avatar: 'https://placehold.co/100x100.png',
     dataAiHint: 'album cover',
     metadata: { pixelCount: 45, tags: ['paisagem', 'portugal', 'natureza'] },
-    relevanceScore: 82
+    relevanceScore: 82,
   },
   {
     id: '4',
@@ -105,7 +117,7 @@ const mockSearchResults: SearchResult[] = [
     subtitle: 'Conquista Rara',
     description: 'Use 30 cores diferentes nos seus píxeis',
     metadata: { rarity: 'Rara' },
-    relevanceScore: 75
+    relevanceScore: 75,
   },
   {
     id: '5',
@@ -114,7 +126,7 @@ const mockSearchResults: SearchResult[] = [
     subtitle: 'Região Capital',
     description: '2.847 píxeis ativos • Preço médio: 52€',
     metadata: { pixelCount: 2847 },
-    relevanceScore: 70
+    relevanceScore: 70,
   },
   {
     id: '6',
@@ -123,8 +135,8 @@ const mockSearchResults: SearchResult[] = [
     subtitle: '1.2K píxeis',
     description: 'Tag popular para paisagens naturais',
     metadata: { pixelCount: 1200 },
-    relevanceScore: 65
-  }
+    relevanceScore: 65,
+  },
 ];
 
 const recentSearches = [
@@ -132,7 +144,7 @@ const recentSearches = [
   'Lisboa pixels',
   'paisagens portugal',
   '#arte',
-  'conquistas raras'
+  'conquistas raras',
 ];
 
 const trendingSearches = [
@@ -140,7 +152,7 @@ const trendingSearches = [
   'álbuns populares',
   'novos utilizadores',
   '#pixel-art',
-  'regiões em alta'
+  'regiões em alta',
 ];
 
 interface SearchSystemProps {
@@ -167,21 +179,22 @@ export default function SearchSystem({ children }: SearchSystemProps) {
 
     setIsLoading(true);
     setShowSuggestions(false);
-    
+
     const searchTimeout = setTimeout(() => {
       // Simulate API search
       const filteredResults = mockSearchResults
         .filter(result => {
-          const matchesQuery = result.title.toLowerCase().includes(query.toLowerCase()) ||
-                              result.subtitle?.toLowerCase().includes(query.toLowerCase()) ||
-                              result.description?.toLowerCase().includes(query.toLowerCase());
-          
+          const matchesQuery =
+            result.title.toLowerCase().includes(query.toLowerCase()) ||
+            result.subtitle?.toLowerCase().includes(query.toLowerCase()) ||
+            result.description?.toLowerCase().includes(query.toLowerCase());
+
           const matchesFilter = activeFilter === 'all' || result.type === activeFilter;
-          
+
           return matchesQuery && matchesFilter;
         })
         .sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
-      
+
       setResults(filteredResults);
       setIsLoading(false);
     }, 300);
@@ -192,14 +205,13 @@ export default function SearchSystem({ children }: SearchSystemProps) {
   // Update filter counts
   const filtersWithCounts = searchFilters.map(filter => ({
     ...filter,
-    count: filter.type === 'all' 
-      ? results.length 
-      : results.filter(r => r.type === filter.type).length
+    count:
+      filter.type === 'all' ? results.length : results.filter(r => r.type === filter.type).length,
   }));
 
   const handleResultClick = (result: SearchResult) => {
     toast({
-      title: "Resultado Selecionado",
+      title: 'Resultado Selecionado',
       description: `Navegando para: ${result.title}`,
     });
     setIsOpen(false);
@@ -225,7 +237,7 @@ export default function SearchSystem({ children }: SearchSystemProps) {
       album: <BookImage className="h-4 w-4" />,
       achievement: <Trophy className="h-4 w-4" />,
       region: <Globe className="h-4 w-4" />,
-      hashtag: <Hash className="h-4 w-4" />
+      hashtag: <Hash className="h-4 w-4" />,
     };
     return iconMap[type];
   };
@@ -237,30 +249,28 @@ export default function SearchSystem({ children }: SearchSystemProps) {
       album: 'bg-purple-500',
       achievement: 'bg-yellow-500',
       region: 'bg-indigo-500',
-      hashtag: 'bg-pink-500'
+      hashtag: 'bg-pink-500',
     };
     return colorMap[type];
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      
-      <DialogContent className="max-w-2xl max-h-[80vh] p-0 gap-0">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+
+      <DialogContent className="max-h-[80vh] max-w-2xl gap-0 p-0">
         <DialogHeader className="p-4 pb-2">
           <DialogTitle className="sr-only">Pesquisar no Pixel Universe</DialogTitle>
-          
+
           {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               ref={inputRef}
               placeholder="Pesquisar utilizadores, píxeis, álbuns..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-10 pr-10 h-12 text-base"
+              onChange={e => setQuery(e.target.value)}
+              className="h-12 pl-10 pr-10 text-base"
               autoFocus
             />
             {query && (
@@ -268,16 +278,16 @@ export default function SearchSystem({ children }: SearchSystemProps) {
                 variant="ghost"
                 size="sm"
                 onClick={clearSearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 transform p-0"
               >
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
-          
+
           {/* Filter Tabs */}
-          <div className="flex gap-1 mt-3 overflow-x-auto pb-1">
-            {filtersWithCounts.map((filter) => (
+          <div className="mt-3 flex gap-1 overflow-x-auto pb-1">
+            {filtersWithCounts.map(filter => (
               <Button
                 key={filter.type}
                 variant={activeFilter === filter.type ? 'default' : 'ghost'}
@@ -288,7 +298,7 @@ export default function SearchSystem({ children }: SearchSystemProps) {
                 {filter.icon}
                 <span className="ml-1">{filter.label}</span>
                 {filter.count !== undefined && filter.count > 0 && (
-                  <Badge variant="secondary" className="ml-1 text-xs h-4 px-1">
+                  <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
                     {filter.count}
                   </Badge>
                 )}
@@ -297,13 +307,13 @@ export default function SearchSystem({ children }: SearchSystemProps) {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 max-h-[60vh]">
+        <ScrollArea className="max-h-[60vh] flex-1">
           <div className="p-4 pt-2">
             {showSuggestions && !query ? (
               <div className="space-y-6">
                 {/* Recent Searches */}
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     Pesquisas Recentes
                   </h3>
@@ -312,12 +322,12 @@ export default function SearchSystem({ children }: SearchSystemProps) {
                       <Button
                         key={index}
                         variant="ghost"
-                        className="w-full justify-start text-left h-auto p-2"
+                        className="h-auto w-full justify-start p-2 text-left"
                         onClick={() => handleRecentSearch(search)}
                       >
-                        <Search className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <Search className="mr-2 h-4 w-4 text-muted-foreground" />
                         <span>{search}</span>
-                        <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
+                        <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
                       </Button>
                     ))}
                   </div>
@@ -327,7 +337,7 @@ export default function SearchSystem({ children }: SearchSystemProps) {
 
                 {/* Trending Searches */}
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <TrendingUp className="h-4 w-4" />
                     Tendências
                   </h3>
@@ -336,10 +346,10 @@ export default function SearchSystem({ children }: SearchSystemProps) {
                       <Button
                         key={index}
                         variant="ghost"
-                        className="w-full justify-start text-left h-auto p-2"
+                        className="h-auto w-full justify-start p-2 text-left"
                         onClick={() => handleRecentSearch(search)}
                       >
-                        <TrendingUp className="h-4 w-4 mr-2 text-orange-500" />
+                        <TrendingUp className="mr-2 h-4 w-4 text-orange-500" />
                         <span>{search}</span>
                         <Badge variant="outline" className="ml-auto text-xs">
                           Popular
@@ -353,23 +363,23 @@ export default function SearchSystem({ children }: SearchSystemProps) {
               <div className="space-y-3">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                   </div>
                 ) : results.length === 0 && query ? (
                   <Card className="p-8 text-center">
-                    <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                    <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground opacity-50" />
                     <p className="text-muted-foreground">
                       Nenhum resultado encontrado para "{query}"
                     </p>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       Tenta pesquisar por utilizadores, píxeis, álbuns ou regiões
                     </p>
                   </Card>
                 ) : (
-                  results.map((result) => (
+                  results.map(result => (
                     <Card
                       key={result.id}
-                      className="transition-all duration-200 hover:shadow-md cursor-pointer hover:border-primary/50"
+                      className="cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md"
                       onClick={() => handleResultClick(result)}
                     >
                       <CardContent className="p-3">
@@ -377,45 +387,45 @@ export default function SearchSystem({ children }: SearchSystemProps) {
                           <div className="flex-shrink-0">
                             {result.avatar ? (
                               <Avatar className="h-10 w-10">
-                                <AvatarImage 
-                                  src={result.avatar} 
+                                <AvatarImage
+                                  src={result.avatar}
                                   alt={result.title}
                                   data-ai-hint={result.dataAiHint}
                                 />
-                                <AvatarFallback>
-                                  {getResultIcon(result.type)}
-                                </AvatarFallback>
+                                <AvatarFallback>{getResultIcon(result.type)}</AvatarFallback>
                               </Avatar>
                             ) : (
-                              <div className={cn(
-                                "h-10 w-10 rounded-full flex items-center justify-center text-white",
-                                getResultBadgeColor(result.type)
-                              )}>
+                              <div
+                                className={cn(
+                                  'flex h-10 w-10 items-center justify-center rounded-full text-white',
+                                  getResultBadgeColor(result.type)
+                                )}
+                              >
                                 {getResultIcon(result.type)}
                               </div>
                             )}
                           </div>
-                          
-                          <div className="flex-1 min-w-0">
+
+                          <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
-                                <h4 className="font-medium text-sm leading-tight">
+                                <h4 className="text-sm font-medium leading-tight">
                                   {result.title}
                                 </h4>
                                 {result.subtitle && (
-                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                  <p className="mt-0.5 text-xs text-muted-foreground">
                                     {result.subtitle}
                                   </p>
                                 )}
                                 {result.description && (
-                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                                     {result.description}
                                   </p>
                                 )}
-                                
+
                                 {/* Metadata */}
                                 {result.metadata && (
-                                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  <div className="mt-2 flex flex-wrap items-center gap-2">
                                     {result.metadata.level && (
                                       <Badge variant="outline" className="text-xs">
                                         Nível {result.metadata.level}
@@ -439,11 +449,8 @@ export default function SearchSystem({ children }: SearchSystemProps) {
                                   </div>
                                 )}
                               </div>
-                              
-                              <Badge 
-                                variant="secondary" 
-                                className="text-xs flex-shrink-0"
-                              >
+
+                              <Badge variant="secondary" className="flex-shrink-0 text-xs">
                                 {searchFilters.find(f => f.type === result.type)?.label}
                               </Badge>
                             </div>

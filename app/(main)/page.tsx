@@ -2,11 +2,16 @@
 'use client';
 
 import React from 'react';
-import PixelGrid from '@/components/pixel-grid/PixelGrid';
+import dynamic from 'next/dynamic';
+
+const PixelGrid = dynamic(() => import('@/components/pixel-grid/PixelGrid'), {
+  ssr: false,
+  loading: () => <div className="p-6 text-sm text-muted-foreground">A carregar mapa…</div>,
+});
 
 export default function HomePage() {
   return (
-    <div className="relative w-full h-full">
+    <div className="relative h-full w-full p-6">
       <PixelGrid />
     </div>
   );

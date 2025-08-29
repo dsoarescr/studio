@@ -2,7 +2,15 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +18,20 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import {
-  CreditCard, DollarSign, Gift, Clock,
-  Shield, CheckCircle, AlertCircle, Lock,
-  Wallet, Receipt, History, Settings,
-  CreditCard as CreditCardIcon, Plus
+  CreditCard,
+  DollarSign,
+  Gift,
+  Clock,
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  Lock,
+  Wallet,
+  Receipt,
+  History,
+  Settings,
+  CreditCard as CreditCardIcon,
+  Plus,
 } from 'lucide-react';
 
 interface PaymentMethod {
@@ -56,8 +74,8 @@ const mockPaymentMethods: PaymentMethod[] = [
     brand: 'visa',
     expiryMonth: 12,
     expiryYear: 2025,
-    isDefault: true
-  }
+    isDefault: true,
+  },
 ];
 
 const mockTransactions: Transaction[] = [
@@ -68,8 +86,8 @@ const mockTransactions: Transaction[] = [
     currency: 'eur',
     status: 'succeeded',
     date: '2024-03-20T14:30:00Z',
-    description: 'Assinatura Premium - Mensal'
-  }
+    description: 'Assinatura Premium - Mensal',
+  },
 ];
 
 const subscriptionPlans: SubscriptionPlan[] = [
@@ -80,13 +98,9 @@ const subscriptionPlans: SubscriptionPlan[] = [
     price: {
       amount: 1000,
       currency: 'eur',
-      interval: 'month'
+      interval: 'month',
     },
-    features: [
-      'Acesso a recursos básicos',
-      'Suporte por email',
-      '100 créditos mensais'
-    ]
+    features: ['Acesso a recursos básicos', 'Suporte por email', '100 créditos mensais'],
   },
   {
     id: 'plan_pro',
@@ -95,15 +109,15 @@ const subscriptionPlans: SubscriptionPlan[] = [
     price: {
       amount: 2500,
       currency: 'eur',
-      interval: 'month'
+      interval: 'month',
     },
     features: [
       'Todos os recursos básicos',
       'Suporte prioritário',
       '500 créditos mensais',
-      'Recursos premium'
-    ]
-  }
+      'Recursos premium',
+    ],
+  },
 ];
 
 export function PaymentSystem() {
@@ -114,49 +128,47 @@ export function PaymentSystem() {
   const handleAddCard = () => {
     // Integração com Stripe Elements aqui
     toast({
-      title: "Cartão Adicionado",
-      description: "Seu cartão foi adicionado com sucesso!",
+      title: 'Cartão Adicionado',
+      description: 'Seu cartão foi adicionado com sucesso!',
     });
     setIsAddingCard(false);
   };
 
   const handleMakeDefault = (methodId: string) => {
     toast({
-      title: "Método Padrão Atualizado",
-      description: "Seu método de pagamento padrão foi atualizado.",
+      title: 'Método Padrão Atualizado',
+      description: 'Seu método de pagamento padrão foi atualizado.',
     });
   };
 
   const handleDeleteMethod = (methodId: string) => {
     toast({
-      title: "Método Removido",
-      description: "Seu método de pagamento foi removido.",
+      title: 'Método Removido',
+      description: 'Seu método de pagamento foi removido.',
     });
   };
 
   const handleSubscribe = (planId: string) => {
     toast({
-      title: "Assinatura Iniciada",
-      description: "Sua assinatura foi iniciada com sucesso!",
+      title: 'Assinatura Iniciada',
+      description: 'Sua assinatura foi iniciada com sucesso!',
     });
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6 py-6">
       <Card className="border-2 border-primary/20">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-2xl">
                 <Wallet className="h-6 w-6 text-primary" />
                 Sistema de Pagamentos
               </CardTitle>
-              <CardDescription>
-                Gerencie seus métodos de pagamento e assinaturas
-              </CardDescription>
+              <CardDescription>Gerencie seus métodos de pagamento e assinaturas</CardDescription>
             </div>
             <Button onClick={() => setIsAddingCard(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Adicionar Cartão
             </Button>
           </div>
@@ -172,13 +184,13 @@ export function PaymentSystem() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {mockPaymentMethods.map((method) => (
+              {mockPaymentMethods.map(method => (
                 <Card key={method.id} className="relative overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         {method.type === 'card' && (
-                          <div className="p-2 rounded-full bg-primary/10">
+                          <div className="rounded-full bg-primary/10 p-2">
                             <CreditCardIcon className="h-6 w-6 text-primary" />
                           </div>
                         )}
@@ -192,9 +204,7 @@ export function PaymentSystem() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {method.isDefault && (
-                          <Badge variant="secondary">Padrão</Badge>
-                        )}
+                        {method.isDefault && <Badge variant="secondary">Padrão</Badge>}
                         <Button
                           variant="outline"
                           size="sm"
@@ -217,37 +227,26 @@ export function PaymentSystem() {
 
               {isAddingCard && (
                 <Card>
-                  <CardContent className="p-4 space-y-4">
+                  <CardContent className="space-y-4 p-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Número do Cartão
-                      </label>
+                      <label className="text-sm font-medium">Número do Cartão</label>
                       <Input placeholder="4242 4242 4242 4242" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Data de Expiração
-                        </label>
+                        <label className="text-sm font-medium">Data de Expiração</label>
                         <Input placeholder="MM/AA" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Código de Segurança
-                        </label>
+                        <label className="text-sm font-medium">Código de Segurança</label>
                         <Input placeholder="CVC" />
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsAddingCard(false)}
-                      >
+                      <Button variant="outline" onClick={() => setIsAddingCard(false)}>
                         Cancelar
                       </Button>
-                      <Button onClick={handleAddCard}>
-                        Adicionar Cartão
-                      </Button>
+                      <Button onClick={handleAddCard}>Adicionar Cartão</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -265,15 +264,19 @@ export function PaymentSystem() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockTransactions.map((transaction) => (
+                {mockTransactions.map(transaction => (
                   <Card key={transaction.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "p-2 rounded-full",
-                            transaction.status === 'succeeded' ? "bg-green-500/10" : "bg-red-500/10"
-                          )}>
+                          <div
+                            className={cn(
+                              'rounded-full p-2',
+                              transaction.status === 'succeeded'
+                                ? 'bg-green-500/10'
+                                : 'bg-red-500/10'
+                            )}
+                          >
                             {transaction.status === 'succeeded' ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
@@ -288,9 +291,7 @@ export function PaymentSystem() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">
-                            {(transaction.amount / 100).toFixed(2)} €
-                          </p>
+                          <p className="font-medium">{(transaction.amount / 100).toFixed(2)} €</p>
                           <Badge
                             variant={transaction.status === 'succeeded' ? 'default' : 'destructive'}
                           >
@@ -314,8 +315,8 @@ export function PaymentSystem() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {subscriptionPlans.map((plan) => (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {subscriptionPlans.map(plan => (
                   <Card key={plan.id} className="relative overflow-hidden">
                     <CardHeader>
                       <CardTitle>{plan.name}</CardTitle>
@@ -326,9 +327,7 @@ export function PaymentSystem() {
                         <span className="text-3xl font-bold">
                           {(plan.price.amount / 100).toFixed(2)} €
                         </span>
-                        <span className="text-muted-foreground">
-                          /{plan.price.interval}
-                        </span>
+                        <span className="text-muted-foreground">/{plan.price.interval}</span>
                       </div>
                       <div className="space-y-2">
                         {plan.features.map((feature, index) => (
@@ -340,10 +339,7 @@ export function PaymentSystem() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button
-                        className="w-full"
-                        onClick={() => handleSubscribe(plan.id)}
-                      >
+                      <Button className="w-full" onClick={() => handleSubscribe(plan.id)}>
                         Assinar Agora
                       </Button>
                     </CardFooter>
@@ -397,11 +393,11 @@ export function PaymentSystem() {
 
         <CardFooter className="flex justify-between border-t pt-4">
           <Button variant="outline">
-            <Receipt className="h-4 w-4 mr-2" />
+            <Receipt className="mr-2 h-4 w-4" />
             Baixar Faturas
           </Button>
           <Button variant="outline">
-            <Shield className="h-4 w-4 mr-2" />
+            <Shield className="mr-2 h-4 w-4" />
             Segurança
           </Button>
         </CardFooter>

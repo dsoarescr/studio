@@ -47,7 +47,7 @@ export function TouchFeedback({
   onLongPress,
   pressDelay = 0,
   longPressDelay = 500,
-  disabled = false
+  disabled = false,
 }: TouchFeedbackProps) {
   const [isPressed, setIsPressed] = useState(false);
   const [pressTimer, setPressTimer] = useState<NodeJS.Timeout | null>(null);
@@ -91,10 +91,10 @@ export function TouchFeedback({
 
   return (
     <motion.div
-      className={cn("touch-none", className)}
+      className={cn('touch-none', className)}
       animate={{
         scale: isPressed ? 0.95 : 1,
-        opacity: isPressed ? 0.9 : 1
+        opacity: isPressed ? 0.9 : 1,
       }}
       transition={{ duration: 0.1 }}
       onTouchStart={handlePressStart}
@@ -115,7 +115,7 @@ export function SwipeAction({
   onSwipeLeft,
   onSwipeRight,
   threshold = 50,
-  disabled = false
+  disabled = false,
 }: SwipeActionProps) {
   const [dragX, setDragX] = useState(0);
 
@@ -133,7 +133,7 @@ export function SwipeAction({
 
   return (
     <motion.div
-      className={cn("touch-none", className)}
+      className={cn('touch-none', className)}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
@@ -152,13 +152,13 @@ export function PullToRefresh({
   className,
   onRefresh,
   pullDistance = 100,
-  loadingText = 'Atualizando...'
+  loadingText = 'Atualizando...',
 }: PullToRefreshProps) {
   const [isPulling, setIsPulling] = useState(false);
   const [pullProgress, setPullProgress] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handlePull = async (_, info: any) => {
+  const handlePull = async (_: unknown, info: { offset: { y: number } }) => {
     const pull = Math.max(0, info.offset.y);
     const progress = Math.min(1, pull / pullDistance);
     setPullProgress(progress);
@@ -178,7 +178,7 @@ export function PullToRefresh({
 
   return (
     <motion.div
-      className={cn("relative overflow-hidden", className)}
+      className={cn('relative overflow-hidden', className)}
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.2}
@@ -187,18 +187,21 @@ export function PullToRefresh({
     >
       {/* Indicador de Pull */}
       <motion.div
-        className="absolute top-0 left-0 right-0 flex items-center justify-center bg-primary/10 overflow-hidden"
+        className="absolute left-0 right-0 top-0 flex items-center justify-center overflow-hidden bg-primary/10"
         animate={{
-          height: isPulling || isRefreshing ? Math.max(pullProgress * pullDistance, isRefreshing ? 50 : 0) : 0
+          height:
+            isPulling || isRefreshing
+              ? Math.max(pullProgress * pullDistance, isRefreshing ? 50 : 0)
+              : 0,
         }}
       >
         <motion.div
           animate={{
-            rotate: isRefreshing ? 360 : pullProgress * 180
+            rotate: isRefreshing ? 360 : pullProgress * 180,
           }}
           transition={{
             duration: isRefreshing ? 1 : 0,
-            repeat: isRefreshing ? Infinity : 0
+            repeat: isRefreshing ? Infinity : 0,
           }}
         >
           {isRefreshing ? '↻' : '↓'}
@@ -216,11 +219,11 @@ export function BottomSheet({
   className,
   isOpen,
   onClose,
-  snapPoints = [0, 50, 100]
+  snapPoints = [0, 50, 100],
 }: BottomSheetProps) {
   const [currentSnap, setCurrentSnap] = useState(0);
 
-  const handleDragEnd = (_, info: any) => {
+  const handleDragEnd = (_: unknown, info: { velocity: { y: number }; point: { y: number } }) => {
     const velocity = info.velocity.y;
     const position = info.point.y;
 
@@ -249,7 +252,7 @@ export function BottomSheet({
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 z-40 bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -259,7 +262,7 @@ export function BottomSheet({
           {/* Bottom Sheet */}
           <motion.div
             className={cn(
-              "fixed bottom-0 left-0 right-0 bg-background rounded-t-2xl z-50",
+              'fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-background',
               className
             )}
             initial={{ y: '100%' }}
@@ -272,7 +275,7 @@ export function BottomSheet({
             onDragEnd={handleDragEnd}
           >
             {/* Indicador de Arrasto */}
-            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto my-3" />
+            <div className="mx-auto my-3 h-1.5 w-12 rounded-full bg-muted" />
             {children}
           </motion.div>
         </>
@@ -288,12 +291,7 @@ interface DoubleTapProps {
   threshold?: number;
 }
 
-export function DoubleTap({
-  children,
-  className,
-  onDoubleTap,
-  threshold = 300
-}: DoubleTapProps) {
+export function DoubleTap({ children, className, onDoubleTap, threshold = 300 }: DoubleTapProps) {
   const [lastTap, setLastTap] = useState(0);
 
   const handleTap = () => {
@@ -306,7 +304,7 @@ export function DoubleTap({
 
   return (
     <motion.div
-      className={cn("touch-none", className)}
+      className={cn('touch-none', className)}
       onTouchStart={handleTap}
       onMouseDown={handleTap}
     >
@@ -320,7 +318,7 @@ export const MobileOptimizations = {
   SwipeAction,
   PullToRefresh,
   BottomSheet,
-  DoubleTap
+  DoubleTap,
 };
 
 export default MobileOptimizations;

@@ -1,12 +1,32 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-// Lucide imports removed
+import {
+  Search,
+  ShoppingCart,
+  Gavel,
+  Gem,
+  Star,
+  Eye,
+  Heart,
+  Clock,
+  CheckCircle,
+  Check,
+  MousePointer,
+  MapPin,
+  Plus,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -101,7 +121,8 @@ export const AdvancedMarketplace: React.FC = () => {
         id: '1',
         type: 'pixel',
         title: 'Pixel Premium em Lisboa',
-        description: 'Pixel raro localizado no centro histórico de Lisboa, próximo à Torre de Belém.',
+        description:
+          'Pixel raro localizado no centro histórico de Lisboa, próximo à Torre de Belém.',
         price: 150,
         originalPrice: 200,
         seller: {
@@ -229,10 +250,11 @@ export const AdvancedMarketplace: React.FC = () => {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        item =>
+          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -242,15 +264,11 @@ export const AdvancedMarketplace: React.FC = () => {
     }
 
     // Price range filter
-    filtered = filtered.filter(item => 
-      item.price >= priceRange[0] && item.price <= priceRange[1]
-    );
+    filtered = filtered.filter(item => item.price >= priceRange[0] && item.price <= priceRange[1]);
 
     // Rarity filter
     if (selectedRarity !== 'all' && filtered.some(item => item.pixel)) {
-      filtered = filtered.filter(item => 
-        item.pixel?.rarity === selectedRarity
-      );
+      filtered = filtered.filter(item => item.pixel?.rarity === selectedRarity);
     }
 
     // Sort
@@ -276,80 +294,84 @@ export const AdvancedMarketplace: React.FC = () => {
     setFilteredItems(filtered);
   }, [items, searchTerm, selectedCategory, sortBy, priceRange, selectedRarity]);
 
-  const handlePurchase = useCallback((item: MarketplaceItem) => {
-    if (!user) {
+  const handlePurchase = useCallback(
+    (item: MarketplaceItem) => {
+      if (!user) {
+        toast({
+          title: 'Autenticação Necessária',
+          description: 'Por favor, inicie sessão para fazer compras.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (item.price > credits) {
+        toast({
+          title: 'Créditos Insuficientes',
+          description: 'Você não tem créditos suficientes para esta compra.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       toast({
-        title: "Autenticação Necessária",
-        description: "Por favor, inicie sessão para fazer compras.",
-        variant: "destructive",
+        title: 'Compra Realizada!',
+        description: `Você comprou "${item.title}" por €${item.price}`,
       });
-      return;
-    }
+    },
+    [user, credits, toast]
+  );
 
-    if (item.price > credits) {
+  const handleBid = useCallback(
+    (item: MarketplaceItem, bidAmount: number) => {
+      if (!user) {
+        toast({
+          title: 'Autenticação Necessária',
+          description: 'Por favor, inicie sessão para fazer lances.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (bidAmount <= item.price) {
+        toast({
+          title: 'Lance Inválido',
+          description: 'O lance deve ser maior que o lance atual.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       toast({
-        title: "Créditos Insuficientes",
-        description: "Você não tem créditos suficientes para esta compra.",
-        variant: "destructive",
+        title: 'Lance Realizado!',
+        description: `Seu lance de €${bidAmount} foi registrado.`,
       });
-      return;
-    }
-
-    toast({
-      title: "Compra Realizada!",
-      description: `Você comprou "${item.title}" por €${item.price}`,
-    });
-  }, [user, credits, toast]);
-
-  const handleBid = useCallback((item: MarketplaceItem, bidAmount: number) => {
-    if (!user) {
-      toast({
-        title: "Autenticação Necessária",
-        description: "Por favor, inicie sessão para fazer lances.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (bidAmount <= item.price) {
-      toast({
-        title: "Lance Inválido",
-        description: "O lance deve ser maior que o lance atual.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Lance Realizado!",
-      description: `Seu lance de €${bidAmount} foi registrado.`,
-    });
-  }, [user, toast]);
+    },
+    [user, toast]
+  );
 
   const getTimeRemaining = (expiresAt: Date) => {
     const now = new Date();
     const diff = expiresAt.getTime() - now.getTime();
-    
+
     if (diff <= 0) return 'Expirado';
-    
+
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (days > 0) return `${days}d ${hours}h`;
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Marketplace Avançado</h1>
-          <p className="text-muted-foreground">
-            Compre, venda e leiloe pixels únicos de Portugal
-          </p>
+          <p className="text-muted-foreground">Compre, venda e leiloe pixels únicos de Portugal</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
@@ -366,17 +388,17 @@ export const AdvancedMarketplace: React.FC = () => {
       {/* Filters and Search */}
       <Card>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Procurar pixels..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
-            
+
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="Categoria" />
@@ -424,7 +446,8 @@ export const AdvancedMarketplace: React.FC = () => {
       {/* View Toggle */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} encontrado{filteredItems.length !== 1 ? 's' : ''}
+          {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} encontrado
+          {filteredItems.length !== 1 ? 's' : ''}
         </p>
         <div className="flex items-center gap-2">
           <Button
@@ -445,8 +468,12 @@ export const AdvancedMarketplace: React.FC = () => {
       </div>
 
       {/* Items Grid/List */}
-      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-        {filteredItems.map((item) => (
+      <div
+        className={
+          viewMode === 'grid' ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'
+        }
+      >
+        {filteredItems.map(item => (
           <MarketplaceItemCard
             key={item.id}
             item={item}
@@ -461,8 +488,8 @@ export const AdvancedMarketplace: React.FC = () => {
       {filteredItems.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
-            <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum item encontrado</h3>
+            <ShoppingCart className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+            <h3 className="mb-2 text-lg font-semibold">Nenhum item encontrado</h3>
             <p className="text-muted-foreground">
               Tente ajustar os filtros ou procurar por algo diferente.
             </p>
@@ -496,8 +523,8 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
   const currentBid = item.bids?.[0]?.amount || item.price;
 
   return (
-    <Card className={`hover:shadow-lg transition-all ${viewMode === 'list' ? 'flex' : ''}`}>
-      <div className={`${viewMode === 'list' ? 'flex-1 flex' : ''}`}>
+    <Card className={`transition-all hover:shadow-lg ${viewMode === 'list' ? 'flex' : ''}`}>
+      <div className={`${viewMode === 'list' ? 'flex flex-1' : ''}`}>
         {/* Image */}
         <div className={`relative ${viewMode === 'list' ? 'w-48' : ''}`}>
           <img
@@ -506,41 +533,39 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
             className={`w-full object-cover ${viewMode === 'list' ? 'h-32' : 'h-48'}`}
           />
           {item.type === 'auction' && (
-            <Badge className="absolute top-2 left-2 bg-orange-500">
-              <Gavel className="h-3 w-3 mr-1" />
+            <Badge className="absolute left-2 top-2 bg-orange-500">
+              <Gavel className="mr-1 h-3 w-3" />
               Leilão
             </Badge>
           )}
           {item.type === 'collection' && (
-            <Badge className="absolute top-2 left-2 bg-purple-500">
-              <Gem className="h-3 w-3 mr-1" />
+            <Badge className="absolute left-2 top-2 bg-purple-500">
+              <Gem className="mr-1 h-3 w-3" />
               Coleção
             </Badge>
           )}
           {item.originalPrice && item.originalPrice > item.price && (
-            <Badge className="absolute top-2 right-2 bg-green-500">
+            <Badge className="absolute right-2 top-2 bg-green-500">
               -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
             </Badge>
           )}
         </div>
 
         {/* Content */}
-        <div className={`p-4 flex-1 ${viewMode === 'list' ? 'flex flex-col justify-between' : ''}`}>
+        <div className={`flex-1 p-4 ${viewMode === 'list' ? 'flex flex-col justify-between' : ''}`}>
           <div>
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="font-semibold line-clamp-2">{item.title}</h3>
+            <div className="mb-2 flex items-start justify-between">
+              <h3 className="line-clamp-2 font-semibold">{item.title}</h3>
               <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                <Star className="h-4 w-4 fill-current text-yellow-500" />
                 <span className="text-sm">{item.seller.rating}</span>
               </div>
             </div>
 
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-              {item.description}
-            </p>
+            <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
 
             {item.pixel && (
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-3 flex items-center gap-2">
                 <Badge variant="outline">{item.pixel.rarity}</Badge>
                 <Badge variant="outline">{item.pixel.region}</Badge>
                 <span className="text-sm text-muted-foreground">
@@ -549,7 +574,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
@@ -570,15 +595,13 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
             </div>
 
             {/* Seller Info */}
-            <div className="flex items-center gap-2 mb-3">
+            <div className="mb-3 flex items-center gap-2">
               <Avatar className="h-6 w-6">
                 <AvatarImage src={item.seller.avatar} />
                 <AvatarFallback>{item.seller.name[0]}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium">{item.seller.name}</span>
-              {item.seller.verified && (
-                <CheckCircle className="h-4 w-4 text-blue-500" />
-              )}
+              {item.seller.verified && <CheckCircle className="h-4 w-4 text-blue-500" />}
             </div>
           </div>
 
@@ -586,13 +609,9 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
           <div className="flex items-center justify-between">
             <div>
               {item.originalPrice && item.originalPrice > item.price && (
-                <p className="text-sm text-muted-foreground line-through">
-                  €{item.originalPrice}
-                </p>
+                <p className="text-sm text-muted-foreground line-through">€{item.originalPrice}</p>
               )}
-              <p className="text-xl font-bold">
-                €{isAuction ? currentBid : item.price}
-              </p>
+              <p className="text-xl font-bold">€{isAuction ? currentBid : item.price}</p>
               {isAuction && item.bids && item.bids.length > 0 && (
                 <p className="text-sm text-muted-foreground">
                   {item.bids.length} lance{item.bids.length !== 1 ? 's' : ''}
@@ -607,7 +626,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
                   onClick={() => setShowBidModal(true)}
                   className="bg-orange-500 hover:bg-orange-600"
                 >
-                  <Gavel className="h-4 w-4 mr-1" />
+                  <Gavel className="mr-1 h-4 w-4" />
                   Fazer Lance
                 </Button>
               ) : (
@@ -616,7 +635,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
                   onClick={() => onPurchase(item)}
                   disabled={item.status !== 'active'}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-1" />
+                  <ShoppingCart className="mr-1 h-4 w-4" />
                   Comprar
                 </Button>
               )}
@@ -627,7 +646,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
 
       {/* Bid Modal */}
       {showBidModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <Card className="w-96">
             <CardHeader>
               <CardTitle>Fazer Lance</CardTitle>
@@ -639,10 +658,10 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
                   id="bid-amount"
                   type="number"
                   value={bidAmount}
-                  onChange={(e) => setBidAmount(Number(e.target.value))}
+                  onChange={e => setBidAmount(Number(e.target.value))}
                   min={currentBid + 1}
                 />
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Lance mínimo: €{currentBid + 1}
                 </p>
               </div>
@@ -656,11 +675,7 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
                 >
                   Confirmar Lance
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowBidModal(false)}
-                  className="flex-1"
-                >
+                <Button variant="outline" onClick={() => setShowBidModal(false)} className="flex-1">
                   Cancelar
                 </Button>
               </div>
@@ -671,4 +686,3 @@ const MarketplaceItemCard: React.FC<MarketplaceItemCardProps> = ({
     </Card>
   );
 };
-

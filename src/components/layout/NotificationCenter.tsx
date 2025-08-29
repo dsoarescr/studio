@@ -252,18 +252,15 @@ export default function NotificationCenter({ children }: NotificationCenterProps
           {/* Filter Tabs */}
           <div className="flex gap-1 mt-3">
             {[
-              { key: 'all', label: t('notifications.all'), count: notifications.length },
-              { key: 'unread', label: t('notifications.unread'), count: unreadCount },
-              { key: 'important', label: t('notifications.important'), count: importantCount }
-            { key: 'all', label: 'Todas', count: notifications.length },
-            { key: 'unread', label: 'Não lidas', count: unreadCount },
-            { key: 'important', label: 'Importantes', count: importantCount }
-          ].map(({ key, label, count }) => (
+              { key: 'all', label: 'Todas', count: notifications.length },
+              { key: 'unread', label: 'Não lidas', count: unreadCount },
+              { key: 'important', label: 'Importantes', count: importantCount },
+            ].map(({ key, label, count }) => (
               <Button
                 key={key}
-                variant={filter === key ? 'default' : 'ghost'}
+                variant={filter === (key as 'all' | 'unread' | 'important') ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setFilter(key as NotificationFilter)}
+                onClick={() => setFilter(key as 'all' | 'unread' | 'important')}
                 className="text-xs flex-1"
               >
                 {label}

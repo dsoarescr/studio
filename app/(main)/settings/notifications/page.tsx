@@ -1,28 +1,26 @@
-
 'use client';
 
- import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useSettingsStore } from "@/lib/store";
-import { Bell, ShoppingCart, Trophy, MessageSquare, BellRing, Volume2 } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useSettingsStore } from '@/lib/store';
+import { Bell, ShoppingCart, Trophy, MessageSquare, BellRing, Volume2 } from 'lucide-react';
 
 export default function NotificationSettingsPage() {
-  const { notifications, toggleNotifications, soundEffects, toggleSoundEffects } = useSettingsStore();
+  const { notifications, toggleNotifications, soundEffects, toggleSoundEffects } =
+    useSettingsStore();
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl flex items-center">
-            <Bell className="h-6 w-6 mr-3 text-primary" />
+          <CardTitle className="flex items-center text-2xl">
+            <Bell className="mr-3 h-6 w-6 text-primary" />
             Notificações
           </CardTitle>
-          <CardDescription>
-            Gerencie como e quando você recebe notificações
-          </CardDescription>
+          <CardDescription>Gerencie como e quando você recebe notificações</CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="space-y-4">
@@ -35,9 +33,9 @@ export default function NotificationSettingsPage() {
               <Switch checked={soundEffects} onCheckedChange={toggleSoundEffects} />
             </div>
           </div>
-          
+
           <div>
-            <h3 className="text-lg font-semibold mb-4">Notificações por Email</h3>
+            <h3 className="mb-4 text-lg font-semibold">Notificações por Email</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label>Resumos Semanais</Label>
@@ -53,9 +51,9 @@ export default function NotificationSettingsPage() {
               </div>
             </div>
           </div>
-          
+
           <div>
-            <h3 className="text-lg font-semibold mb-4">Notificações Push</h3>
+            <h3 className="mb-4 text-lg font-semibold">Notificações Push</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -87,8 +85,8 @@ export default function NotificationSettingsPage() {
               </div>
             </div>
           </div>
-          
-          <div className="flex justify-end pt-6 border-t">
+
+          <div className="flex justify-end border-t pt-6">
             <Button>Guardar Alterações</Button>
           </div>
         </CardContent>

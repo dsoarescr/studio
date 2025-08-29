@@ -1,28 +1,62 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store";
-import { useStripePayment, StripePaymentElements } from "@/components/payment/StripePaymentProvider";
-import CheckoutForm from "@/components/payment/CheckoutForm";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { useUserStore } from '@/lib/store';
+import {
+  useStripePayment,
+  StripePaymentElements,
+} from '@/components/payment/StripePaymentProvider';
+import CheckoutForm from '@/components/payment/CheckoutForm';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Crown, Star, Zap, Shield, Sparkles, Check, X, CreditCard, Gift,
-  Palette, Users, Globe, Headphones, Coins, Percent,
-  Rocket, Diamond, UserPlus, TrendingUp, BarChart3,
-  Play, Layers, MessageCircle, ShoppingCart
-} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import {
+  Crown,
+  Star,
+  Zap,
+  Shield,
+  Sparkles,
+  Check,
+  X,
+  CreditCard,
+  Gift,
+  Palette,
+  Users,
+  Globe,
+  Headphones,
+  Coins,
+  Percent,
+  Rocket,
+  Diamond,
+  UserPlus,
+  TrendingUp,
+  BarChart3,
+  Play,
+  Layers,
+  MessageCircle,
+  ShoppingCart,
+  Share2,
+  Calendar,
+  Award,
+  Eye,
+} from 'lucide-react';
 
 const subscriptionPlans = [
   {
@@ -36,16 +70,12 @@ const subscriptionPlans = [
       'Personalização básica',
       'Acesso ao mapa completo',
       'Participação em eventos',
-      'Suporte por email'
+      'Suporte por email',
     ],
-    limitations: [
-      'Máximo 10 pixels por dia',
-      'Sem acesso a pixels premium',
-      'Anúncios ocasionais'
-    ],
+    limitations: ['Máximo 10 pixels por dia', 'Sem acesso a pixels premium', 'Anúncios ocasionais'],
     color: 'from-gray-500 to-gray-600',
     icon: <Users className="h-6 w-6" />,
-    popular: false
+    popular: false,
   },
   {
     id: 'premium',
@@ -61,16 +91,16 @@ const subscriptionPlans = [
       'Suporte prioritário',
       'Estatísticas detalhadas',
       'Backup automático',
-      'Temas personalizados'
+      'Temas personalizados',
     ],
     bonuses: [
       '100 créditos especiais/mês',
       '15% desconto em compras',
-      'Acesso antecipado a funcionalidades'
+      'Acesso antecipado a funcionalidades',
     ],
     color: 'from-primary to-accent',
     icon: <Crown className="h-6 w-6" />,
-    popular: true
+    popular: true,
   },
   {
     id: 'ultimate',
@@ -86,18 +116,18 @@ const subscriptionPlans = [
       'Analytics avançados',
       'Suporte VIP 24/7',
       'Consultoria personalizada',
-      'Eventos exclusivos'
+      'Eventos exclusivos',
     ],
     bonuses: [
       '300 créditos especiais/mês',
       '25% desconto em compras',
       'Acesso beta a novas funcionalidades',
-      'Sessões de mentoria mensais'
+      'Sessões de mentoria mensais',
     ],
     color: 'from-purple-500 to-pink-500',
     icon: <Rocket className="h-6 w-6" />,
-    popular: false
-  }
+    popular: false,
+  },
 ];
 
 const premiumFeatures = [
@@ -105,38 +135,38 @@ const premiumFeatures = [
     icon: <Palette className="h-8 w-8" />,
     title: 'Editor Avançado',
     description: 'Ferramentas profissionais de pixel art com camadas, filtros e efeitos especiais.',
-    color: 'text-blue-500'
+    color: 'text-blue-500',
   },
   {
     icon: <Users className="h-8 w-8" />,
     title: 'Colaboração',
     description: 'Trabalhe em projetos com outros artistas em tempo real.',
-    color: 'text-green-500'
+    color: 'text-green-500',
   },
   {
     icon: <Globe className="h-8 w-8" />,
     title: 'Galeria Global',
     description: 'Exponha suas criações para milhões de usuários ao redor do mundo.',
-    color: 'text-purple-500'
+    color: 'text-purple-500',
   },
   {
     icon: <Shield className="h-8 w-8" />,
     title: 'Backup Seguro',
     description: 'Seus pixels são automaticamente salvos e protegidos na nuvem.',
-    color: 'text-orange-500'
+    color: 'text-orange-500',
   },
   {
     icon: <Zap className="h-8 w-8" />,
     title: 'Performance',
     description: 'Renderização ultra-rápida e ferramentas otimizadas para produtividade.',
-    color: 'text-yellow-500'
+    color: 'text-yellow-500',
   },
   {
     icon: <Headphones className="h-8 w-8" />,
     title: 'Suporte VIP',
     description: 'Atendimento prioritário com especialistas em pixel art.',
-    color: 'text-red-500'
-  }
+    color: 'text-red-500',
+  },
 ];
 
 // Novos dados para melhorias premium
@@ -151,8 +181,8 @@ const premiumBenefits = [
       'Créditos bônus mensais crescentes',
       'Descontos progressivos no marketplace',
       'Títulos exclusivos por tempo de premium',
-      'Acesso antecipado a funcionalidades'
-    ]
+      'Acesso antecipado a funcionalidades',
+    ],
   },
   {
     id: 'referral',
@@ -164,8 +194,8 @@ const premiumBenefits = [
       '100 créditos por indicação bem-sucedida',
       '1 mês grátis para ambos os usuários',
       'Desconto de 20% na próxima renovação',
-      'Badge especial de "Influenciador"'
-    ]
+      'Badge especial de "Influenciador"',
+    ],
   },
   {
     id: 'community',
@@ -177,8 +207,8 @@ const premiumBenefits = [
       'Grupos exclusivos por categoria',
       'Eventos mensais com especialistas',
       'Sessões de mentoria gratuitas',
-      'Networking com artistas profissionais'
-    ]
+      'Networking com artistas profissionais',
+    ],
   },
   {
     id: 'analytics',
@@ -190,9 +220,9 @@ const premiumBenefits = [
       'Dashboard de performance personalizado',
       'Análise de tendências de mercado',
       'Previsões de valorização',
-      'Relatórios semanais automáticos'
-    ]
-  }
+      'Relatórios semanais automáticos',
+    ],
+  },
 ];
 
 const premiumTools = [
@@ -201,29 +231,29 @@ const premiumTools = [
     icon: <Layers className="h-8 w-8" />,
     description: 'Camadas, filtros e efeitos profissionais',
     demo: 'preview-editor',
-    color: 'text-blue-500'
+    color: 'text-blue-500',
   },
   {
     name: 'Ferramentas de Análise',
     icon: <TrendingUp className="h-8 w-8" />,
     description: 'Insights de mercado em tempo real',
     demo: 'preview-analytics',
-    color: 'text-green-500'
+    color: 'text-green-500',
   },
   {
     name: 'Colaboração em Tempo Real',
     icon: <MessageCircle className="h-8 w-8" />,
     description: 'Trabalhe com outros artistas simultaneamente',
     demo: 'preview-collaboration',
-    color: 'text-purple-500'
+    color: 'text-purple-500',
   },
   {
     name: 'Marketplace Premium',
     icon: <ShoppingCart className="h-8 w-8" />,
     description: 'Acesso a pixels exclusivos e leilões VIP',
     demo: 'preview-marketplace',
-    color: 'text-orange-500'
-  }
+    color: 'text-orange-500',
+  },
 ];
 
 const loyaltyLevels = [
@@ -231,7 +261,7 @@ const loyaltyLevels = [
   { level: 2, name: 'Entusiasta', days: 30, bonus: 100, discount: 10 },
   { level: 3, name: 'Profissional', days: 90, bonus: 200, discount: 15 },
   { level: 4, name: 'Mestre', days: 180, bonus: 300, discount: 20 },
-  { level: 5, name: 'Lendário', days: 365, bonus: 500, discount: 25 }
+  { level: 5, name: 'Lendário', days: 365, bonus: 500, discount: 25 },
 ];
 
 export default function PremiumSubscription() {
@@ -246,15 +276,18 @@ export default function PremiumSubscription() {
   const [loyaltyDays, setLoyaltyDays] = useState(45); // Mock data
   const [referralCode, setReferralCode] = useState('PIXEL2024');
   const [referralCount, setReferralCount] = useState(3); // Mock data
-  
+
   const { createSubscription } = useStripePayment();
   const { toast } = useToast();
   const { isPremium, addCredits, addSpecialCredits } = useUserStore();
 
   // Calcular nível de fidelidade
-  const currentLoyaltyLevel = loyaltyLevels.find(level => loyaltyDays >= level.days) || loyaltyLevels[0];
+  const currentLoyaltyLevel =
+    loyaltyLevels.find(level => loyaltyDays >= level.days) || loyaltyLevels[0];
   const nextLevel = loyaltyLevels.find(level => level.days > loyaltyDays);
-  const progressToNextLevel = nextLevel ? ((loyaltyDays - currentLoyaltyLevel.days) / (nextLevel.days - currentLoyaltyLevel.days)) * 100 : 100;
+  const progressToNextLevel = nextLevel
+    ? ((loyaltyDays - currentLoyaltyLevel.days) / (nextLevel.days - currentLoyaltyLevel.days)) * 100
+    : 100;
 
   // Calcular economia anual
   const calculateAnnualSavings = (planId: string) => {
@@ -272,26 +305,26 @@ export default function PremiumSubscription() {
   const handleSubscribe = async (planId: string) => {
     if (planId === 'basic') {
       toast({
-        title: "Plano Básico",
-        description: "Você já tem acesso ao plano básico gratuitamente!",
+        title: 'Plano Básico',
+        description: 'Você já tem acesso ao plano básico gratuitamente!',
       });
       return;
     }
 
     setIsProcessing(true);
-    
+
     try {
       const priceId = `price_${planId}_${isAnnual ? 'annual' : 'monthly'}`;
       const result = await createSubscription(priceId);
-      
+
       if (result?.clientSecret) {
         setClientSecret(result.clientSecret);
       }
     } catch (error) {
       toast({
-        title: "Erro na Subscrição",
-        description: "Não foi possível processar a subscrição. Tente novamente.",
-        variant: "destructive"
+        title: 'Erro na Subscrição',
+        description: 'Não foi possível processar a subscrição. Tente novamente.',
+        variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);
@@ -301,32 +334,36 @@ export default function PremiumSubscription() {
   const handlePaymentSuccess = () => {
     setShowConfetti(true);
     setPlaySuccessSound(true);
-    
+
     addCredits(500);
     addSpecialCredits(100);
-    
+
     toast({
-      title: "Bem-vindo ao Premium!",
-      description: "Sua subscrição foi ativada com sucesso. Recebeu 500 créditos + 100 especiais de bônus!",
+      title: 'Bem-vindo ao Premium!',
+      description:
+        'Sua subscrição foi ativada com sucesso. Recebeu 500 créditos + 100 especiais de bônus!',
     });
-    
+
     setClientSecret(null);
   };
 
   const copyReferralCode = () => {
     navigator.clipboard.writeText(referralCode);
     toast({
-      title: "Código Copiado!",
-      description: "Código de referência copiado para a área de transferência.",
+      title: 'Código Copiado!',
+      description: 'Código de referência copiado para a área de transferência.',
     });
   };
 
   if (clientSecret) {
     return (
-      <div className="container mx-auto py-6 px-4 max-w-md">
+      <div className="container mx-auto max-w-md px-4 py-6">
         <StripePaymentElements clientSecret={clientSecret}>
           <CheckoutForm
-            amount={getDiscountedPrice(subscriptionPlans.find(p => p.id === selectedPlan)?.price || 0) * 100}
+            amount={
+              getDiscountedPrice(subscriptionPlans.find(p => p.id === selectedPlan)?.price || 0) *
+              100
+            }
             description={`Subscrição ${subscriptionPlans.find(p => p.id === selectedPlan)?.name} - ${isAnnual ? 'Anual' : 'Mensal'}`}
             onSuccess={handlePaymentSuccess}
             onCancel={() => setClientSecret(null)}
@@ -338,33 +375,41 @@ export default function PremiumSubscription() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+      <SoundEffect
+        src={SOUND_EFFECTS.SUCCESS}
+        play={playSuccessSound}
+        onEnd={() => setPlaySuccessSound(false)}
+      />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
-      
-      <div className="container mx-auto py-6 px-4 space-y-8 max-w-7xl">
+
+      <div className="container mx-auto max-w-7xl space-y-8 px-4 py-6">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="space-y-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl font-headline font-bold text-gradient-gold-animated">
+            <h1 className="text-gradient-gold-animated font-headline text-4xl font-bold md:text-5xl">
               Desbloqueie Todo o Potencial
             </h1>
-            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
-              Transforme sua experiência no Pixel Universe com ferramentas profissionais e recursos exclusivos
+            <p className="mx-auto mt-4 max-w-2xl text-xl text-muted-foreground">
+              Transforme sua experiência no Pixel Universe com ferramentas profissionais e recursos
+              exclusivos
             </p>
           </motion.div>
-          
+
           {/* Billing Toggle */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex items-center justify-center gap-4 mt-8"
+            className="mt-8 flex items-center justify-center gap-4"
           >
-            <Label htmlFor="billing-toggle" className={cn("font-medium", !isAnnual && "text-primary")}>
+            <Label
+              htmlFor="billing-toggle"
+              className={cn('font-medium', !isAnnual && 'text-primary')}
+            >
               Mensal
             </Label>
             <Switch
@@ -373,13 +418,14 @@ export default function PremiumSubscription() {
               onCheckedChange={setIsAnnual}
               className="data-[state=checked]:bg-primary"
             />
-            <Label htmlFor="billing-toggle" className={cn("font-medium", isAnnual && "text-primary")}>
+            <Label
+              htmlFor="billing-toggle"
+              className={cn('font-medium', isAnnual && 'text-primary')}
+            >
               Anual
             </Label>
             {isAnnual && (
-              <Badge className="bg-green-500 text-white animate-pulse">
-                2 meses grátis!
-              </Badge>
+              <Badge className="animate-pulse bg-green-500 text-white">2 meses grátis!</Badge>
             )}
           </motion.div>
         </div>
@@ -391,30 +437,30 @@ export default function PremiumSubscription() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 h-12 bg-card/50 backdrop-blur-sm shadow-md">
+            <TabsList className="grid h-12 w-full grid-cols-2 bg-card/50 shadow-md backdrop-blur-sm sm:grid-cols-4 lg:grid-cols-6">
               <TabsTrigger value="plans" className="font-headline">
-                <CreditCard className="h-4 w-4 mr-2"/> Planos
+                <CreditCard className="mr-2 h-4 w-4" /> Planos
               </TabsTrigger>
               <TabsTrigger value="benefits" className="font-headline">
-                <Gift className="h-4 w-4 mr-2"/> Benefícios
+                <Gift className="mr-2 h-4 w-4" /> Benefícios
               </TabsTrigger>
               <TabsTrigger value="demo" className="font-headline">
-                <Play className="h-4 w-4 mr-2"/> Demo
+                <Play className="mr-2 h-4 w-4" /> Demo
               </TabsTrigger>
               <TabsTrigger value="loyalty" className="font-headline">
-                <Diamond className="h-4 w-4 mr-2"/> Fidelidade
+                <Diamond className="mr-2 h-4 w-4" /> Fidelidade
               </TabsTrigger>
               <TabsTrigger value="referral" className="font-headline">
-                <UserPlus className="h-4 w-4 mr-2"/> Referências
+                <UserPlus className="mr-2 h-4 w-4" /> Referências
               </TabsTrigger>
               <TabsTrigger value="compare" className="font-headline">
-                <BarChart3 className="h-4 w-4 mr-2"/> Comparar
+                <BarChart3 className="mr-2 h-4 w-4" /> Comparar
               </TabsTrigger>
             </TabsList>
 
             {/* Plans Tab */}
             <TabsContent value="plans" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
                 {subscriptionPlans.map((plan, index) => (
                   <motion.div
                     key={plan.id}
@@ -422,29 +468,35 @@ export default function PremiumSubscription() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
-                    <Card className={cn(
-                      "relative overflow-hidden transition-all duration-300 hover:shadow-2xl",
-                      plan.popular && "border-primary/50 shadow-primary/20 scale-105",
-                      selectedPlan === plan.id && "ring-2 ring-primary"
-                    )}>
+                    <Card
+                      className={cn(
+                        'relative overflow-hidden transition-all duration-300 hover:shadow-2xl',
+                        plan.popular && 'scale-105 border-primary/50 shadow-primary/20',
+                        selectedPlan === plan.id && 'ring-2 ring-primary'
+                      )}
+                    >
                       {plan.popular && (
-                        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-accent text-primary-foreground text-center py-2 text-sm font-medium">
-                          <Sparkles className="inline h-4 w-4 mr-1" />
+                        <div className="absolute left-0 right-0 top-0 bg-gradient-to-r from-primary to-accent py-2 text-center text-sm font-medium text-primary-foreground">
+                          <Sparkles className="mr-1 inline h-4 w-4" />
                           Mais Popular
                         </div>
                       )}
-                      
-                      <CardHeader className={cn("text-center", plan.popular && "pt-12")}>
-                        <div className={cn(
-                          "w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4",
-                          `bg-gradient-to-br ${plan.color} text-white shadow-lg`
-                        )}>
+
+                      <CardHeader className={cn('text-center', plan.popular && 'pt-12')}>
+                        <div
+                          className={cn(
+                            'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full',
+                            `bg-gradient-to-br ${plan.color} text-white shadow-lg`
+                          )}
+                        >
                           {plan.icon}
                         </div>
-                        
-                        <CardTitle className="text-2xl font-headline">{plan.name}</CardTitle>
-                        <CardDescription className="text-muted-foreground">{plan.description}</CardDescription>
-                        
+
+                        <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
+                        <CardDescription className="text-muted-foreground">
+                          {plan.description}
+                        </CardDescription>
+
                         <div className="space-y-2">
                           <div className="text-4xl font-bold">
                             {plan.price === 0 ? (
@@ -467,71 +519,80 @@ export default function PremiumSubscription() {
                           )}
                         </div>
                       </CardHeader>
-                      
+
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
                           {plan.features.map((feature, idx) => (
                             <div key={idx} className="flex items-center gap-3">
-                              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
                               <span className="text-sm">{feature}</span>
                             </div>
                           ))}
                         </div>
-                        
+
                         {plan.bonuses && (
                           <>
                             <Separator />
                             <div className="space-y-2">
-                              <h4 className="font-semibold text-sm text-accent flex items-center">
-                                <Gift className="h-4 w-4 mr-2" />
+                              <h4 className="flex items-center text-sm font-semibold text-accent">
+                                <Gift className="mr-2 h-4 w-4" />
                                 Bônus Inclusos
                               </h4>
                               {plan.bonuses.map((bonus, idx) => (
                                 <div key={idx} className="flex items-center gap-3">
-                                  <Sparkles className="h-4 w-4 text-accent flex-shrink-0" />
+                                  <Sparkles className="h-4 w-4 flex-shrink-0 text-accent" />
                                   <span className="text-sm text-accent">{bonus}</span>
                                 </div>
                               ))}
                             </div>
                           </>
                         )}
-                        
+
                         {plan.limitations && (
                           <>
                             <Separator />
                             <div className="space-y-2">
-                              <h4 className="font-semibold text-sm text-muted-foreground">Limitações</h4>
+                              <h4 className="text-sm font-semibold text-muted-foreground">
+                                Limitações
+                              </h4>
                               {plan.limitations.map((limitation, idx) => (
                                 <div key={idx} className="flex items-center gap-3">
-                                  <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                  <span className="text-sm text-muted-foreground">{limitation}</span>
+                                  <X className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {limitation}
+                                  </span>
                                 </div>
                               ))}
                             </div>
                           </>
                         )}
                       </CardContent>
-                      
+
                       <CardFooter>
                         <Button
                           className={cn(
-                            "w-full transition-all duration-300",
-                            plan.id === 'basic' && isPremium && "opacity-50 cursor-not-allowed",
-                            plan.popular && "bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                            'w-full transition-all duration-300',
+                            plan.id === 'basic' && isPremium && 'cursor-not-allowed opacity-50',
+                            plan.popular &&
+                              'bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90'
                           )}
                           onClick={() => handleSubscribe(plan.id)}
                           disabled={isProcessing || (plan.id === 'basic' && isPremium)}
                         >
                           {isProcessing ? (
                             <div className="flex items-center">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
                               Processando...
                             </div>
                           ) : plan.id === 'basic' ? (
-                            isPremium ? 'Plano Atual' : 'Começar Grátis'
+                            isPremium ? (
+                              'Plano Atual'
+                            ) : (
+                              'Começar Grátis'
+                            )
                           ) : (
                             <>
-                              <CreditCard className="h-4 w-4 mr-2" />
+                              <CreditCard className="mr-2 h-4 w-4" />
                               Subscrever Agora
                             </>
                           )}
@@ -545,7 +606,7 @@ export default function PremiumSubscription() {
 
             {/* Benefits Tab */}
             <TabsContent value="benefits" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {premiumBenefits.map((benefit, index) => (
                   <motion.div
                     key={benefit.id}
@@ -553,12 +614,14 @@ export default function PremiumSubscription() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
-                    <Card className="h-full hover:shadow-lg transition-all duration-300">
+                    <Card className="h-full transition-all duration-300 hover:shadow-lg">
                       <CardHeader>
-                        <div className={cn(
-                          "w-12 h-12 rounded-full flex items-center justify-center mb-4",
-                          `bg-gradient-to-br ${benefit.color} text-white`
-                        )}>
+                        <div
+                          className={cn(
+                            'mb-4 flex h-12 w-12 items-center justify-center rounded-full',
+                            `bg-gradient-to-br ${benefit.color} text-white`
+                          )}
+                        >
                           {benefit.icon}
                         </div>
                         <CardTitle className="text-xl">{benefit.title}</CardTitle>
@@ -568,7 +631,7 @@ export default function PremiumSubscription() {
                         <div className="space-y-2">
                           {benefit.features.map((feature, idx) => (
                             <div key={idx} className="flex items-center gap-3">
-                              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
                               <span className="text-sm">{feature}</span>
                             </div>
                           ))}
@@ -582,7 +645,7 @@ export default function PremiumSubscription() {
 
             {/* Demo Tab */}
             <TabsContent value="demo" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {premiumTools.map((tool, index) => (
                   <motion.div
                     key={tool.name}
@@ -590,19 +653,19 @@ export default function PremiumSubscription() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer"
-                          onClick={() => setShowDemo(tool.demo)}>
+                    <Card
+                      className="cursor-pointer transition-all duration-300 hover:shadow-lg"
+                      onClick={() => setShowDemo(tool.demo)}
+                    >
                       <CardContent className="p-6">
                         <div className="flex items-center gap-4">
-                          <div className={tool.color}>
-                            {tool.icon}
-                          </div>
+                          <div className={tool.color}>{tool.icon}</div>
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg">{tool.name}</h3>
-                            <p className="text-muted-foreground text-sm">{tool.description}</p>
+                            <h3 className="text-lg font-semibold">{tool.name}</h3>
+                            <p className="text-sm text-muted-foreground">{tool.description}</p>
                           </div>
                           <Button variant="outline" size="sm">
-                            <Play className="h-4 w-4 mr-2" />
+                            <Play className="mr-2 h-4 w-4" />
                             Demo
                           </Button>
                         </div>
@@ -615,7 +678,7 @@ export default function PremiumSubscription() {
 
             {/* Loyalty Tab */}
             <TabsContent value="loyalty" className="space-y-6">
-              <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+              <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-pink-500/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Diamond className="h-6 w-6 text-purple-500" />
@@ -627,7 +690,7 @@ export default function PremiumSubscription() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Current Level */}
-                  <div className="text-center space-y-4">
+                  <div className="space-y-4 text-center">
                     <div className="text-3xl font-bold text-purple-500">
                       Nível {currentLoyaltyLevel.level}: {currentLoyaltyLevel.name}
                     </div>
@@ -643,15 +706,15 @@ export default function PremiumSubscription() {
                   </div>
 
                   {/* Benefits */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="flex items-center justify-between rounded-lg bg-background/50 p-4">
                       <div className="flex items-center gap-3">
                         <Coins className="h-5 w-5 text-yellow-500" />
                         <span>Créditos Bônus</span>
                       </div>
                       <Badge variant="secondary">{currentLoyaltyLevel.bonus}/mês</Badge>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg">
+                    <div className="flex items-center justify-between rounded-lg bg-background/50 p-4">
                       <div className="flex items-center gap-3">
                         <Percent className="h-5 w-5 text-green-500" />
                         <span>Desconto Marketplace</span>
@@ -663,13 +726,20 @@ export default function PremiumSubscription() {
                   {/* Levels */}
                   <div className="space-y-3">
                     <h3 className="font-semibold">Próximos Níveis</h3>
-                    {loyaltyLevels.slice(currentLoyaltyLevel.level).map((level) => (
-                      <div key={level.level} className="flex items-center justify-between p-3 bg-background/30 rounded-lg">
+                    {loyaltyLevels.slice(currentLoyaltyLevel.level).map(level => (
+                      <div
+                        key={level.level}
+                        className="flex items-center justify-between rounded-lg bg-background/30 p-3"
+                      >
                         <div className="flex items-center gap-3">
-                          <div className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-                            loyaltyDays >= level.days ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"
-                          )}>
+                          <div
+                            className={cn(
+                              'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold',
+                              loyaltyDays >= level.days
+                                ? 'bg-green-500 text-white'
+                                : 'bg-muted text-muted-foreground'
+                            )}
+                          >
                             {level.level}
                           </div>
                           <div>
@@ -679,7 +749,9 @@ export default function PremiumSubscription() {
                         </div>
                         <div className="text-right">
                           <div className="text-sm font-medium">+{level.bonus} créditos</div>
-                          <div className="text-sm text-muted-foreground">{level.discount}% desconto</div>
+                          <div className="text-sm text-muted-foreground">
+                            {level.discount}% desconto
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -690,29 +762,29 @@ export default function PremiumSubscription() {
 
             {/* Referral Tab */}
             <TabsContent value="referral" className="space-y-6">
-              <Card className="bg-gradient-to-br from-green-500/10 to-blue-500/10 border-green-500/20">
+              <Card className="border-green-500/20 bg-gradient-to-br from-green-500/10 to-blue-500/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <UserPlus className="h-6 w-6 text-green-500" />
                     Programa de Referências
                   </CardTitle>
-                  <CardDescription>
-                    Indique amigos e ganhe recompensas para ambos
-                  </CardDescription>
+                  <CardDescription>Indique amigos e ganhe recompensas para ambos</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Stats */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-background/50 rounded-lg">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="rounded-lg bg-background/50 p-4 text-center">
                       <div className="text-2xl font-bold text-green-500">{referralCount}</div>
                       <div className="text-sm text-muted-foreground">Indicações</div>
                     </div>
-                    <div className="text-center p-4 bg-background/50 rounded-lg">
+                    <div className="rounded-lg bg-background/50 p-4 text-center">
                       <div className="text-2xl font-bold text-blue-500">{referralCount * 100}</div>
                       <div className="text-sm text-muted-foreground">Créditos Ganhos</div>
                     </div>
-                    <div className="text-center p-4 bg-background/50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-500">€{(referralCount * 9.99).toFixed(2)}</div>
+                    <div className="rounded-lg bg-background/50 p-4 text-center">
+                      <div className="text-2xl font-bold text-purple-500">
+                        €{(referralCount * 9.99).toFixed(2)}
+                      </div>
                       <div className="text-sm text-muted-foreground">Valor Gerado</div>
                     </div>
                   </div>
@@ -720,12 +792,12 @@ export default function PremiumSubscription() {
                   {/* Referral Code */}
                   <div className="space-y-4">
                     <h3 className="font-semibold">Seu Código de Referência</h3>
-                    <div className="flex items-center gap-3 p-4 bg-background/50 rounded-lg">
+                    <div className="flex items-center gap-3 rounded-lg bg-background/50 p-4">
                       <div className="flex-1 font-mono text-lg font-bold text-primary">
                         {referralCode}
                       </div>
                       <Button onClick={copyReferralCode} size="sm">
-                        <Share2 className="h-4 w-4 mr-2" />
+                        <Share2 className="mr-2 h-4 w-4" />
                         Copiar
                       </Button>
                     </div>
@@ -734,29 +806,31 @@ export default function PremiumSubscription() {
                   {/* Rewards */}
                   <div className="space-y-3">
                     <h3 className="font-semibold">Recompensas por Indicação</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="flex items-center gap-3 p-3 bg-background/30 rounded-lg">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <div className="flex items-center gap-3 rounded-lg bg-background/30 p-3">
                         <Coins className="h-5 w-5 text-yellow-500" />
                         <div>
                           <div className="font-medium">100 créditos</div>
-                          <div className="text-sm text-muted-foreground">Para ambos os usuários</div>
+                          <div className="text-sm text-muted-foreground">
+                            Para ambos os usuários
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-background/30 rounded-lg">
+                      <div className="flex items-center gap-3 rounded-lg bg-background/30 p-3">
                         <Calendar className="h-5 w-5 text-green-500" />
                         <div>
                           <div className="font-medium">1 mês grátis</div>
                           <div className="text-sm text-muted-foreground">Para o novo usuário</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-background/30 rounded-lg">
+                      <div className="flex items-center gap-3 rounded-lg bg-background/30 p-3">
                         <Percent className="h-5 w-5 text-blue-500" />
                         <div>
                           <div className="font-medium">20% desconto</div>
                           <div className="text-sm text-muted-foreground">Na próxima renovação</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-background/30 rounded-lg">
+                      <div className="flex items-center gap-3 rounded-lg bg-background/30 p-3">
                         <Award className="h-5 w-5 text-purple-500" />
                         <div>
                           <div className="font-medium">Badge especial</div>
@@ -786,54 +860,54 @@ export default function PremiumSubscription() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left p-4">Funcionalidade</th>
-                          <th className="text-center p-4">Básico</th>
-                          <th className="text-center p-4">Premium</th>
-                          <th className="text-center p-4">Ultimate</th>
+                          <th className="p-4 text-left">Funcionalidade</th>
+                          <th className="p-4 text-center">Básico</th>
+                          <th className="p-4 text-center">Premium</th>
+                          <th className="p-4 text-center">Ultimate</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr className="border-b">
                           <td className="p-4 font-medium">Preço Mensal</td>
-                          <td className="text-center p-4 text-green-500 font-bold">Grátis</td>
-                          <td className="text-center p-4 font-bold">€9.99</td>
-                          <td className="text-center p-4 font-bold">€19.99</td>
+                          <td className="p-4 text-center font-bold text-green-500">Grátis</td>
+                          <td className="p-4 text-center font-bold">€9.99</td>
+                          <td className="p-4 text-center font-bold">€19.99</td>
                         </tr>
                         <tr className="border-b">
                           <td className="p-4 font-medium">Economia Anual</td>
-                          <td className="text-center p-4">-</td>
-                          <td className="text-center p-4 text-green-500">€19.98</td>
-                          <td className="text-center p-4 text-green-500">€39.96</td>
+                          <td className="p-4 text-center">-</td>
+                          <td className="p-4 text-center text-green-500">€19.98</td>
+                          <td className="p-4 text-center text-green-500">€39.96</td>
                         </tr>
                         <tr className="border-b">
                           <td className="p-4 font-medium">Pixels por Dia</td>
-                          <td className="text-center p-4">10</td>
-                          <td className="text-center p-4 text-green-500">Ilimitados</td>
-                          <td className="text-center p-4 text-green-500">Ilimitados</td>
+                          <td className="p-4 text-center">10</td>
+                          <td className="p-4 text-center text-green-500">Ilimitados</td>
+                          <td className="p-4 text-center text-green-500">Ilimitados</td>
                         </tr>
                         <tr className="border-b">
                           <td className="p-4 font-medium">Créditos Especiais</td>
-                          <td className="text-center p-4">-</td>
-                          <td className="text-center p-4">100/mês</td>
-                          <td className="text-center p-4">300/mês</td>
+                          <td className="p-4 text-center">-</td>
+                          <td className="p-4 text-center">100/mês</td>
+                          <td className="p-4 text-center">300/mês</td>
                         </tr>
                         <tr className="border-b">
                           <td className="p-4 font-medium">Desconto Marketplace</td>
-                          <td className="text-center p-4">-</td>
-                          <td className="text-center p-4">15%</td>
-                          <td className="text-center p-4">25%</td>
+                          <td className="p-4 text-center">-</td>
+                          <td className="p-4 text-center">15%</td>
+                          <td className="p-4 text-center">25%</td>
                         </tr>
                         <tr className="border-b">
                           <td className="p-4 font-medium">Suporte</td>
-                          <td className="text-center p-4">Email</td>
-                          <td className="text-center p-4">Prioritário</td>
-                          <td className="text-center p-4">VIP 24/7</td>
+                          <td className="p-4 text-center">Email</td>
+                          <td className="p-4 text-center">Prioritário</td>
+                          <td className="p-4 text-center">VIP 24/7</td>
                         </tr>
                         <tr>
                           <td className="p-4 font-medium">ROI Estimado</td>
-                          <td className="text-center p-4">-</td>
-                          <td className="text-center p-4 text-green-500">+150%</td>
-                          <td className="text-center p-4 text-green-500">+300%</td>
+                          <td className="p-4 text-center">-</td>
+                          <td className="p-4 text-center text-green-500">+150%</td>
+                          <td className="p-4 text-center text-green-500">+300%</td>
                         </tr>
                       </tbody>
                     </table>
@@ -851,17 +925,17 @@ export default function PremiumSubscription() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
               onClick={() => setShowDemo(null)}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-background rounded-lg shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
+                className="max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-lg bg-background shadow-2xl"
+                onClick={e => e.stopPropagation()}
               >
-                <div className="p-6 border-b">
+                <div className="border-b p-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">Demonstração Interativa</h2>
                     <Button variant="ghost" size="sm" onClick={() => setShowDemo(null)}>
@@ -870,8 +944,8 @@ export default function PremiumSubscription() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                    <div className="text-center space-y-4">
+                  <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
+                    <div className="space-y-4 text-center">
                       <div className="text-6xl">🎨</div>
                       <h3 className="text-xl font-semibold">Demonstração em Desenvolvimento</h3>
                       <p className="text-muted-foreground">
@@ -892,26 +966,24 @@ export default function PremiumSubscription() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="text-center"
         >
-          <Card className="bg-gradient-to-r from-primary/20 to-accent/20 border-primary/30">
+          <Card className="border-primary/30 bg-gradient-to-r from-primary/20 to-accent/20">
             <CardContent className="p-8">
-              <h2 className="text-2xl font-headline font-bold mb-4">
-                Pronto para Começar?
-              </h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Junte-se a milhares de artistas que já descobriram o poder do Pixel Universe Premium.
-                Comece sua jornada hoje mesmo!
+              <h2 className="mb-4 font-headline text-2xl font-bold">Pronto para Começar?</h2>
+              <p className="mx-auto mb-6 max-w-2xl text-muted-foreground">
+                Junte-se a milhares de artistas que já descobriram o poder do Pixel Universe
+                Premium. Comece sua jornada hoje mesmo!
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
                   onClick={() => handleSubscribe('premium')}
                 >
-                  <Crown className="h-5 w-5 mr-2" />
+                  <Crown className="mr-2 h-5 w-5" />
                   Começar Premium
                 </Button>
                 <Button variant="outline" size="lg" onClick={() => setActiveTab('demo')}>
-                  <Eye className="h-5 w-5 mr-2" />
+                  <Eye className="mr-2 h-5 w-5" />
                   Ver Demonstração
                 </Button>
               </div>
@@ -922,4 +994,3 @@ export default function PremiumSubscription() {
     </div>
   );
 }
-

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -17,7 +16,32 @@ import MapSidebar from './MapSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import {
-  Home, Grid3X3, Users, Trophy, Bell, Settings, Plus, Search, Camera, Sparkles, Crown, Star, Zap, Heart, Coins, BarChart3, TrendingUp, Activity, Menu, X, ChevronUp, Video, Mic, Globe, Target, ChevronRight,
+  Home,
+  Grid3X3,
+  Users,
+  Trophy,
+  Bell,
+  Settings,
+  Plus,
+  Search,
+  Camera,
+  Sparkles,
+  Crown,
+  Star,
+  Zap,
+  Heart,
+  Coins,
+  BarChart3,
+  TrendingUp,
+  Activity,
+  Menu,
+  X,
+  ChevronUp,
+  Video,
+  Mic,
+  Globe,
+  Target,
+  ChevronRight,
 } from 'lucide-react';
 
 interface BottomNavBarProps {
@@ -45,16 +69,16 @@ const menuCategories = [
         name: 'Colaboração em Tempo Real',
         description: 'Edite pixels em conjunto com outros utilizadores',
         icon: <Video className="h-3 w-3" />,
-        premium: false
+        premium: false,
       },
       {
         id: 'live-sessions',
         name: 'Sessões ao Vivo',
         description: 'Participe em sessões de criação colaborativa',
         icon: <Mic className="h-3 w-3" />,
-        premium: true
-      }
-    ]
+        premium: true,
+      },
+    ],
   },
   {
     id: 'ar',
@@ -69,16 +93,16 @@ const menuCategories = [
         name: 'Experiência AR',
         description: 'Veja pixels sobrepostos na realidade',
         icon: <Globe className="h-3 w-3" />,
-        premium: false
+        premium: false,
       },
       {
         id: 'ai-assistant',
         name: 'Assistente IA',
         description: 'IA que ajuda na criação de pixels',
         icon: <Sparkles className="h-3 w-3" />,
-        premium: true
-      }
-    ]
+        premium: true,
+      },
+    ],
   },
   {
     id: 'gamification',
@@ -93,9 +117,9 @@ const menuCategories = [
         name: 'Sistema Avançado',
         description: 'Missões diárias e eventos especiais',
         icon: <Target className="h-3 w-3" />,
-        premium: false
-      }
-    ]
+        premium: false,
+      },
+    ],
   },
   {
     id: 'analytics',
@@ -110,14 +134,20 @@ const menuCategories = [
         name: 'Analytics Avançados',
         description: 'Estatísticas em tempo real',
         icon: <TrendingUp className="h-3 w-3" />,
-        premium: true
-      }
-    ]
-  }
+        premium: true,
+      },
+    ],
+  },
 ];
 
 export default function BottomNavBar({
-  onNavigate, activeSection, notifications = 0, achievements = 0, credits = 0, xp = 0, level = 1
+  onNavigate,
+  activeSection,
+  notifications = 0,
+  achievements = 0,
+  credits = 0,
+  xp = 0,
+  level = 1,
 }: BottomNavBarProps) {
   const { user } = useAuth();
   const { isPremium } = useUserStore();
@@ -129,10 +159,34 @@ export default function BottomNavBar({
 
   const navItems = [
     { id: 'home', href: '/', label: 'Início', icon: <Home className="h-5 w-5" />, badge: null },
-    { id: 'pixels', href: '/pixels', label: 'Pixels', icon: <Grid3X3 className="h-5 w-5" />, badge: null },
-    { id: 'community', href: '/community', label: 'Comunidade', icon: <Users className="h-5 w-5" />, badge: null },
-    { id: 'achievements', href: '/achievements', label: 'Conquistas', icon: <Trophy className="h-5 w-5" />, badge: achievements > 0 ? achievements : null },
-    { id: 'settings', href: '/settings', label: 'Ajustes', icon: <Settings className="h-5 w-5" />, badge: notifications > 0 ? notifications : null }
+    {
+      id: 'pixels',
+      href: '/pixels',
+      label: 'Pixels',
+      icon: <Grid3X3 className="h-5 w-5" />,
+      badge: null,
+    },
+    {
+      id: 'community',
+      href: '/community',
+      label: 'Comunidade',
+      icon: <Users className="h-5 w-5" />,
+      badge: null,
+    },
+    {
+      id: 'achievements',
+      href: '/achievements',
+      label: 'Conquistas',
+      icon: <Trophy className="h-5 w-5" />,
+      badge: achievements > 0 ? achievements : null,
+    },
+    {
+      id: 'settings',
+      href: '/settings',
+      label: 'Ajustes',
+      icon: <Settings className="h-5 w-5" />,
+      badge: notifications > 0 ? notifications : null,
+    },
   ];
 
   const handleNavClick = (section: string) => {
@@ -163,8 +217,14 @@ export default function BottomNavBar({
 
   return (
     <>
-      <SoundEffect src={SOUND_EFFECTS.HOVER} play={playHoverSound} onEnd={() => setPlayHoverSound(false)} volume={0.15} rate={1.5} />
-      
+      <SoundEffect
+        src={SOUND_EFFECTS.HOVER}
+        play={playHoverSound}
+        onEnd={() => setPlayHoverSound(false)}
+        volume={0.15}
+        rate={1.5}
+      />
+
       {/* Integrated Sidebar Overlay */}
       <AnimatePresence>
         {showSidebar && (
@@ -174,61 +234,64 @@ export default function BottomNavBar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-40"
+              className="fixed inset-0 z-40 bg-black/50"
               onClick={toggleSidebar}
             />
-            
+
             {/* Sidebar Panel */}
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 rounded-t-3xl shadow-2xl"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl"
               style={{ height: `${sidebarHeight}px` }}
             >
               {/* Sidebar Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border/50">
+              <div className="flex items-center justify-between border-b border-border/50 p-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-500 rounded-lg flex items-center justify-center">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-purple-500">
                     <Grid3X3 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                    <h2 className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-lg font-bold text-transparent">
                       Pixel Universe
                     </h2>
                     <p className="text-xs text-muted-foreground">Experiência Única</p>
                   </div>
                 </div>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleSidebar}
-                  className="p-2"
-                >
+
+                <Button variant="ghost" size="sm" onClick={toggleSidebar} className="p-2">
                   <X className="h-5 w-5" />
                 </Button>
               </div>
 
               {/* Sidebar Content */}
               <div className="flex-1 overflow-hidden">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-                  <div className="p-4 border-b border-border/50">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="flex h-full flex-col"
+                >
+                  <div className="border-b border-border/50 p-4">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="stats" className="text-xs">Estatísticas</TabsTrigger>
-                      <TabsTrigger value="features" className="text-xs">Funcionalidades</TabsTrigger>
+                      <TabsTrigger value="stats" className="text-xs">
+                        Estatísticas
+                      </TabsTrigger>
+                      <TabsTrigger value="features" className="text-xs">
+                        Funcionalidades
+                      </TabsTrigger>
                     </TabsList>
                   </div>
 
                   <ScrollArea className="flex-1">
-                    <TabsContent value="stats" className="p-4 space-y-4 m-0">
+                    <TabsContent value="stats" className="m-0 space-y-4 p-4">
                       <MapSidebar />
                     </TabsContent>
 
-                    <TabsContent value="features" className="p-4 space-y-4 m-0">
+                    <TabsContent value="features" className="m-0 space-y-4 p-4">
                       <div className="space-y-4">
-                        {menuCategories.map((category) => (
+                        {menuCategories.map(category => (
                           <motion.div
                             key={category.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -237,17 +300,19 @@ export default function BottomNavBar({
                             className="space-y-3"
                           >
                             <div className="flex items-center space-x-3">
-                              <div className={`p-2 rounded-lg ${category.bgColor}`}>
+                              <div className={`rounded-lg p-2 ${category.bgColor}`}>
                                 <div className={category.color}>{category.icon}</div>
                               </div>
                               <div className="flex-1">
-                                <h3 className="font-semibold text-sm">{category.name}</h3>
-                                <p className="text-xs text-muted-foreground">{category.description}</p>
+                                <h3 className="text-sm font-semibold">{category.name}</h3>
+                                <p className="text-xs text-muted-foreground">
+                                  {category.description}
+                                </p>
                               </div>
                             </div>
 
                             <div className="space-y-2">
-                              {category.features.map((feature) => (
+                              {category.features.map(feature => (
                                 <motion.div
                                   key={feature.id}
                                   whileHover={{ scale: 1.02 }}
@@ -260,12 +325,12 @@ export default function BottomNavBar({
                                   >
                                     <CardContent className="p-3">
                                       <div className="flex items-center space-x-3">
-                                        <div className={`p-2 rounded-lg ${category.bgColor}`}>
+                                        <div className={`rounded-lg p-2 ${category.bgColor}`}>
                                           <div className={category.color}>{feature.icon}</div>
                                         </div>
                                         <div className="flex-1">
                                           <div className="flex items-center space-x-2">
-                                            <h4 className="font-medium text-sm">{feature.name}</h4>
+                                            <h4 className="text-sm font-medium">{feature.name}</h4>
                                             {feature.premium && (
                                               <Crown className="h-3 w-3 text-yellow-500" />
                                             )}
@@ -294,26 +359,32 @@ export default function BottomNavBar({
       </AnimatePresence>
 
       {/* User Status Bar */}
-      <motion.div 
-        initial={{ y: 100 }} 
-        animate={{ y: 0 }} 
+      <motion.div
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
         className="fixed bottom-20 left-0 right-0 z-30 px-4"
       >
-        <Card className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg">
+        <Card className="border-border/50 bg-background/95 shadow-lg backdrop-blur-sm">
           <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-purple-500">
+                  <span className="text-xs font-bold text-white">
                     {user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U'}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Badge variant={isPremium ? "default" : "secondary"} className="text-xs">
+                  <Badge variant={isPremium ? 'default' : 'secondary'} className="text-xs">
                     {isPremium ? (
-                      <><Crown className="h-3 w-3 mr-1" />Premium</>
+                      <>
+                        <Crown className="mr-1 h-3 w-3" />
+                        Premium
+                      </>
                     ) : (
-                      <><Star className="h-3 w-3 mr-1" />Free</>
+                      <>
+                        <Star className="mr-1 h-3 w-3" />
+                        Free
+                      </>
                     )}
                   </Badge>
                   <span className="text-xs text-muted-foreground">Nível {level}</span>
@@ -335,28 +406,31 @@ export default function BottomNavBar({
       </motion.div>
 
       {/* Enhanced Bottom Navigation */}
-      <motion.div 
-        initial={{ y: 100 }} 
-        animate={{ y: 0 }} 
-        className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50"
+      <motion.div
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background/95 backdrop-blur-sm"
       >
         <div className="flex items-center justify-around p-2">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <TooltipProvider key={item.id} delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link href={item.href} passHref>
-                    <Button 
-                      variant={activeSection === item.id ? "default" : "ghost"} 
-                      size="sm" 
-                      className="relative flex flex-col items-center space-y-1 p-2 h-auto" 
-                      onClick={() => handleNavClick(item.id)} 
+                    <Button
+                      variant={activeSection === item.id ? 'default' : 'ghost'}
+                      size="sm"
+                      className="relative flex h-auto flex-col items-center space-y-1 p-2"
+                      onClick={() => handleNavClick(item.id)}
                       onMouseEnter={() => setPlayHoverSound(true)}
                     >
                       <div className="relative">
                         {item.icon}
                         {item.badge && (
-                          <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                          <Badge
+                            variant="destructive"
+                            className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-xs"
+                          >
                             {item.badge}
                           </Badge>
                         )}
@@ -371,20 +445,20 @@ export default function BottomNavBar({
               </Tooltip>
             </TooltipProvider>
           ))}
-          
+
           {/* Sidebar Toggle Button */}
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button 
-                  variant={showSidebar ? "default" : "ghost"} 
-                  size="sm" 
-                  className="relative flex flex-col items-center space-y-1 p-2 h-auto" 
-                  onClick={toggleSidebar} 
+                <Button
+                  variant={showSidebar ? 'default' : 'ghost'}
+                  size="sm"
+                  className="relative flex h-auto flex-col items-center space-y-1 p-2"
+                  onClick={toggleSidebar}
                   onMouseEnter={() => setPlayHoverSound(true)}
                 >
-                  <motion.div 
-                    animate={{ rotate: showSidebar ? 180 : 0 }} 
+                  <motion.div
+                    animate={{ rotate: showSidebar ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
                     <ChevronUp className="h-5 w-5" />

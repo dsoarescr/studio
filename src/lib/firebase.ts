@@ -1,7 +1,12 @@
-
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, GithubAuthProvider } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  TwitterAuthProvider,
+  GithubAuthProvider,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from './firebase-config'; // Import the configuration directly
 
@@ -13,7 +18,7 @@ if (typeof window !== 'undefined' && !getApps().length) {
 }
 
 // We need to handle the case where app might not be fully initialized on the server
-const auth = app ? getAuth(app) : ({} as any); 
+const auth = app ? getAuth(app) : ({} as any);
 const db = app ? getFirestore(app) : ({} as any);
 
 // Initialize providers for social login
@@ -22,11 +27,4 @@ const facebookProvider = new FacebookAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
-export { 
-  auth, 
-  db, 
-  googleProvider, 
-  facebookProvider, 
-  twitterProvider, 
-  githubProvider,
-};
+export { auth, db, googleProvider, facebookProvider, twitterProvider, githubProvider };

@@ -132,10 +132,16 @@ interface SelectedPixelDetails {
   isOwnedByCurrentUser?: boolean;
   isForSaleBySystem?: boolean;
   specialCreditsPrice?: number;
-  history: Array<{ owner: string; date: string; price?: number }>;
+  history: Array<{ action?: string; user?: string; date: string; price?: number; details?: string }>;
   views: number;
   likes: number;
   isProtected?: boolean;
+  tags?: string[];
+  gpsCoords?: { lat: number; lon: number };
+  features?: string[];
+  rating?: number;
+  totalRatings?: number;
+  userRating?: number;
 }
 
 type VisualizationMode = 'default' | 'density' | 'value' | 'ownership' | 'activity';
@@ -172,6 +178,7 @@ export default function PixelGrid() {
   const [showPixelInfoModal, setShowPixelInfoModal] = useState(false);
   const [showPixelEditModal, setShowPixelEditModal] = useState(false);
   const [showDetailedPixelModal, setShowDetailedPixelModal] = useState(false);
+  const [showPixelPurchaseModal, setShowPixelPurchaseModal] = useState(false);
   const { user } = useAuth();
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -761,7 +768,7 @@ export default function PixelGrid() {
       addPixel();
 
       // Haptic feedback
-      vibrate([50, 50, 50]);
+      vibrate('success');
 
       toast({
         title: "Pixel comprado!",
@@ -785,7 +792,7 @@ export default function PixelGrid() {
     const existingPixel = soldPixels.find(p => p.x === x && p.y === y);
     
     if (existingPixel) {
-      // Show detailed pixel info
+      // Show detailed pixel info for owned pixels
       const detailedPixelData = {
         id,
         x,
@@ -822,11 +829,11 @@ export default function PixelGrid() {
       };
       
       setSelectedPixelDetails(detailedPixelData as any);
-      setShowDetailedPixelModal(true);
+      setShowPixelInfoModal(true);
     } else {
-      // Show purchase modal for unsold pixels
-      const detailedPixelData = {
-        id,
+      // Show purchase modal directly for unsold pixels
+      const pixelData = {
+        id: id || Math.floor(Math.random() * 1000000),
         x,
         y,
         price: PIXEL_BASE_PRICE,
@@ -845,11 +852,11 @@ export default function PixelGrid() {
         userRating: 0
       };
       
-      setSelectedPixelDetails(detailedPixelData as any);
-      setShowDetailedPixelModal(true);
+      setSelectedPixelDetails(pixelData as any);
+      setShowPixelPurchaseModal(true);
     }
     
-    vibrate([30]);
+    vibrate('selection');
   }, [soldPixels, user?.uid, vibrate, toast]);
 
   // Save bookmarks
@@ -1126,7 +1133,49 @@ export default function PixelGrid() {
         <DetailedPixelModal
           isOpen={showDetailedPixelModal}
           onClose={() => setShowDetailedPixelModal(false)}
-          pixelData={selectedPixelDetails as any}
+          pixelData={{
+            id: selectedPixelDetails.id,
+            x: selectedPixelDetails.x,
+            y: selectedPixelDetails.y,
+            owner: typeof selectedPixelDetails.owner === 'string'
+              ? {
+                  id: selectedPixelDetails.owner,
+                  name: selectedPixelDetails.owner,
+                  avatar: 'https://placehold.co/40x40.png',
+                  level: 1,
+                  verified: false,
+                  joinDate: '2024-01-01',
+                  totalPixels: 0,
+                  totalValue: 0,
+                  badges: []
+                }
+              : (selectedPixelDetails.owner as any),
+            price: selectedPixelDetails.price,
+            region: selectedPixelDetails.region,
+            views: selectedPixelDetails.views,
+            likes: selectedPixelDetails.likes,
+            rarity: selectedPixelDetails.rarity as any,
+            color: selectedPixelDetails.color,
+            title: selectedPixelDetails.title,
+            description: selectedPixelDetails.description,
+            tags: selectedPixelDetails.tags,
+            isOwnedByCurrentUser: selectedPixelDetails.isOwnedByCurrentUser,
+            isForSaleBySystem: selectedPixelDetails.isForSaleBySystem,
+            gpsCoords: selectedPixelDetails.gpsCoords ?? null,
+            isProtected: selectedPixelDetails.isProtected,
+            features: selectedPixelDetails.features,
+            specialCreditsPrice: selectedPixelDetails.specialCreditsPrice,
+            history: (selectedPixelDetails.history || []).map((h: any) => ({
+              action: h.action ?? 'Transação',
+              user: h.user ?? (typeof selectedPixelDetails.owner === 'string' ? selectedPixelDetails.owner : (selectedPixelDetails.owner as any)?.id) ?? 'Sistema',
+              date: h.date,
+              price: h.price,
+              details: h.details,
+            })),
+            rating: selectedPixelDetails.rating,
+            totalRatings: selectedPixelDetails.totalRatings,
+            userRating: selectedPixelDetails.userRating,
+          }}
           onPurchase={() => {
             setShowDetailedPixelModal(false);
             setShowPixelEditModal(true);
@@ -1142,9 +1191,38 @@ export default function PixelGrid() {
         <EnhancedPixelPurchaseModal
           isOpen={showPixelEditModal}
           onClose={() => setShowPixelEditModal(false)}
-          pixelData={selectedPixelDetails}
+          pixelData={{
+            x: selectedPixelDetails.x,
+            y: selectedPixelDetails.y,
+            owner: typeof selectedPixelDetails.owner === 'string' ? selectedPixelDetails.owner : (selectedPixelDetails.owner as any)?.id,
+            price: selectedPixelDetails.price,
+            region: selectedPixelDetails.region,
+            rarity: selectedPixelDetails.rarity,
+            color: selectedPixelDetails.color,
+            title: selectedPixelDetails.title,
+            description: selectedPixelDetails.description,
+            isOwnedByCurrentUser: selectedPixelDetails.isOwnedByCurrentUser,
+            isForSaleBySystem: selectedPixelDetails.isForSaleBySystem,
+            specialCreditsPrice: selectedPixelDetails.specialCreditsPrice,
+            history: (selectedPixelDetails.history || []).map((h: any) => ({
+              owner: h.user ?? (typeof selectedPixelDetails.owner === 'string' ? selectedPixelDetails.owner : (selectedPixelDetails.owner as any)?.id) ?? 'Sistema',
+              date: h.date,
+              price: h.price,
+            })),
+            views: selectedPixelDetails.views,
+            likes: selectedPixelDetails.likes,
+            isProtected: selectedPixelDetails.isProtected,
+          }}
           userCredits={credits}
-          onPurchase={handlePixelPurchase}
+          onPurchase={async (pixelDataArg, paymentMethod, customizations) => {
+            const ok = await handlePixelPurchase(
+              { ...(selectedPixelDetails as any), price: pixelDataArg.price },
+              paymentMethod,
+              customizations
+            );
+            if (ok) setShowPixelEditModal(false);
+            return ok;
+          }}
         />
       )}
 
@@ -1160,6 +1238,64 @@ export default function PixelGrid() {
           onPurchase={() => {
             setShowPixelInfoModal(false);
             setShowPixelEditModal(true);
+          }}
+        />
+      )}
+
+      {showPixelPurchaseModal && selectedPixelDetails && (
+        <DetailedPixelModal
+          isOpen={showPixelPurchaseModal}
+          onClose={() => setShowPixelPurchaseModal(false)}
+          pixelData={{
+            id: selectedPixelDetails.id,
+            x: selectedPixelDetails.x,
+            y: selectedPixelDetails.y,
+            owner: typeof selectedPixelDetails.owner === 'string'
+              ? {
+                  id: selectedPixelDetails.owner,
+                  name: selectedPixelDetails.owner,
+                  avatar: 'https://placehold.co/40x40.png',
+                  level: 1,
+                  verified: false,
+                  joinDate: '2024-01-01',
+                  totalPixels: 0,
+                  totalValue: 0,
+                  badges: []
+                }
+              : (selectedPixelDetails.owner as any),
+            price: selectedPixelDetails.price,
+            region: selectedPixelDetails.region,
+            views: selectedPixelDetails.views,
+            likes: selectedPixelDetails.likes,
+            rarity: selectedPixelDetails.rarity as any,
+            color: selectedPixelDetails.color,
+            title: selectedPixelDetails.title,
+            description: selectedPixelDetails.description,
+            tags: selectedPixelDetails.tags,
+            isOwnedByCurrentUser: selectedPixelDetails.isOwnedByCurrentUser,
+            isForSaleBySystem: selectedPixelDetails.isForSaleBySystem,
+            gpsCoords: selectedPixelDetails.gpsCoords ?? null,
+            isProtected: selectedPixelDetails.isProtected,
+            features: selectedPixelDetails.features,
+            specialCreditsPrice: selectedPixelDetails.specialCreditsPrice,
+            history: (selectedPixelDetails.history || []).map((h: any) => ({
+              action: h.action ?? 'Transação',
+              user: h.user ?? (typeof selectedPixelDetails.owner === 'string' ? selectedPixelDetails.owner : (selectedPixelDetails.owner as any)?.id) ?? 'Sistema',
+              date: h.date,
+              price: h.price,
+              details: h.details,
+            })),
+            rating: selectedPixelDetails.rating,
+            totalRatings: selectedPixelDetails.totalRatings,
+            userRating: selectedPixelDetails.userRating,
+          }}
+          onPurchase={() => {
+            void handlePixelPurchase(
+              selectedPixelDetails,
+              'credits',
+              {}
+            );
+            setShowPixelPurchaseModal(false);
           }}
         />
       )}

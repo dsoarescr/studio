@@ -9,8 +9,14 @@ const fs = require('fs');
 const path = require('path');
 const { createCanvas } = require('canvas');
 
-const DEFAULT_TILE_PX = parseInt(process.argv.includes('--tile') ? process.argv[process.argv.indexOf('--tile') + 1] : '512', 10) || 512;
-const OUTPUT_DIR = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : 'public/tiles/lod0';
+const DEFAULT_TILE_PX =
+  parseInt(
+    process.argv.includes('--tile') ? process.argv[process.argv.indexOf('--tile') + 1] : '512',
+    10
+  ) || 512;
+const OUTPUT_DIR = process.argv.includes('--out')
+  ? process.argv[process.argv.indexOf('--out') + 1]
+  : 'public/tiles/lod0';
 
 const SRC_FILE = path.join(process.cwd(), 'src', 'components', 'pixel-grid', 'PortugalMapSvg.tsx');
 
@@ -28,19 +34,35 @@ function extractPaths(svgSource) {
   const closeGRegex = /<\s*\/\s*g\s*>/gi;
   const stack = [];
   const getAttr = (attrs, name) => {
-    const m = new RegExp(name+"=\"([^\"]*)\"").exec(attrs);
+    const m = new RegExp(name + '="([^"]*)"').exec(attrs);
     return m ? m[1] : undefined;
   };
-  const parseTransform = (t) => {
+  const parseTransform = t => {
     if (!t) return { tx: 0, ty: 0, sx: 1, sy: 1 };
-    let tx = 0, ty = 0, sx = 1, sy = 1;
+    let tx = 0,
+      ty = 0,
+      sx = 1,
+      sy = 1;
     const tr = /translate\(([-\d.]+)\s*,?\s*([\-\d.]+)?\)/.exec(t);
-    if (tr) { tx += parseFloat(tr[1]); ty += parseFloat(tr[2] || '0'); }
+    if (tr) {
+      tx += parseFloat(tr[1]);
+      ty += parseFloat(tr[2] || '0');
+    }
     const sc = /scale\(([-\d.]+)\s*,?\s*([\-\d.]+)?\)/.exec(t);
-    if (sc) { const s1 = parseFloat(sc[1]); const s2 = sc[2] ? parseFloat(sc[2]) : s1; sx *= s1; sy *= s2; }
+    if (sc) {
+      const s1 = parseFloat(sc[1]);
+      const s2 = sc[2] ? parseFloat(sc[2]) : s1;
+      sx *= s1;
+      sy *= s2;
+    }
     return { tx, ty, sx, sy };
   };
-  const compose = (a, b) => ({ tx: a.tx + b.tx, ty: a.ty + b.ty, sx: a.sx * b.sx, sy: a.sy * b.sy });
+  const compose = (a, b) => ({
+    tx: a.tx + b.tx,
+    ty: a.ty + b.ty,
+    sx: a.sx * b.sx,
+    sy: a.sy * b.sy,
+  });
 
   while (true) {
     const mOpen = openTagRegex.exec(svgSource);
@@ -52,12 +74,12 @@ function extractPaths(svgSource) {
       const attrs = mOpen[2] || '';
       if (tag.toLowerCase() === 'g') {
         const t = parseTransform(getAttr(attrs, 'transform'));
-        const top = stack[stack.length - 1] || { tx:0, ty:0, sx:1, sy:1 };
+        const top = stack[stack.length - 1] || { tx: 0, ty: 0, sx: 1, sy: 1 };
         stack.push(compose(top, t));
       } else if (tag.toLowerCase() === 'path') {
         const d = getAttr(attrs, 'd');
         if (d) {
-          const top = stack[stack.length - 1] || { tx:0, ty:0, sx:1, sy:1 };
+          const top = stack[stack.length - 1] || { tx: 0, ty: 0, sx: 1, sy: 1 };
           entries.push({ d, transform: top });
         }
       }
@@ -103,7 +125,7 @@ async function main() {
       for (const e of entries) {
         try {
           ctx.save();
-          const tf = e.transform || { tx:0, ty:0, sx:1, sy:1 };
+          const tf = e.transform || { tx: 0, ty: 0, sx: 1, sy: 1 };
           ctx.transform(tf.sx, 0, 0, tf.sy, tf.tx, tf.ty);
           const p = new (require('canvas').Path2D)(e.d);
           ctx.fill(p);
@@ -127,9 +149,7 @@ async function main() {
   console.log(`\nGerado LOD0: ${manifest.length} tiles em ${OUTPUT_DIR}`);
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(err);
   process.exit(1);
 });
-
-

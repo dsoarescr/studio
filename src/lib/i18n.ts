@@ -10,7 +10,7 @@ const resources = {
       // Common
       'app.name': 'Pixel Universe',
       'app.tagline': 'Mapa Interativo de Portugal',
-      
+
       // Navigation
       'nav.universe': 'Universo',
       'nav.market': 'Market',
@@ -19,7 +19,7 @@ const resources = {
       'nav.ranking': 'Ranking',
       'nav.achievements': 'Conquistas',
       'nav.settings': 'Definições',
-      
+
       // Map
       'map.loading': 'A carregar mapa...',
       'map.zoom': 'Zoom',
@@ -32,7 +32,7 @@ const resources = {
       'map.location': 'Ir para Minha Localização',
       'map.view': 'Ver no Google Maps',
       'map.performance': 'Modo de Desempenho',
-      
+
       // Pixel Details
       'pixel.owner': 'Proprietário',
       'pixel.price': 'Preço',
@@ -42,21 +42,21 @@ const resources = {
       'pixel.buy': 'Comprar',
       'pixel.edit': 'Editar',
       'pixel.share': 'Partilhar',
-      
+
       // Achievements
       'achievements.unlocked': 'Conquista Desbloqueada!',
       'achievements.progress': 'Progresso',
       'achievements.reward': 'Recompensa',
       'achievements.xp': 'XP',
       'achievements.credits': 'Créditos',
-      
+
       // User
       'user.level': 'Nível',
       'user.credits': 'Créditos',
       'user.special': 'Especiais',
       'user.pixels': 'Pixels',
       'user.achievements': 'Conquistas',
-      
+
       // Errors
       'error.loading': 'Erro ao carregar',
       'error.retry': 'Tentar Novamente',
@@ -64,14 +64,14 @@ const resources = {
       'error.grid': 'Não foi possível gerar a grelha interativa',
       'error.purchase': 'Falha na compra',
       'error.ai': 'Não foi possível gerar uma descrição',
-    }
+    },
   },
   'en-US': {
     translation: {
       // Common
       'app.name': 'Pixel Universe',
       'app.tagline': 'Interactive Map of Portugal',
-      
+
       // Navigation
       'nav.universe': 'Universe',
       'nav.market': 'Market',
@@ -80,7 +80,7 @@ const resources = {
       'nav.ranking': 'Ranking',
       'nav.achievements': 'Achievements',
       'nav.settings': 'Settings',
-      
+
       // Map
       'map.loading': 'Loading map...',
       'map.zoom': 'Zoom',
@@ -93,7 +93,7 @@ const resources = {
       'map.location': 'Go to My Location',
       'map.view': 'View on Google Maps',
       'map.performance': 'Performance Mode',
-      
+
       // Pixel Details
       'pixel.owner': 'Owner',
       'pixel.price': 'Price',
@@ -103,21 +103,21 @@ const resources = {
       'pixel.buy': 'Buy',
       'pixel.edit': 'Edit',
       'pixel.share': 'Share',
-      
+
       // Achievements
       'achievements.unlocked': 'Achievement Unlocked!',
       'achievements.progress': 'Progress',
       'achievements.reward': 'Reward',
       'achievements.xp': 'XP',
       'achievements.credits': 'Credits',
-      
+
       // User
       'user.level': 'Level',
       'user.credits': 'Credits',
       'user.special': 'Special',
       'user.pixels': 'Pixels',
       'user.achievements': 'Achievements',
-      
+
       // Errors
       'error.loading': 'Loading Error',
       'error.retry': 'Try Again',
@@ -125,14 +125,14 @@ const resources = {
       'error.grid': 'Could not generate the interactive grid',
       'error.purchase': 'Purchase failed',
       'error.ai': 'Could not generate a description',
-    }
+    },
   },
   'es-ES': {
     translation: {
       // Common
       'app.name': 'Pixel Universe',
       'app.tagline': 'Mapa Interactivo de Portugal',
-      
+
       // Navigation
       'nav.universe': 'Universo',
       'nav.market': 'Mercado',
@@ -141,7 +141,7 @@ const resources = {
       'nav.ranking': 'Ranking',
       'nav.achievements': 'Logros',
       'nav.settings': 'Ajustes',
-      
+
       // Map
       'map.loading': 'Cargando mapa...',
       'map.zoom': 'Zoom',
@@ -154,7 +154,7 @@ const resources = {
       'map.location': 'Ir a Mi Ubicación',
       'map.view': 'Ver en Google Maps',
       'map.performance': 'Modo de Rendimiento',
-      
+
       // Pixel Details
       'pixel.owner': 'Propietario',
       'pixel.price': 'Precio',
@@ -164,21 +164,21 @@ const resources = {
       'pixel.buy': 'Comprar',
       'pixel.edit': 'Editar',
       'pixel.share': 'Compartir',
-      
+
       // Achievements
       'achievements.unlocked': '¡Logro Desbloqueado!',
       'achievements.progress': 'Progreso',
       'achievements.reward': 'Recompensa',
       'achievements.xp': 'XP',
       'achievements.credits': 'Créditos',
-      
+
       // User
       'user.level': 'Nivel',
       'user.credits': 'Créditos',
       'user.special': 'Especiales',
       'user.pixels': 'Píxeles',
       'user.achievements': 'Logros',
-      
+
       // Errors
       'error.loading': 'Error de carga',
       'error.retry': 'Intentar de nuevo',
@@ -186,25 +186,23 @@ const resources = {
       'error.grid': 'No se pudo generar la cuadrícula interactiva',
       'error.purchase': 'Falló la compra',
       'error.ai': 'No se pudo generar una descripción',
-    }
-  }
+    },
+  },
 };
 
 // Initialize i18next
 if (!i18n.isInitialized) {
-  i18n
-    .use(initReactI18next)
-    .init({
-      resources,
-      lng: 'pt-PT',
-      fallbackLng: 'pt-PT',
-      interpolation: {
-        escapeValue: false // React already escapes values
-      },
-      react: {
-        useSuspense: false
-      }
-    });
+  i18n.use(initReactI18next).init({
+    resources,
+    lng: 'pt-PT',
+    fallbackLng: 'pt-PT',
+    interpolation: {
+      escapeValue: false, // React already escapes values
+    },
+    react: {
+      useSuspense: false,
+    },
+  });
 }
 
 export default i18n;

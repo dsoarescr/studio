@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { pt, enUS, es } from 'date-fns/locale';
 import { useUserStore } from './store';
@@ -8,7 +8,7 @@ import { useUserStore } from './store';
 const locales = {
   'pt-PT': pt,
   'en-US': enUS,
-  'es-ES': es
+  'es-ES': es,
 };
 
 // Get current locale from localStorage or default to Portuguese
@@ -18,7 +18,7 @@ export function getCurrentLocale(): 'pt-PT' | 'en-US' | 'es-ES' {
 }
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -27,7 +27,11 @@ export function cn(...inputs: ClassValue[]) {
  * @param formatStr The format string to use
  * @returns The formatted date string
  */
-export function formatDate(date: Date | string, formatStr: string = 'PPP', locale?: 'pt-PT' | 'en-US' | 'es-ES'): string {
+export function formatDate(
+  date: Date | string,
+  formatStr: string = 'PPP',
+  locale?: 'pt-PT' | 'en-US' | 'es-ES'
+): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const selectedLocale = locale || getCurrentLocale();
   return format(dateObj, formatStr, { locale: locales[selectedLocale] });
@@ -97,13 +101,15 @@ export function isValidHexColor(color: string): boolean {
  */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   if (!isValidHexColor(hex)) return null;
-  
+
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
 /**
@@ -114,7 +120,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
  * @returns Hex color string
  */
 export function rgbToHex(r: number, g: number, b: number): string {
-  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
 /**
@@ -122,7 +128,9 @@ export function rgbToHex(r: number, g: number, b: number): string {
  * @returns A random hex color string
  */
 export function getRandomColor(): string {
-  return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+  return `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, '0')}`;
 }
 
 /**
@@ -137,20 +145,20 @@ export function getContrastRatio(color1: string, color2: string): number {
     const r = parseInt(hex.substr(0, 2), 16) / 255;
     const g = parseInt(hex.substr(2, 2), 16) / 255;
     const b = parseInt(hex.substr(4, 2), 16) / 255;
-    
+
     const rgb = [r, g, b].map(v => {
       return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
-    
+
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   };
-  
+
   const luminance1 = getLuminance(color1);
   const luminance2 = getLuminance(color2);
-  
+
   const brightest = Math.max(luminance1, luminance2);
   const darkest = Math.min(luminance1, luminance2);
-  
+
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
@@ -164,11 +172,11 @@ export function isLightColor(color: string): boolean {
   const r = parseInt(hex.substr(0, 2), 16);
   const g = parseInt(hex.substr(2, 2), 16);
   const b = parseInt(hex.substr(4, 2), 16);
-  
+
   // Calculate the perceived brightness using the formula
   // (0.299*R + 0.587*G + 0.114*B)
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  
+
   return brightness > 128;
 }
 
@@ -180,7 +188,7 @@ export function isLightColor(color: string): boolean {
 export function getComplementaryColor(color: string): string {
   const rgb = hexToRgb(color);
   if (!rgb) return color;
-  
+
   return rgbToHex(255 - rgb.r, 255 - rgb.g, 255 - rgb.b);
 }
 
@@ -193,9 +201,9 @@ export function getComplementaryColor(color: string): string {
 export function generateColorPalette(baseColor: string, count: number = 5): string[] {
   const rgb = hexToRgb(baseColor);
   if (!rgb) return [baseColor];
-  
+
   const palette: string[] = [baseColor];
-  
+
   for (let i = 1; i < count; i++) {
     const factor = i / count;
     const newR = Math.round(rgb.r + (255 - rgb.r) * factor);
@@ -203,7 +211,7 @@ export function generateColorPalette(baseColor: string, count: number = 5): stri
     const newB = Math.round(rgb.b + (255 - rgb.b) * factor);
     palette.push(rgbToHex(newR, newG, newB));
   }
-  
+
   return palette;
 }
 
@@ -211,7 +219,7 @@ export function generateColorPalette(baseColor: string, count: number = 5): stri
 const PORTUGAL_GPS_BOUNDS = {
   MIN_LAT: 36.96, // Approximate minimum latitude
   MAX_LAT: 42.15, // Approximate maximum latitude
-  MIN_LON: -9.5,  // Approximate minimum longitude (West is negative)
+  MIN_LON: -9.5, // Approximate minimum longitude (West is negative)
   MAX_LON: -6.18, // Approximate maximum longitude
 };
 
@@ -244,14 +252,18 @@ export function mapPixelToApproxGps(
   }
 
   // Calculate relative position (0.0 to 1.0)
-  const relX = logicalCol / (totalLogicalCols -1); // Normalize to 0-1 range
+  const relX = logicalCol / (totalLogicalCols - 1); // Normalize to 0-1 range
   const relY = logicalRow / (totalLogicalRows - 1); // Normalize to 0-1 range
 
   // Interpolate longitude (more straightforward: left to right)
-  const lon = PORTUGAL_GPS_BOUNDS.MIN_LON + relX * (PORTUGAL_GPS_BOUNDS.MAX_LON - PORTUGAL_GPS_BOUNDS.MIN_LON);
+  const lon =
+    PORTUGAL_GPS_BOUNDS.MIN_LON +
+    relX * (PORTUGAL_GPS_BOUNDS.MAX_LON - PORTUGAL_GPS_BOUNDS.MIN_LON);
 
   // Interpolate latitude (inverted: SVG Y is top-to-bottom, Latitude is bottom-to-top)
-  const lat = PORTUGAL_GPS_BOUNDS.MAX_LAT - relY * (PORTUGAL_GPS_BOUNDS.MAX_LAT - PORTUGAL_GPS_BOUNDS.MIN_LAT);
+  const lat =
+    PORTUGAL_GPS_BOUNDS.MAX_LAT -
+    relY * (PORTUGAL_GPS_BOUNDS.MAX_LAT - PORTUGAL_GPS_BOUNDS.MIN_LAT);
   // Or, if SVG top matches GPS North:
   // const lat = PORTUGAL_GPS_BOUNDS.MIN_LAT + (1 - relY) * (PORTUGAL_GPS_BOUNDS.MAX_LAT - PORTUGAL_GPS_BOUNDS.MIN_LAT);
 
@@ -267,19 +279,22 @@ export function mapPixelToApproxGps(
  * @param wait The time to wait in milliseconds
  * @returns A debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
-  
-  return function(...args: Parameters<T>): void {
+
+  return function (...args: Parameters<T>): void {
     const later = () => {
       timeout = null;
       func(...args);
     };
-    
+
     if (timeout !== null) {
       clearTimeout(timeout);
     }
-    
+
     timeout = setTimeout(later, wait);
   };
 }
@@ -290,14 +305,17 @@ export function debounce<T extends (...args: any[]) => any>(func: T, wait: numbe
  * @param limit The time limit in milliseconds
  * @returns A throttled function
  */
-export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
   let inThrottle = false;
   let lastFunc: ReturnType<typeof setTimeout>;
   let lastRan: number;
-  
-  return function(...args: Parameters<T>): void {
-    const context = this;
-    
+
+  return function (this: unknown, ...args: Parameters<T>): void {
+    const context: unknown = this;
+
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
@@ -311,12 +329,15 @@ export function throttle<T extends (...args: any[]) => any>(func: T, limit: numb
       }, limit);
     } else {
       clearTimeout(lastFunc);
-      lastFunc = setTimeout(() => {
-        if (Date.now() - lastRan >= limit) {
-          func.apply(context, args);
-          lastRan = Date.now();
-        }
-      }, limit - (Date.now() - lastRan));
+      lastFunc = setTimeout(
+        () => {
+          if (Date.now() - lastRan >= limit) {
+            (func as any).apply(context as any, args);
+            lastRan = Date.now();
+          }
+        },
+        limit - (Date.now() - lastRan)
+      );
     }
   };
 }
@@ -337,7 +358,7 @@ export function isMobileDevice(): boolean {
 export function isLowPerformanceDevice(): boolean {
   if (typeof navigator === 'undefined') return false;
   return (
-    navigator.hardwareConcurrency <= 4 || 
+    navigator.hardwareConcurrency <= 4 ||
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
     (navigator as any).deviceMemory < 4
   );
@@ -388,26 +409,26 @@ export function validatePassword(password: string): {
 } {
   const feedback: string[] = [];
   let score = 0;
-  
+
   if (password.length >= 8) score += 1;
   else feedback.push('Deve ter pelo menos 8 caracteres');
-  
+
   if (/[a-z]/.test(password)) score += 1;
   else feedback.push('Deve conter pelo menos uma letra minúscula');
-  
+
   if (/[A-Z]/.test(password)) score += 1;
   else feedback.push('Deve conter pelo menos uma letra maiúscula');
-  
+
   if (/\d/.test(password)) score += 1;
   else feedback.push('Deve conter pelo menos um número');
-  
+
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
   else feedback.push('Deve conter pelo menos um caractere especial');
-  
+
   return {
     isValid: score >= 4,
     score,
-    feedback
+    feedback,
   };
 }
 
@@ -418,11 +439,11 @@ export function validatePassword(password: string): {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
@@ -448,10 +469,12 @@ export function isPointInArea(
   point: { x: number; y: number },
   area: { x: number; y: number; width: number; height: number }
 ): boolean {
-  return point.x >= area.x && 
-         point.x <= area.x + area.width &&
-         point.y >= area.y && 
-         point.y <= area.y + area.height;
+  return (
+    point.x >= area.x &&
+    point.x <= area.x + area.width &&
+    point.y >= area.y &&
+    point.y <= area.y + area.height
+  );
 }
 
 /**
@@ -460,7 +483,8 @@ export function isPointInArea(
  * @returns Random ID string
  */
 export function generateId(prefix?: string): string {
-  const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  const id =
+    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   return prefix ? `${prefix}_${id}` : id;
 }
 
@@ -528,37 +552,37 @@ export function checkAffordability(
   }>;
 } {
   const canAfford = userCredits >= price;
-  const canAffordWithSpecial = acceptSpecialCredits && (userCredits + userSpecialCredits) >= price;
+  const canAffordWithSpecial = acceptSpecialCredits && userCredits + userSpecialCredits >= price;
   const shortfall = Math.max(0, price - userCredits);
-  
+
   const paymentOptions = [];
-  
+
   if (canAfford) {
     paymentOptions.push({
       type: 'credits' as const,
       amount: price,
-      label: `${price} créditos`
+      label: `${price} créditos`,
     });
   }
-  
+
   if (acceptSpecialCredits && userSpecialCredits > 0) {
     const specialCreditsNeeded = Math.min(userSpecialCredits, shortfall);
     const regularCreditsNeeded = price - specialCreditsNeeded;
-    
+
     if (regularCreditsNeeded <= userCredits) {
       paymentOptions.push({
         type: 'mixed' as const,
         amount: price,
-        label: `${regularCreditsNeeded} créditos + ${specialCreditsNeeded} especiais`
+        label: `${regularCreditsNeeded} créditos + ${specialCreditsNeeded} especiais`,
       });
     }
   }
-  
+
   return {
     canAfford,
     canAffordWithSpecial,
     shortfall,
-    paymentOptions
+    paymentOptions,
   };
 }
 
@@ -568,7 +592,10 @@ export function checkAffordability(
  * @param currentXp Current XP amount
  * @returns XP needed for next level
  */
-export function calculateXpForNextLevel(currentLevel: number, currentXp: number): {
+export function calculateXpForNextLevel(
+  currentLevel: number,
+  currentXp: number
+): {
   xpNeeded: number;
   xpMax: number;
   progress: number;
@@ -577,7 +604,7 @@ export function calculateXpForNextLevel(currentLevel: number, currentXp: number)
   const xpMax = Math.floor(baseXp * Math.pow(1.2, currentLevel - 1));
   const xpNeeded = xpMax - currentXp;
   const progress = (currentXp / xpMax) * 100;
-  
+
   return { xpNeeded, xpMax, progress };
 }
 

@@ -2,15 +2,30 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useUserStore } from '@/lib/store';
 import {
-  Calendar, Star, Trophy, Target, Zap, Gift, 
-  Timer, Sparkles, ArrowUp, CheckCircle2
+  Calendar,
+  Star,
+  Trophy,
+  Target,
+  Zap,
+  Gift,
+  Timer,
+  Sparkles,
+  ArrowUp,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface Challenge {
@@ -35,26 +50,26 @@ const difficultyConfig = {
     color: 'text-green-500',
     bg: 'bg-green-500/10',
     border: 'border-green-500/30',
-    label: 'Fácil'
+    label: 'Fácil',
   },
   medium: {
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/30',
-    label: 'Médio'
+    label: 'Médio',
   },
   hard: {
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/30',
-    label: 'Difícil'
+    label: 'Difícil',
   },
   epic: {
     color: 'text-amber-500',
     bg: 'bg-amber-500/10',
     border: 'border-amber-500/30',
-    label: 'Épico'
-  }
+    label: 'Épico',
+  },
 };
 
 const mockChallenges: Challenge[] = [
@@ -68,10 +83,10 @@ const mockChallenges: Challenge[] = [
     goal: 5,
     rewards: {
       xp: 100,
-      credits: 50
+      credits: 50,
     },
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    completed: false
+    completed: false,
   },
   {
     id: 'daily-2',
@@ -83,10 +98,10 @@ const mockChallenges: Challenge[] = [
     goal: 3,
     rewards: {
       xp: 150,
-      credits: 75
+      credits: 75,
     },
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    completed: false
+    completed: false,
   },
   {
     id: 'weekly-1',
@@ -99,10 +114,10 @@ const mockChallenges: Challenge[] = [
     rewards: {
       xp: 300,
       credits: 150,
-      special: 'Paleta Especial'
+      special: 'Paleta Especial',
     },
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    completed: false
+    completed: false,
   },
   {
     id: 'special-1',
@@ -115,11 +130,11 @@ const mockChallenges: Challenge[] = [
     rewards: {
       xp: 500,
       credits: 250,
-      special: 'Badge Exclusiva do Evento'
+      special: 'Badge Exclusiva do Evento',
     },
     expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    completed: false
-  }
+    completed: false,
+  },
 ];
 
 export function DailyChallenges() {
@@ -131,9 +146,9 @@ export function DailyChallenges() {
   const handleClaimReward = (challenge: Challenge) => {
     if (!challenge.completed) {
       toast({
-        title: "Desafio não completado",
-        description: "Complete o desafio primeiro para receber a recompensa!",
-        variant: "destructive"
+        title: 'Desafio não completado',
+        description: 'Complete o desafio primeiro para receber a recompensa!',
+        variant: 'destructive',
       });
       return;
     }
@@ -143,20 +158,18 @@ export function DailyChallenges() {
     addCredits(challenge.rewards.credits);
 
     // Atualizar estado
-    setChallenges(prev => prev.map(c => 
-      c.id === challenge.id ? { ...c, claimed: true } : c
-    ));
+    setChallenges(prev => prev.map(c => (c.id === challenge.id ? { ...c, claimed: true } : c)));
 
     // Mostrar notificação
     toast({
-      title: "Recompensa Recebida!",
+      title: 'Recompensa Recebida!',
       description: `Você recebeu ${challenge.rewards.xp} XP e ${challenge.rewards.credits} créditos!`,
-      variant: "success"
+      variant: 'default',
     });
   };
 
-  const filteredChallenges = challenges.filter(challenge => 
-    activeFilter === 'all' || challenge.type === activeFilter
+  const filteredChallenges = challenges.filter(
+    challenge => activeFilter === 'all' || challenge.type === activeFilter
   );
 
   return (
@@ -167,7 +180,7 @@ export function DailyChallenges() {
           onClick={() => setActiveFilter('all')}
           className="text-sm"
         >
-          <Star className="h-4 w-4 mr-2" />
+          <Star className="mr-2 h-4 w-4" />
           Todos
         </Button>
         <Button
@@ -175,7 +188,7 @@ export function DailyChallenges() {
           onClick={() => setActiveFilter('daily')}
           className="text-sm"
         >
-          <Calendar className="h-4 w-4 mr-2" />
+          <Calendar className="mr-2 h-4 w-4" />
           Diários
         </Button>
         <Button
@@ -183,7 +196,7 @@ export function DailyChallenges() {
           onClick={() => setActiveFilter('weekly')}
           className="text-sm"
         >
-          <Target className="h-4 w-4 mr-2" />
+          <Target className="mr-2 h-4 w-4" />
           Semanais
         </Button>
         <Button
@@ -191,12 +204,12 @@ export function DailyChallenges() {
           onClick={() => setActiveFilter('special')}
           className="text-sm"
         >
-          <Sparkles className="h-4 w-4 mr-2" />
+          <Sparkles className="mr-2 h-4 w-4" />
           Especiais
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {filteredChallenges.map(challenge => {
           const config = difficultyConfig[challenge.difficulty];
           const timeLeft = new Date(challenge.expiresAt).getTime() - Date.now();
@@ -210,15 +223,15 @@ export function DailyChallenges() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className={`border-2 ${config.border} hover:shadow-lg transition-all duration-300`}>
+              <Card
+                className={`border-2 ${config.border} transition-all duration-300 hover:shadow-lg`}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         {challenge.title}
-                        <Badge className={`${config.color} ${config.bg}`}>
-                          {config.label}
-                        </Badge>
+                        <Badge className={`${config.color} ${config.bg}`}>{config.label}</Badge>
                       </CardTitle>
                       <CardDescription>{challenge.description}</CardDescription>
                     </div>
@@ -241,16 +254,19 @@ export function DailyChallenges() {
 
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="secondary" className="flex items-center">
-                      <Zap className="h-3 w-3 mr-1" />
+                      <Zap className="mr-1 h-3 w-3" />
                       {challenge.rewards.xp} XP
                     </Badge>
                     <Badge variant="outline" className="flex items-center">
-                      <ArrowUp className="h-3 w-3 mr-1" />
+                      <ArrowUp className="mr-1 h-3 w-3" />
                       {challenge.rewards.credits} Créditos
                     </Badge>
                     {challenge.rewards.special && (
-                      <Badge variant="default" className="flex items-center bg-gradient-to-r from-purple-500 to-pink-500">
-                        <Gift className="h-3 w-3 mr-1" />
+                      <Badge
+                        variant="default"
+                        className="flex items-center bg-gradient-to-r from-purple-500 to-pink-500"
+                      >
+                        <Gift className="mr-1 h-3 w-3" />
                         {challenge.rewards.special}
                       </Badge>
                     )}
@@ -258,16 +274,13 @@ export function DailyChallenges() {
                 </CardContent>
                 <CardFooter>
                   {challenge.completed ? (
-                    <Button 
-                      className="w-full"
-                      onClick={() => handleClaimReward(challenge)}
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                    <Button className="w-full" onClick={() => handleClaimReward(challenge)}>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
                       Reclamar Recompensa
                     </Button>
                   ) : (
                     <Button variant="outline" className="w-full" disabled>
-                      <Target className="h-4 w-4 mr-2" />
+                      <Target className="mr-2 h-4 w-4" />
                       Em Progresso
                     </Button>
                   )}

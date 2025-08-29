@@ -41,12 +41,15 @@ export async function POST(request: Request) {
           firebaseUserId: userId,
         },
       });
-      
+
       customerId = customer.id;
-      
-      await adminDb.collection('users').doc(userId).set({
-        stripeCustomerId: customerId,
-      }, { merge: true });
+
+      await adminDb.collection('users').doc(userId).set(
+        {
+          stripeCustomerId: customerId,
+        },
+        { merge: true }
+      );
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -78,9 +81,6 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Error creating payment intent:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

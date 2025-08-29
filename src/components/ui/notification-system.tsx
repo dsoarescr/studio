@@ -65,41 +65,40 @@ export const useNotificationSystem = () => {
     setUnreadCount(notifications.filter(n => !n.read).length);
   }, [notifications]);
 
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      read: false,
-    };
+  const addNotification = useCallback(
+    (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+      const newNotification: Notification = {
+        ...notification,
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        read: false,
+      };
 
-    setNotifications(prev => [newNotification, ...prev.slice(0, 99)]); // Keep only last 100
+      setNotifications(prev => [newNotification, ...prev.slice(0, 99)]); // Keep only last 100
 
-    // Show toast if enabled
-    if (settings.pushEnabled) {
-      toast({
-        title: notification.title,
-        description: notification.message,
-        variant: notification.type === 'error' ? 'destructive' : 'default',
-      });
-    }
+      // Show toast if enabled
+      if (settings.pushEnabled) {
+        toast({
+          title: notification.title,
+          description: notification.message,
+          variant: notification.type === 'error' ? 'destructive' : 'default',
+        });
+      }
 
-    // Play sound if enabled
-    if (settings.soundEnabled) {
-      playNotificationSound(notification.type);
-    }
-  }, [settings, toast]);
+      // Play sound if enabled
+      if (settings.soundEnabled) {
+        playNotificationSound(notification.type);
+      }
+    },
+    [settings, toast]
+  );
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   }, []);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev => 
-      prev.map(n => ({ ...n, read: true }))
-    );
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   }, []);
 
   const removeNotification = useCallback((id: string) => {
@@ -129,7 +128,7 @@ export const useNotificationSystem = () => {
 
 const playNotificationSound = (type: Notification['type']) => {
   const audio = new Audio();
-  
+
   switch (type) {
     case 'achievement':
       audio.src = '/sounds/achievement.mp3';
@@ -146,7 +145,7 @@ const playNotificationSound = (type: Notification['type']) => {
     default:
       audio.src = '/sounds/notification.mp3';
   }
-  
+
   audio.play().catch(() => {
     // Ignore errors if audio fails to play
   });
@@ -221,14 +220,9 @@ export const NotificationCenter: React.FC = () => {
   return (
     <div className="relative">
       {/* Notification Bell */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative"
-      >
+      <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} className="relative">
         {unreadCount > 0 ? (
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+          <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs">
             {unreadCount > 99 ? '99+' : unreadCount}
           </Badge>
         ) : null}
@@ -237,7 +231,7 @@ export const NotificationCenter: React.FC = () => {
 
       {/* Notification Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-12 w-80 bg-background border border-border rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 top-12 z-50 w-80 rounded-lg border border-border bg-background shadow-lg">
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -251,12 +245,7 @@ export const NotificationCenter: React.FC = () => {
                     <Settings className="h-4 w-4" />
                   </Button>
                   {unreadCount > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={markAllAsRead}
-                      className="text-xs"
-                    >
+                    <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
                       Marcar como lidas
                     </Button>
                   )}
@@ -266,10 +255,7 @@ export const NotificationCenter: React.FC = () => {
 
             <CardContent className="p-0">
               {showSettings ? (
-                <NotificationSettings
-                  settings={settings}
-                  onUpdate={updateSettings}
-                />
+                <NotificationSettings settings={settings} onUpdate={updateSettings} />
               ) : (
                 <NotificationList
                   notifications={notifications}
@@ -297,7 +283,7 @@ const NotificationList: React.FC<{
   if (notifications.length === 0) {
     return (
       <div className="p-4 text-center text-muted-foreground">
-        <BellOff className="h-8 w-8 mx-auto mb-2 opacity-50" />
+        <BellOff className="mx-auto mb-2 h-8 w-8 opacity-50" />
         <p className="text-sm">Nenhuma notificação</p>
       </div>
     );
@@ -307,26 +293,24 @@ const NotificationList: React.FC<{
     <div>
       <ScrollArea className="h-64">
         <div className="space-y-1 p-2">
-          {notifications.map((notification) => (
+          {notifications.map(notification => (
             <div
               key={notification.id}
-              className={`p-3 rounded-lg border transition-all cursor-pointer hover:bg-muted/50 ${
+              className={`cursor-pointer rounded-lg border p-3 transition-all hover:bg-muted/50 ${
                 notification.read ? 'opacity-75' : ''
               } ${getNotificationColor(notification.type)}`}
               onClick={() => onMarkAsRead(notification.id)}
             >
               <div className="flex items-start gap-3">
                 {getNotificationIcon(notification.type)}
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between">
-                    <h4 className="text-sm font-medium truncate">
-                      {notification.title}
-                    </h4>
+                    <h4 className="truncate text-sm font-medium">{notification.title}</h4>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-4 w-4 opacity-50 hover:opacity-100"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         onRemove(notification.id);
                       }}
@@ -334,10 +318,8 @@ const NotificationList: React.FC<{
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="mt-1 text-xs text-muted-foreground">{notification.message}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
                     {formatTime(notification.timestamp)}
                   </p>
                 </div>
@@ -346,15 +328,10 @@ const NotificationList: React.FC<{
           ))}
         </div>
       </ScrollArea>
-      
+
       {notifications.length > 0 && (
-        <div className="p-2 border-t">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearAll}
-            className="w-full text-xs"
-          >
+        <div className="border-t p-2">
+          <Button variant="ghost" size="sm" onClick={onClearAll} className="w-full text-xs">
             Limpar todas
           </Button>
         </div>
@@ -368,7 +345,7 @@ const NotificationSettings: React.FC<{
   onUpdate: (settings: Partial<NotificationSettings>) => void;
 }> = ({ settings, onUpdate }) => {
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4 p-4">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label htmlFor="push-notifications" className="text-sm">
@@ -377,10 +354,10 @@ const NotificationSettings: React.FC<{
           <Switch
             id="push-notifications"
             checked={settings.pushEnabled}
-            onCheckedChange={(checked) => onUpdate({ pushEnabled: checked })}
+            onCheckedChange={checked => onUpdate({ pushEnabled: checked })}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="email-notifications" className="text-sm">
             Notificações por Email
@@ -388,10 +365,10 @@ const NotificationSettings: React.FC<{
           <Switch
             id="email-notifications"
             checked={settings.emailEnabled}
-            onCheckedChange={(checked) => onUpdate({ emailEnabled: checked })}
+            onCheckedChange={checked => onUpdate({ emailEnabled: checked })}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="price-alerts" className="text-sm">
             Alertas de Preço
@@ -399,10 +376,10 @@ const NotificationSettings: React.FC<{
           <Switch
             id="price-alerts"
             checked={settings.priceAlerts}
-            onCheckedChange={(checked) => onUpdate({ priceAlerts: checked })}
+            onCheckedChange={checked => onUpdate({ priceAlerts: checked })}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="achievement-alerts" className="text-sm">
             Alertas de Conquistas
@@ -410,10 +387,10 @@ const NotificationSettings: React.FC<{
           <Switch
             id="achievement-alerts"
             checked={settings.achievementAlerts}
-            onCheckedChange={(checked) => onUpdate({ achievementAlerts: checked })}
+            onCheckedChange={checked => onUpdate({ achievementAlerts: checked })}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="activity-alerts" className="text-sm">
             Alertas de Atividade
@@ -421,10 +398,10 @@ const NotificationSettings: React.FC<{
           <Switch
             id="activity-alerts"
             checked={settings.activityAlerts}
-            onCheckedChange={(checked) => onUpdate({ activityAlerts: checked })}
+            onCheckedChange={checked => onUpdate({ activityAlerts: checked })}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="sound-enabled" className="text-sm">
             Sons de Notificação
@@ -432,7 +409,7 @@ const NotificationSettings: React.FC<{
           <Switch
             id="sound-enabled"
             checked={settings.soundEnabled}
-            onCheckedChange={(checked) => onUpdate({ soundEnabled: checked })}
+            onCheckedChange={checked => onUpdate({ soundEnabled: checked })}
           />
         </div>
       </div>

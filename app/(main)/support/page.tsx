@@ -1,14 +1,15 @@
-
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Mail, MessageSquare, Phone, Send } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Mail, MessageSquare, Phone, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+export const dynamic = 'force-dynamic';
 
 export default function SupportPage() {
   const { toast } = useToast();
@@ -16,17 +17,17 @@ export default function SupportPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Mensagem Enviada!",
-      description: "A nossa equipa de suporte entrará em contacto consigo em breve.",
+      title: 'Mensagem Enviada!',
+      description: 'A nossa equipa de suporte entrará em contacto consigo em breve.',
     });
   };
 
   return (
-    <div className="container mx-auto py-6 px-4 mb-16 space-y-6 max-w-4xl">
-      <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30">
+    <div className="container mx-auto mb-16 max-w-4xl space-y-6 px-4 py-6">
+      <Card className="border-primary/30 bg-gradient-to-br from-card via-card/95 to-primary/10 shadow-2xl">
         <CardHeader>
-          <CardTitle className="text-3xl font-headline text-gradient-gold flex items-center">
-            <MessageSquare className="h-8 w-8 mr-3" />
+          <CardTitle className="text-gradient-gold flex items-center font-headline text-3xl">
+            <MessageSquare className="mr-3 h-8 w-8" />
             Suporte ao Cliente
           </CardTitle>
           <CardDescription>
@@ -35,13 +36,11 @@ export default function SupportPage() {
         </CardHeader>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Enviar Mensagem</CardTitle>
-            <CardDescription>
-              A forma mais rápida de obter ajuda.
-            </CardDescription>
+            <CardDescription>A forma mais rápida de obter ajuda.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -59,10 +58,15 @@ export default function SupportPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="message">Mensagem</Label>
-                <Textarea id="message" placeholder="Descreva o seu problema ou dúvida em detalhe." required rows={5} />
+                <Textarea
+                  id="message"
+                  placeholder="Descreva o seu problema ou dúvida em detalhe."
+                  required
+                  rows={5}
+                />
               </div>
               <Button type="submit" className="w-full">
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="mr-2 h-4 w-4" />
                 Enviar Mensagem
               </Button>
             </form>
@@ -76,21 +80,24 @@ export default function SupportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-4">
-                <Mail className="h-6 w-6 text-primary mt-1" />
+                <Mail className="mt-1 h-6 w-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Email</h3>
                   <p className="text-sm text-muted-foreground">Para questões menos urgentes.</p>
-                  <a href="mailto:suporte@pixeluniverse.pt" className="text-primary text-sm hover:underline">
+                  <a
+                    href="mailto:suporte@pixeluniverse.pt"
+                    className="text-sm text-primary hover:underline"
+                  >
                     suporte@pixeluniverse.pt
                   </a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <Phone className="h-6 w-6 text-primary mt-1" />
+                <Phone className="mt-1 h-6 w-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Telefone</h3>
                   <p className="text-sm text-muted-foreground">Disponível de Seg a Sex, 9h-18h.</p>
-                  <p className="text-primary text-sm">+351 210 000 000</p>
+                  <p className="text-sm text-primary">+351 210 000 000</p>
                 </div>
               </div>
             </CardContent>
@@ -101,7 +108,7 @@ export default function SupportPage() {
               <CardTitle>Perguntas Frequentes</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="mb-4 text-sm text-muted-foreground">
                 Muitas dúvidas comuns já estão respondidas na nossa secção de tutoriais.
               </p>
               <a href="/tutorials">

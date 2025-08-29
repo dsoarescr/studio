@@ -7,9 +7,24 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Info, Star, Heart, Eye, MapPin, Calendar, User, Coins, 
-  Trophy, Crown, Gem, Sparkles, Zap, Target, Award, Shield, UserPlus
+import {
+  Info,
+  Star,
+  Heart,
+  Eye,
+  MapPin,
+  Calendar,
+  User,
+  Coins,
+  Trophy,
+  Crown,
+  Gem,
+  Sparkles,
+  Zap,
+  Target,
+  Award,
+  Shield,
+  UserPlus,
 } from 'lucide-react';
 
 interface EnhancedTooltipProps {
@@ -53,20 +68,18 @@ export function EnhancedTooltip({
   delayDuration = 300,
   maxWidth = '320px',
   showArrow = true,
-  interactive = false
+  interactive = false,
 }: EnhancedTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <TooltipProvider delayDuration={delayDuration}>
       <Tooltip open={isOpen} onOpenChange={setIsOpen}>
-        <TooltipTrigger asChild>
-          {children}
-        </TooltipTrigger>
-        <TooltipContent 
-          side={side} 
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent
+          side={side}
           align={align}
-          className="p-0 border-primary/20 shadow-2xl"
+          className="border-primary/20 p-0 shadow-2xl"
           style={{ maxWidth }}
         >
           <AnimatePresence>
@@ -76,15 +89,13 @@ export function EnhancedTooltip({
               exit={{ opacity: 0, scale: 0.95, y: 5 }}
               transition={{ duration: 0.15 }}
             >
-              <Card className="border-0 shadow-none bg-background/95 backdrop-blur-sm">
-                <CardContent className="p-4 space-y-3">
+              <Card className="border-0 bg-background/95 shadow-none backdrop-blur-sm">
+                <CardContent className="space-y-3 p-4">
                   {/* Header */}
                   <div className="space-y-2">
                     <h3 className="font-semibold text-foreground">{title}</h3>
                     {description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {description}
-                      </p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
                     )}
                   </div>
 
@@ -92,8 +103,8 @@ export function EnhancedTooltip({
                   {badges.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {badges.map((badge, index) => (
-                        <Badge 
-                          key={index} 
+                        <Badge
+                          key={index}
                           variant={badge.variant || 'outline'}
                           className={badge.color ? `${badge.color} border-current` : ''}
                         >
@@ -109,7 +120,7 @@ export function EnhancedTooltip({
                       <Separator />
                       <div className="grid grid-cols-2 gap-3">
                         {stats.map((stat, index) => (
-                          <div key={index} className="text-center space-y-1">
+                          <div key={index} className="space-y-1 text-center">
                             {stat.icon && (
                               <div className={`mx-auto ${stat.color || 'text-primary'}`}>
                                 {stat.icon}
@@ -118,9 +129,7 @@ export function EnhancedTooltip({
                             <p className={`font-bold ${stat.color || 'text-foreground'}`}>
                               {stat.value}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {stat.label}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{stat.label}</p>
                           </div>
                         ))}
                       </div>
@@ -143,9 +152,7 @@ export function EnhancedTooltip({
                             }}
                             className="flex-1"
                           >
-                            {action.icon && (
-                              <span className="mr-2">{action.icon}</span>
-                            )}
+                            {action.icon && <span className="mr-2">{action.icon}</span>}
                             {action.label}
                           </Button>
                         ))}
@@ -163,10 +170,10 @@ export function EnhancedTooltip({
 }
 
 // Predefined tooltip variants for common use cases
-export function PixelTooltip({ 
-  children, 
-  pixelData 
-}: { 
+export function PixelTooltip({
+  children,
+  pixelData,
+}: {
   children: React.ReactNode;
   pixelData: {
     coordinates: { x: number; y: number };
@@ -184,12 +191,34 @@ export function PixelTooltip({
       description={`Localizado em ${pixelData.region}`}
       badges={[
         ...(pixelData.rarity ? [{ label: pixelData.rarity, variant: 'outline' as const }] : []),
-        ...(pixelData.owner ? [{ label: `Proprietário: ${pixelData.owner}`, variant: 'secondary' as const }] : [])
+        ...(pixelData.owner
+          ? [{ label: `Proprietário: ${pixelData.owner}`, variant: 'secondary' as const }]
+          : []),
       ]}
       stats={[
-        ...(pixelData.views ? [{ label: 'Visualizações', value: pixelData.views, icon: <Eye className="h-4 w-4" /> }] : []),
-        ...(pixelData.likes ? [{ label: 'Curtidas', value: pixelData.likes, icon: <Heart className="h-4 w-4" />, color: 'text-red-500' }] : []),
-        ...(pixelData.price ? [{ label: 'Preço', value: `€${pixelData.price}`, icon: <Coins className="h-4 w-4" />, color: 'text-primary' }] : [])
+        ...(pixelData.views
+          ? [{ label: 'Visualizações', value: pixelData.views, icon: <Eye className="h-4 w-4" /> }]
+          : []),
+        ...(pixelData.likes
+          ? [
+              {
+                label: 'Curtidas',
+                value: pixelData.likes,
+                icon: <Heart className="h-4 w-4" />,
+                color: 'text-red-500',
+              },
+            ]
+          : []),
+        ...(pixelData.price
+          ? [
+              {
+                label: 'Preço',
+                value: `€${pixelData.price}`,
+                icon: <Coins className="h-4 w-4" />,
+                color: 'text-primary',
+              },
+            ]
+          : []),
       ]}
     >
       {children}
@@ -197,10 +226,10 @@ export function PixelTooltip({
   );
 }
 
-export function UserTooltip({ 
-  children, 
-  userData 
-}: { 
+export function UserTooltip({
+  children,
+  userData,
+}: {
   children: React.ReactNode;
   userData: {
     name: string;
@@ -216,16 +245,30 @@ export function UserTooltip({
       title={userData.name}
       badges={[
         { label: `Nível ${userData.level}`, variant: 'secondary' },
-        ...(userData.verified ? [{ label: 'Verificado', variant: 'default' as const, color: 'text-blue-500' }] : []),
-        ...(userData.premium ? [{ label: 'Premium', variant: 'default' as const, color: 'text-amber-500' }] : [])
+        ...(userData.verified
+          ? [{ label: 'Verificado', variant: 'default' as const, color: 'text-blue-500' }]
+          : []),
+        ...(userData.premium
+          ? [{ label: 'Premium', variant: 'default' as const, color: 'text-amber-500' }]
+          : []),
       ]}
       stats={[
         { label: 'Pixels', value: userData.pixels, icon: <MapPin className="h-4 w-4" /> },
-        { label: 'Conquistas', value: userData.achievements, icon: <Trophy className="h-4 w-4" />, color: 'text-yellow-500' }
+        {
+          label: 'Conquistas',
+          value: userData.achievements,
+          icon: <Trophy className="h-4 w-4" />,
+          color: 'text-yellow-500',
+        },
       ]}
       actions={[
         { label: 'Ver Perfil', onClick: () => {}, icon: <User className="h-4 w-4" /> },
-        { label: 'Seguir', onClick: () => {}, variant: 'default', icon: <UserPlus className="h-4 w-4" /> }
+        {
+          label: 'Seguir',
+          onClick: () => {},
+          variant: 'default',
+          icon: <UserPlus className="h-4 w-4" />,
+        },
       ]}
       interactive={true}
     >
@@ -234,10 +277,10 @@ export function UserTooltip({
   );
 }
 
-export function AchievementTooltip({ 
-  children, 
-  achievementData 
-}: { 
+export function AchievementTooltip({
+  children,
+  achievementData,
+}: {
   children: React.ReactNode;
   achievementData: {
     name: string;
@@ -253,12 +296,20 @@ export function AchievementTooltip({
     <EnhancedTooltip
       title={achievementData.name}
       description={achievementData.description}
-      badges={[
-        { label: achievementData.rarity, variant: 'outline', color: 'text-primary' }
-      ]}
+      badges={[{ label: achievementData.rarity, variant: 'outline', color: 'text-primary' }]}
       stats={[
-        { label: 'XP', value: `+${achievementData.xpReward}`, icon: <Zap className="h-4 w-4" />, color: 'text-primary' },
-        { label: 'Créditos', value: `+${achievementData.creditsReward}`, icon: <Coins className="h-4 w-4" />, color: 'text-accent' }
+        {
+          label: 'XP',
+          value: `+${achievementData.xpReward}`,
+          icon: <Zap className="h-4 w-4" />,
+          color: 'text-primary',
+        },
+        {
+          label: 'Créditos',
+          value: `+${achievementData.creditsReward}`,
+          icon: <Coins className="h-4 w-4" />,
+          color: 'text-accent',
+        },
       ]}
     >
       {children}

@@ -5,7 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Crown, Star, Flame, Award, Zap, Target, TrendingUp, Coins, MapPin } from 'lucide-react';
+import {
+  Trophy,
+  Crown,
+  Star,
+  Flame,
+  Award,
+  Zap,
+  Target,
+  TrendingUp,
+  Coins,
+  MapPin,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -69,7 +80,7 @@ const achievements: Achievement[] = [
     unlockedAt: '2024-01-15T10:30:00Z',
     rewards: { credits: 100, xp: 50 },
     tier: 1,
-    maxTier: 1
+    maxTier: 1,
   },
   {
     id: 'pixel_collector',
@@ -83,7 +94,7 @@ const achievements: Achievement[] = [
     isUnlocked: false,
     rewards: { credits: 500, xp: 200 },
     tier: 1,
-    maxTier: 3
+    maxTier: 3,
   },
   {
     id: 'streak_master',
@@ -97,7 +108,7 @@ const achievements: Achievement[] = [
     isUnlocked: false,
     rewards: { credits: 1000, xp: 500, specialRewards: ['Badge de Fogo'] },
     tier: 1,
-    maxTier: 1
+    maxTier: 1,
   },
   {
     id: 'art_virtuoso',
@@ -111,7 +122,7 @@ const achievements: Achievement[] = [
     isUnlocked: false,
     rewards: { credits: 2000, xp: 1000, specialRewards: ['Título de Artista'] },
     tier: 1,
-    maxTier: 1
+    maxTier: 1,
   },
   {
     id: 'market_king',
@@ -125,8 +136,8 @@ const achievements: Achievement[] = [
     isUnlocked: false,
     rewards: { credits: 5000, xp: 2500, specialRewards: ['Título de Mercador', 'Pixel Dourado'] },
     tier: 1,
-    maxTier: 1
-  }
+    maxTier: 1,
+  },
 ];
 
 const titles: Title[] = [
@@ -138,7 +149,7 @@ const titles: Title[] = [
     rarity: 'common',
     isUnlocked: true,
     requirements: ['Comprar primeiro pixel'],
-    effects: ['+5% XP ganho']
+    effects: ['+5% XP ganho'],
   },
   {
     id: 'pixel_collector',
@@ -148,7 +159,7 @@ const titles: Title[] = [
     rarity: 'uncommon',
     isUnlocked: false,
     requirements: ['Possuir 100 pixels', 'Desbloquear 10 conquistas'],
-    effects: ['+10% XP ganho', '+5% créditos ganhos']
+    effects: ['+10% XP ganho', '+5% créditos ganhos'],
   },
   {
     id: 'pixel_artist',
@@ -158,7 +169,7 @@ const titles: Title[] = [
     rarity: 'rare',
     isUnlocked: false,
     requirements: ['Criar 50 pixels artísticos', 'Receber 1000 gostos'],
-    effects: ['+15% XP ganho', '+10% valor de pixels', 'Badge especial']
+    effects: ['+15% XP ganho', '+10% valor de pixels', 'Badge especial'],
   },
   {
     id: 'pixel_legend',
@@ -168,8 +179,8 @@ const titles: Title[] = [
     rarity: 'legendary',
     isUnlocked: false,
     requirements: ['Top 1% do ranking', '1000 dias de sequência', 'Todas as conquistas'],
-    effects: ['+25% XP ganho', '+20% créditos ganhos', 'Título único', 'Pixel lendário']
-  }
+    effects: ['+25% XP ganho', '+20% créditos ganhos', 'Título único', 'Pixel lendário'],
+  },
 ];
 
 const prestigeLevels: PrestigeLevel[] = [
@@ -181,7 +192,7 @@ const prestigeLevels: PrestigeLevel[] = [
     color: 'text-gray-500',
     requirements: { achievements: 0, titles: 0, totalXP: 0 },
     isUnlocked: true,
-    rewards: ['Acesso básico']
+    rewards: ['Acesso básico'],
   },
   {
     level: 2,
@@ -191,7 +202,7 @@ const prestigeLevels: PrestigeLevel[] = [
     color: 'text-green-500',
     requirements: { achievements: 5, titles: 1, totalXP: 1000 },
     isUnlocked: false,
-    rewards: ['+10% XP', 'Badge de Aventureiro']
+    rewards: ['+10% XP', 'Badge de Aventureiro'],
   },
   {
     level: 3,
@@ -201,7 +212,7 @@ const prestigeLevels: PrestigeLevel[] = [
     color: 'text-blue-500',
     requirements: { achievements: 15, titles: 3, totalXP: 5000 },
     isUnlocked: false,
-    rewards: ['+20% XP', 'Título de Veterano', 'Pixels especiais']
+    rewards: ['+20% XP', 'Título de Veterano', 'Pixels especiais'],
   },
   {
     level: 4,
@@ -211,7 +222,7 @@ const prestigeLevels: PrestigeLevel[] = [
     color: 'text-purple-500',
     requirements: { achievements: 30, titles: 5, totalXP: 15000 },
     isUnlocked: false,
-    rewards: ['+30% XP', 'Título de Mestre', 'Pixels lendários']
+    rewards: ['+30% XP', 'Título de Mestre', 'Pixels lendários'],
   },
   {
     level: 5,
@@ -221,29 +232,41 @@ const prestigeLevels: PrestigeLevel[] = [
     color: 'text-yellow-500',
     requirements: { achievements: 50, titles: 10, totalXP: 50000 },
     isUnlocked: false,
-    rewards: ['+50% XP', 'Título de Lenda', 'Pixel único', 'Acesso VIP']
-  }
+    rewards: ['+50% XP', 'Título de Lenda', 'Pixel único', 'Acesso VIP'],
+  },
 ];
 
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
-    case 'common': return 'text-gray-500';
-    case 'uncommon': return 'text-green-500';
-    case 'rare': return 'text-blue-500';
-    case 'epic': return 'text-purple-500';
-    case 'legendary': return 'text-yellow-500';
-    default: return 'text-gray-500';
+    case 'common':
+      return 'text-gray-500';
+    case 'uncommon':
+      return 'text-green-500';
+    case 'rare':
+      return 'text-blue-500';
+    case 'epic':
+      return 'text-purple-500';
+    case 'legendary':
+      return 'text-yellow-500';
+    default:
+      return 'text-gray-500';
   }
 };
 
 const getRarityBorder = (rarity: string) => {
   switch (rarity) {
-    case 'common': return 'border-gray-500/20';
-    case 'uncommon': return 'border-green-500/20';
-    case 'rare': return 'border-blue-500/20';
-    case 'epic': return 'border-purple-500/20';
-    case 'legendary': return 'border-yellow-500/20';
-    default: return 'border-gray-500/20';
+    case 'common':
+      return 'border-gray-500/20';
+    case 'uncommon':
+      return 'border-green-500/20';
+    case 'rare':
+      return 'border-blue-500/20';
+    case 'epic':
+      return 'border-purple-500/20';
+    case 'legendary':
+      return 'border-yellow-500/20';
+    default:
+      return 'border-gray-500/20';
   }
 };
 
@@ -256,7 +279,7 @@ export const AdvancedAchievementSystem: React.FC = () => {
     totalTitles: titles.length,
     unlockedTitles: titles.filter(t => t.isUnlocked).length,
     currentPrestige: 1,
-    totalXP: 2500
+    totalXP: 2500,
   });
 
   const categories = [
@@ -264,7 +287,7 @@ export const AdvancedAchievementSystem: React.FC = () => {
     { id: 'collection', name: 'Coleção', icon: <Target className="h-4 w-4" /> },
     { id: 'consistency', name: 'Consistência', icon: <Flame className="h-4 w-4" /> },
     { id: 'art', name: 'Arte', icon: <Star className="h-4 w-4" /> },
-    { id: 'trading', name: 'Trading', icon: <TrendingUp className="h-4 w-4" /> }
+    { id: 'trading', name: 'Trading', icon: <TrendingUp className="h-4 w-4" /> },
   ];
 
   const filteredAchievements = achievements.filter(
@@ -274,32 +297,44 @@ export const AdvancedAchievementSystem: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Progress Overview */}
-      <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/10 to-accent/5">
         <CardHeader>
           <CardTitle className="flex items-center text-primary">
-            <Trophy className="h-5 w-5 mr-2" />
+            <Trophy className="mr-2 h-5 w-5" />
             Progresso Geral
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{userProgress.unlockedAchievements}</div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="rounded-lg bg-card/50 p-4 text-center">
+              <div className="text-2xl font-bold text-primary">
+                {userProgress.unlockedAchievements}
+              </div>
               <div className="text-sm text-muted-foreground">Conquistas</div>
-              <Progress value={(userProgress.unlockedAchievements / userProgress.totalAchievements) * 100} className="mt-2" />
+              <Progress
+                value={(userProgress.unlockedAchievements / userProgress.totalAchievements) * 100}
+                className="mt-2"
+              />
             </div>
-            <div className="text-center p-4 bg-card/50 rounded-lg">
+            <div className="rounded-lg bg-card/50 p-4 text-center">
               <div className="text-2xl font-bold text-accent">{userProgress.unlockedTitles}</div>
               <div className="text-sm text-muted-foreground">Títulos</div>
-              <Progress value={(userProgress.unlockedTitles / userProgress.totalTitles) * 100} className="mt-2" />
+              <Progress
+                value={(userProgress.unlockedTitles / userProgress.totalTitles) * 100}
+                className="mt-2"
+              />
             </div>
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-green-500">{userProgress.currentPrestige}</div>
+            <div className="rounded-lg bg-card/50 p-4 text-center">
+              <div className="text-2xl font-bold text-green-500">
+                {userProgress.currentPrestige}
+              </div>
               <div className="text-sm text-muted-foreground">Prestígio</div>
               <Progress value={(userProgress.currentPrestige / 5) * 100} className="mt-2" />
             </div>
-            <div className="text-center p-4 bg-card/50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-500">{userProgress.totalXP.toLocaleString('pt-PT')}</div>
+            <div className="rounded-lg bg-card/50 p-4 text-center">
+              <div className="text-2xl font-bold text-purple-500">
+                {userProgress.totalXP.toLocaleString('pt-PT')}
+              </div>
               <div className="text-sm text-muted-foreground">XP Total</div>
               <Progress value={(userProgress.totalXP / 50000) * 100} className="mt-2" />
             </div>
@@ -311,7 +346,7 @@ export const AdvancedAchievementSystem: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-primary">
-            <Crown className="h-5 w-5 mr-2" />
+            <Crown className="mr-2 h-5 w-5" />
             Sistema de Prestígio
           </CardTitle>
         </CardHeader>
@@ -324,34 +359,34 @@ export const AdvancedAchievementSystem: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className={cn(
-                  "transition-all duration-300",
-                  level.isUnlocked ? "ring-2 ring-primary bg-primary/5" : "opacity-60"
-                )}>
+                <Card
+                  className={cn(
+                    'transition-all duration-300',
+                    level.isUnlocked ? 'bg-primary/5 ring-2 ring-primary' : 'opacity-60'
+                  )}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={cn("p-2 rounded-lg", level.color)}>
-                          {level.icon}
-                        </div>
+                        <div className={cn('rounded-lg p-2', level.color)}>{level.icon}</div>
                         <div>
                           <h3 className="font-semibold">{level.name}</h3>
                           <p className="text-sm text-muted-foreground">{level.description}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <Badge variant={level.isUnlocked ? "default" : "secondary"}>
+                        <Badge variant={level.isUnlocked ? 'default' : 'secondary'}>
                           Nível {level.level}
                         </Badge>
                         {level.isUnlocked && (
-                          <div className="text-xs text-green-500 mt-1">Desbloqueado</div>
+                          <div className="mt-1 text-xs text-green-500">Desbloqueado</div>
                         )}
                       </div>
                     </div>
-                    
+
                     {!level.isUnlocked && (
-                      <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                        <h4 className="text-sm font-medium mb-2">Requisitos:</h4>
+                      <div className="mt-3 rounded-lg bg-muted/50 p-3">
+                        <h4 className="mb-2 text-sm font-medium">Requisitos:</h4>
                         <div className="grid grid-cols-3 gap-2 text-xs">
                           <div>Conquistas: {level.requirements.achievements}</div>
                           <div>Títulos: {level.requirements.titles}</div>
@@ -359,9 +394,9 @@ export const AdvancedAchievementSystem: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="mt-3">
-                      <h4 className="text-sm font-medium mb-2">Recompensas:</h4>
+                      <h4 className="mb-2 text-sm font-medium">Recompensas:</h4>
                       <div className="flex flex-wrap gap-1">
                         {level.rewards.map((reward, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
@@ -382,7 +417,7 @@ export const AdvancedAchievementSystem: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-primary">
-            <Award className="h-5 w-5 mr-2" />
+            <Award className="mr-2 h-5 w-5" />
             Conquistas
           </CardTitle>
         </CardHeader>
@@ -390,13 +425,17 @@ export const AdvancedAchievementSystem: React.FC = () => {
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
             <TabsList className="grid w-full grid-cols-5">
               {categories.map(category => (
-                <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-2">
+                <TabsTrigger
+                  key={category.id}
+                  value={category.id}
+                  className="flex items-center gap-2"
+                >
                   {category.icon}
                   <span className="hidden md:inline">{category.name}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
-            
+
             <TabsContent value={selectedCategory} className="mt-4">
               <div className="space-y-4">
                 <AnimatePresence>
@@ -408,21 +447,28 @@ export const AdvancedAchievementSystem: React.FC = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className={cn(
-                        "transition-all duration-300 hover:shadow-lg",
-                        achievement.isUnlocked ? "ring-2 ring-green-500/20 bg-green-500/5" : "",
-                        getRarityBorder(achievement.rarity)
-                      )}>
+                      <Card
+                        className={cn(
+                          'transition-all duration-300 hover:shadow-lg',
+                          achievement.isUnlocked ? 'bg-green-500/5 ring-2 ring-green-500/20' : '',
+                          getRarityBorder(achievement.rarity)
+                        )}
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              <div className={cn("p-3 rounded-lg", getRarityColor(achievement.rarity))}>
+                              <div
+                                className={cn('rounded-lg p-3', getRarityColor(achievement.rarity))}
+                              >
                                 {achievement.icon}
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
                                   <h3 className="font-semibold">{achievement.name}</h3>
-                                  <Badge variant="outline" className={cn("text-xs", getRarityColor(achievement.rarity))}>
+                                  <Badge
+                                    variant="outline"
+                                    className={cn('text-xs', getRarityColor(achievement.rarity))}
+                                  >
                                     {achievement.rarity.toUpperCase()}
                                   </Badge>
                                   {achievement.isUnlocked && (
@@ -431,8 +477,10 @@ export const AdvancedAchievementSystem: React.FC = () => {
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                                <div className="flex items-center gap-4 mt-2">
+                                <p className="text-sm text-muted-foreground">
+                                  {achievement.description}
+                                </p>
+                                <div className="mt-2 flex items-center gap-4">
                                   <div className="flex items-center gap-2">
                                     <Coins className="h-4 w-4 text-yellow-500" />
                                     <span className="text-sm">{achievement.rewards.credits}</span>
@@ -444,17 +492,17 @@ export const AdvancedAchievementSystem: React.FC = () => {
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="text-right">
                               <div className="text-sm font-medium">
                                 {achievement.progress} / {achievement.maxProgress}
                               </div>
-                              <Progress 
-                                value={(achievement.progress / achievement.maxProgress) * 100} 
-                                className="w-24 mt-1" 
+                              <Progress
+                                value={(achievement.progress / achievement.maxProgress) * 100}
+                                className="mt-1 w-24"
                               />
                               {achievement.isUnlocked && achievement.unlockedAt && (
-                                <div className="text-xs text-muted-foreground mt-1">
+                                <div className="mt-1 text-xs text-muted-foreground">
                                   {new Date(achievement.unlockedAt).toLocaleDateString('pt-PT')}
                                 </div>
                               )}
@@ -475,12 +523,12 @@ export const AdvancedAchievementSystem: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-primary">
-            <Crown className="h-5 w-5 mr-2" />
+            <Crown className="mr-2 h-5 w-5" />
             Títulos
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {titles.map((title, index) => (
               <motion.div
                 key={title.id}
@@ -488,18 +536,18 @@ export const AdvancedAchievementSystem: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card 
+                <Card
                   className={cn(
-                    "cursor-pointer transition-all duration-300 hover:shadow-lg",
-                    title.isUnlocked ? "ring-2 ring-primary bg-primary/5" : "opacity-60",
+                    'cursor-pointer transition-all duration-300 hover:shadow-lg',
+                    title.isUnlocked ? 'bg-primary/5 ring-2 ring-primary' : 'opacity-60',
                     getRarityBorder(title.rarity)
                   )}
                   onClick={() => setSelectedTitle(selectedTitle === title.id ? null : title.id)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={cn("p-2 rounded-lg", getRarityColor(title.rarity))}>
+                        <div className={cn('rounded-lg p-2', getRarityColor(title.rarity))}>
                           {title.icon}
                         </div>
                         <div>
@@ -507,11 +555,14 @@ export const AdvancedAchievementSystem: React.FC = () => {
                           <p className="text-sm text-muted-foreground">{title.description}</p>
                         </div>
                       </div>
-                      <Badge variant={title.isUnlocked ? "default" : "secondary"} className={getRarityColor(title.rarity)}>
+                      <Badge
+                        variant={title.isUnlocked ? 'default' : 'secondary'}
+                        className={getRarityColor(title.rarity)}
+                      >
                         {title.rarity.toUpperCase()}
                       </Badge>
                     </div>
-                    
+
                     {selectedTitle === title.id && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
@@ -520,19 +571,19 @@ export const AdvancedAchievementSystem: React.FC = () => {
                         className="space-y-3"
                       >
                         <div>
-                          <h4 className="text-sm font-medium mb-2">Requisitos:</h4>
-                          <ul className="text-sm text-muted-foreground space-y-1">
+                          <h4 className="mb-2 text-sm font-medium">Requisitos:</h4>
+                          <ul className="space-y-1 text-sm text-muted-foreground">
                             {title.requirements.map((req, idx) => (
                               <li key={idx} className="flex items-center gap-2">
-                                <div className="w-1 h-1 bg-muted-foreground rounded-full" />
+                                <div className="h-1 w-1 rounded-full bg-muted-foreground" />
                                 {req}
                               </li>
                             ))}
                           </ul>
                         </div>
-                        
+
                         <div>
-                          <h4 className="text-sm font-medium mb-2">Efeitos:</h4>
+                          <h4 className="mb-2 text-sm font-medium">Efeitos:</h4>
                           <div className="flex flex-wrap gap-1">
                             {title.effects.map((effect, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">
@@ -553,4 +604,3 @@ export const AdvancedAchievementSystem: React.FC = () => {
     </div>
   );
 };
-

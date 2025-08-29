@@ -1,4 +1,6 @@
 import '@testing-library/jest-dom';
+import 'jest-extended';
+import 'whatwg-fetch';
 
 // Mock do IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {

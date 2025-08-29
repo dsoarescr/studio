@@ -25,65 +25,74 @@ export const usePixelCache = (maxSize: number = DEFAULT_CACHE_SIZE) => {
 
   const getCacheKey = useCallback((x: number, y: number) => `${x},${y}`, []);
 
-  const get = useCallback((x: number, y: number): PixelData | null => {
-    const key = getCacheKey(x, y);
-    const entry = cache.current.get(key);
-    
-    if (entry) {
-      // Update access statistics
-      entry.accessCount++;
-      entry.lastAccessed = Date.now();
-      setHitCount(prev => prev + 1);
-      return entry.data;
-    }
-    
-    setMissCount(prev => prev + 1);
-    return null;
-  }, [getCacheKey]);
+  const get = useCallback(
+    (x: number, y: number): PixelData | null => {
+      const key = getCacheKey(x, y);
+      const entry = cache.current.get(key);
 
-  const set = useCallback((x: number, y: number, data: Omit<PixelData, 'lastUpdated'>) => {
-    const key = getCacheKey(x, y);
-    
-    // If cache is full, remove least recently used entry
-    if (cache.current.size >= maxSize) {
-      let oldestKey = '';
-      let oldestTime = Date.now();
-      
-      for (const [k, entry] of cache.current.entries()) {
-        if (entry.lastAccessed < oldestTime) {
-          oldestTime = entry.lastAccessed;
-          oldestKey = k;
+      if (entry) {
+        // Update access statistics
+        entry.accessCount++;
+        entry.lastAccessed = Date.now();
+        setHitCount(prev => prev + 1);
+        return entry.data;
+      }
+
+      setMissCount(prev => prev + 1);
+      return null;
+    },
+    [getCacheKey]
+  );
+
+  const set = useCallback(
+    (x: number, y: number, data: Omit<PixelData, 'lastUpdated'>) => {
+      const key = getCacheKey(x, y);
+
+      // If cache is full, remove least recently used entry
+      if (cache.current.size >= maxSize) {
+        let oldestKey = '';
+        let oldestTime = Date.now();
+
+        for (const [k, entry] of cache.current.entries()) {
+          if (entry.lastAccessed < oldestTime) {
+            oldestTime = entry.lastAccessed;
+            oldestKey = k;
+          }
+        }
+
+        if (oldestKey) {
+          cache.current.delete(oldestKey);
         }
       }
-      
-      if (oldestKey) {
-        cache.current.delete(oldestKey);
-      }
-    }
-    
-    cache.current.set(key, {
-      data: { ...data, lastUpdated: Date.now() },
-      accessCount: 1,
-      lastAccessed: Date.now()
-    });
-  }, [getCacheKey, maxSize]);
+
+      cache.current.set(key, {
+        data: { ...data, lastUpdated: Date.now() },
+        accessCount: 1,
+        lastAccessed: Date.now(),
+      });
+    },
+    [getCacheKey, maxSize]
+  );
 
   const clear = useCallback(() => {
     cache.current.clear();
   }, []);
 
-  const getStats = useMemo(() => ({
-    size: cache.current.size,
-    hitCount,
-    missCount,
-    hitRate: hitCount + missCount > 0 ? hitCount / (hitCount + missCount) : 0
-  }), [hitCount, missCount]);
+  const getStats = useMemo(
+    () => ({
+      size: cache.current.size,
+      hitCount,
+      missCount,
+      hitRate: hitCount + missCount > 0 ? hitCount / (hitCount + missCount) : 0,
+    }),
+    [hitCount, missCount]
+  );
 
   return {
     get,
     set,
     clear,
-    stats: getStats
+    stats: getStats,
   };
 };
 
@@ -104,7 +113,7 @@ export const usePerformanceMonitor = () => {
   const updateFPS = useCallback(() => {
     frameCount.current++;
     const currentTime = performance.now();
-    
+
     if (currentTime - lastTime.current >= 1000) {
       setFps(Math.round((frameCount.current * 1000) / (currentTime - lastTime.current)));
       frameCount.current = 0;
@@ -116,7 +125,7 @@ export const usePerformanceMonitor = () => {
     fps,
     renderTime,
     measureRender,
-    updateFPS
+    updateFPS,
   };
 };
 
@@ -131,14 +140,11 @@ export const useVirtualization = <T>(
 
   const visibleRange = useMemo(() => {
     const start = Math.floor(scrollTop / itemHeight);
-    const end = Math.min(
-      start + Math.ceil(containerHeight / itemHeight) + overscan,
-      items.length
-    );
-    
+    const end = Math.min(start + Math.ceil(containerHeight / itemHeight) + overscan, items.length);
+
     return {
       start: Math.max(0, start - overscan),
-      end
+      end,
     };
   }, [scrollTop, itemHeight, containerHeight, overscan, items.length]);
 
@@ -150,8 +156,8 @@ export const useVirtualization = <T>(
         position: 'absolute' as const,
         top: (visibleRange.start + index) * itemHeight,
         height: itemHeight,
-        width: '100%'
-      }
+        width: '100%',
+      },
     }));
   }, [items, visibleRange, itemHeight]);
 
@@ -160,6 +166,6 @@ export const useVirtualization = <T>(
   return {
     visibleItems,
     totalHeight,
-    setScrollTop
+    setScrollTop,
   };
 };

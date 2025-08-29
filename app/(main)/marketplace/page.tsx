@@ -1,25 +1,44 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
+import { useUserStore } from '@/lib/store';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
-  ShoppingCart, Gavel, Eye, Heart, MessageSquare, Star, Crown, Gem, 
-  MapPin, TrendingUp, Search, Gift, Users, Globe,
-  BarChart3, X, Sparkles, Timer, Check, Edit, DollarSign, Package
-} from "lucide-react";
+  ShoppingCart,
+  Gavel,
+  Eye,
+  Heart,
+  MessageSquare,
+  Star,
+  Crown,
+  Gem,
+  MapPin,
+  TrendingUp,
+  Search,
+  Gift,
+  Users,
+  Globe,
+  BarChart3,
+  X,
+  Sparkles,
+  Timer,
+  Check,
+  Edit,
+  DollarSign,
+  Package,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -27,8 +46,8 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface MarketplacePixel {
   id: string;
@@ -108,7 +127,8 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     owner: 'PixelCollector',
     ownerAvatar: 'https://placehold.co/40x40.png',
     title: 'Vista Tejo Premium',
-    description: 'Pixel exclusivo com vista privilegiada para o Rio Tejo no coração histórico de Lisboa.',
+    description:
+      'Pixel exclusivo com vista privilegiada para o Rio Tejo no coração histórico de Lisboa.',
     rarity: 'Lendário',
     color: '#D4A757',
     views: 2340,
@@ -129,8 +149,8 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     priceHistory: [
       { price: 300, date: '2024-01-01' },
       { price: 380, date: '2024-01-15' },
-      { price: 450, date: '2024-02-01' }
-    ]
+      { price: 450, date: '2024-02-01' },
+    ],
   },
   {
     id: '2',
@@ -142,7 +162,8 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     owner: 'PortoArtist',
     ownerAvatar: 'https://placehold.co/40x40.png',
     title: 'Ribeira Artística',
-    description: 'Pixel na zona ribeirinha do Porto, perfeito para arte urbana e expressão criativa.',
+    description:
+      'Pixel na zona ribeirinha do Porto, perfeito para arte urbana e expressão criativa.',
     rarity: 'Épico',
     color: '#7DF9FF',
     views: 1890,
@@ -154,7 +175,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     isAuction: false,
     imageUrl: 'https://placehold.co/300x200/7DF9FF/000000?text=Porto+Art',
     gpsCoords: { lat: 41.1579, lon: -8.6291 },
-    lastPriceChange: '1 semana atrás'
+    lastPriceChange: '1 semana atrás',
   },
   {
     id: '3',
@@ -165,7 +186,8 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     owner: 'StudentCollector',
     ownerAvatar: 'https://placehold.co/40x40.png',
     title: 'Universidade Histórica',
-    description: 'Pixel próximo da histórica Universidade de Coimbra, ideal para estudantes e académicos.',
+    description:
+      'Pixel próximo da histórica Universidade de Coimbra, ideal para estudantes e académicos.',
     rarity: 'Raro',
     color: '#9C27B0',
     views: 1234,
@@ -177,7 +199,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     isAuction: false,
     imageUrl: 'https://placehold.co/300x200/9C27B0/FFFFFF?text=Coimbra+Uni',
     gpsCoords: { lat: 40.2033, lon: -8.4103 },
-    lastPriceChange: '3 dias atrás'
+    lastPriceChange: '3 dias atrás',
   },
   {
     id: '4',
@@ -188,7 +210,8 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     owner: 'NorthernExplorer',
     ownerAvatar: 'https://placehold.co/40x40.png',
     title: 'Santuário Místico',
-    description: 'Pixel com vista para o Santuário do Bom Jesus, um dos locais mais emblemáticos do Norte.',
+    description:
+      'Pixel com vista para o Santuário do Bom Jesus, um dos locais mais emblemáticos do Norte.',
     rarity: 'Incomum',
     color: '#4CAF50',
     views: 890,
@@ -200,7 +223,7 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     isAuction: false,
     imageUrl: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Braga+Santuário',
     gpsCoords: { lat: 41.5518, lon: -8.4229 },
-    lastPriceChange: '5 dias atrás'
+    lastPriceChange: '5 dias atrás',
   },
   {
     id: '5',
@@ -227,8 +250,8 @@ const mockMarketplacePixels: MarketplacePixel[] = [
     buyNowPrice: 250,
     imageUrl: 'https://placehold.co/300x200/FFD700/000000?text=Faro+Beach',
     gpsCoords: { lat: 37.0194, lon: -7.9322 },
-    lastPriceChange: '1 dia atrás'
-  }
+    lastPriceChange: '1 dia atrás',
+  },
 ];
 
 const mockUserPixels: UserPixel[] = [
@@ -255,7 +278,7 @@ const mockUserPixels: UserPixel[] = [
         amount: 320,
         message: 'Adorei este pixel! Aceita esta oferta?',
         timestamp: '2h atrás',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'offer2',
@@ -263,9 +286,9 @@ const mockUserPixels: UserPixel[] = [
         buyerAvatar: 'https://placehold.co/40x40.png',
         amount: 300,
         timestamp: '1d atrás',
-        status: 'pending'
-      }
-    ]
+        status: 'pending',
+      },
+    ],
   },
   {
     id: 'user2',
@@ -282,8 +305,8 @@ const mockUserPixels: UserPixel[] = [
     comments: 12,
     followers: 34,
     isForSale: true,
-    offers: []
-  }
+    offers: [],
+  },
 ];
 
 export default function MarketplacePage() {
@@ -307,22 +330,24 @@ export default function MarketplacePage() {
   const [bookmarkedPixels, setBookmarkedPixels] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [playSound, setPlaySound] = useState(false);
-  
+
   const { toast } = useToast();
-  const { credits, specialCredits, isPremium, addCredits, removeCredits, addXp, addPixel } = useUserStore();
+  const { credits, specialCredits, isPremium, addCredits, removeCredits, addXp, addPixel } =
+    useUserStore();
 
   // Filter and sort pixels
   const filteredPixels = pixels
     .filter(pixel => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch =
+        !searchQuery ||
         pixel.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pixel.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pixel.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
+
       const matchesRegion = selectedRegion === 'all' || pixel.region === selectedRegion;
       const matchesRarity = selectedRarity === 'all' || pixel.rarity === selectedRarity;
       const matchesPrice = pixel.price >= priceRange[0] && pixel.price <= priceRange[1];
-      
+
       return matchesSearch && matchesRegion && matchesRarity && matchesPrice;
     })
     .sort((a, b) => {
@@ -361,12 +386,12 @@ export default function MarketplacePage() {
 
   const confirmPurchase = () => {
     if (!selectedPixel) return;
-    
+
     if (credits < selectedPixel.price) {
       toast({
-        title: "Créditos Insuficientes",
+        title: 'Créditos Insuficientes',
         description: `Precisa de ${selectedPixel.price - credits} créditos adicionais.`,
-        variant: "destructive"
+        variant: 'destructive',
       });
       return;
     }
@@ -376,48 +401,48 @@ export default function MarketplacePage() {
     addPixel();
     setShowConfetti(true);
     setPlaySound(true);
-    
+
     toast({
-      title: "Pixel Comprado! 🎉",
+      title: 'Pixel Comprado! 🎉',
       description: `Adquiriu &quot;${selectedPixel.title}&quot; por €${selectedPixel.price}. Recebeu 50 XP!`,
     });
-    
+
     setShowPurchaseModal(false);
     setSelectedPixel(null);
   };
 
   const confirmBid = () => {
     if (!selectedPixel || !bidAmount) return;
-    
+
     const bid = parseFloat(bidAmount);
     const minBid = (selectedPixel.currentBid || selectedPixel.price) + 10;
-    
+
     if (bid < minBid) {
       toast({
-        title: "Lance Insuficiente",
+        title: 'Lance Insuficiente',
         description: `O lance mínimo é €${minBid}.`,
-        variant: "destructive"
+        variant: 'destructive',
       });
       return;
     }
 
     if (credits < bid) {
       toast({
-        title: "Créditos Insuficientes",
+        title: 'Créditos Insuficientes',
         description: `Precisa de ${bid - credits} créditos adicionais.`,
-        variant: "destructive"
+        variant: 'destructive',
       });
       return;
     }
 
     setPlaySound(true);
     addXp(25);
-    
+
     toast({
-      title: "Lance Colocado! 🎯",
+      title: 'Lance Colocado! 🎯',
       description: `Lance de €${bid} registado com sucesso. Recebeu 25 XP!`,
     });
-    
+
     setShowBidModal(false);
     setBidAmount('');
     setSelectedPixel(null);
@@ -425,35 +450,36 @@ export default function MarketplacePage() {
 
   const submitOffer = () => {
     if (!selectedPixel || !offerAmount) return;
-    
+
     const offer = parseFloat(offerAmount);
-    
+
     if (offer >= selectedPixel.price) {
       toast({
-        title: "Oferta Muito Alta",
-        description: "A oferta deve ser inferior ao preço de venda. Use 'Comprar' para pagar o preço total.",
-        variant: "destructive"
+        title: 'Oferta Muito Alta',
+        description:
+          "A oferta deve ser inferior ao preço de venda. Use 'Comprar' para pagar o preço total.",
+        variant: 'destructive',
       });
       return;
     }
 
     if (credits < offer) {
       toast({
-        title: "Créditos Insuficientes",
+        title: 'Créditos Insuficientes',
         description: `Precisa de ${offer - credits} créditos adicionais.`,
-        variant: "destructive"
+        variant: 'destructive',
       });
       return;
     }
 
     setPlaySound(true);
     addXp(15);
-    
+
     toast({
-      title: "Oferta Enviada! 💌",
+      title: 'Oferta Enviada! 💌',
       description: `Oferta de €${offer} enviada para ${selectedPixel.owner}. Recebeu 15 XP!`,
     });
-    
+
     setShowOfferModal(false);
     setOfferAmount('');
     setOfferMessage('');
@@ -462,22 +488,22 @@ export default function MarketplacePage() {
 
   const handleFollowPixel = (pixelId: string) => {
     const isFollowing = followedPixels.includes(pixelId);
-    
+
     if (isFollowing) {
       setFollowedPixels(prev => prev.filter(id => id !== pixelId));
       toast({
-        title: "Deixou de Seguir",
-        description: "Não receberá mais notificações sobre este pixel.",
+        title: 'Deixou de Seguir',
+        description: 'Não receberá mais notificações sobre este pixel.',
       });
     } else {
       setFollowedPixels(prev => [...prev, pixelId]);
       addXp(10);
       addCredits(5);
       setPlaySound(true);
-      
+
       toast({
-        title: "A Seguir Pixel! 👁️",
-        description: "Receberá notificações sobre mudanças de preço. Recebeu 10 XP + 5 créditos!",
+        title: 'A Seguir Pixel! 👁️',
+        description: 'Receberá notificações sobre mudanças de preço. Recebeu 10 XP + 5 créditos!',
       });
     }
   };
@@ -485,30 +511,32 @@ export default function MarketplacePage() {
   const handleAcceptOffer = (pixelId: string, offerId: string) => {
     const pixel = userPixels.find(p => p.id === pixelId);
     const offer = pixel?.offers.find(o => o.id === offerId);
-    
+
     if (!pixel || !offer) return;
-    
+
     const commission = isPremium ? 0.05 : 0.07;
     const finalAmount = Math.floor(offer.amount * (1 - commission));
-    
-    setUserPixels(prev => prev.map(p => 
-      p.id === pixelId 
-        ? { 
-            ...p, 
-            offers: p.offers.map(o => 
-              o.id === offerId ? { ...o, status: 'accepted' as const } : o
-            )
-          }
-        : p
-    ));
-    
+
+    setUserPixels(prev =>
+      prev.map(p =>
+        p.id === pixelId
+          ? {
+              ...p,
+              offers: p.offers.map(o =>
+                o.id === offerId ? { ...o, status: 'accepted' as const } : o
+              ),
+            }
+          : p
+      )
+    );
+
     addCredits(finalAmount);
     addXp(100);
     setShowConfetti(true);
     setPlaySound(true);
-    
+
     toast({
-      title: "Oferta Aceite! 💰",
+      title: 'Oferta Aceite! 💰',
       description: `Vendeu &quot;${pixel.title}&quot; por €${offer.amount}. Recebeu €${finalAmount} (após comissão de ${Math.round(commission * 100)}%). +100 XP!`,
     });
   };
@@ -516,22 +544,24 @@ export default function MarketplacePage() {
   const handleRejectOffer = (pixelId: string, offerId: string) => {
     const pixel = userPixels.find(p => p.id === pixelId);
     const offer = pixel?.offers.find(o => o.id === offerId);
-    
+
     if (!pixel || !offer) return;
-    
-    setUserPixels(prev => prev.map(p => 
-      p.id === pixelId 
-        ? { 
-            ...p, 
-            offers: p.offers.map(o => 
-              o.id === offerId ? { ...o, status: 'rejected' as const } : o
-            )
-          }
-        : p
-    ));
-    
+
+    setUserPixels(prev =>
+      prev.map(p =>
+        p.id === pixelId
+          ? {
+              ...p,
+              offers: p.offers.map(o =>
+                o.id === offerId ? { ...o, status: 'rejected' as const } : o
+              ),
+            }
+          : p
+      )
+    );
+
     toast({
-      title: "Oferta Rejeitada",
+      title: 'Oferta Rejeitada',
       description: `Rejeitou a oferta de €${offer.amount} de ${offer.buyer}.`,
     });
   };
@@ -539,9 +569,9 @@ export default function MarketplacePage() {
   const handlePromotePixel = (pixelId: string) => {
     if (credits < 50) {
       toast({
-        title: "Créditos Insuficientes",
-        description: "Precisa de 50 créditos para promover um pixel.",
-        variant: "destructive"
+        title: 'Créditos Insuficientes',
+        description: 'Precisa de 50 créditos para promover um pixel.',
+        variant: 'destructive',
       });
       return;
     }
@@ -549,22 +579,29 @@ export default function MarketplacePage() {
     removeCredits(50);
     addXp(25);
     setPlaySound(true);
-    
+
     toast({
-      title: "Pixel Promovido! 📢",
-      description: "Seu pixel aparecerá em destaque por 24h. Recebeu 25 XP!",
+      title: 'Pixel Promovido! 📢',
+      description: 'Seu pixel aparecerá em destaque por 24h. Recebeu 25 XP!',
     });
   };
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'Comum': return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
-      case 'Incomum': return 'text-green-500 bg-green-500/10 border-green-500/30';
-      case 'Raro': return 'text-blue-500 bg-blue-500/10 border-blue-500/30';
-      case 'Épico': return 'text-purple-500 bg-purple-500/10 border-purple-500/30';
-      case 'Lendário': return 'text-amber-500 bg-amber-500/10 border-amber-500/30';
-      case 'Marco Histórico': return 'text-red-500 bg-red-500/10 border-red-500/30';
-      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
+      case 'Comum':
+        return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
+      case 'Incomum':
+        return 'text-green-500 bg-green-500/10 border-green-500/30';
+      case 'Raro':
+        return 'text-blue-500 bg-blue-500/10 border-blue-500/30';
+      case 'Épico':
+        return 'text-purple-500 bg-purple-500/10 border-purple-500/30';
+      case 'Lendário':
+        return 'text-amber-500 bg-amber-500/10 border-amber-500/30';
+      case 'Marco Histórico':
+        return 'text-red-500 bg-red-500/10 border-red-500/30';
+      default:
+        return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
     }
   };
 
@@ -573,7 +610,7 @@ export default function MarketplacePage() {
     const diff = endTime.getTime() - now.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
@@ -587,33 +624,33 @@ export default function MarketplacePage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSound} onEnd={() => setPlaySound(false)} />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
-      
-      <div className="container mx-auto py-3 px-2 sm:py-6 sm:px-4 space-y-4 sm:space-y-6 max-w-7xl mb-16">
+
+      <div className="container mx-auto mb-16 max-w-7xl space-y-4 px-2 py-3 sm:space-y-6 sm:px-4 sm:py-6">
         {/* Header */}
-        <Card className="shadow-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30">
+        <Card className="border-primary/30 bg-gradient-to-br from-card via-card/95 to-primary/10 shadow-2xl">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="font-headline text-2xl sm:text-3xl text-gradient-gold flex items-center">
-              <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3" />
+            <CardTitle className="text-gradient-gold flex items-center font-headline text-2xl sm:text-3xl">
+              <ShoppingCart className="mr-2 h-6 w-6 sm:mr-3 sm:h-8 sm:w-8" />
               Marketplace de Pixels
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-sm sm:text-base">
+            <CardDescription className="text-sm text-muted-foreground sm:text-base">
               Descubra, compre e venda pixels únicos no mapa de Portugal
             </CardDescription>
           </CardHeader>
         </Card>
 
         <Tabs defaultValue="browse" className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-10 sm:h-12">
+          <TabsList className="grid h-10 w-full grid-cols-3 sm:h-12">
             <TabsTrigger value="browse" className="text-xs sm:text-sm">
-              <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              <Eye className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
               Explorar
             </TabsTrigger>
             <TabsTrigger value="auctions" className="text-xs sm:text-sm">
-              <Gavel className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              <Gavel className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
               Leilões
             </TabsTrigger>
             <TabsTrigger value="my-sales" className="text-xs sm:text-sm">
-              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>
+              <BarChart3 className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
               Minhas Vendas
             </TabsTrigger>
           </TabsList>
@@ -625,20 +662,20 @@ export default function MarketplacePage() {
               <CardContent className="p-3 sm:p-4">
                 <div className="space-y-3 sm:space-y-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 transform text-muted-foreground sm:h-4 sm:w-4" />
                     <Input
                       placeholder="Pesquisar pixels..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-8 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10"
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="h-8 pl-8 text-xs sm:h-10 sm:pl-10 sm:text-sm"
                     />
                   </div>
-                  
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     <select
                       value={selectedRegion}
-                      onChange={(e) => setSelectedRegion(e.target.value)}
-                      className="px-2 py-1 sm:px-3 sm:py-2 border border-input bg-background rounded-md text-xs sm:text-sm h-8 sm:h-10"
+                      onChange={e => setSelectedRegion(e.target.value)}
+                      className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs sm:h-10 sm:px-3 sm:py-2 sm:text-sm"
                     >
                       <option value="all">Todas as Regiões</option>
                       <option value="Lisboa">Lisboa</option>
@@ -647,11 +684,11 @@ export default function MarketplacePage() {
                       <option value="Braga">Braga</option>
                       <option value="Faro">Faro</option>
                     </select>
-                    
+
                     <select
                       value={selectedRarity}
-                      onChange={(e) => setSelectedRarity(e.target.value)}
-                      className="px-2 py-1 sm:px-3 sm:py-2 border border-input bg-background rounded-md text-xs sm:text-sm h-8 sm:h-10"
+                      onChange={e => setSelectedRarity(e.target.value)}
+                      className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs sm:h-10 sm:px-3 sm:py-2 sm:text-sm"
                     >
                       <option value="all">Todas as Raridades</option>
                       <option value="Comum">Comum</option>
@@ -660,23 +697,23 @@ export default function MarketplacePage() {
                       <option value="Épico">Épico</option>
                       <option value="Lendário">Lendário</option>
                     </select>
-                    
+
                     <select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="px-2 py-1 sm:px-3 sm:py-2 border border-input bg-background rounded-md text-xs sm:text-sm h-8 sm:h-10"
+                      onChange={e => setSortBy(e.target.value as any)}
+                      className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs sm:h-10 sm:px-3 sm:py-2 sm:text-sm"
                     >
                       <option value="recent">Mais Recentes</option>
                       <option value="price">Preço</option>
                       <option value="views">Mais Vistos</option>
                       <option value="likes">Mais Curtidos</option>
                     </select>
-                    
+
                     <Button
                       variant={viewMode === 'grid' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                      className="h-8 sm:h-10 text-xs sm:text-sm"
+                      className="h-8 text-xs sm:h-10 sm:text-sm"
                     >
                       {viewMode === 'grid' ? 'Grade' : 'Lista'}
                     </Button>
@@ -686,64 +723,72 @@ export default function MarketplacePage() {
             </Card>
 
             {/* Pixels Grid */}
-            <div className={cn(
-              "grid gap-3 sm:gap-6",
-              viewMode === 'grid' 
-                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
-                : "grid-cols-1"
-            )}>
-              {filteredPixels.map((pixel) => (
-                <Card 
-                  key={pixel.id} 
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+            <div
+              className={cn(
+                'grid gap-3 sm:gap-6',
+                viewMode === 'grid'
+                  ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                  : 'grid-cols-1'
+              )}
+            >
+              {filteredPixels.map(pixel => (
+                <Card
+                  key={pixel.id}
+                  className="cursor-pointer overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   onClick={() => handlePixelClick(pixel)}
                 >
                   <div className="relative">
-                    <img 
-                      src={pixel.imageUrl} 
+                    <img
+                      src={pixel.imageUrl}
                       alt={pixel.title}
-                      className="w-full h-32 sm:h-48 object-cover"
+                      className="h-32 w-full object-cover sm:h-48"
                     />
-                    
+
                     {/* Raridade - Canto Superior Esquerdo */}
-                    <Badge className={cn("absolute top-2 left-2 text-xs", getRarityColor(pixel.rarity))}>
+                    <Badge
+                      className={cn('absolute left-2 top-2 text-xs', getRarityColor(pixel.rarity))}
+                    >
                       {pixel.rarity}
                     </Badge>
-                    
+
                     {/* Leilão - Canto Superior Direito */}
                     {pixel.isAuction && pixel.auctionEndTime && (
-                      <Badge className="absolute top-2 right-2 bg-red-500 text-white animate-pulse text-xs">
-                        <Timer className="h-3 w-3 mr-1" />
+                      <Badge className="absolute right-2 top-2 animate-pulse bg-red-500 text-xs text-white">
+                        <Timer className="mr-1 h-3 w-3" />
                         {formatTimeLeft(pixel.auctionEndTime)}
                       </Badge>
                     )}
-                    
+
                     {pixel.isPromoted && (
                       <Badge className="absolute bottom-2 left-2 bg-gradient-to-r from-primary to-accent text-xs">
-                        <Sparkles className="h-3 w-3 mr-1" />
+                        <Sparkles className="mr-1 h-3 w-3" />
                         Promovido
                       </Badge>
                     )}
                   </div>
-                  
+
                   <CardContent className="p-3 sm:p-4">
                     <div className="space-y-2 sm:space-y-3">
                       <div>
-                        <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{pixel.title}</h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground">
+                        <h3 className="line-clamp-1 text-sm font-semibold sm:text-base">
+                          {pixel.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground sm:text-sm">
                           {pixel.id ? `#${pixel.id}` : `(${pixel.x}, ${pixel.y})`} • {pixel.region}
                         </p>
                       </div>
-                      
-                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+
+                      <p className="line-clamp-2 text-xs text-muted-foreground sm:text-sm">
                         {pixel.description}
                       </p>
-                      
+
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 sm:gap-3">
                           <span className="flex items-center gap-1">
                             <Eye className="h-3 w-3" />
-                            {pixel.views > 1000 ? `${Math.floor(pixel.views/1000)}K` : pixel.views}
+                            {pixel.views > 1000
+                              ? `${Math.floor(pixel.views / 1000)}K`
+                              : pixel.views}
                           </span>
                           <span className="flex items-center gap-1">
                             <Heart className="h-3 w-3" />
@@ -755,70 +800,69 @@ export default function MarketplacePage() {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-lg sm:text-xl font-bold text-primary">
+                          <span className="text-lg font-bold text-primary sm:text-xl">
                             €{pixel.price}
                           </span>
                           {pixel.specialCreditsPrice && (
-                            <span className="text-xs sm:text-sm text-accent">
+                            <span className="text-xs text-accent sm:text-sm">
                               {pixel.specialCreditsPrice} especiais
                             </span>
                           )}
                         </div>
-                        
+
                         {pixel.isAuction ? (
                           <div className="grid grid-cols-2 gap-2">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               className="min-h-[36px] text-xs"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 handleBidOnPixel(pixel);
                               }}
                             >
-                              <Gavel className="h-3 w-3 mr-1" />
+                              <Gavel className="mr-1 h-3 w-3" />
                               Licitar
                             </Button>
                             {pixel.buyNowPrice && (
-                              <Button 
+                              <Button
                                 size="sm"
                                 className="min-h-[36px] text-xs"
-                                onClick={(e) => {
+                                onClick={e => {
                                   e.stopPropagation();
                                   handleBuyPixel(pixel);
                                 }}
                               >
-                                <ShoppingCart className="h-3 w-3 mr-1" />
-                                €{pixel.buyNowPrice}
+                                <ShoppingCart className="mr-1 h-3 w-3" />€{pixel.buyNowPrice}
                               </Button>
                             )}
                           </div>
                         ) : (
                           <div className="grid grid-cols-2 gap-2">
-                            <Button 
+                            <Button
                               size="sm"
                               className="min-h-[36px] text-xs"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 handleBuyPixel(pixel);
                               }}
                             >
-                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <ShoppingCart className="mr-1 h-3 w-3" />
                               Comprar
                             </Button>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               className="min-h-[36px] text-xs"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 handleMakeOffer(pixel);
                               }}
                             >
-                              <Gift className="h-3 w-3 mr-1" />
+                              <Gift className="mr-1 h-3 w-3" />
                               Oferta
                             </Button>
                           </div>
@@ -833,229 +877,246 @@ export default function MarketplacePage() {
 
           {/* Auctions Tab */}
           <TabsContent value="auctions" className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredPixels.filter(p => p.isAuction).map((pixel) => (
-                <Card key={pixel.id} className="overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative">
-                    <img 
-                      src={pixel.imageUrl} 
-                      alt={pixel.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    
-                    <Badge className={cn("absolute top-2 left-2", getRarityColor(pixel.rarity))}>
-                      {pixel.rarity}
-                    </Badge>
-                    
-                    {pixel.auctionEndTime && (
-                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold animate-pulse">
-                        {formatTimeLeft(pixel.auctionEndTime)}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2">{pixel.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {pixel.id ? `#${pixel.id}` : `(${pixel.x}, ${pixel.y})`} • {pixel.region}
-                    </p>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Lance Atual:</span>
-                        <span className="text-xl font-bold text-primary">
-                          €{pixel.currentBid || pixel.price}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{pixel.bidCount || 0} lances</span>
-                        <span>{pixel.views} visualizações</span>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleBidOnPixel(pixel);
-                          }}
-                        >
-                          <Gavel className="h-4 w-4 mr-2" />
-                          Licitar
-                        </Button>
-                        {pixel.buyNowPrice && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={(e) => {
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+              {filteredPixels
+                .filter(p => p.isAuction)
+                .map(pixel => (
+                  <Card
+                    key={pixel.id}
+                    className="overflow-hidden transition-shadow hover:shadow-xl"
+                  >
+                    <div className="relative">
+                      <img
+                        src={pixel.imageUrl}
+                        alt={pixel.title}
+                        className="h-48 w-full object-cover"
+                      />
+
+                      <Badge className={cn('absolute left-2 top-2', getRarityColor(pixel.rarity))}>
+                        {pixel.rarity}
+                      </Badge>
+
+                      {pixel.auctionEndTime && (
+                        <div className="absolute right-2 top-2 animate-pulse rounded bg-red-500 px-2 py-1 text-xs font-bold text-white">
+                          {formatTimeLeft(pixel.auctionEndTime)}
+                        </div>
+                      )}
+                    </div>
+
+                    <CardContent className="p-4">
+                      <h3 className="mb-2 font-semibold">{pixel.title}</h3>
+                      <p className="mb-3 text-sm text-muted-foreground">
+                        {pixel.id ? `#${pixel.id}` : `(${pixel.x}, ${pixel.y})`} • {pixel.region}
+                      </p>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Lance Atual:</span>
+                          <span className="text-xl font-bold text-primary">
+                            €{pixel.currentBid || pixel.price}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>{pixel.bidCount || 0} lances</span>
+                          <span>{pixel.views} visualizações</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            size="sm"
+                            onClick={e => {
                               e.stopPropagation();
-                              handleBuyPixel(pixel);
+                              handleBidOnPixel(pixel);
                             }}
                           >
-                            Comprar €{pixel.buyNowPrice}
+                            <Gavel className="mr-2 h-4 w-4" />
+                            Licitar
                           </Button>
-                        )}
+                          {pixel.buyNowPrice && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleBuyPixel(pixel);
+                              }}
+                            >
+                              Comprar €{pixel.buyNowPrice}
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </TabsContent>
 
           {/* My Sales Tab */}
           <TabsContent value="my-sales" className="space-y-4 sm:space-y-6">
             {/* Sales Dashboard */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <Card className="text-center p-3 sm:p-4">
-                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 mx-auto mb-2" />
-                <div className="text-lg sm:text-2xl font-bold text-green-500">€1,247</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Total Vendido</div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+              <Card className="p-3 text-center sm:p-4">
+                <DollarSign className="mx-auto mb-2 h-6 w-6 text-green-500 sm:h-8 sm:w-8" />
+                <div className="text-lg font-bold text-green-500 sm:text-2xl">€1,247</div>
+                <div className="text-xs text-muted-foreground sm:text-sm">Total Vendido</div>
               </Card>
-              
-              <Card className="text-center p-3 sm:p-4">
-                <Package className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
-                <div className="text-lg sm:text-2xl font-bold text-primary">{userPixels.length}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">À Venda</div>
-              </Card>
-              
-              <Card className="text-center p-3 sm:p-4">
-                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mx-auto mb-2" />
-                <div className="text-lg sm:text-2xl font-bold text-blue-500">4.8</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Rating</div>
-              </Card>
-              
-              <Card className="text-center p-3 sm:p-4">
-                <Gift className="h-6 w-6 sm:h-8 sm:w-8 text-accent mx-auto mb-2" />
-                <div className="text-lg sm:text-2xl font-bold text-accent">
-                  {userPixels.reduce((total, pixel) => total + pixel.offers.filter(o => o.status === 'pending').length, 0)}
+
+              <Card className="p-3 text-center sm:p-4">
+                <Package className="mx-auto mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
+                <div className="text-lg font-bold text-primary sm:text-2xl">
+                  {userPixels.length}
                 </div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Ofertas</div>
+                <div className="text-xs text-muted-foreground sm:text-sm">À Venda</div>
+              </Card>
+
+              <Card className="p-3 text-center sm:p-4">
+                <TrendingUp className="mx-auto mb-2 h-6 w-6 text-blue-500 sm:h-8 sm:w-8" />
+                <div className="text-lg font-bold text-blue-500 sm:text-2xl">4.8</div>
+                <div className="text-xs text-muted-foreground sm:text-sm">Rating</div>
+              </Card>
+
+              <Card className="p-3 text-center sm:p-4">
+                <Gift className="mx-auto mb-2 h-6 w-6 text-accent sm:h-8 sm:w-8" />
+                <div className="text-lg font-bold text-accent sm:text-2xl">
+                  {userPixels.reduce(
+                    (total, pixel) =>
+                      total + pixel.offers.filter(o => o.status === 'pending').length,
+                    0
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground sm:text-sm">Ofertas</div>
               </Card>
             </div>
 
             {/* User Pixels */}
             <div className="space-y-4">
-              {userPixels.map((pixel) => (
+              {userPixels.map(pixel => (
                 <Card key={pixel.id} className="overflow-hidden">
                   <CardContent className="p-3 sm:p-4">
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                      <div 
-                        className="w-full sm:w-24 h-24 rounded-lg flex items-center justify-center text-2xl font-bold"
+                    <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                      <div
+                        className="flex h-24 w-full items-center justify-center rounded-lg text-2xl font-bold sm:w-24"
                         style={{ backgroundColor: pixel.color }}
                       >
                         🎨
                       </div>
-                      
+
                       <div className="flex-1 space-y-2 sm:space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <div>
-                            <h3 className="font-semibold text-sm sm:text-base">{pixel.title}</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground">
+                            <h3 className="text-sm font-semibold sm:text-base">{pixel.title}</h3>
+                            <p className="text-xs text-muted-foreground sm:text-sm">
                               ({pixel.x}, {pixel.y}) • {pixel.region}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge className={getRarityColor(pixel.rarity)}>
-                              {pixel.rarity}
-                            </Badge>
-                            <span className="text-lg sm:text-xl font-bold text-primary">€{pixel.price}</span>
+                            <Badge className={getRarityColor(pixel.rarity)}>{pixel.rarity}</Badge>
+                            <span className="text-lg font-bold text-primary sm:text-xl">
+                              €{pixel.price}
+                            </span>
                           </div>
                         </div>
-                        
-                        <div className="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+
+                        <div className="grid grid-cols-4 gap-2 text-center sm:gap-4">
                           <div>
-                            <div className="text-sm sm:text-base font-bold">{pixel.views}</div>
+                            <div className="text-sm font-bold sm:text-base">{pixel.views}</div>
                             <div className="text-xs text-muted-foreground">Views</div>
                           </div>
                           <div>
-                            <div className="text-sm sm:text-base font-bold">{pixel.likes}</div>
+                            <div className="text-sm font-bold sm:text-base">{pixel.likes}</div>
                             <div className="text-xs text-muted-foreground">Likes</div>
                           </div>
                           <div>
-                            <div className="text-sm sm:text-base font-bold">{pixel.comments}</div>
+                            <div className="text-sm font-bold sm:text-base">{pixel.comments}</div>
                             <div className="text-xs text-muted-foreground">Comentários</div>
                           </div>
                           <div>
-                            <div className="text-sm sm:text-base font-bold">{pixel.followers}</div>
+                            <div className="text-sm font-bold sm:text-base">{pixel.followers}</div>
                             <div className="text-xs text-muted-foreground">Seguidores</div>
                           </div>
                         </div>
-                        
+
                         {pixel.offers.filter(o => o.status === 'pending').length > 0 && (
                           <div className="space-y-2">
-                            <h4 className="font-medium text-sm">Ofertas Pendentes:</h4>
-                            {pixel.offers.filter(o => o.status === 'pending').map((offer) => (
-                              <div key={offer.id} className="p-2 sm:p-3 bg-muted/30 rounded-lg">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                  <div className="flex items-center gap-2 sm:gap-3">
-                                    <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                                      <AvatarImage src={offer.buyerAvatar} />
-                                      <AvatarFallback className="text-xs">{offer.buyer[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <div className="font-medium text-xs sm:text-sm">{offer.buyer}</div>
-                                      <div className="text-xs text-muted-foreground">{offer.timestamp}</div>
+                            <h4 className="text-sm font-medium">Ofertas Pendentes:</h4>
+                            {pixel.offers
+                              .filter(o => o.status === 'pending')
+                              .map(offer => (
+                                <div key={offer.id} className="rounded-lg bg-muted/30 p-2 sm:p-3">
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="flex items-center gap-2 sm:gap-3">
+                                      <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                                        <AvatarImage src={offer.buyerAvatar} />
+                                        <AvatarFallback className="text-xs">
+                                          {offer.buyer[0]}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <div className="text-xs font-medium sm:text-sm">
+                                          {offer.buyer}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                          {offer.timestamp}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-bold text-primary sm:text-base">
+                                        €{offer.amount}
+                                      </span>
+                                      <div className="flex gap-1 sm:gap-2">
+                                        <Button
+                                          size="sm"
+                                          className="h-6 px-2 text-xs sm:h-8 sm:px-3"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            handleAcceptOffer(pixel.id, offer.id);
+                                          }}
+                                        >
+                                          <Check className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="h-6 px-2 text-xs sm:h-8 sm:px-3"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            handleRejectOffer(pixel.id, offer.id);
+                                          }}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </div>
                                     </div>
                                   </div>
-                                  
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-bold text-primary text-sm sm:text-base">€{offer.amount}</span>
-                                    <div className="flex gap-1 sm:gap-2">
-                                      <Button 
-                                        size="sm" 
-                                        className="h-6 sm:h-8 px-2 sm:px-3 text-xs"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleAcceptOffer(pixel.id, offer.id);
-                                        }}
-                                      >
-                                        <Check className="h-3 w-3" />
-                                      </Button>
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        className="h-6 sm:h-8 px-2 sm:px-3 text-xs"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleRejectOffer(pixel.id, offer.id);
-                                        }}
-                                      >
-                                        <X className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
+
+                                  {offer.message && (
+                                    <p className="mt-2 text-xs italic text-muted-foreground">
+                                      &quot;{offer.message}&quot;
+                                    </p>
+                                  )}
                                 </div>
-                                
-                                {offer.message && (
-                                  <p className="text-xs text-muted-foreground mt-2 italic">
-                                    &quot;{offer.message}&quot;
-                                  </p>
-                                )}
-                              </div>
-                            ))}
+                              ))}
                           </div>
                         )}
-                        
+
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1 min-h-[36px] text-xs"
-                            onClick={(e) => {
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="min-h-[36px] flex-1 text-xs"
+                            onClick={e => {
                               e.stopPropagation();
                               handlePromotePixel(pixel.id);
                             }}
                           >
-                            <Sparkles className="h-3 w-3 mr-1" />
+                            <Sparkles className="mr-1 h-3 w-3" />
                             Promover (50)
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="min-h-[36px] text-xs"
-                          >
+                          <Button size="sm" variant="outline" className="min-h-[36px] text-xs">
                             <Edit className="h-3 w-3" />
                           </Button>
                         </div>
@@ -1075,10 +1136,11 @@ export default function MarketplacePage() {
           <DialogHeader>
             <DialogTitle>Confirmar Compra</DialogTitle>
             <DialogDescription>
-              {selectedPixel && `Pixel &quot;${selectedPixel.title}&quot; em ${selectedPixel.region}`}
+              {selectedPixel &&
+                `Pixel &quot;${selectedPixel.title}&quot; em ${selectedPixel.region}`}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedPixel && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -1088,7 +1150,9 @@ export default function MarketplacePage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Seus Créditos:</span>
-                  <span className={credits >= selectedPixel.price ? 'text-green-500' : 'text-red-500'}>
+                  <span
+                    className={credits >= selectedPixel.price ? 'text-green-500' : 'text-red-500'}
+                  >
                     €{credits}
                   </span>
                 </div>
@@ -1099,12 +1163,16 @@ export default function MarketplacePage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowPurchaseModal(false)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPurchaseModal(false)}
+                  className="flex-1"
+                >
                   Cancelar
                 </Button>
-                <Button 
+                <Button
                   onClick={confirmPurchase}
                   disabled={credits < selectedPixel.price}
                   className="flex-1"
@@ -1126,20 +1194,24 @@ export default function MarketplacePage() {
               {selectedPixel && `Leilão: &quot;${selectedPixel.title}&quot;`}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedPixel && (
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Lance Atual:</span>
-                  <span className="font-bold">€{selectedPixel.currentBid || selectedPixel.price}</span>
+                  <span className="font-bold">
+                    €{selectedPixel.currentBid || selectedPixel.price}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Lance Mínimo:</span>
-                  <span className="text-primary">€{(selectedPixel.currentBid || selectedPixel.price) + 10}</span>
+                  <span className="text-primary">
+                    €{(selectedPixel.currentBid || selectedPixel.price) + 10}
+                  </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="bid-amount">Seu Lance (€)</Label>
                 <Input
@@ -1147,11 +1219,11 @@ export default function MarketplacePage() {
                   type="number"
                   placeholder={`Mínimo: ${(selectedPixel.currentBid || selectedPixel.price) + 10}`}
                   value={bidAmount}
-                  onChange={(e) => setBidAmount(e.target.value)}
+                  onChange={e => setBidAmount(e.target.value)}
                   min={(selectedPixel.currentBid || selectedPixel.price) + 10}
                 />
               </div>
-              
+
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setShowBidModal(false)} className="flex-1">
                   Cancelar
@@ -1174,7 +1246,7 @@ export default function MarketplacePage() {
               {selectedPixel && `Pixel "${selectedPixel.title}" por ${selectedPixel.owner}`}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedPixel && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -1183,7 +1255,7 @@ export default function MarketplacePage() {
                   <span className="font-bold">€{selectedPixel.price}</span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="offer-amount">Sua Oferta (€)</Label>
                 <Input
@@ -1191,24 +1263,28 @@ export default function MarketplacePage() {
                   type="number"
                   placeholder={`Máximo: ${selectedPixel.price - 1}`}
                   value={offerAmount}
-                  onChange={(e) => setOfferAmount(e.target.value)}
+                  onChange={e => setOfferAmount(e.target.value)}
                   max={selectedPixel.price - 1}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="offer-message">Mensagem (opcional)</Label>
                 <Textarea
                   id="offer-message"
                   placeholder="Adicione uma mensagem para o vendedor..."
                   value={offerMessage}
-                  onChange={(e) => setOfferMessage(e.target.value)}
+                  onChange={e => setOfferMessage(e.target.value)}
                   rows={3}
                 />
               </div>
-              
+
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowOfferModal(false)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowOfferModal(false)}
+                  className="flex-1"
+                >
                   Cancelar
                 </Button>
                 <Button onClick={submitOffer} className="flex-1">
@@ -1222,54 +1298,57 @@ export default function MarketplacePage() {
 
       {/* Pixel Details Modal */}
       <Dialog open={showPixelModal} onOpenChange={setShowPixelModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh]">
+        <DialogContent className="max-h-[90vh] max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <MapPin className="h-5 w-5 mr-2 text-primary" />
+              <MapPin className="mr-2 h-5 w-5 text-primary" />
               {selectedPixel?.title}
             </DialogTitle>
             <DialogDescription>
-              {selectedPixel?.id ? `#${selectedPixel?.id}` : `(${selectedPixel?.x}, ${selectedPixel?.y})`} • {selectedPixel?.region}
+              {selectedPixel?.id
+                ? `#${selectedPixel?.id}`
+                : `(${selectedPixel?.x}, ${selectedPixel?.y})`}{' '}
+              • {selectedPixel?.region}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedPixel && (
             <ScrollArea className="max-h-[60vh]">
               <div className="space-y-4">
-                <img 
-                  src={selectedPixel.imageUrl} 
+                <img
+                  src={selectedPixel.imageUrl}
                   alt={selectedPixel.title}
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="h-48 w-full rounded-lg object-cover"
                 />
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+
+                <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
                   <div>
-                    <Eye className="h-5 w-5 text-blue-500 mx-auto mb-1" />
+                    <Eye className="mx-auto mb-1 h-5 w-5 text-blue-500" />
                     <div className="font-bold">{selectedPixel.views.toLocaleString()}</div>
                     <div className="text-xs text-muted-foreground">Views</div>
                   </div>
                   <div>
-                    <Heart className="h-5 w-5 text-red-500 mx-auto mb-1" />
+                    <Heart className="mx-auto mb-1 h-5 w-5 text-red-500" />
                     <div className="font-bold">{selectedPixel.likes}</div>
                     <div className="text-xs text-muted-foreground">Likes</div>
                   </div>
                   <div>
-                    <MessageSquare className="h-5 w-5 text-green-500 mx-auto mb-1" />
+                    <MessageSquare className="mx-auto mb-1 h-5 w-5 text-green-500" />
                     <div className="font-bold">{selectedPixel.comments}</div>
                     <div className="text-xs text-muted-foreground">Comentários</div>
                   </div>
                   <div>
-                    <Users className="h-5 w-5 text-purple-500 mx-auto mb-1" />
+                    <Users className="mx-auto mb-1 h-5 w-5 text-purple-500" />
                     <div className="font-bold">{selectedPixel.followers}</div>
                     <div className="text-xs text-muted-foreground">Seguidores</div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-semibold">Descrição</h4>
                   <p className="text-sm text-muted-foreground">{selectedPixel.description}</p>
                 </div>
-                
+
                 {selectedPixel.features.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="font-semibold">Características</h4>
@@ -1282,26 +1361,26 @@ export default function MarketplacePage() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => handleFollowPixel(selectedPixel.id)}
                   >
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="mr-2 h-4 w-4" />
                     {followedPixels.includes(selectedPixel.id) ? 'A Seguir' : 'Seguir'}
                   </Button>
-                  
+
                   {selectedPixel.gpsCoords && (
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => {
                         const url = `https://www.google.com/maps?q=${selectedPixel.gpsCoords!.lat},${selectedPixel.gpsCoords!.lon}&z=18&t=k`;
                         window.open(url, '_blank');
                       }}
                     >
-                      <Globe className="h-4 w-4 mr-2" />
+                      <Globe className="mr-2 h-4 w-4" />
                       Ver no Mapa
                     </Button>
                   )}

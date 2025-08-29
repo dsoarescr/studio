@@ -8,8 +8,8 @@
  * - GeneratePixelDescriptionOutput - The return type for the generatePixelDescription function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const GeneratePixelDescriptionInputSchema = z.object({
   x: z.number().describe('The x coordinate of the pixel.'),
@@ -23,7 +23,9 @@ const GeneratePixelDescriptionInputSchema = z.object({
 export type GeneratePixelDescriptionInput = z.infer<typeof GeneratePixelDescriptionInputSchema>;
 
 const GeneratePixelDescriptionOutputSchema = z.object({
-  description: z.string().describe('A description of the selected pixel based on the surrounding area.'),
+  description: z
+    .string()
+    .describe('A description of the selected pixel based on the surrounding area.'),
 });
 export type GeneratePixelDescriptionOutput = z.infer<typeof GeneratePixelDescriptionOutputSchema>;
 
@@ -35,8 +37,8 @@ export async function generatePixelDescription(
 
 const prompt = ai.definePrompt({
   name: 'generatePixelDescriptionPrompt',
-  input: {schema: GeneratePixelDescriptionInputSchema},
-  output: {schema: GeneratePixelDescriptionOutputSchema},
+  input: { schema: GeneratePixelDescriptionInputSchema },
+  output: { schema: GeneratePixelDescriptionOutputSchema },
   prompt: `You are an AI assistant that generates a description of a pixel based on the surrounding area.
 
   You will receive the coordinates of the pixel and the image data of the surrounding area.
@@ -55,7 +57,7 @@ const generatePixelDescriptionFlow = ai.defineFlow(
     outputSchema: GeneratePixelDescriptionOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

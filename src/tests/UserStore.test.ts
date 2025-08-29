@@ -4,6 +4,25 @@ import { act } from '@testing-library/react';
 // Reset the module registry before each test
 beforeEach(() => {
   jest.resetModules();
+  // Resetar o estado inicial do store para evitar interferência entre testes
+  useUserStore.setState({
+    credits: 12500,
+    specialCredits: 120,
+    level: 8,
+    xp: 2450,
+    xpMax: 3000,
+    pixels: 42,
+    achievements: 5,
+    notifications: 3,
+    isPremium: true,
+    isVerified: true,
+    streak: 15,
+    lastLoginDate: new Date().toISOString().split('T')[0],
+    totalSpent: 1250,
+    totalEarned: 890,
+    favoriteColor: '#D4A757',
+    joinDate: '2024-01-15',
+  } as any);
 });
 
 describe('UserStore', () => {

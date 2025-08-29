@@ -6,10 +6,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Lucide imports removed
+import {
+  Users,
+  Heart,
+  MessageSquare,
+  Share2,
+  Eye,
+  Camera,
+  MapPin,
+  Send,
+  Star,
+  Flame,
+  UserPlus,
+  Calendar,
+  Target,
+  Gift,
+  Trophy,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -69,21 +91,21 @@ const mockPosts: SocialPost[] = [
       name: 'PixelArtist',
       avatar: 'https://placehold.co/40x40.png',
       verified: true,
-      level: 15
+      level: 15,
     },
     content: 'Acabei de criar esta obra-prima em Lisboa! O que acham? 🎨✨',
     pixel: {
       x: 245,
       y: 156,
       region: 'Lisboa',
-      imageUrl: 'https://placehold.co/200x200/D4A757/FFFFFF?text=Arte+Lisboa'
+      imageUrl: 'https://placehold.co/200x200/D4A757/FFFFFF?text=Arte+Lisboa',
     },
     likes: 89,
     comments: 23,
     shares: 12,
     timestamp: '2h',
     isLiked: false,
-    tags: ['arte', 'lisboa', 'masterpiece']
+    tags: ['arte', 'lisboa', 'masterpiece'],
   },
   {
     id: '2',
@@ -91,7 +113,7 @@ const mockPosts: SocialPost[] = [
       name: 'ColorMaster',
       avatar: 'https://placehold.co/40x40.png',
       verified: false,
-      level: 12
+      level: 12,
     },
     content: 'Novo recorde pessoal! 50 pixels numa semana! 🚀',
     likes: 156,
@@ -99,8 +121,8 @@ const mockPosts: SocialPost[] = [
     shares: 28,
     timestamp: '4h',
     isLiked: true,
-    tags: ['recorde', 'coleção']
-  }
+    tags: ['recorde', 'coleção'],
+  },
 ];
 
 const mockClubs: PixelClub[] = [
@@ -112,7 +134,7 @@ const mockClubs: PixelClub[] = [
     category: 'Regional',
     avatar: 'https://placehold.co/60x60/D4A757/FFFFFF?text=LX',
     isJoined: true,
-    recentActivity: 'Nova obra partilhada há 2h'
+    recentActivity: 'Nova obra partilhada há 2h',
   },
   {
     id: '2',
@@ -122,7 +144,7 @@ const mockClubs: PixelClub[] = [
     category: 'Investimento',
     avatar: 'https://placehold.co/60x60/7DF9FF/000000?text=💎',
     isJoined: false,
-    recentActivity: 'Discussão sobre tendências'
+    recentActivity: 'Discussão sobre tendências',
   },
   {
     id: '3',
@@ -132,8 +154,8 @@ const mockClubs: PixelClub[] = [
     category: 'Educação',
     avatar: 'https://placehold.co/60x60/9C27B0/FFFFFF?text=🎨',
     isJoined: false,
-    recentActivity: 'Tutorial publicado há 1h'
-  }
+    recentActivity: 'Tutorial publicado há 1h',
+  },
 ];
 
 const mockChallenges: Challenge[] = [
@@ -145,7 +167,7 @@ const mockChallenges: Challenge[] = [
     prize: '1000 créditos + badge exclusivo',
     endDate: '2024-12-31',
     difficulty: 'Médio',
-    progress: 65
+    progress: 65,
   },
   {
     id: '2',
@@ -154,8 +176,8 @@ const mockChallenges: Challenge[] = [
     participants: 89,
     prize: '500 créditos especiais',
     endDate: '2024-12-25',
-    difficulty: 'Difícil'
-  }
+    difficulty: 'Difícil',
+  },
 ];
 
 export default function PixelSocialFeatures({ children }: PixelSocialFeaturesProps) {
@@ -165,36 +187,40 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
   const [challenges] = useState(mockChallenges);
   const [newPost, setNewPost] = useState('');
   const [selectedTab, setSelectedTab] = useState('feed');
-  
+
   const { toast } = useToast();
 
   const handleLike = (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            isLiked: !post.isLiked,
-            likes: post.isLiked ? post.likes - 1 : post.likes + 1
-          }
-        : post
-    ));
+    setPosts(prev =>
+      prev.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+              isLiked: !post.isLiked,
+              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+            }
+          : post
+      )
+    );
   };
 
   const handleJoinClub = (clubId: string) => {
-    setClubs(prev => prev.map(club => 
-      club.id === clubId 
-        ? { 
-            ...club, 
-            isJoined: !club.isJoined,
-            members: club.isJoined ? club.members - 1 : club.members + 1
-          }
-        : club
-    ));
-    
+    setClubs(prev =>
+      prev.map(club =>
+        club.id === clubId
+          ? {
+              ...club,
+              isJoined: !club.isJoined,
+              members: club.isJoined ? club.members - 1 : club.members + 1,
+            }
+          : club
+      )
+    );
+
     const club = clubs.find(c => c.id === clubId);
     if (club) {
       toast({
-        title: club.isJoined ? "Saiu do Clube" : "Juntou-se ao Clube!",
+        title: club.isJoined ? 'Saiu do Clube' : 'Juntou-se ao Clube!',
         description: `${club.name} - ${club.isJoined ? 'Deixou de seguir' : 'Agora é membro'}`,
       });
     }
@@ -202,14 +228,14 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
 
   const createPost = () => {
     if (!newPost.trim()) return;
-    
+
     const post: SocialPost = {
       id: Date.now().toString(),
       author: {
         name: 'Você',
         avatar: 'https://placehold.co/40x40.png',
         verified: true,
-        level: 15
+        level: 15,
       },
       content: newPost,
       likes: 0,
@@ -217,15 +243,15 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
       shares: 0,
       timestamp: 'agora',
       isLiked: false,
-      tags: []
+      tags: [],
     };
-    
+
     setPosts(prev => [post, ...prev]);
     setNewPost('');
-    
+
     toast({
-      title: "Post Criado!",
-      description: "Sua publicação foi partilhada com a comunidade.",
+      title: 'Post Criado!',
+      description: 'Sua publicação foi partilhada com a comunidade.',
     });
   };
 
@@ -233,7 +259,7 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
     const challenge = challenges.find(c => c.id === challengeId);
     if (challenge) {
       toast({
-        title: "Desafio Aceite! 🎯",
+        title: 'Desafio Aceite! 🎯',
         description: `Juntou-se ao "${challenge.title}"`,
       });
     }
@@ -241,51 +267,53 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Fácil': return 'text-green-500 bg-green-500/10';
-      case 'Médio': return 'text-yellow-500 bg-yellow-500/10';
-      case 'Difícil': return 'text-red-500 bg-red-500/10';
-      default: return 'text-gray-500 bg-gray-500/10';
+      case 'Fácil':
+        return 'text-green-500 bg-green-500/10';
+      case 'Médio':
+        return 'text-yellow-500 bg-yellow-500/10';
+      case 'Difícil':
+        return 'text-red-500 bg-red-500/10';
+      default:
+        return 'text-gray-500 bg-gray-500/10';
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      
-      <DialogContent className="max-w-4xl h-[90vh] p-0">
-        <DialogHeader className="p-4 border-b bg-gradient-to-r from-pink-500/10 to-purple-500/10">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+
+      <DialogContent className="h-[90vh] max-w-4xl p-0">
+        <DialogHeader className="border-b bg-gradient-to-r from-pink-500/10 to-purple-500/10 p-4">
           <DialogTitle className="flex items-center">
-            <Users className="h-5 w-5 mr-2 text-pink-500" />
+            <Users className="mr-2 h-5 w-5 text-pink-500" />
             Hub Social de Pixels
             <Badge className="ml-2 bg-gradient-to-r from-pink-500 to-purple-500">
-              <Heart className="h-3 w-3 mr-1" />
+              <Heart className="mr-1 h-3 w-3" />
               Comunidade
             </Badge>
           </DialogTitle>
         </DialogHeader>
-        
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
-          <TabsList className="px-4 pt-4 bg-transparent justify-start border-b rounded-none">
+
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex flex-1 flex-col">
+          <TabsList className="justify-start rounded-none border-b bg-transparent px-4 pt-4">
             <TabsTrigger value="feed">
-              <MessageSquare className="h-4 w-4 mr-2" />
+              <MessageSquare className="mr-2 h-4 w-4" />
               Feed
             </TabsTrigger>
             <TabsTrigger value="clubs">
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="mr-2 h-4 w-4" />
               Clubes
             </TabsTrigger>
             <TabsTrigger value="challenges">
-              <Target className="h-4 w-4 mr-2" />
+              <Target className="mr-2 h-4 w-4" />
               Desafios
             </TabsTrigger>
             <TabsTrigger value="events">
-              <Calendar className="h-4 w-4 mr-2" />
+              <Calendar className="mr-2 h-4 w-4" />
               Eventos
             </TabsTrigger>
           </TabsList>
-          
+
           <div className="flex-1 overflow-hidden">
             {/* Feed Social */}
             <TabsContent value="feed" className="h-full">
@@ -303,22 +331,22 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                           <Input
                             placeholder="Partilhe algo com a comunidade..."
                             value={newPost}
-                            onChange={(e) => setNewPost(e.target.value)}
+                            onChange={e => setNewPost(e.target.value)}
                             className="mb-3"
                           />
                           <div className="flex justify-between">
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm">
-                                <Camera className="h-4 w-4 mr-2" />
+                                <Camera className="mr-2 h-4 w-4" />
                                 Foto
                               </Button>
                               <Button variant="outline" size="sm">
-                                <MapPin className="h-4 w-4 mr-2" />
+                                <MapPin className="mr-2 h-4 w-4" />
                                 Pixel
                               </Button>
                             </div>
                             <Button onClick={createPost} disabled={!newPost.trim()}>
-                              <Send className="h-4 w-4 mr-2" />
+                              <Send className="mr-2 h-4 w-4" />
                               Publicar
                             </Button>
                           </div>
@@ -326,7 +354,7 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   {/* Posts */}
                   <div className="space-y-4">
                     <AnimatePresence>
@@ -339,7 +367,7 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                         >
                           <Card>
                             <CardContent className="p-4">
-                              <div className="flex items-center gap-3 mb-3">
+                              <div className="mb-3 flex items-center gap-3">
                                 <Avatar>
                                   <AvatarImage src={post.author.avatar} />
                                   <AvatarFallback>{post.author.name[0]}</AvatarFallback>
@@ -348,26 +376,28 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                                   <div className="flex items-center gap-2">
                                     <span className="font-semibold">{post.author.name}</span>
                                     {post.author.verified && (
-                                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                                      <Star className="h-4 w-4 fill-current text-yellow-500" />
                                     )}
                                     <Badge variant="secondary" className="text-xs">
                                       Nível {post.author.level}
                                     </Badge>
                                   </div>
-                                  <span className="text-sm text-muted-foreground">{post.timestamp}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {post.timestamp}
+                                  </span>
                                 </div>
                               </div>
-                              
+
                               <p className="mb-3">{post.content}</p>
-                              
+
                               {post.pixel && (
                                 <Card className="mb-3 bg-muted/20">
                                   <CardContent className="p-3">
                                     <div className="flex items-center gap-3">
-                                      <img 
-                                        src={post.pixel.imageUrl} 
+                                      <img
+                                        src={post.pixel.imageUrl}
                                         alt="Pixel"
-                                        className="w-16 h-16 rounded border"
+                                        className="h-16 w-16 rounded border"
                                       />
                                       <div>
                                         <h4 className="font-medium">
@@ -381,9 +411,9 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                                   </CardContent>
                                 </Card>
                               )}
-                              
+
                               {post.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-3">
+                                <div className="mb-3 flex flex-wrap gap-1">
                                   {post.tags.map(tag => (
                                     <Badge key={tag} variant="outline" className="text-xs">
                                       #{tag}
@@ -391,7 +421,7 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                                   ))}
                                 </div>
                               )}
-                              
+
                               <div className="flex items-center justify-between">
                                 <div className="flex gap-4">
                                   <Button
@@ -400,21 +430,23 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                                     onClick={() => handleLike(post.id)}
                                     className={post.isLiked ? 'text-red-500' : ''}
                                   >
-                                    <Heart className={`h-4 w-4 mr-2 ${post.isLiked ? 'fill-current' : ''}`} />
+                                    <Heart
+                                      className={`mr-2 h-4 w-4 ${post.isLiked ? 'fill-current' : ''}`}
+                                    />
                                     {post.likes}
                                   </Button>
-                                  
+
                                   <Button variant="ghost" size="sm">
-                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                    <MessageSquare className="mr-2 h-4 w-4" />
                                     {post.comments}
                                   </Button>
-                                  
+
                                   <Button variant="ghost" size="sm">
-                                    <Share2 className="h-4 w-4 mr-2" />
+                                    <Share2 className="mr-2 h-4 w-4" />
                                     {post.shares}
                                   </Button>
                                 </div>
-                                
+
                                 <Button variant="ghost" size="sm">
                                   <Eye className="h-4 w-4" />
                                 </Button>
@@ -426,13 +458,13 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                     </AnimatePresence>
                   </div>
                 </div>
-                
+
                 {/* Sidebar - Trending */}
                 <div className="w-80 border-l p-4">
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center text-sm">
-                        <Flame className="h-4 w-4 mr-2 text-orange-500" />
+                        <Flame className="mr-2 h-4 w-4 text-orange-500" />
                         Trending
                       </CardTitle>
                     </CardHeader>
@@ -440,7 +472,7 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                       {[
                         { tag: '#LisboaArt', posts: '234 posts' },
                         { tag: '#PixelInvestment', posts: '156 posts' },
-                        { tag: '#PortugalPixels', posts: '89 posts' }
+                        { tag: '#PortugalPixels', posts: '89 posts' },
                       ].map((trend, index) => (
                         <div key={index} className="flex justify-between">
                           <span className="font-medium text-primary">{trend.tag}</span>
@@ -452,19 +484,15 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                 </div>
               </div>
             </TabsContent>
-            
+
             {/* Clubes */}
             <TabsContent value="clubs" className="h-full p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {clubs.map(club => (
-                  <Card key={club.id} className="hover:shadow-lg transition-shadow">
+                  <Card key={club.id} className="transition-shadow hover:shadow-lg">
                     <CardContent className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <img 
-                          src={club.avatar} 
-                          alt={club.name}
-                          className="w-12 h-12 rounded-full"
-                        />
+                      <div className="mb-3 flex items-center gap-3">
+                        <img src={club.avatar} alt={club.name} className="h-12 w-12 rounded-full" />
                         <div className="flex-1">
                           <h3 className="font-semibold">{club.name}</h3>
                           <Badge variant="outline" className="text-xs">
@@ -472,29 +500,27 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                           </Badge>
                         </div>
                       </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {club.description}
-                      </p>
-                      
-                      <div className="flex justify-between items-center mb-3 text-sm">
+
+                      <p className="mb-3 text-sm text-muted-foreground">{club.description}</p>
+
+                      <div className="mb-3 flex items-center justify-between text-sm">
                         <span>{club.members} membros</span>
                         <span className="text-muted-foreground">{club.recentActivity}</span>
                       </div>
-                      
-                      <Button 
+
+                      <Button
                         onClick={() => handleJoinClub(club.id)}
                         variant={club.isJoined ? 'outline' : 'default'}
                         className="w-full"
                       >
                         {club.isJoined ? (
                           <>
-                            <Users className="h-4 w-4 mr-2" />
+                            <Users className="mr-2 h-4 w-4" />
                             Membro
                           </>
                         ) : (
                           <>
-                            <UserPlus className="h-4 w-4 mr-2" />
+                            <UserPlus className="mr-2 h-4 w-4" />
                             Juntar-se
                           </>
                         )}
@@ -504,16 +530,16 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                 ))}
               </div>
             </TabsContent>
-            
+
             {/* Desafios */}
             <TabsContent value="challenges" className="h-full p-4">
               <div className="space-y-4">
                 {challenges.map(challenge => (
                   <Card key={challenge.id}>
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/20 rounded-full">
+                          <div className="rounded-full bg-primary/20 p-2">
                             <Target className="h-6 w-6 text-primary" />
                           </div>
                           <div>
@@ -523,18 +549,16 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                             </Badge>
                           </div>
                         </div>
-                        
+
                         <div className="text-right">
                           <div className="text-sm text-muted-foreground">Termina em</div>
                           <div className="font-medium">{challenge.endDate}</div>
                         </div>
                       </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {challenge.description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between mb-3">
+
+                      <p className="mb-3 text-sm text-muted-foreground">{challenge.description}</p>
+
+                      <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm">
                           <span className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
@@ -545,22 +569,22 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                             {challenge.prize}
                           </span>
                         </div>
-                        
+
                         <Button onClick={() => joinChallenge(challenge.id)}>
-                          <Trophy className="h-4 w-4 mr-2" />
+                          <Trophy className="mr-2 h-4 w-4" />
                           Participar
                         </Button>
                       </div>
-                      
+
                       {challenge.progress && (
                         <div className="space-y-1">
                           <div className="flex justify-between text-sm">
                             <span>Seu Progresso</span>
                             <span>{challenge.progress}%</span>
                           </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div 
-                              className="bg-primary h-2 rounded-full transition-all"
+                          <div className="h-2 w-full rounded-full bg-muted">
+                            <div
+                              className="h-2 rounded-full bg-primary transition-all"
                               style={{ width: `${challenge.progress}%` }}
                             />
                           </div>
@@ -571,42 +595,44 @@ export default function PixelSocialFeatures({ children }: PixelSocialFeaturesPro
                 ))}
               </div>
             </TabsContent>
-            
+
             {/* Eventos */}
             <TabsContent value="events" className="h-full p-4">
               <div className="space-y-4">
-                <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30">
+                <Card className="border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
                   <CardContent className="p-6">
                     <div className="text-center">
-                      <Calendar className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-                      <h3 className="text-xl font-bold mb-2">Próximos Eventos</h3>
-                      <p className="text-muted-foreground mb-4">
+                      <Calendar className="mx-auto mb-4 h-12 w-12 text-purple-500" />
+                      <h3 className="mb-2 text-xl font-bold">Próximos Eventos</h3>
+                      <p className="mb-4 text-muted-foreground">
                         Participe em eventos exclusivos da comunidade
                       </p>
-                      
+
                       <div className="space-y-3">
                         {[
                           {
                             name: 'Concurso de Arte Natalícia',
                             date: '25 Dezembro',
-                            prize: '2000 créditos especiais'
+                            prize: '2000 créditos especiais',
                           },
                           {
                             name: 'Maratona de Ano Novo',
                             date: '31 Dezembro',
-                            prize: 'Pixel lendário exclusivo'
-                          }
+                            prize: 'Pixel lendário exclusivo',
+                          },
                         ].map((event, index) => (
                           <Card key={index} className="bg-background/50">
                             <CardContent className="p-4">
-                              <div className="flex justify-between items-center">
+                              <div className="flex items-center justify-between">
                                 <div>
                                   <h4 className="font-medium">{event.name}</h4>
                                   <p className="text-sm text-muted-foreground">{event.date}</p>
                                 </div>
                                 <div className="text-right">
                                   <p className="text-sm font-medium text-primary">{event.prize}</p>
-                                  <Button size="sm" className="mt-1">Participar</Button>
+                                  <Button size="sm" className="mt-1">
+                                    Participar
+                                  </Button>
                                 </div>
                               </div>
                             </CardContent>

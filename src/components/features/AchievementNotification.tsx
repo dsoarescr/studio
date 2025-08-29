@@ -21,7 +21,7 @@ const rarityColors = {
   uncommon: 'bg-green-500',
   rare: 'bg-blue-500',
   epic: 'bg-purple-500',
-  legendary: 'bg-amber-500'
+  legendary: 'bg-amber-500',
 };
 
 const rarityIcons = {
@@ -29,10 +29,14 @@ const rarityIcons = {
   uncommon: Trophy,
   rare: Star,
   epic: Star,
-  legendary: Award
+  legendary: Award,
 };
 
-export function AchievementNotification({ achievement, tier, onClose }: AchievementNotificationProps) {
+export function AchievementNotification({
+  achievement,
+  tier,
+  onClose,
+}: AchievementNotificationProps) {
   const { toast } = useToast();
   const Icon = rarityIcons[achievement.rarity] || Trophy;
 
@@ -49,20 +53,18 @@ export function AchievementNotification({ achievement, tier, onClose }: Achievem
         exit={{ opacity: 0, y: -50, scale: 0.3 }}
         className="fixed bottom-20 right-4 z-50"
       >
-        <Card className="p-4 shadow-lg border-2 border-primary/20 bg-background/95 backdrop-blur-sm">
+        <Card className="border-2 border-primary/20 bg-background/95 p-4 shadow-lg backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-full ${rarityColors[achievement.rarity]}`}>
+            <div className={`rounded-full p-2 ${rarityColors[achievement.rarity]}`}>
               <Icon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h4 className="font-bold text-lg">{achievement.name}</h4>
+              <h4 className="text-lg font-bold">{achievement.name}</h4>
               <p className="text-sm text-muted-foreground">
                 {achievement.tiers[tier - 1].description}
               </p>
-              <div className="flex gap-2 mt-2">
-                <Badge variant="secondary">
-                  +{achievement.tiers[tier - 1].xpReward} XP
-                </Badge>
+              <div className="mt-2 flex gap-2">
+                <Badge variant="secondary">+{achievement.tiers[tier - 1].xpReward} XP</Badge>
                 <Badge variant="outline">
                   +{achievement.tiers[tier - 1].creditsReward} Créditos
                 </Badge>
@@ -70,7 +72,7 @@ export function AchievementNotification({ achievement, tier, onClose }: Achievem
             </div>
           </div>
         </Card>
-        <SoundEffect src="/sounds/achievement.mp3" />
+        <SoundEffect src="/sounds/achievement.mp3" play />
         <Confetti active duration={2500} />
       </motion.div>
     </AnimatePresence>
@@ -81,17 +83,10 @@ export function useAchievementNotification() {
   const { toast } = useToast();
 
   const showAchievementNotification = (achievement: Achievement, tier: number) => {
-    const notificationId = `achievement-${achievement.id}-${tier}`;
-    
     toast({
-      id: notificationId,
       duration: 5000,
       render: ({ onClose }) => (
-        <AchievementNotification
-          achievement={achievement}
-          tier={tier}
-          onClose={onClose}
-        />
+        <AchievementNotification achievement={achievement} tier={tier} onClose={onClose} />
       ),
     });
   };

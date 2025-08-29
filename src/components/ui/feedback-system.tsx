@@ -4,14 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import {
-  CheckCircle,
-  AlertCircle,
-  Info,
-  AlertTriangle,
-  X,
-  Loader2
-} from 'lucide-react';
+import { CheckCircle, AlertCircle, Info, AlertTriangle, X, Loader2 } from 'lucide-react';
 
 interface FeedbackProps {
   type: 'success' | 'error' | 'info' | 'warning' | 'loading';
@@ -46,7 +39,7 @@ const feedbackIcons = {
   error: AlertCircle,
   info: Info,
   warning: AlertTriangle,
-  loading: Loader2
+  loading: Loader2,
 };
 
 const feedbackColors = {
@@ -54,7 +47,7 @@ const feedbackColors = {
   error: 'bg-red-500',
   info: 'bg-blue-500',
   warning: 'bg-yellow-500',
-  loading: 'bg-primary'
+  loading: 'bg-primary',
 };
 
 export function Feedback({
@@ -63,7 +56,7 @@ export function Feedback({
   description,
   duration = 3000,
   position = 'bottom',
-  onClose
+  onClose,
 }: FeedbackProps) {
   const [isVisible, setIsVisible] = useState(true);
   const Icon = feedbackIcons[type];
@@ -87,19 +80,17 @@ export function Feedback({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: position === 'top' ? -20 : 20 }}
           className={cn(
-            "fixed z-50 flex items-center p-4 rounded-lg shadow-lg",
+            'fixed z-50 flex items-center rounded-lg p-4 shadow-lg',
             position === 'top' ? 'top-4' : 'bottom-4',
-            'left-1/2 transform -translate-x-1/2',
+            'left-1/2 -translate-x-1/2 transform',
             feedbackColors[type],
             'text-white'
           )}
         >
-          <Icon className="h-5 w-5 mr-2" />
+          <Icon className="mr-2 h-5 w-5" />
           <div className="flex-1">
             <p className="font-semibold">{message}</p>
-            {description && (
-              <p className="text-sm opacity-90">{description}</p>
-            )}
+            {description && <p className="text-sm opacity-90">{description}</p>}
           </div>
           <button
             onClick={() => {
@@ -116,32 +107,26 @@ export function Feedback({
   );
 }
 
-export function LoadingIndicator({
-  size = 'md',
-  className,
-  message
-}: LoadingIndicatorProps) {
+export function LoadingIndicator({ size = 'md', className, message }: LoadingIndicatorProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
-    lg: 'h-8 w-8'
+    lg: 'h-8 w-8',
   };
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <motion.div
         animate={{ rotate: 360 }}
         transition={{
           duration: 1,
           repeat: Infinity,
-          ease: "linear"
+          ease: 'linear',
         }}
       >
-        <Loader2 className={cn("text-primary", sizeClasses[size])} />
+        <Loader2 className={cn('text-primary', sizeClasses[size])} />
       </motion.div>
-      {message && (
-        <span className="text-muted-foreground">{message}</span>
-      )}
+      {message && <span className="text-muted-foreground">{message}</span>}
     </div>
   );
 }
@@ -150,24 +135,22 @@ export function ProgressIndicator({
   progress,
   className,
   showPercentage = true,
-  size = 'md'
+  size = 'md',
 }: ProgressIndicatorProps) {
   const sizeClasses = {
     sm: 'h-1',
     md: 'h-2',
-    lg: 'h-3'
+    lg: 'h-3',
   };
 
   return (
-    <div className={cn("w-full", className)}>
-      <div className="flex justify-between mb-1">
+    <div className={cn('w-full', className)}>
+      <div className="mb-1 flex justify-between">
         {showPercentage && (
-          <span className="text-sm text-muted-foreground">
-            {Math.round(progress)}%
-          </span>
+          <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
         )}
       </div>
-      <div className={cn("w-full bg-muted rounded-full overflow-hidden", sizeClasses[size])}>
+      <div className={cn('w-full overflow-hidden rounded-full bg-muted', sizeClasses[size])}>
         <motion.div
           className="bg-primary"
           initial={{ width: 0 }}
@@ -179,38 +162,26 @@ export function ProgressIndicator({
   );
 }
 
-export function StatusBadge({
-  status,
-  className,
-  pulse = true
-}: StatusBadgeProps) {
+export function StatusBadge({ status, className, pulse = true }: StatusBadgeProps) {
   const statusColors = {
     online: 'bg-green-500',
     offline: 'bg-gray-500',
     away: 'bg-yellow-500',
-    busy: 'bg-red-500'
+    busy: 'bg-red-500',
   };
 
   return (
-    <div className={cn("relative", className)}>
-      <div
-        className={cn(
-          "w-3 h-3 rounded-full",
-          statusColors[status]
-        )}
-      />
+    <div className={cn('relative', className)}>
+      <div className={cn('h-3 w-3 rounded-full', statusColors[status])} />
       {pulse && (
         <motion.div
-          className={cn(
-            "absolute inset-0 rounded-full",
-            statusColors[status]
-          )}
+          className={cn('absolute inset-0 rounded-full', statusColors[status])}
           initial={{ opacity: 0.5, scale: 1 }}
           animate={{ opacity: 0, scale: 1.5 }}
           transition={{
             duration: 2,
             repeat: Infinity,
-            ease: "linear"
+            ease: 'linear',
           }}
         />
       )}
@@ -229,7 +200,7 @@ export function InteractionFeedback({
   children,
   className,
   onClick,
-  feedback = 'both'
+  feedback = 'both',
 }: InteractionFeedbackProps) {
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
 
@@ -251,7 +222,7 @@ export function InteractionFeedback({
 
   return (
     <motion.div
-      className={cn("relative overflow-hidden", className)}
+      className={cn('relative overflow-hidden', className)}
       onClick={handleClick}
       whileHover={feedback === 'scale' || feedback === 'both' ? { scale: 1.02 } : undefined}
       whileTap={feedback === 'scale' || feedback === 'both' ? { scale: 0.98 } : undefined}
@@ -265,22 +236,22 @@ export function InteractionFeedback({
               x: ripple.x,
               y: ripple.y,
               scale: 0,
-              opacity: 0.5
+              opacity: 0.5,
             }}
             animate={{
               scale: 4,
-              opacity: 0
+              opacity: 0,
             }}
             exit={{
-              opacity: 0
+              opacity: 0,
             }}
             transition={{
-              duration: 0.5
+              duration: 0.5,
             }}
-            className="absolute bg-white rounded-full w-4 h-4 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
             style={{
               left: ripple.x,
-              top: ripple.y
+              top: ripple.y,
             }}
           />
         ))}
@@ -295,26 +266,22 @@ interface SuccessAnimationProps {
   onComplete?: () => void;
 }
 
-export function SuccessAnimation({
-  className,
-  size = 'md',
-  onComplete
-}: SuccessAnimationProps) {
+export function SuccessAnimation({ className, size = 'md', onComplete }: SuccessAnimationProps) {
   const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-12 w-12',
-    lg: 'h-16 w-16'
+    lg: 'h-16 w-16',
   };
 
   return (
     <motion.div
-      className={cn("text-green-500", className)}
+      className={cn('text-green-500', className)}
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{
-        type: "spring",
+        type: 'spring',
         stiffness: 200,
-        damping: 10
+        damping: 10,
       }}
       onAnimationComplete={onComplete}
     >
@@ -335,7 +302,7 @@ export const FeedbackSystem = {
   ProgressIndicator,
   StatusBadge,
   InteractionFeedback,
-  SuccessAnimation
+  SuccessAnimation,
 };
 
 export default FeedbackSystem;

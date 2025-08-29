@@ -65,11 +65,7 @@ const testFeatures = async () => {
 
 async function testAchievements() {
   // Simula ações para testar conquistas
-  const actions = [
-    'create_pixel',
-    'visit_region',
-    'interact_user'
-  ];
+  const actions = ['create_pixel', 'visit_region', 'interact_user'];
 
   for (const action of actions) {
     // Simula a ação
@@ -81,11 +77,7 @@ async function testAchievements() {
 
 async function testChallenges() {
   // Simula participação em desafios
-  const challenges = [
-    'daily_art',
-    'community_engagement',
-    'pixel_collection'
-  ];
+  const challenges = ['daily_art', 'community_engagement', 'pixel_collection'];
 
   for (const challenge of challenges) {
     // Participa do desafio
@@ -100,7 +92,7 @@ async function testXPSystem() {
   const xpActions = [
     { action: 'create_pixel', xp: 50 },
     { action: 'complete_challenge', xp: 100 },
-    { action: 'social_interaction', xp: 25 }
+    { action: 'social_interaction', xp: 25 },
   ];
 
   for (const { action, xp } of xpActions) {
@@ -116,7 +108,7 @@ async function testListings() {
   const listings = [
     { type: 'pixel', price: 100 },
     { type: 'collection', price: 500 },
-    { type: 'special', price: 1000 }
+    { type: 'special', price: 1000 },
   ];
 
   for (const listing of listings) {
@@ -131,7 +123,7 @@ async function testAuctions() {
   // Simula leilões
   const auctions = [
     { item: 'rare_pixel', startPrice: 1000 },
-    { item: 'unique_collection', startPrice: 5000 }
+    { item: 'unique_collection', startPrice: 5000 },
   ];
 
   for (const auction of auctions) {
@@ -147,7 +139,7 @@ async function testPromotions() {
   const promotions = [
     { type: 'featured', duration: 7 },
     { type: 'premium', duration: 30 },
-    { type: 'spotlight', duration: 1 }
+    { type: 'spotlight', duration: 1 },
   ];
 
   for (const promotion of promotions) {
@@ -160,11 +152,7 @@ async function testPromotions() {
 
 async function testCreativeAssistant() {
   // Testa assistente criativo
-  const prompts = [
-    'pixel art landscape',
-    'cyberpunk character',
-    'retro gaming scene'
-  ];
+  const prompts = ['pixel art landscape', 'cyberpunk character', 'retro gaming scene'];
 
   for (const prompt of prompts) {
     // Gera arte
@@ -176,11 +164,7 @@ async function testCreativeAssistant() {
 
 async function testRecommendations() {
   // Testa sistema de recomendações
-  const userInterests = [
-    'landscapes',
-    'characters',
-    'gaming'
-  ];
+  const userInterests = ['landscapes', 'characters', 'gaming'];
 
   for (const interest of userInterests) {
     // Gera recomendações
@@ -192,11 +176,7 @@ async function testRecommendations() {
 
 async function testModeration() {
   // Testa moderação automática
-  const contentTypes = [
-    'pixel_art',
-    'comments',
-    'messages'
-  ];
+  const contentTypes = ['pixel_art', 'comments', 'messages'];
 
   for (const type of contentTypes) {
     // Analisa conteúdo

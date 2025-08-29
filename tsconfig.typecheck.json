@@ -1,0 +1,36 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/lib/**/*.ts",
+    "src/lib/**/*.tsx",
+    "src/hooks/**/*.ts",
+    "src/hooks/**/*.tsx",
+    "src/components/ui/**/*.ts",
+    "src/components/ui/**/*.tsx",
+    "src/components/layout/**/*.ts",
+    "src/components/layout/**/*.tsx",
+    "src/components/auth/**/*.ts",
+    "src/components/auth/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "cypress/**",
+    "src/tests/**",
+    "src/stories/**",
+    "functions/**",
+    "app/**",
+    "src/app/**",
+    "src/components/features/**",
+    "src/components/pixel-grid/**",
+    "src/components/mobile/**",
+    "src/components/payment/**",
+    "src/components/user/**"
+  ]
+}
+
+

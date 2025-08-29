@@ -1,7 +1,7 @@
 /*
   Gera bitmap de máscara (1 dentro, 0 fora) a partir de paths SVG.
   Mensagens:
-  - IN:  { type: 'mask-generate', requestId, paths: string[], logicalGridCols, viewWidth, viewHeight }
+  - IN:  { type: 'mask-generate', requestId, paths: string[], transforms?: Array<{tx:number,ty:number,sx:number,sy:number}>, logicalGridCols, viewWidth, viewHeight }
   - OUT: { type: 'mask-result', requestId, bitmap:ArrayBuffer, rowCounts:ArrayBuffer, cols:number, rows:number, insideCount:number } | { type:'mask-result', requestId, error:string }
 */
 
@@ -9,7 +9,7 @@ self.onmessage = function (event) {
   const data = event.data || {};
   if (data.type !== 'mask-generate') return;
 
-  const { requestId, paths, logicalGridCols, viewWidth, viewHeight } = data;
+  const { requestId, paths, transforms, logicalGridCols, viewWidth, viewHeight } = data;
 
   try {
     if (typeof OffscreenCanvas === 'undefined') {
@@ -33,10 +33,17 @@ self.onmessage = function (event) {
     ctx.save();
     ctx.scale(cols / viewWidth, rows / viewHeight);
     ctx.fillStyle = '#000';
-    for (const d of paths) {
+    for (let i = 0; i < paths.length; i++) {
+      const d = paths[i];
       try {
+        ctx.save();
+        const tf = Array.isArray(transforms) && transforms[i]
+          ? transforms[i]
+          : { tx: 0, ty: 0, sx: 1, sy: 1 };
+        ctx.transform(tf.sx || 1, 0, 0, tf.sy || 1, tf.tx || 0, tf.ty || 0);
         const p = new Path2D(d);
         ctx.fill(p);
+        ctx.restore();
       } catch (_) {
         // ignora path malformado
       }

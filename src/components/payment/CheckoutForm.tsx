@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  PaymentElement,
-  useStripe,
-  useElements,
-  AddressElement,
-} from '@stripe/react-stripe-js';
+import { PaymentElement, useStripe, useElements, AddressElement } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -14,7 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
-// Lucide imports removed
+import {
+  CreditCard,
+  CheckCircle,
+  AlertTriangle,
+  Lock,
+  Loader2,
+} from 'lucide-react';
 
 interface CheckoutFormProps {
   amount: number;
@@ -88,28 +89,32 @@ export default function CheckoutForm({
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-card/95 backdrop-blur-sm border-primary/30">
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+    <Card className="mx-auto w-full max-w-md border-primary/30 bg-card/95 backdrop-blur-sm">
+      <SoundEffect
+        src={SOUND_EFFECTS.SUCCESS}
+        play={playSuccessSound}
+        onEnd={() => setPlaySuccessSound(false)}
+      />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
-      
-      <CardHeader className="space-y-1 bg-gradient-to-r from-card to-primary/5 border-b border-primary/20">
-        <CardTitle className="text-xl font-headline flex items-center">
-          <CreditCard className="h-5 w-5 mr-2 text-primary" />
+
+      <CardHeader className="space-y-1 border-b border-primary/20 bg-gradient-to-r from-card to-primary/5">
+        <CardTitle className="flex items-center font-headline text-xl">
+          <CreditCard className="mr-2 h-5 w-5 text-primary" />
           Finalizar Pagamento
         </CardTitle>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{description}</p>
           <Badge variant="outline" className="font-mono">
             {(amount / 100).toFixed(2)} {currency}
           </Badge>
         </div>
       </CardHeader>
-      
+
       {isPaymentSuccessful ? (
         <CardContent className="pt-6 text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Pagamento Concluído</h3>
-          <p className="text-muted-foreground mb-4">
+          <CheckCircle className="mx-auto mb-4 h-16 w-16 text-green-500" />
+          <h3 className="mb-2 text-xl font-semibold">Pagamento Concluído</h3>
+          <p className="mb-4 text-muted-foreground">
             O seu pagamento foi processado com sucesso. Obrigado pela sua compra!
           </p>
           <Button onClick={onSuccess} className="w-full">
@@ -118,26 +123,26 @@ export default function CheckoutForm({
         </CardContent>
       ) : (
         <form onSubmit={handleSubmit}>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="space-y-6 pt-6">
             <div className="space-y-4">
               <PaymentElement />
               <Separator />
               <AddressElement options={{ mode: 'shipping' }} />
             </div>
-            
+
             {message && (
-              <div className="bg-destructive/10 p-3 rounded-md flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 rounded-md bg-destructive/10 p-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive" />
                 <p className="text-sm text-destructive">{message}</p>
               </div>
             )}
-            
-            <div className="flex items-center justify-center text-xs text-muted-foreground gap-1">
+
+            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <Lock className="h-3 w-3" />
               <span>Pagamento seguro processado pela Stripe</span>
             </div>
           </CardContent>
-          
+
           <CardFooter className="flex justify-between border-t border-primary/20 pt-4">
             <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
               Cancelar
@@ -145,8 +150,7 @@ export default function CheckoutForm({
             <Button type="submit" disabled={isLoading || !stripe || !elements}>
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  A processar...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />A processar...
                 </>
               ) : (
                 <>

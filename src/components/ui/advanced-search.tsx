@@ -17,16 +17,30 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Filter, X, MapPin, Calendar, Star, Coins, User,
-  Palette, Trophy, Crown, Gem, Sparkles, Target, Zap, Activity,
-  SlidersHorizontal, ChevronDown, Check, Plus, Minus
+  Search,
+  Filter,
+  X,
+  MapPin,
+  Calendar,
+  Star,
+  Coins,
+  User,
+  Palette,
+  Trophy,
+  Crown,
+  Gem,
+  Sparkles,
+  Target,
+  Zap,
+  Activity,
+  SlidersHorizontal,
+  ChevronDown,
+  Check,
+  Plus,
+  Minus,
 } from 'lucide-react';
 
 interface SearchFilter {
@@ -62,8 +76,8 @@ const defaultFilters: SearchFilter[] = [
       { value: 'porto', label: 'Porto', count: 189 },
       { value: 'coimbra', label: 'Coimbra', count: 156 },
       { value: 'braga', label: 'Braga', count: 98 },
-      { value: 'faro', label: 'Faro', count: 87 }
-    ]
+      { value: 'faro', label: 'Faro', count: 87 },
+    ],
   },
   {
     id: 'price',
@@ -72,7 +86,7 @@ const defaultFilters: SearchFilter[] = [
     icon: <Coins className="h-4 w-4" />,
     min: 0,
     max: 1000,
-    value: [0, 1000]
+    value: [0, 1000],
   },
   {
     id: 'rarity',
@@ -84,8 +98,8 @@ const defaultFilters: SearchFilter[] = [
       { value: 'uncommon', label: 'Incomum', count: 234 },
       { value: 'rare', label: 'Raro', count: 123 },
       { value: 'epic', label: 'Épico', count: 67 },
-      { value: 'legendary', label: 'Lendário', count: 23 }
-    ]
+      { value: 'legendary', label: 'Lendário', count: 23 },
+    ],
   },
   {
     id: 'type',
@@ -96,8 +110,8 @@ const defaultFilters: SearchFilter[] = [
       { value: 'pixel', label: 'Pixel', count: 789 },
       { value: 'collection', label: 'Coleção', count: 156 },
       { value: 'tool', label: 'Ferramenta', count: 89 },
-      { value: 'theme', label: 'Tema', count: 45 }
-    ]
+      { value: 'theme', label: 'Tema', count: 45 },
+    ],
   },
   {
     id: 'date',
@@ -109,20 +123,20 @@ const defaultFilters: SearchFilter[] = [
       { value: 'week', label: 'Esta Semana' },
       { value: 'month', label: 'Este Mês' },
       { value: 'year', label: 'Este Ano' },
-      { value: 'all', label: 'Todos os Tempos' }
-    ]
-  }
+      { value: 'all', label: 'Todos os Tempos' },
+    ],
+  },
 ];
 
 export function AdvancedSearch({
-  placeholder = "Pesquisar...",
+  placeholder = 'Pesquisar...',
   filters = defaultFilters,
   onSearch,
   onFilterChange,
   suggestions = [],
   recentSearches = [],
-  className = "",
-  showAdvancedFilters = true
+  className = '',
+  showAdvancedFilters = true,
 }: AdvancedSearchProps) {
   const [query, setQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
@@ -134,9 +148,12 @@ export function AdvancedSearch({
     if (searchQuery.trim()) {
       onSearch?.(searchQuery, activeFilters);
       setShowSuggestions(false);
-      
+
       // Add to recent searches
-      const newRecentSearches = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
+      const newRecentSearches = [
+        searchQuery,
+        ...recentSearches.filter(s => s !== searchQuery),
+      ].slice(0, 5);
     }
   };
 
@@ -168,8 +185,8 @@ export function AdvancedSearch({
     return Object.keys(activeFilters).length;
   };
 
-  const filteredSuggestions = suggestions.filter(suggestion =>
-    suggestion.toLowerCase().includes(query.toLowerCase()) && suggestion !== query
+  const filteredSuggestions = suggestions.filter(
+    suggestion => suggestion.toLowerCase().includes(query.toLowerCase()) && suggestion !== query
   );
 
   return (
@@ -177,20 +194,20 @@ export function AdvancedSearch({
       {/* Main Search Bar */}
       <div className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
           <Input
             placeholder={placeholder}
             value={query}
-            onChange={(e) => {
+            onChange={e => {
               setQuery(e.target.value);
               setShowSuggestions(true);
             }}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyPress={e => e.key === 'Enter' && handleSearch()}
             onFocus={() => setShowSuggestions(true)}
             className="pl-10 pr-20"
           />
-          
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+
+          <div className="absolute right-2 top-1/2 flex -translate-y-1/2 transform gap-1">
             {showAdvancedFilters && (
               <Button
                 variant="ghost"
@@ -200,19 +217,14 @@ export function AdvancedSearch({
               >
                 <Filter className="h-4 w-4" />
                 {getActiveFilterCount() > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs">
+                  <Badge className="absolute -right-1 -top-1 h-4 w-4 p-0 text-xs">
                     {getActiveFilterCount()}
                   </Badge>
                 )}
               </Button>
             )}
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleSearch()}
-              className="h-8 w-8"
-            >
+
+            <Button variant="ghost" size="icon" onClick={() => handleSearch()} className="h-8 w-8">
               <Search className="h-4 w-4" />
             </Button>
           </div>
@@ -225,20 +237,22 @@ export function AdvancedSearch({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 z-50 mt-1"
+              className="absolute left-0 right-0 top-full z-50 mt-1"
             >
-              <Card className="shadow-lg border-primary/20">
+              <Card className="border-primary/20 shadow-lg">
                 <CardContent className="p-2">
                   <ScrollArea className="max-h-64">
                     {/* Current Query */}
                     {query && (
                       <Button
                         variant="ghost"
-                        className="w-full justify-start text-left p-2 h-auto"
+                        className="h-auto w-full justify-start p-2 text-left"
                         onClick={() => handleSearch()}
                       >
-                        <Search className="h-4 w-4 mr-2 text-primary" />
-                        <span>Pesquisar por "<strong>{query}</strong>"</span>
+                        <Search className="mr-2 h-4 w-4 text-primary" />
+                        <span>
+                          Pesquisar por "<strong>{query}</strong>"
+                        </span>
                       </Button>
                     )}
 
@@ -247,18 +261,18 @@ export function AdvancedSearch({
                       <>
                         {query && <Separator className="my-2" />}
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground px-2 py-1">Sugestões</p>
+                          <p className="px-2 py-1 text-xs text-muted-foreground">Sugestões</p>
                           {filteredSuggestions.slice(0, 5).map((suggestion, index) => (
                             <Button
                               key={index}
                               variant="ghost"
-                              className="w-full justify-start text-left p-2 h-auto"
+                              className="h-auto w-full justify-start p-2 text-left"
                               onClick={() => {
                                 setQuery(suggestion);
                                 handleSearch(suggestion);
                               }}
                             >
-                              <Sparkles className="h-4 w-4 mr-2 text-accent" />
+                              <Sparkles className="mr-2 h-4 w-4 text-accent" />
                               {suggestion}
                             </Button>
                           ))}
@@ -271,18 +285,20 @@ export function AdvancedSearch({
                       <>
                         <Separator className="my-2" />
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground px-2 py-1">Pesquisas Recentes</p>
+                          <p className="px-2 py-1 text-xs text-muted-foreground">
+                            Pesquisas Recentes
+                          </p>
                           {recentSearches.slice(0, 3).map((search, index) => (
                             <Button
                               key={index}
                               variant="ghost"
-                              className="w-full justify-start text-left p-2 h-auto"
+                              className="h-auto w-full justify-start p-2 text-left"
                               onClick={() => {
                                 setQuery(search);
                                 handleSearch(search);
                               }}
                             >
-                              <Activity className="h-4 w-4 mr-2 text-muted-foreground" />
+                              <Activity className="mr-2 h-4 w-4 text-muted-foreground" />
                               {search}
                             </Button>
                           ))}
@@ -295,18 +311,20 @@ export function AdvancedSearch({
                       <>
                         <Separator className="my-2" />
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground px-2 py-1">Pesquisas Salvas</p>
+                          <p className="px-2 py-1 text-xs text-muted-foreground">
+                            Pesquisas Salvas
+                          </p>
                           {savedSearches.slice(0, 3).map((search, index) => (
                             <Button
                               key={index}
                               variant="ghost"
-                              className="w-full justify-start text-left p-2 h-auto"
+                              className="h-auto w-full justify-start p-2 text-left"
                               onClick={() => {
                                 setQuery(search);
                                 handleSearch(search);
                               }}
                             >
-                              <Star className="h-4 w-4 mr-2 text-yellow-500" />
+                              <Star className="mr-2 h-4 w-4 text-yellow-500" />
                               {search}
                             </Button>
                           ))}
@@ -323,7 +341,7 @@ export function AdvancedSearch({
 
       {/* Active Filters */}
       {getActiveFilterCount() > 0 && (
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">Filtros ativos:</span>
           {Object.entries(activeFilters).map(([filterId, value]) => {
             const filter = filters.find(f => f.id === filterId);
@@ -349,13 +367,8 @@ export function AdvancedSearch({
               </Badge>
             );
           })}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="text-xs"
-          >
+
+          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs">
             Limpar Todos
           </Button>
         </div>
@@ -373,13 +386,13 @@ export function AdvancedSearch({
             <Card className="border-primary/20">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center">
-                    <SlidersHorizontal className="h-5 w-5 mr-2 text-primary" />
+                  <CardTitle className="flex items-center text-lg">
+                    <SlidersHorizontal className="mr-2 h-5 w-5 text-primary" />
                     Filtros Avançados
                   </CardTitle>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={saveSearch}>
-                      <Star className="h-4 w-4 mr-2" />
+                      <Star className="mr-2 h-4 w-4" />
                       Salvar Pesquisa
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
@@ -388,24 +401,24 @@ export function AdvancedSearch({
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filters.map((filter) => (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filters.map(filter => (
                     <div key={filter.id} className="space-y-3">
                       <Label className="flex items-center gap-2 font-medium">
                         {filter.icon}
                         {filter.label}
                       </Label>
-                      
+
                       {filter.type === 'checkbox' && filter.options && (
                         <div className="space-y-2">
-                          {filter.options.map((option) => (
+                          {filter.options.map(option => (
                             <div key={option.value} className="flex items-center space-x-2">
                               <Checkbox
                                 id={`${filter.id}-${option.value}`}
                                 checked={activeFilters[filter.id]?.includes(option.value)}
-                                onCheckedChange={(checked) => {
+                                onCheckedChange={checked => {
                                   const current = activeFilters[filter.id] || [];
                                   const newValue = checked
                                     ? [...current, option.value]
@@ -413,9 +426,9 @@ export function AdvancedSearch({
                                   handleFilterChange(filter.id, newValue);
                                 }}
                               />
-                              <Label 
+                              <Label
                                 htmlFor={`${filter.id}-${option.value}`}
-                                className="text-sm flex-1 flex items-center justify-between"
+                                className="flex flex-1 items-center justify-between text-sm"
                               >
                                 {option.label}
                                 {option.count && (
@@ -439,12 +452,12 @@ export function AdvancedSearch({
                           </PopoverTrigger>
                           <PopoverContent className="w-64 p-2">
                             <div className="space-y-2">
-                              {filter.options.map((option) => (
+                              {filter.options.map(option => (
                                 <div key={option.value} className="flex items-center space-x-2">
                                   <Checkbox
                                     id={`${filter.id}-${option.value}`}
                                     checked={activeFilters[filter.id]?.includes(option.value)}
-                                    onCheckedChange={(checked) => {
+                                    onCheckedChange={checked => {
                                       const current = activeFilters[filter.id] || [];
                                       const newValue = checked
                                         ? [...current, option.value]
@@ -452,13 +465,15 @@ export function AdvancedSearch({
                                       handleFilterChange(filter.id, newValue);
                                     }}
                                   />
-                                  <Label 
+                                  <Label
                                     htmlFor={`${filter.id}-${option.value}`}
-                                    className="text-sm flex-1 flex items-center justify-between"
+                                    className="flex flex-1 items-center justify-between text-sm"
                                   >
                                     {option.label}
                                     {option.count && (
-                                      <span className="text-muted-foreground">({option.count})</span>
+                                      <span className="text-muted-foreground">
+                                        ({option.count})
+                                      </span>
                                     )}
                                   </Label>
                                 </div>
@@ -472,7 +487,7 @@ export function AdvancedSearch({
                         <div className="space-y-3">
                           <Slider
                             value={activeFilters[filter.id] || [filter.min || 0, filter.max || 100]}
-                            onValueChange={(value) => handleFilterChange(filter.id, value)}
+                            onValueChange={value => handleFilterChange(filter.id, value)}
                             min={filter.min || 0}
                             max={filter.max || 100}
                             step={1}
@@ -488,11 +503,11 @@ export function AdvancedSearch({
                       {filter.type === 'select' && filter.options && (
                         <select
                           value={activeFilters[filter.id] || ''}
-                          onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                          className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                          onChange={e => handleFilterChange(filter.id, e.target.value)}
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         >
                           <option value="">Selecionar...</option>
-                          {filter.options.map((option) => (
+                          {filter.options.map(option => (
                             <option key={option.value} value={option.value}>
                               {option.label}
                             </option>
@@ -502,14 +517,12 @@ export function AdvancedSearch({
                     </div>
                   ))}
                 </div>
-                
-                <div className="flex justify-end gap-2 pt-4 border-t">
+
+                <div className="flex justify-end gap-2 border-t pt-4">
                   <Button variant="outline" onClick={clearAllFilters}>
                     Limpar Filtros
                   </Button>
-                  <Button onClick={() => setShowFilters(false)}>
-                    Aplicar Filtros
-                  </Button>
+                  <Button onClick={() => setShowFilters(false)}>Aplicar Filtros</Button>
                 </div>
               </CardContent>
             </Card>

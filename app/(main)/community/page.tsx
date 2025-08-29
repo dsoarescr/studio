@@ -1,57 +1,147 @@
-
-
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { 
-  Heart, MessageSquare, Share2, Send, Users, MapPin, Calendar, 
-  Clock, Star, Eye, ThumbsUp, UserPlus, 
-  Play, Pause, X, ChevronLeft, ChevronRight, Camera,
-  Palette, Trophy, Target, Flame, TrendingUp, BookOpen, Video,
-  Music, Mic, Settings, Filter, Search, Plus, MoreHorizontal,
-  Bookmark, Flag, Volume2, VolumeX, Compass, Globe, Award,
-  Sparkles, Coins, Bell, Phone, MessageCircle, User, Edit,
-  Copy, ExternalLink, Info, CheckCircle, AlertTriangle, Lock,
-  Shield, UserCheck, Ban, AlertOctagon, TrendingDown, FileText,
-  BarChart4, PieChart, Gavel, Handshake, Megaphone, Lightbulb,
-  Hash, Sliders, Timer, RefreshCw, Activity, Layers,
-  Database, Bot, Brain, Wand2, Network, Link2,
-  Smile, AtSign, Download, Upload, RotateCcw, RotateCw, Volume,
-  VolumeOff, Vibrate, Wifi, WifiOff, Battery, Signal, Menu,
-  ChevronUp, ChevronDown, MoreVertical, Reply, Forward, Trash2,
-  Archive, Pin, PinOff, Maximize2, Minimize2, FileVideo,
-  Headphones, Smartphone, Laptop, Monitor, Watch, Gamepad2, EyeOff
-} from "lucide-react";
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import {
+  Heart,
+  MessageSquare,
+  Share2,
+  Send,
+  Users,
+  MapPin,
+  Calendar,
+  Clock,
+  Star,
+  Eye,
+  ThumbsUp,
+  UserPlus,
+  Play,
+  Pause,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Camera,
+  Palette,
+  Trophy,
+  Target,
+  Flame,
+  TrendingUp,
+  BookOpen,
+  Video,
+  Music,
+  Mic,
+  Settings,
+  Filter,
+  Search,
+  Plus,
+  MoreHorizontal,
+  Bookmark,
+  Flag,
+  Volume2,
+  VolumeX,
+  Compass,
+  Globe,
+  Award,
+  Sparkles,
+  Coins,
+  Bell,
+  Phone,
+  MessageCircle,
+  User,
+  Edit,
+  Copy,
+  ExternalLink,
+  Info,
+  CheckCircle,
+  AlertTriangle,
+  Lock,
+  Shield,
+  UserCheck,
+  Ban,
+  AlertOctagon,
+  TrendingDown,
+  FileText,
+  BarChart4,
+  PieChart,
+  Gavel,
+  Handshake,
+  Megaphone,
+  Lightbulb,
+  Hash,
+  Sliders,
+  Timer,
+  RefreshCw,
+  Activity,
+  Layers,
+  Database,
+  Bot,
+  Brain,
+  Wand2,
+  Network,
+  Link2,
+  Smile,
+  AtSign,
+  Download,
+  Upload,
+  RotateCcw,
+  RotateCw,
+  Volume,
+  VolumeOff,
+  Vibrate,
+  Wifi,
+  WifiOff,
+  Battery,
+  Signal,
+  Menu,
+  ChevronUp,
+  ChevronDown,
+  MoreVertical,
+  Reply,
+  Forward,
+  Trash2,
+  Archive,
+  Pin,
+  PinOff,
+  Maximize2,
+  Minimize2,
+  FileVideo,
+  Headphones,
+  Smartphone,
+  Laptop,
+  Monitor,
+  Watch,
+  Gamepad2,
+  EyeOff,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sheet";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth-context";
-import { useUserStore } from "@/lib/store";
-import { AuthModal } from "@/components/auth/AuthModal";
+} from '@/components/ui/sheet';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/lib/auth-context';
+import { useUserStore } from '@/lib/store';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
@@ -221,7 +311,7 @@ const mockPosts: Post[] = [
       bio: 'Artista digital especializado em paisagens portuguesas 🎨',
       joinDate: '2023-05-15',
       pixelsOwned: 89,
-      achievements: 12
+      achievements: 12,
     },
     content: 'Acabei de criar esta obra-prima em Lisboa! O que acham? 🎨✨ #LisboaArt #PixelArt',
     type: 'pixel',
@@ -234,12 +324,12 @@ const mockPosts: Post[] = [
           name: 'ColorMaster',
           avatar: 'https://placehold.co/30x30.png',
           verified: false,
-          level: 12
+          level: 12,
         },
         content: 'Incrível! Que técnica usaste para as sombras?',
         timestamp: '1h',
         likes: 5,
-        isLiked: false
+        isLiked: false,
       },
       {
         id: 'c2',
@@ -247,13 +337,13 @@ const mockPosts: Post[] = [
           name: 'ArtLover',
           avatar: 'https://placehold.co/30x30.png',
           verified: true,
-          level: 8
+          level: 8,
         },
         content: 'Fantástico trabalho! 👏',
         timestamp: '45m',
         likes: 3,
-        isLiked: true
-      }
+        isLiked: true,
+      },
     ],
     shares: 23,
     isLiked: false,
@@ -264,8 +354,8 @@ const mockPosts: Post[] = [
       y: 156,
       region: 'Lisboa',
       imageUrl: 'https://placehold.co/300x300.png',
-      price: 150
-    }
+      price: 150,
+    },
   },
   {
     id: '2',
@@ -281,7 +371,7 @@ const mockPosts: Post[] = [
       bio: 'Especialista em teoria das cores e paletas harmoniosas 🌈',
       joinDate: '2023-08-20',
       pixelsOwned: 45,
-      achievements: 8
+      achievements: 8,
     },
     content: 'Novo recorde pessoal! 50 pixels numa semana! 🚀 #Milestone #PixelCollection',
     type: 'achievement',
@@ -296,9 +386,9 @@ const mockPosts: Post[] = [
       name: 'Colecionador Semanal',
       description: 'Comprou 50 pixels numa semana',
       rarity: 'Épico',
-      icon: '🏆'
-    }
-  }
+      icon: '🏆',
+    },
+  },
 ];
 
 const mockStories: Story[] = [
@@ -307,33 +397,33 @@ const mockStories: Story[] = [
     author: {
       name: 'PixelArtist',
       avatar: 'https://placehold.co/40x40.png',
-      verified: true
+      verified: true,
     },
     content: {
       type: 'image',
       url: 'https://placehold.co/400x600.png',
-      duration: 5
+      duration: 5,
     },
     timestamp: '2h',
     views: 234,
-    isViewed: false
+    isViewed: false,
   },
   {
     id: '2',
     author: {
       name: 'ColorMaster',
       avatar: 'https://placehold.co/40x40.png',
-      verified: false
+      verified: false,
     },
     content: {
       type: 'text',
       text: 'Trabalhando num novo projeto incrível! 🎨',
-      duration: 8
+      duration: 8,
     },
     timestamp: '4h',
     views: 156,
-    isViewed: true
-  }
+    isViewed: true,
+  },
 ];
 
 const mockGroups: Group[] = [
@@ -350,10 +440,10 @@ const mockGroups: Group[] = [
     rules: [
       'Respeitar todos os membros',
       'Partilhar apenas conteúdo relacionado com Lisboa',
-      'Não spam ou autopromoção excessiva'
+      'Não spam ou autopromoção excessiva',
     ],
     moderators: ['AdminLisboa', 'ModeradorPT'],
-    createdAt: '2023-01-15'
+    createdAt: '2023-01-15',
   },
   {
     id: '2',
@@ -368,11 +458,11 @@ const mockGroups: Group[] = [
     rules: [
       'Apenas membros premium',
       'Discussões sobre investimentos',
-      'Partilhar análises de mercado'
+      'Partilhar análises de mercado',
     ],
     moderators: ['InvestorPro'],
-    createdAt: '2023-03-10'
-  }
+    createdAt: '2023-03-10',
+  },
 ];
 
 const mockConversations: ChatConversation[] = [
@@ -384,7 +474,7 @@ const mockConversations: ChatConversation[] = [
     lastMessage: 'Obrigado pelo feedback!',
     timestamp: '2h',
     unreadCount: 2,
-    isOnline: true
+    isOnline: true,
   },
   {
     id: '2',
@@ -395,35 +485,32 @@ const mockConversations: ChatConversation[] = [
     timestamp: '1d',
     unreadCount: 0,
     isOnline: false,
-    participants: ['PixelArtist', 'ColorMaster', 'ArtLover']
-  }
+    participants: ['PixelArtist', 'ColorMaster', 'ArtLover'],
+  },
 ];
 
 const mockEvents: Event[] = [
   {
     id: '1',
     title: 'Concurso de Arte Natalícia',
-    description: 'Crie a melhor arte natalícia usando pixels portugueses e ganhe prémios incríveis!',
+    description:
+      'Crie a melhor arte natalícia usando pixels portugueses e ganhe prémios incríveis!',
     startDate: '2024-12-01',
     endDate: '2024-12-25',
     participants: 156,
     maxParticipants: 500,
     prize: '2000 créditos especiais + Pixel lendário exclusivo',
-    requirements: [
-      'Nível mínimo: 5',
-      'Pelo menos 10 pixels owned',
-      'Tema natalício obrigatório'
-    ],
+    requirements: ['Nível mínimo: 5', 'Pelo menos 10 pixels owned', 'Tema natalício obrigatório'],
     rules: [
       'Apenas pixels em território português',
       'Máximo 5 submissões por participante',
-      'Votação da comunidade + júri especializado'
+      'Votação da comunidade + júri especializado',
     ],
     category: 'Concurso',
     difficulty: 'Médio',
     isParticipating: false,
     organizer: 'Equipa Pixel Universe',
-    imageUrl: 'https://placehold.co/400x200.png'
+    imageUrl: 'https://placehold.co/400x200.png',
   },
   {
     id: '2',
@@ -433,28 +520,22 @@ const mockEvents: Event[] = [
     endDate: '2025-01-01',
     participants: 89,
     prize: '5000 créditos + Título exclusivo',
-    requirements: [
-      'Disponibilidade de 24h',
-      'Nível mínimo: 10'
-    ],
-    rules: [
-      'Desafios a cada 2 horas',
-      'Pontuação cumulativa',
-      'Prémios por escalões'
-    ],
+    requirements: ['Disponibilidade de 24h', 'Nível mínimo: 10'],
+    rules: ['Desafios a cada 2 horas', 'Pontuação cumulativa', 'Prémios por escalões'],
     category: 'Maratona',
     difficulty: 'Extremo',
     isParticipating: true,
     organizer: 'Comunidade',
-    imageUrl: 'https://placehold.co/400x200.png'
-  }
+    imageUrl: 'https://placehold.co/400x200.png',
+  },
 ];
 
 const mockTutorials: Tutorial[] = [
   {
     id: '1',
     title: 'Primeiros Passos no Pixel Art',
-    description: 'Aprenda os fundamentos básicos da arte pixel, desde a escolha de cores até técnicas de sombreamento.',
+    description:
+      'Aprenda os fundamentos básicos da arte pixel, desde a escolha de cores até técnicas de sombreamento.',
     author: 'PixelMaster',
     duration: '15 min',
     difficulty: 'Iniciante',
@@ -465,10 +546,10 @@ const mockTutorials: Tutorial[] = [
       'Escolher a paleta de cores',
       'Definir a resolução',
       'Técnicas de sombreamento',
-      'Finalização e exportação'
+      'Finalização e exportação',
     ],
     videoUrl: 'https://placehold.co/400x300.png',
-    isSaved: false
+    isSaved: false,
   },
   {
     id: '2',
@@ -484,23 +565,23 @@ const mockTutorials: Tutorial[] = [
       'Análise de mercado',
       'Identificar tendências',
       'Diversificação de portfólio',
-      'Gestão de risco'
+      'Gestão de risco',
     ],
     videoUrl: 'https://placehold.co/400x300.png',
-    isSaved: true
-  }
+    isSaved: true,
+  },
 ];
 
 const GroupIcon = ({ isPrivate }: { isPrivate: boolean }) => {
-    if (!isPrivate) return null;
-    return <Lock className="h-4 w-4 text-muted-foreground" />;
+  if (!isPrivate) return null;
+  return <Lock className="h-4 w-4 text-muted-foreground" />;
 };
 
 export default function CommunityPage() {
   const { user } = useAuth();
   const { addCredits, addXp } = useUserStore();
   const { toast } = useToast();
-  
+
   // States
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [stories, setStories] = useState<Story[]>(mockStories);
@@ -508,7 +589,7 @@ export default function CommunityPage() {
   const [conversations, setConversations] = useState<ChatConversation[]>(mockConversations);
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [tutorials, setTutorials] = useState<Tutorial[]>(mockTutorials);
-  
+
   // UI States
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostType, setNewPostType] = useState<'text' | 'pixel' | 'image'>('text');
@@ -526,12 +607,12 @@ export default function CommunityPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
   const [followingUsers, setFollowingUsers] = useState<string[]>([]);
-  
+
   // Sound and visual effects
   const [playLikeSound, setPlayLikeSound] = useState(false);
   const [playSuccessSound, setPlaySuccessSound] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  
+
   // Mobile-specific states
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -550,13 +631,13 @@ export default function CommunityPage() {
   const [cameraMode, setCameraMode] = useState<'photo' | 'video'>('photo');
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(3);
-  
+
   // Mobile interaction states
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
   const [doubleTapTimeout, setDoubleTapTimeout] = useState<NodeJS.Timeout | null>(null);
   const [lastTap, setLastTap] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  
+
   // Refs
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const storyProgressRef = useRef<NodeJS.Timeout | null>(null);
@@ -577,10 +658,10 @@ export default function CommunityPage() {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -591,9 +672,9 @@ export default function CommunityPage() {
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
-        setTouchStart({ 
-          x: e.touches[0].clientX, 
-          y: e.touches[0].clientY 
+        setTouchStart({
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
         });
       }
     };
@@ -602,12 +683,12 @@ export default function CommunityPage() {
       if (e.touches.length === 1 && feedScrollRef.current) {
         const scrollTop = feedScrollRef.current.scrollTop;
         const deltaY = e.touches[0].clientY - touchStart.y;
-        
+
         if (scrollTop === 0 && deltaY > 0) {
           e.preventDefault();
           const distance = Math.min(deltaY * 0.5, 100);
           setPullDistance(distance);
-          
+
           if (distance > 60) {
             setHasNewContent(true);
           }
@@ -639,11 +720,11 @@ export default function CommunityPage() {
     const interval = setInterval(() => {
       const randomUsers = ['Ana Silva', 'Carlos Santos', 'Maria Costa'];
       const isTyping = Math.random() > 0.8;
-      
+
       if (isTyping) {
         const randomUser = randomUsers[Math.floor(Math.random() * randomUsers.length)];
         setTypingUsers(prev => [...prev.slice(-2), randomUser]);
-        
+
         setTimeout(() => {
           setTypingUsers(prev => prev.filter(user => user !== randomUser));
         }, 3000);
@@ -659,7 +740,7 @@ export default function CommunityPage() {
       const patterns = {
         light: [10],
         medium: [20],
-        heavy: [30]
+        heavy: [30],
       };
       navigator.vibrate(patterns[type]);
     }
@@ -671,7 +752,7 @@ export default function CommunityPage() {
       const duration = selectedStory.content.duration * 1000;
       storyProgressRef.current = setInterval(() => {
         setStoryProgress(prev => {
-          const newProgress = prev + (100 / (duration / 100));
+          const newProgress = prev + 100 / (duration / 100);
           if (newProgress >= 100) {
             nextStory();
             return 0;
@@ -696,10 +777,10 @@ export default function CommunityPage() {
   const refreshFeed = async () => {
     setIsRefreshing(true);
     hapticFeedback('medium');
-    
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // Add some new mock posts
     const newPosts = [
       {
@@ -716,7 +797,7 @@ export default function CommunityPage() {
           bio: 'Novo na comunidade!',
           joinDate: '2024-01-15',
           pixelsOwned: 12,
-          achievements: 3
+          achievements: 3,
         },
         content: 'Acabei de me juntar à comunidade! Que emocionante! 🎉',
         type: 'text' as const,
@@ -726,17 +807,17 @@ export default function CommunityPage() {
         shares: 0,
         isLiked: false,
         isSaved: false,
-        tags: []
-      }
+        tags: [],
+      },
     ];
-    
+
     setPosts(prev => [...newPosts, ...prev]);
     setIsRefreshing(false);
     setPlaySuccessSound(true);
-    
+
     toast({
-      title: "Feed Atualizado! 🔄",
-      description: "Novos posts carregados com sucesso!",
+      title: 'Feed Atualizado! 🔄',
+      description: 'Novos posts carregados com sucesso!',
     });
   };
 
@@ -747,12 +828,12 @@ export default function CommunityPage() {
     if (doubleTapTimeout) {
       clearTimeout(doubleTapTimeout);
       setDoubleTapTimeout(null);
-      
+
       // Double tap detected
       if (now - lastTap < DOUBLE_TAP_DELAY) {
         toggleLike(postId);
         hapticFeedback('heavy');
-        
+
         // Create heart animation
         const heart = document.createElement('div');
         heart.innerHTML = '❤️';
@@ -764,19 +845,21 @@ export default function CommunityPage() {
         heart.style.top = `${event.changedTouches[0].clientY}px`;
         heart.style.transform = 'translate(-50%, -50%)';
         heart.style.zIndex = '1000';
-        
+
         document.body.appendChild(heart);
-        
+
         setTimeout(() => {
           document.body.removeChild(heart);
         }, 1000);
       }
     } else {
-      setDoubleTapTimeout(setTimeout(() => {
-        setDoubleTapTimeout(null);
-      }, DOUBLE_TAP_DELAY));
+      setDoubleTapTimeout(
+        setTimeout(() => {
+          setDoubleTapTimeout(null);
+        }, DOUBLE_TAP_DELAY)
+      );
     }
-    
+
     setLastTap(now);
   };
 
@@ -789,16 +872,16 @@ export default function CommunityPage() {
   const handleAudioRecord = () => {
     setIsRecording(!isRecording);
     hapticFeedback('medium');
-    
+
     if (!isRecording) {
       toast({
-        title: "Gravação Iniciada 🎤",
-        description: "Toque novamente para parar.",
+        title: 'Gravação Iniciada 🎤',
+        description: 'Toque novamente para parar.',
       });
     } else {
       toast({
-        title: "Áudio Gravado! 📹",
-        description: "Mensagem de voz adicionada ao post.",
+        title: 'Áudio Gravado! 📹',
+        description: 'Mensagem de voz adicionada ao post.',
       });
     }
   };
@@ -810,35 +893,55 @@ export default function CommunityPage() {
 
   const quickReaction = (postId: string, reaction: string) => {
     hapticFeedback('light');
-    
+
     // Add reaction to post
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        return { 
-          ...post, 
-          content: post.content + ` ${reaction}`,
-          likes: post.likes + 1
-        };
-      }
-      return post;
-    }));
-    
+    setPosts(prev =>
+      prev.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            content: post.content + ` ${reaction}`,
+            likes: post.likes + 1,
+          };
+        }
+        return post;
+      })
+    );
+
     addXp(2);
     addCredits(1);
   };
 
   const handleSwipeGesture = (direction: 'left' | 'right') => {
     hapticFeedback('light');
-    
+
     if (direction === 'left') {
       // Navigate to next tab
-      const tabs = ['feed', 'groups', 'chat', 'events', 'learn', 'gamification', 'analytics', 'moderation'];
+      const tabs = [
+        'feed',
+        'groups',
+        'chat',
+        'events',
+        'learn',
+        'gamification',
+        'analytics',
+        'moderation',
+      ];
       const currentIndex = tabs.indexOf(activeTab);
       const nextIndex = (currentIndex + 1) % tabs.length;
       setActiveTab(tabs[nextIndex]);
     } else if (direction === 'right') {
       // Navigate to previous tab
-      const tabs = ['feed', 'groups', 'chat', 'events', 'learn', 'gamification', 'analytics', 'moderation'];
+      const tabs = [
+        'feed',
+        'groups',
+        'chat',
+        'events',
+        'learn',
+        'gamification',
+        'analytics',
+        'moderation',
+      ];
       const currentIndex = tabs.indexOf(activeTab);
       const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
       setActiveTab(tabs[prevIndex]);
@@ -847,16 +950,17 @@ export default function CommunityPage() {
 
   const searchContent = (query: string) => {
     setSearchQuery(query);
-    
+
     if (!query.trim()) return;
-    
+
     // Filter posts by search query
-    const filteredPosts = posts.filter(post => 
-      post.content.toLowerCase().includes(query.toLowerCase()) ||
-      post.author.name.toLowerCase().includes(query.toLowerCase()) ||
-      post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+    const filteredPosts = posts.filter(
+      post =>
+        post.content.toLowerCase().includes(query.toLowerCase()) ||
+        post.author.name.toLowerCase().includes(query.toLowerCase()) ||
+        post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     );
-    
+
     toast({
       title: `Pesquisa: "${query}" 🔍`,
       description: `Encontrados ${filteredPosts.length} resultados.`,
@@ -867,9 +971,9 @@ export default function CommunityPage() {
   const createPost = () => {
     if (!newPostContent.trim()) {
       toast({
-        title: "Conteúdo Obrigatório",
-        description: "Por favor, escreva algo para publicar.",
-        variant: "destructive"
+        title: 'Conteúdo Obrigatório',
+        description: 'Por favor, escreva algo para publicar.',
+        variant: 'destructive',
       });
       return;
     }
@@ -888,7 +992,7 @@ export default function CommunityPage() {
         bio: 'Explorador do Pixel Universe',
         joinDate: '2023-06-01',
         pixelsOwned: 42,
-        achievements: 8
+        achievements: 8,
       },
       content: newPostContent,
       type: newPostType,
@@ -898,58 +1002,62 @@ export default function CommunityPage() {
       shares: 0,
       isLiked: false,
       isSaved: false,
-      tags: newPostContent.match(/#\w+/g)?.map(tag => tag.substring(1)) || []
+      tags: newPostContent.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
     };
 
     setPosts(prev => [newPost, ...prev]);
     setNewPostContent('');
-    
+
     // Rewards
     addXp(25);
     addCredits(10);
     setPlaySuccessSound(true);
-    
+
     toast({
-      title: "Publicação Criada! 🎉",
-      description: "Recebeu 25 XP + 10 créditos por partilhar conteúdo!",
+      title: 'Publicação Criada! 🎉',
+      description: 'Recebeu 25 XP + 10 créditos por partilhar conteúdo!',
     });
   };
 
   const toggleLike = (postId: string) => {
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        const newIsLiked = !post.isLiked;
-        const newLikes = newIsLiked ? post.likes + 1 : post.likes - 1;
-        
-        if (newIsLiked) {
-          addXp(5);
-          addCredits(2);
-          setPlayLikeSound(true);
+    setPosts(prev =>
+      prev.map(post => {
+        if (post.id === postId) {
+          const newIsLiked = !post.isLiked;
+          const newLikes = newIsLiked ? post.likes + 1 : post.likes - 1;
+
+          if (newIsLiked) {
+            addXp(5);
+            addCredits(2);
+            setPlayLikeSound(true);
+          }
+
+          return { ...post, isLiked: newIsLiked, likes: newLikes };
         }
-        
-        return { ...post, isLiked: newIsLiked, likes: newLikes };
-      }
-      return post;
-    }));
+        return post;
+      })
+    );
   };
 
   const toggleSave = (postId: string) => {
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        const newIsSaved = !post.isSaved;
-        
-        if (newIsSaved) {
-          addXp(3);
-          toast({
-            title: "Post Guardado! 📌",
-            description: "Adicionado aos seus favoritos. +3 XP",
-          });
+    setPosts(prev =>
+      prev.map(post => {
+        if (post.id === postId) {
+          const newIsSaved = !post.isSaved;
+
+          if (newIsSaved) {
+            addXp(3);
+            toast({
+              title: 'Post Guardado! 📌',
+              description: 'Adicionado aos seus favoritos. +3 XP',
+            });
+          }
+
+          return { ...post, isSaved: newIsSaved };
         }
-        
-        return { ...post, isSaved: newIsSaved };
-      }
-      return post;
-    }));
+        return post;
+      })
+    );
   };
 
   const addComment = (postId: string) => {
@@ -961,28 +1069,30 @@ export default function CommunityPage() {
         name: 'Você',
         avatar: 'https://placehold.co/30x30.png',
         verified: true,
-        level: 15
+        level: 15,
       },
       content: newComment,
       timestamp: 'agora',
       likes: 0,
-      isLiked: false
+      isLiked: false,
     };
 
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        return { ...post, comments: [...post.comments, comment] };
-      }
-      return post;
-    }));
+    setPosts(prev =>
+      prev.map(post => {
+        if (post.id === postId) {
+          return { ...post, comments: [...post.comments, comment] };
+        }
+        return post;
+      })
+    );
 
     setNewComment('');
     addXp(8);
     addCredits(3);
-    
+
     toast({
-      title: "Comentário Adicionado! 💬",
-      description: "Recebeu 8 XP + 3 créditos por interagir!",
+      title: 'Comentário Adicionado! 💬',
+      description: 'Recebeu 8 XP + 3 créditos por interagir!',
     });
   };
 
@@ -991,16 +1101,16 @@ export default function CommunityPage() {
       navigator.share({
         title: `Post de ${post.author.name}`,
         text: post.content,
-        url: window.location.href
+        url: window.location.href,
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast({
-        title: "Link Copiado! 🔗",
-        description: "Link do post copiado para a área de transferência.",
+        title: 'Link Copiado! 🔗',
+        description: 'Link do post copiado para a área de transferência.',
       });
     }
-    
+
     addXp(5);
     addCredits(2);
   };
@@ -1011,22 +1121,22 @@ export default function CommunityPage() {
 
   const followUser = (userId: string) => {
     const isFollowing = followingUsers.includes(userId);
-    
+
     if (isFollowing) {
       setFollowingUsers(prev => prev.filter(id => id !== userId));
       toast({
-        title: "Deixou de Seguir",
-        description: "Não receberá mais atualizações deste utilizador.",
+        title: 'Deixou de Seguir',
+        description: 'Não receberá mais atualizações deste utilizador.',
       });
     } else {
       setFollowingUsers(prev => [...prev, userId]);
       addXp(10);
       addCredits(5);
       setPlaySuccessSound(true);
-      
+
       toast({
-        title: "A Seguir! 👥",
-        description: "Recebeu 10 XP + 5 créditos por seguir um utilizador!",
+        title: 'A Seguir! 👥',
+        description: 'Recebeu 10 XP + 5 créditos por seguir um utilizador!',
       });
     }
   };
@@ -1061,36 +1171,38 @@ export default function CommunityPage() {
   };
 
   const joinGroup = (groupId: string) => {
-    setGroups(prev => prev.map(group => {
-      if (group.id === groupId) {
-        const newIsJoined = !group.isJoined;
-        const newMembers = newIsJoined ? group.members + 1 : group.members - 1;
-        
-        if (newIsJoined) {
-          addXp(15);
-          addCredits(8);
-          setPlaySuccessSound(true);
-          
-          toast({
-            title: "Juntou-se ao Grupo! 👥",
-            description: `Bem-vindo ao ${group.name}! +15 XP + 8 créditos`,
-          });
-        } else {
-          toast({
-            title: "Saiu do Grupo",
-            description: `Deixou o grupo ${group.name}.`,
-          });
+    setGroups(prev =>
+      prev.map(group => {
+        if (group.id === groupId) {
+          const newIsJoined = !group.isJoined;
+          const newMembers = newIsJoined ? group.members + 1 : group.members - 1;
+
+          if (newIsJoined) {
+            addXp(15);
+            addCredits(8);
+            setPlaySuccessSound(true);
+
+            toast({
+              title: 'Juntou-se ao Grupo! 👥',
+              description: `Bem-vindo ao ${group.name}! +15 XP + 8 créditos`,
+            });
+          } else {
+            toast({
+              title: 'Saiu do Grupo',
+              description: `Deixou o grupo ${group.name}.`,
+            });
+          }
+
+          return { ...group, isJoined: newIsJoined, members: newMembers };
         }
-        
-        return { ...group, isJoined: newIsJoined, members: newMembers };
-      }
-      return group;
-    }));
+        return group;
+      })
+    );
   };
 
   const openChat = (conversation: ChatConversation) => {
     setSelectedChat(conversation);
-    
+
     // Mock messages for the conversation
     const mockMessages: ChatMessage[] = [
       {
@@ -1098,24 +1210,24 @@ export default function CommunityPage() {
         sender: conversation.name,
         content: 'Olá! Vi o teu pixel em Lisboa, está fantástico!',
         timestamp: '14:20',
-        type: 'text'
+        type: 'text',
       },
       {
         id: '2',
         sender: 'Você',
         content: 'Obrigado! Demorei muito tempo a fazer.',
         timestamp: '14:22',
-        type: 'text'
+        type: 'text',
       },
       {
         id: '3',
         sender: conversation.name,
         content: 'Obrigado pelo feedback!',
         timestamp: '14:25',
-        type: 'text'
-      }
+        type: 'text',
+      },
     ];
-    
+
     setChatMessages(mockMessages);
   };
 
@@ -1127,43 +1239,47 @@ export default function CommunityPage() {
       sender: 'Você',
       content: newChatMessage,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
-      type: 'text'
+      type: 'text',
     };
 
     setChatMessages(prev => [...prev, message]);
     setNewChatMessage('');
-    
+
     addXp(3);
     addCredits(1);
   };
 
   const participateInEvent = (eventId: string) => {
-    setEvents(prev => prev.map(event => {
-      if (event.id === eventId) {
-        const newIsParticipating = !event.isParticipating;
-        const newParticipants = newIsParticipating ? event.participants + 1 : event.participants - 1;
-        
-        if (newIsParticipating) {
-          addXp(20);
-          addCredits(15);
-          setShowConfetti(true);
-          setPlaySuccessSound(true);
-          
-          toast({
-            title: "Inscrito no Evento! 🎉",
-            description: `Inscrito em ${event.title}! +20 XP + 15 créditos`,
-          });
-        } else {
-          toast({
-            title: "Saiu do Evento",
-            description: `Cancelou a participação em ${event.title}.`,
-          });
+    setEvents(prev =>
+      prev.map(event => {
+        if (event.id === eventId) {
+          const newIsParticipating = !event.isParticipating;
+          const newParticipants = newIsParticipating
+            ? event.participants + 1
+            : event.participants - 1;
+
+          if (newIsParticipating) {
+            addXp(20);
+            addCredits(15);
+            setShowConfetti(true);
+            setPlaySuccessSound(true);
+
+            toast({
+              title: 'Inscrito no Evento! 🎉',
+              description: `Inscrito em ${event.title}! +20 XP + 15 créditos`,
+            });
+          } else {
+            toast({
+              title: 'Saiu do Evento',
+              description: `Cancelou a participação em ${event.title}.`,
+            });
+          }
+
+          return { ...event, isParticipating: newIsParticipating, participants: newParticipants };
         }
-        
-        return { ...event, isParticipating: newIsParticipating, participants: newParticipants };
-      }
-      return event;
-    }));
+        return event;
+      })
+    );
   };
 
   const startTutorial = (tutorialId: string) => {
@@ -1171,30 +1287,32 @@ export default function CommunityPage() {
     if (tutorial) {
       addXp(5);
       addCredits(2);
-      
+
       toast({
-        title: "Tutorial Iniciado! 📚",
+        title: 'Tutorial Iniciado! 📚',
         description: `Começou "${tutorial.title}". +5 XP + 2 créditos`,
       });
     }
   };
 
   const saveTutorial = (tutorialId: string) => {
-    setTutorials(prev => prev.map(tutorial => {
-      if (tutorial.id === tutorialId) {
-        const newIsSaved = !tutorial.isSaved;
-        
-        if (newIsSaved) {
-          toast({
-            title: "Tutorial Guardado! 📌",
-            description: "Adicionado aos seus favoritos.",
-          });
+    setTutorials(prev =>
+      prev.map(tutorial => {
+        if (tutorial.id === tutorialId) {
+          const newIsSaved = !tutorial.isSaved;
+
+          if (newIsSaved) {
+            toast({
+              title: 'Tutorial Guardado! 📌',
+              description: 'Adicionado aos seus favoritos.',
+            });
+          }
+
+          return { ...tutorial, isSaved: newIsSaved };
         }
-        
-        return { ...tutorial, isSaved: newIsSaved };
-      }
-      return tutorial;
-    }));
+        return tutorial;
+      })
+    );
   };
 
   const openUserActions = (author: Post['author']) => {
@@ -1204,7 +1322,7 @@ export default function CommunityPage() {
   const sendPrivateMessage = (userId: string, userName: string) => {
     // Create or open conversation
     const existingConversation = conversations.find(c => c.name === userName);
-    
+
     if (existingConversation) {
       openChat(existingConversation);
     } else {
@@ -1216,13 +1334,13 @@ export default function CommunityPage() {
         lastMessage: '',
         timestamp: 'agora',
         unreadCount: 0,
-        isOnline: true
+        isOnline: true,
       };
-      
+
       setConversations(prev => [newConversation, ...prev]);
       openChat(newConversation);
     }
-    
+
     setSelectedUser(null);
   };
 
@@ -1231,20 +1349,22 @@ export default function CommunityPage() {
     const interval = setInterval(() => {
       // Random likes on posts
       if (Math.random() > 0.7) {
-        setPosts(prev => prev.map(post => ({
-          ...post,
-          likes: post.likes + Math.floor(Math.random() * 3)
-        })));
+        setPosts(prev =>
+          prev.map(post => ({
+            ...post,
+            likes: post.likes + Math.floor(Math.random() * 3),
+          }))
+        );
       }
-      
+
       // Random new messages in conversations
       if (Math.random() > 0.8 && conversations.length > 0) {
         const randomConv = conversations[Math.floor(Math.random() * conversations.length)];
-        setConversations(prev => prev.map(conv => 
-          conv.id === randomConv.id 
-            ? { ...conv, unreadCount: conv.unreadCount + 1 }
-            : conv
-        ));
+        setConversations(prev =>
+          prev.map(conv =>
+            conv.id === randomConv.id ? { ...conv, unreadCount: conv.unreadCount + 1 } : conv
+          )
+        );
       }
     }, 5000);
 
@@ -1253,18 +1373,18 @@ export default function CommunityPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center">
-          <CardContent className="pt-6 pb-4 px-6">
-            <Users className="h-16 w-16 mx-auto mb-4 text-primary" />
-            <h2 className="text-2xl font-bold mb-2">Junte-se à Comunidade</h2>
-            <p className="text-muted-foreground mb-6">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background/95 to-primary/5 p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="px-6 pb-4 pt-6">
+            <Users className="mx-auto mb-4 h-16 w-16 text-primary" />
+            <h2 className="mb-2 text-2xl font-bold">Junte-se à Comunidade</h2>
+            <p className="mb-6 text-muted-foreground">
               Conecte-se com outros criadores, partilhe os seus pixels e descubra arte incrível!
             </p>
             <div className="space-y-3">
               <AuthModal defaultTab="register">
                 <Button className="w-full">
-                  <UserPlus className="h-4 w-4 mr-2" />
+                  <UserPlus className="mr-2 h-4 w-4" />
                   Criar Conta Grátis
                 </Button>
               </AuthModal>
@@ -1283,8 +1403,9 @@ export default function CommunityPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       {/* Mobile CSS Animations */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @keyframes heartAnimation {
             0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             50% { transform: translate(-50%, -70%) scale(1.5); opacity: 0.8; }
@@ -1337,36 +1458,47 @@ export default function CommunityPage() {
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: rgba(99, 102, 241, 0.5);
           }
-        `
-      }} />
-      
-      <SoundEffect src={SOUND_EFFECTS.SUCCESS} play={playLikeSound} onEnd={() => setPlayLikeSound(false)} />
-      <SoundEffect src={SOUND_EFFECTS.ACHIEVEMENT} play={playSuccessSound} onEnd={() => setPlaySuccessSound(false)} />
+        `,
+        }}
+      />
+
+      <SoundEffect
+        src={SOUND_EFFECTS.SUCCESS}
+        play={playLikeSound}
+        onEnd={() => setPlayLikeSound(false)}
+      />
+      <SoundEffect
+        src={SOUND_EFFECTS.ACHIEVEMENT}
+        play={playSuccessSound}
+        onEnd={() => setPlaySuccessSound(false)}
+      />
       <Confetti active={showConfetti} duration={3000} onComplete={() => setShowConfetti(false)} />
-      
-      <div className="container mx-auto py-4 px-3 space-y-4 max-w-4xl">
+
+      <div className="container mx-auto max-w-4xl space-y-4 px-3 py-4">
         {/* Enhanced Mobile Header */}
-        <Card className="shadow-lg bg-gradient-to-br from-card via-card/95 to-primary/10 border-primary/30 sticky top-0 z-50 backdrop-blur-md bg-opacity-95">
+        <Card className="sticky top-0 z-50 border-primary/30 bg-opacity-95 bg-gradient-to-br from-card via-card/95 to-primary/10 shadow-lg backdrop-blur-md">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Users className="h-6 w-6 mr-3 text-primary" />
+                <Users className="mr-3 h-6 w-6 text-primary" />
                 <div>
-                  <CardTitle className="font-headline text-xl text-gradient-gold">
+                  <CardTitle className="text-gradient-gold font-headline text-xl">
                     Comunidade Pixel
                   </CardTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className={cn(
-                      "w-2 h-2 rounded-full",
-                      isOnline ? "bg-green-500" : "bg-red-500"
-                    )} />
+                  <div className="mt-1 flex items-center gap-2">
+                    <div
+                      className={cn(
+                        'h-2 w-2 rounded-full',
+                        isOnline ? 'bg-green-500' : 'bg-red-500'
+                      )}
+                    />
                     <span className="text-xs text-muted-foreground">
                       {isOnline ? 'Online' : 'Offline'}
                     </span>
                     {typingUsers.length > 0 && (
                       <>
                         <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-primary animate-pulse">
+                        <span className="animate-pulse text-xs text-primary">
                           {typingUsers[0]} está a escrever...
                         </span>
                       </>
@@ -1374,7 +1506,7 @@ export default function CommunityPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {/* Search Button */}
                 <Button
@@ -1385,12 +1517,12 @@ export default function CommunityPage() {
                 >
                   <Search className="h-4 w-4" />
                 </Button>
-                
+
                 {/* Notifications */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 relative"
+                  className="relative h-8 w-8"
                   onClick={() => {
                     setShowNotifications(!showNotifications);
                     hapticFeedback('light');
@@ -1398,12 +1530,12 @@ export default function CommunityPage() {
                 >
                   <Bell className="h-4 w-4" />
                   {unreadNotifications > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 text-xs bg-red-500 border-0">
+                    <Badge className="absolute -right-1 -top-1 h-5 w-5 border-0 bg-red-500 text-xs">
                       {unreadNotifications}
                     </Badge>
                   )}
                 </Button>
-                
+
                 {/* Dark Mode Toggle */}
                 <Button
                   variant="ghost"
@@ -1413,14 +1545,14 @@ export default function CommunityPage() {
                     setIsDarkMode(!isDarkMode);
                     hapticFeedback('light');
                     toast({
-                      title: isDarkMode ? "Modo Claro Ativado ☀️" : "Modo Escuro Ativado 🌙",
-                      description: "Tema alterado com sucesso!",
+                      title: isDarkMode ? 'Modo Claro Ativado ☀️' : 'Modo Escuro Ativado 🌙',
+                      description: 'Tema alterado com sucesso!',
                     });
                   }}
                 >
                   {isDarkMode ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </Button>
-                
+
                 {/* Settings */}
                 <Button
                   variant="ghost"
@@ -1429,8 +1561,8 @@ export default function CommunityPage() {
                   onClick={() => {
                     hapticFeedback('light');
                     toast({
-                      title: "Definições ⚙️",
-                      description: "Funcionalidade em desenvolvimento!",
+                      title: 'Definições ⚙️',
+                      description: 'Funcionalidade em desenvolvimento!',
                     });
                   }}
                 >
@@ -1438,7 +1570,7 @@ export default function CommunityPage() {
                 </Button>
               </div>
             </div>
-            
+
             {/* Pull to Refresh Indicator */}
             <AnimatePresence>
               {pullDistance > 0 && (
@@ -1458,7 +1590,11 @@ export default function CommunityPage() {
                       <ChevronDown className="h-4 w-4" />
                     )}
                     <span className="text-sm font-medium">
-                      {isRefreshing ? 'A atualizar...' : hasNewContent ? 'Solte para atualizar' : 'Puxe para atualizar'}
+                      {isRefreshing
+                        ? 'A atualizar...'
+                        : hasNewContent
+                          ? 'Solte para atualizar'
+                          : 'Puxe para atualizar'}
                     </span>
                   </div>
                 </motion.div>
@@ -1468,37 +1604,37 @@ export default function CommunityPage() {
         </Card>
 
         <Tabs defaultValue="feed" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 h-12 bg-card/50 backdrop-blur-sm">
+          <TabsList className="grid h-12 w-full grid-cols-4 bg-card/50 backdrop-blur-sm sm:grid-cols-6 lg:grid-cols-8">
             <TabsTrigger value="feed" className="text-xs">
-              <MessageSquare className="h-4 w-4 mb-1" />
+              <MessageSquare className="mb-1 h-4 w-4" />
               Feed
             </TabsTrigger>
             <TabsTrigger value="groups" className="text-xs">
-              <Users className="h-4 w-4 mb-1" />
+              <Users className="mb-1 h-4 w-4" />
               Grupos
             </TabsTrigger>
             <TabsTrigger value="chat" className="text-xs">
-              <MessageCircle className="h-4 w-4 mb-1" />
+              <MessageCircle className="mb-1 h-4 w-4" />
               Chat
             </TabsTrigger>
             <TabsTrigger value="events" className="text-xs">
-              <Calendar className="h-4 w-4 mb-1" />
+              <Calendar className="mb-1 h-4 w-4" />
               Eventos
             </TabsTrigger>
             <TabsTrigger value="learn" className="text-xs">
-              <BookOpen className="h-4 w-4 mb-1" />
+              <BookOpen className="mb-1 h-4 w-4" />
               Aprender
             </TabsTrigger>
             <TabsTrigger value="gamification" className="text-xs">
-              <Trophy className="h-4 w-4 mb-1" />
+              <Trophy className="mb-1 h-4 w-4" />
               Badges
             </TabsTrigger>
             <TabsTrigger value="analytics" className="text-xs">
-              <BarChart4 className="h-4 w-4 mb-1" />
+              <BarChart4 className="mb-1 h-4 w-4" />
               Analytics
             </TabsTrigger>
             <TabsTrigger value="moderation" className="text-xs">
-              <Shield className="h-4 w-4 mb-1" />
+              <Shield className="mb-1 h-4 w-4" />
               Moderação
             </TabsTrigger>
           </TabsList>
@@ -1515,18 +1651,18 @@ export default function CommunityPage() {
                       className="flex-shrink-0 cursor-pointer"
                       onClick={() => openStory(story, index)}
                     >
-                      <div className={cn(
-                        "w-16 h-16 rounded-full p-0.5",
-                        story.isViewed ? "bg-muted" : "bg-gradient-to-tr from-primary to-accent"
-                      )}>
-                        <Avatar className="w-full h-full">
+                      <div
+                        className={cn(
+                          'h-16 w-16 rounded-full p-0.5',
+                          story.isViewed ? 'bg-muted' : 'bg-gradient-to-tr from-primary to-accent'
+                        )}
+                      >
+                        <Avatar className="h-full w-full">
                           <AvatarImage src={story.author.avatar} data-ai-hint="story avatar" />
                           <AvatarFallback>{story.author.name[0]}</AvatarFallback>
                         </Avatar>
                       </div>
-                      <p className="text-xs text-center mt-1 truncate w-16">
-                        {story.author.name}
-                      </p>
+                      <p className="mt-1 w-16 truncate text-center text-xs">{story.author.name}</p>
                     </div>
                   ))}
                 </div>
@@ -1534,11 +1670,14 @@ export default function CommunityPage() {
             </Card>
 
             {/* Enhanced Create Post */}
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="transition-shadow hover:shadow-md">
               <CardContent className="p-4">
                 <div className="flex gap-3">
                   <Avatar className="ring-2 ring-primary/20">
-                    <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile avatar" />
+                    <AvatarImage
+                      src="https://placehold.co/40x40.png"
+                      data-ai-hint="profile avatar"
+                    />
                     <AvatarFallback>V</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-3">
@@ -1547,7 +1686,7 @@ export default function CommunityPage() {
                         ref={postInputRef}
                         placeholder="Partilhe algo com a comunidade..."
                         value={newPostContent}
-                        onChange={(e) => {
+                        onChange={e => {
                           setNewPostContent(e.target.value);
                           setIsTyping(e.target.value.length > 0);
                         }}
@@ -1555,12 +1694,12 @@ export default function CommunityPage() {
                         maxLength={500}
                         onFocus={() => hapticFeedback('light')}
                       />
-                      
+
                       {/* Emoji Button */}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="absolute top-2 right-2 h-8 w-8"
+                        className="absolute right-2 top-2 h-8 w-8"
                         onClick={() => {
                           setShowEmojiPicker(!showEmojiPicker);
                           hapticFeedback('light');
@@ -1568,7 +1707,7 @@ export default function CommunityPage() {
                       >
                         <Smile className="h-4 w-4" />
                       </Button>
-                      
+
                       {/* Emoji Picker */}
                       <AnimatePresence>
                         {showEmojiPicker && (
@@ -1576,9 +1715,22 @@ export default function CommunityPage() {
                             initial={{ opacity: 0, scale: 0.9, y: -10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                            className="absolute top-12 right-0 bg-card border rounded-lg p-3 shadow-lg z-10 grid grid-cols-6 gap-2"
+                            className="absolute right-0 top-12 z-10 grid grid-cols-6 gap-2 rounded-lg border bg-card p-3 shadow-lg"
                           >
-                            {['😀', '😍', '🤔', '😢', '😡', '👍', '❤️', '🔥', '💯', '🎉', '🚀', '✨'].map(emoji => (
+                            {[
+                              '😀',
+                              '😍',
+                              '🤔',
+                              '😢',
+                              '😡',
+                              '👍',
+                              '❤️',
+                              '🔥',
+                              '💯',
+                              '🎉',
+                              '🚀',
+                              '✨',
+                            ].map(emoji => (
                               <Button
                                 key={emoji}
                                 variant="ghost"
@@ -1593,7 +1745,7 @@ export default function CommunityPage() {
                         )}
                       </AnimatePresence>
                     </div>
-                    
+
                     {/* Post Type Selection */}
                     <div className="flex gap-2 overflow-x-auto pb-2">
                       <Button
@@ -1605,7 +1757,7 @@ export default function CommunityPage() {
                         }}
                         className="flex-shrink-0"
                       >
-                        <MessageSquare className="h-4 w-4 mr-1" />
+                        <MessageSquare className="mr-1 h-4 w-4" />
                         Texto
                       </Button>
                       <Button
@@ -1617,7 +1769,7 @@ export default function CommunityPage() {
                         }}
                         className="flex-shrink-0"
                       >
-                        <Palette className="h-4 w-4 mr-1" />
+                        <Palette className="mr-1 h-4 w-4" />
                         Pixel
                       </Button>
                       <Button
@@ -1630,7 +1782,7 @@ export default function CommunityPage() {
                         }}
                         className="flex-shrink-0"
                       >
-                        <Camera className="h-4 w-4 mr-1" />
+                        <Camera className="mr-1 h-4 w-4" />
                         Foto
                       </Button>
                       <Button
@@ -1638,11 +1790,11 @@ export default function CommunityPage() {
                         size="sm"
                         onClick={handleAudioRecord}
                         className={cn(
-                          "flex-shrink-0",
-                          isRecording && "bg-red-500 text-white animate-pulse"
+                          'flex-shrink-0',
+                          isRecording && 'animate-pulse bg-red-500 text-white'
                         )}
                       >
-                        <Mic className="h-4 w-4 mr-1" />
+                        <Mic className="mr-1 h-4 w-4" />
                         {isRecording ? 'Parar' : 'Áudio'}
                       </Button>
                       <Button
@@ -1654,7 +1806,7 @@ export default function CommunityPage() {
                         }}
                         className="flex-shrink-0"
                       >
-                        <Plus className="h-4 w-4 mr-1" />
+                        <Plus className="mr-1 h-4 w-4" />
                         Mais
                       </Button>
                     </div>
@@ -1674,13 +1826,13 @@ export default function CommunityPage() {
                               size="sm"
                               onClick={() => {
                                 toast({
-                                  title: "Evento Criado! 📅",
-                                  description: "Funcionalidade em desenvolvimento!",
+                                  title: 'Evento Criado! 📅',
+                                  description: 'Funcionalidade em desenvolvimento!',
                                 });
                                 hapticFeedback('medium');
                               }}
                             >
-                              <Calendar className="h-4 w-4 mr-2" />
+                              <Calendar className="mr-2 h-4 w-4" />
                               Evento
                             </Button>
                             <Button
@@ -1688,24 +1840,28 @@ export default function CommunityPage() {
                               size="sm"
                               onClick={() => {
                                 toast({
-                                  title: "Sondagem Criada! 📊",
-                                  description: "Funcionalidade em desenvolvimento!",
+                                  title: 'Sondagem Criada! 📊',
+                                  description: 'Funcionalidade em desenvolvimento!',
                                 });
                                 hapticFeedback('medium');
                               }}
                             >
-                              <BarChart4 className="h-4 w-4 mr-2" />
+                              <BarChart4 className="mr-2 h-4 w-4" />
                               Sondagem
                             </Button>
                           </div>
-                          
+
                           <div className="flex items-center gap-3">
                             <Switch
                               id="location"
-                              onCheckedChange={(checked) => {
+                              onCheckedChange={checked => {
                                 toast({
-                                  title: checked ? "Localização Ativada 📍" : "Localização Desativada",
-                                  description: checked ? "A sua localização será incluída no post." : "A sua localização não será partilhada.",
+                                  title: checked
+                                    ? 'Localização Ativada 📍'
+                                    : 'Localização Desativada',
+                                  description: checked
+                                    ? 'A sua localização será incluída no post.'
+                                    : 'A sua localização não será partilhada.',
                                 });
                                 hapticFeedback('light');
                               }}
@@ -1717,33 +1873,35 @@ export default function CommunityPage() {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    
-                    <div className="flex justify-between items-center">
+
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "text-xs transition-colors",
-                          newPostContent.length > 450 ? "text-red-500" : "text-muted-foreground"
-                        )}>
+                        <span
+                          className={cn(
+                            'text-xs transition-colors',
+                            newPostContent.length > 450 ? 'text-red-500' : 'text-muted-foreground'
+                          )}
+                        >
                           {newPostContent.length}/500
                         </span>
                         {isTyping && (
                           <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
                             <span className="text-xs text-primary">A escrever...</span>
                           </div>
                         )}
                       </div>
-                      
-                      <Button 
+
+                      <Button
                         onClick={() => {
                           createPost();
                           hapticFeedback('heavy');
                           setShowCreateOptions(false);
-                        }} 
+                        }}
                         disabled={!newPostContent.trim()}
                         className="relative overflow-hidden"
                       >
-                        <Send className="h-4 w-4 mr-2" />
+                        <Send className="mr-2 h-4 w-4" />
                         Publicar
                       </Button>
                     </div>
@@ -1759,17 +1917,17 @@ export default function CommunityPage() {
               accept="image/*,video/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.files && e.target.files[0]) {
                   toast({
-                    title: "Ficheiro Selecionado! 📎",
+                    title: 'Ficheiro Selecionado! 📎',
                     description: `${e.target.files[0].name} adicionado ao post.`,
                   });
                   hapticFeedback('medium');
                 }
               }}
             />
-            
+
             <input
               ref={audioInputRef}
               type="file"
@@ -1781,16 +1939,16 @@ export default function CommunityPage() {
             {/* Posts */}
             <div className="space-y-4" ref={feedScrollRef}>
               {posts.map(post => (
-                <Card 
-                  key={post.id} 
-                  className="hover:shadow-md transition-shadow relative overflow-hidden"
-                  onTouchEnd={(e) => handleDoubleTap(post.id, e)}
+                <Card
+                  key={post.id}
+                  className="relative overflow-hidden transition-shadow hover:shadow-md"
+                  onTouchEnd={e => handleDoubleTap(post.id, e)}
                 >
                   <CardContent className="p-4">
                     {/* Post Header */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar 
-                        className="cursor-pointer hover:scale-105 transition-transform"
+                    <div className="mb-3 flex items-center gap-3">
+                      <Avatar
+                        className="cursor-pointer transition-transform hover:scale-105"
                         onClick={() => openUserProfile(post.author)}
                       >
                         <AvatarImage src={post.author.avatar} data-ai-hint="profile avatar" />
@@ -1798,14 +1956,14 @@ export default function CommunityPage() {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span 
-                            className="font-semibold cursor-pointer hover:text-primary transition-colors"
+                          <span
+                            className="cursor-pointer font-semibold transition-colors hover:text-primary"
                             onClick={() => openUserProfile(post.author)}
                           >
                             {post.author.name}
                           </span>
                           {post.author.verified && (
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                            <Star className="h-4 w-4 fill-current text-yellow-500" />
                           )}
                           <Badge variant="secondary" className="text-xs">
                             Nível {post.author.level}
@@ -1834,39 +1992,37 @@ export default function CommunityPage() {
                     {/* Post Content */}
                     <div className="mb-3">
                       <p className="leading-relaxed">{post.content}</p>
-                      
+
                       {post.type === 'pixel' && post.pixel && (
                         <Card className="mt-3 bg-muted/20">
                           <CardContent className="p-3">
                             <div className="flex items-center gap-3">
-                              <img 
-                                src={post.pixel.imageUrl} 
+                              <img
+                                src={post.pixel.imageUrl}
                                 alt="Pixel"
                                 data-ai-hint="pixel art"
-                                className="w-20 h-20 rounded border object-cover"
+                                className="h-20 w-20 rounded border object-cover"
                               />
                               <div className="flex-1">
                                 <h4 className="font-medium">
                                   Pixel ({post.pixel.x}, {post.pixel.y})
                                 </h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {post.pixel.region}
-                                </p>
+                                <p className="text-sm text-muted-foreground">{post.pixel.region}</p>
                                 {post.pixel.price && (
                                   <Badge className="mt-1">€{post.pixel.price}</Badge>
                                 )}
                               </div>
                               <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4 mr-2" />
+                                <Eye className="mr-2 h-4 w-4" />
                                 Ver
                               </Button>
                             </div>
                           </CardContent>
                         </Card>
                       )}
-                      
+
                       {post.type === 'achievement' && post.achievement && (
-                        <Card className="mt-3 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
+                        <Card className="mt-3 border-yellow-500/30 bg-gradient-to-r from-yellow-500/10 to-orange-500/10">
                           <CardContent className="p-3">
                             <div className="flex items-center gap-3">
                               <div className="text-3xl">{post.achievement.icon}</div>
@@ -1885,9 +2041,9 @@ export default function CommunityPage() {
                           </CardContent>
                         </Card>
                       )}
-                      
+
                       {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
+                        <div className="mt-3 flex flex-wrap gap-1">
                           {post.tags.map(tag => (
                             <Badge key={tag} variant="outline" className="text-xs">
                               #{tag}
@@ -1912,17 +2068,19 @@ export default function CommunityPage() {
                               quickReaction(post.id, '❤️');
                             }}
                             className={cn(
-                              "gap-2 transition-all duration-300",
-                              post.isLiked && "text-red-500 scale-110"
+                              'gap-2 transition-all duration-300',
+                              post.isLiked && 'scale-110 text-red-500'
                             )}
                           >
-                            <Heart className={cn(
-                              "h-4 w-4 transition-all", 
-                              post.isLiked && "fill-current animate-pulse"
-                            )} />
+                            <Heart
+                              className={cn(
+                                'h-4 w-4 transition-all',
+                                post.isLiked && 'animate-pulse fill-current'
+                              )}
+                            />
                             {post.likes}
                           </Button>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1935,7 +2093,7 @@ export default function CommunityPage() {
                             <MessageSquare className="h-4 w-4" />
                             {post.comments.length}
                           </Button>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1948,7 +2106,7 @@ export default function CommunityPage() {
                             <Share2 className="h-4 w-4" />
                             {post.shares}
                           </Button>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1961,7 +2119,7 @@ export default function CommunityPage() {
                             <ThumbsUp className="h-4 w-4" />
                           </Button>
                         </div>
-                        
+
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
@@ -1970,14 +2128,11 @@ export default function CommunityPage() {
                               toggleSave(post.id);
                               hapticFeedback('light');
                             }}
-                            className={cn(
-                              "transition-colors",
-                              post.isSaved && "text-blue-500"
-                            )}
+                            className={cn('transition-colors', post.isSaved && 'text-blue-500')}
                           >
-                            <Bookmark className={cn("h-4 w-4", post.isSaved && "fill-current")} />
+                            <Bookmark className={cn('h-4 w-4', post.isSaved && 'fill-current')} />
                           </Button>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1990,17 +2145,19 @@ export default function CommunityPage() {
                           </Button>
                         </div>
                       </div>
-                      
+
                       {/* Quick Reactions */}
                       <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                        <span className="text-xs text-muted-foreground flex-shrink-0">Reações rápidas:</span>
+                        <span className="flex-shrink-0 text-xs text-muted-foreground">
+                          Reações rápidas:
+                        </span>
                         {['👍', '❤️', '😂', '😮', '😢', '😡'].map(reaction => (
                           <Button
                             key={reaction}
                             variant="ghost"
                             size="sm"
                             onClick={() => quickReaction(post.id, reaction)}
-                            className="h-8 w-8 p-0 flex-shrink-0 hover:scale-125 transition-transform"
+                            className="h-8 w-8 flex-shrink-0 p-0 transition-transform hover:scale-125"
                           >
                             {reaction}
                           </Button>
@@ -2015,20 +2172,25 @@ export default function CommunityPage() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 pt-4 border-t space-y-3"
+                          className="mt-4 space-y-3 border-t pt-4"
                         >
                           {post.comments.map(comment => (
                             <div key={comment.id} className="flex gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={comment.author.avatar} data-ai-hint="profile avatar" />
+                                <AvatarImage
+                                  src={comment.author.avatar}
+                                  data-ai-hint="profile avatar"
+                                />
                                 <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
-                                <div className="bg-muted/50 rounded-lg p-3">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm">{comment.author.name}</span>
+                                <div className="rounded-lg bg-muted/50 p-3">
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <span className="text-sm font-medium">
+                                      {comment.author.name}
+                                    </span>
                                     {comment.author.verified && (
-                                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                      <Star className="h-3 w-3 fill-current text-yellow-500" />
                                     )}
                                     <Badge variant="outline" className="text-xs">
                                       {comment.author.level}
@@ -2036,10 +2198,12 @@ export default function CommunityPage() {
                                   </div>
                                   <p className="text-sm">{comment.content}</p>
                                 </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                                <div className="mt-1 flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">
+                                    {comment.timestamp}
+                                  </span>
                                   <Button variant="ghost" size="sm" className="h-6 text-xs">
-                                    <Heart className="h-3 w-3 mr-1" />
+                                    <Heart className="mr-1 h-3 w-3" />
                                     {comment.likes}
                                   </Button>
                                   <Button variant="ghost" size="sm" className="h-6 text-xs">
@@ -2049,23 +2213,26 @@ export default function CommunityPage() {
                               </div>
                             </div>
                           ))}
-                          
+
                           {/* Add Comment */}
                           <div className="flex gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile avatar" />
+                              <AvatarImage
+                                src="https://placehold.co/40x40.png"
+                                data-ai-hint="profile avatar"
+                              />
                               <AvatarFallback>V</AvatarFallback>
                             </Avatar>
-                            <div className="flex-1 flex gap-2">
+                            <div className="flex flex-1 gap-2">
                               <Input
                                 placeholder="Escrever comentário..."
                                 value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                                onChange={e => setNewComment(e.target.value)}
+                                onKeyPress={e => e.key === 'Enter' && addComment(post.id)}
                                 className="text-sm"
                               />
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 onClick={() => addComment(post.id)}
                                 disabled={!newComment.trim()}
                               >
@@ -2086,19 +2253,19 @@ export default function CommunityPage() {
           <TabsContent value="groups" className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               {groups.map(group => (
-                <Card key={group.id} className="hover:shadow-md transition-shadow">
+                <Card key={group.id} className="transition-shadow hover:shadow-md">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
-                      <img 
-                        src={group.avatar} 
+                      <img
+                        src={group.avatar}
                         alt={group.name}
                         data-ai-hint="group logo"
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="h-16 w-16 rounded-full object-cover"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 
-                            className="font-semibold cursor-pointer hover:text-primary transition-colors"
+                        <div className="mb-1 flex items-center gap-2">
+                          <h3
+                            className="cursor-pointer font-semibold transition-colors hover:text-primary"
                             onClick={() => setSelectedGroup(group)}
                           >
                             {group.name}
@@ -2106,7 +2273,7 @@ export default function CommunityPage() {
                           <Badge variant="outline">{group.category}</Badge>
                           <GroupIcon isPrivate={group.isPrivate} />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{group.description}</p>
+                        <p className="mb-2 text-sm text-muted-foreground">{group.description}</p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
@@ -2122,12 +2289,12 @@ export default function CommunityPage() {
                       >
                         {group.isJoined ? (
                           <>
-                            <Users className="h-4 w-4 mr-2" />
+                            <Users className="mr-2 h-4 w-4" />
                             Membro
                           </>
                         ) : (
                           <>
-                            <UserPlus className="h-4 w-4 mr-2" />
+                            <UserPlus className="mr-2 h-4 w-4" />
                             Juntar-se
                           </>
                         )}
@@ -2143,9 +2310,9 @@ export default function CommunityPage() {
           <TabsContent value="chat" className="space-y-4">
             <div className="space-y-3">
               {conversations.map(conversation => (
-                <Card 
-                  key={conversation.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                <Card
+                  key={conversation.id}
+                  className="cursor-pointer transition-shadow hover:shadow-md"
                   onClick={() => openChat(conversation)}
                 >
                   <CardContent className="p-4">
@@ -2156,26 +2323,30 @@ export default function CommunityPage() {
                           <AvatarFallback>{conversation.name[0]}</AvatarFallback>
                         </Avatar>
                         {conversation.isOnline && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
+                          <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-background bg-green-500" />
                         )}
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{conversation.name}</span>
                           {conversation.type === 'group' && (
-                            <Badge variant="outline" className="text-xs">Grupo</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Grupo
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="truncate text-sm text-muted-foreground">
                           {conversation.lastMessage}
                         </p>
                       </div>
-                      
+
                       <div className="text-right">
-                        <span className="text-xs text-muted-foreground">{conversation.timestamp}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {conversation.timestamp}
+                        </span>
                         {conversation.unreadCount > 0 && (
-                          <Badge className="bg-red-500 text-white mt-1">
+                          <Badge className="mt-1 bg-red-500 text-white">
                             {conversation.unreadCount}
                           </Badge>
                         )}
@@ -2191,39 +2362,37 @@ export default function CommunityPage() {
           <TabsContent value="events" className="space-y-4">
             <div className="space-y-4">
               {events.map(event => (
-                <Card 
-                  key={event.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                <Card
+                  key={event.id}
+                  className="cursor-pointer transition-shadow hover:shadow-md"
                   onClick={() => setSelectedEvent(event)}
                 >
                   <div className="relative">
-                    <img 
-                      src={event.imageUrl} 
+                    <img
+                      src={event.imageUrl}
                       alt={event.title}
                       data-ai-hint="event poster"
-                      className="w-full h-32 object-cover rounded-t-lg"
+                      className="h-32 w-full rounded-t-lg object-cover"
                     />
-                    <Badge className="absolute top-2 left-2 bg-primary">
-                      {event.category}
-                    </Badge>
-                    <Badge 
+                    <Badge className="absolute left-2 top-2 bg-primary">{event.category}</Badge>
+                    <Badge
                       className={cn(
-                        "absolute top-2 right-2",
-                        event.difficulty === 'Fácil' && "bg-green-500",
-                        event.difficulty === 'Médio' && "bg-yellow-500",
-                        event.difficulty === 'Difícil' && "bg-orange-500",
-                        event.difficulty === 'Extremo' && "bg-red-500"
+                        'absolute right-2 top-2',
+                        event.difficulty === 'Fácil' && 'bg-green-500',
+                        event.difficulty === 'Médio' && 'bg-yellow-500',
+                        event.difficulty === 'Difícil' && 'bg-orange-500',
+                        event.difficulty === 'Extremo' && 'bg-red-500'
                       )}
                     >
                       {event.difficulty}
                     </Badge>
                   </div>
-                  
+
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2">{event.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{event.description}</p>
-                    
-                    <div className="flex items-center justify-between mb-3">
+                    <h3 className="mb-2 font-semibold">{event.title}</h3>
+                    <p className="mb-3 text-sm text-muted-foreground">{event.description}</p>
+
+                    <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
@@ -2235,10 +2404,10 @@ export default function CommunityPage() {
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           participateInEvent(event.id);
                         }}
@@ -2247,12 +2416,12 @@ export default function CommunityPage() {
                       >
                         {event.isParticipating ? (
                           <>
-                            <CheckCircle className="h-4 w-4 mr-2" />
+                            <CheckCircle className="mr-2 h-4 w-4" />
                             Participando
                           </>
                         ) : (
                           <>
-                            <Trophy className="h-4 w-4 mr-2" />
+                            <Trophy className="mr-2 h-4 w-4" />
                             Participar
                           </>
                         )}
@@ -2271,35 +2440,38 @@ export default function CommunityPage() {
           <TabsContent value="learn" className="space-y-4">
             <div className="space-y-4">
               {tutorials.map(tutorial => (
-                <Card 
-                  key={tutorial.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                <Card
+                  key={tutorial.id}
+                  className="cursor-pointer transition-shadow hover:shadow-md"
                   onClick={() => setSelectedTutorial(tutorial)}
                 >
                   <CardContent className="p-4">
                     <div className="flex gap-4">
-                      <img 
-                        src={tutorial.videoUrl} 
+                      <img
+                        src={tutorial.videoUrl}
                         alt={tutorial.title}
                         data-ai-hint="tutorial video"
-                        className="w-24 h-16 rounded object-cover bg-muted"
+                        className="h-16 w-24 rounded bg-muted object-cover"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="mb-1 flex items-center gap-2">
                           <h3 className="font-semibold">{tutorial.title}</h3>
-                          <Badge 
+                          <Badge
                             variant={
-                              tutorial.difficulty === 'Iniciante' ? 'secondary' :
-                              tutorial.difficulty === 'Intermediário' ? 'default' : 'destructive'
+                              tutorial.difficulty === 'Iniciante'
+                                ? 'secondary'
+                                : tutorial.difficulty === 'Intermediário'
+                                  ? 'default'
+                                  : 'destructive'
                             }
                             className="text-xs"
                           >
                             {tutorial.difficulty}
                           </Badge>
                         </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-2">{tutorial.description}</p>
-                        
+
+                        <p className="mb-2 text-sm text-muted-foreground">{tutorial.description}</p>
+
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -2314,8 +2486,8 @@ export default function CommunityPage() {
                             {tutorial.views}
                           </span>
                         </div>
-                        
-                        <div className="flex flex-wrap gap-1 mt-2">
+
+                        <div className="mt-2 flex flex-wrap gap-1">
                           {tutorial.tags.map(tag => (
                             <Badge key={tag} variant="outline" className="text-xs">
                               {tag}
@@ -2323,30 +2495,32 @@ export default function CommunityPage() {
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col gap-2">
-                        <Button 
+                        <Button
                           size="sm"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             startTutorial(tutorial.id);
                           }}
                         >
-                          <Play className="h-4 w-4 mr-2" />
+                          <Play className="mr-2 h-4 w-4" />
                           Começar
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             saveTutorial(tutorial.id);
                           }}
                         >
-                          <Bookmark className={cn(
-                            "h-4 w-4",
-                            tutorial.isSaved && "fill-current text-blue-500"
-                          )} />
+                          <Bookmark
+                            className={cn(
+                              'h-4 w-4',
+                              tutorial.isSaved && 'fill-current text-blue-500'
+                            )}
+                          />
                         </Button>
                       </div>
                     </div>
@@ -2357,7 +2531,7 @@ export default function CommunityPage() {
           </TabsContent>
 
           {/* New Community Features Tabs */}
-          
+
           {/* Gamification Tab */}
           <TabsContent value="gamification" className="space-y-4">
             <CommunityGamification />
@@ -2376,7 +2550,7 @@ export default function CommunityPage() {
       </div>
 
       {/* Mobile-Specific Modals and Dialogs */}
-      
+
       {/* Search Modal */}
       <Dialog open={showSearchModal} onOpenChange={setShowSearchModal}>
         <DialogContent className="max-w-md">
@@ -2385,17 +2559,15 @@ export default function CommunityPage() {
               <Search className="h-5 w-5" />
               Pesquisar Conteúdo
             </DialogTitle>
-            <DialogDescription>
-              Procure por posts, utilizadores ou hashtags
-            </DialogDescription>
+            <DialogDescription>Procure por posts, utilizadores ou hashtags</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <Input
               placeholder="Digite sua pesquisa..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => {
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyPress={e => {
                 if (e.key === 'Enter') {
                   searchContent(searchQuery);
                   setShowSearchModal(false);
@@ -2404,26 +2576,23 @@ export default function CommunityPage() {
               className="w-full"
               autoFocus
             />
-            
+
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={() => {
                   searchContent(searchQuery);
                   setShowSearchModal(false);
                 }}
                 className="flex-1"
               >
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="mr-2 h-4 w-4" />
                 Pesquisar
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowSearchModal(false)}
-              >
+              <Button variant="outline" onClick={() => setShowSearchModal(false)}>
                 Cancelar
               </Button>
             </div>
-            
+
             {/* Quick Search Suggestions */}
             <div className="space-y-2">
               <p className="text-sm font-medium">Pesquisas populares:</p>
@@ -2451,20 +2620,18 @@ export default function CommunityPage() {
       {/* Notifications Panel */}
       <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
         <SheetContent className="w-full max-w-md p-0">
-          <SheetHeader className="p-6 border-b">
+          <SheetHeader className="border-b p-6">
             <SheetTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
               Notificações
               {unreadNotifications > 0 && (
-                <Badge className="bg-red-500">
-                  {unreadNotifications}
-                </Badge>
+                <Badge className="bg-red-500">{unreadNotifications}</Badge>
               )}
             </SheetTitle>
           </SheetHeader>
-          
+
           <ScrollArea className="h-[calc(100vh-120px)]">
-            <div className="p-4 space-y-4">
+            <div className="space-y-4 p-4">
               {/* Mock Notifications */}
               {[
                 {
@@ -2473,7 +2640,7 @@ export default function CommunityPage() {
                   user: 'Ana Silva',
                   action: 'gostou do seu post',
                   time: '2 min',
-                  unread: true
+                  unread: true,
                 },
                 {
                   id: '2',
@@ -2481,7 +2648,7 @@ export default function CommunityPage() {
                   user: 'Carlos Santos',
                   action: 'comentou no seu pixel',
                   time: '5 min',
-                  unread: true
+                  unread: true,
                 },
                 {
                   id: '3',
@@ -2489,19 +2656,19 @@ export default function CommunityPage() {
                   user: 'Maria Costa',
                   action: 'começou a seguir-te',
                   time: '1h',
-                  unread: false
-                }
+                  unread: false,
+                },
               ].map(notification => (
-                <Card 
+                <Card
                   key={notification.id}
                   className={cn(
-                    "p-3 cursor-pointer transition-colors",
-                    notification.unread && "bg-primary/5 border-primary/20"
+                    'cursor-pointer p-3 transition-colors',
+                    notification.unread && 'border-primary/20 bg-primary/5'
                   )}
                   onClick={() => {
                     hapticFeedback('light');
                     toast({
-                      title: "Notificação Aberta 📱",
+                      title: 'Notificação Aberta 📱',
                       description: `${notification.user} ${notification.action}`,
                     });
                   }}
@@ -2511,31 +2678,29 @@ export default function CommunityPage() {
                       <AvatarImage src="https://placehold.co/40x40.png" />
                       <AvatarFallback>{notification.user[0]}</AvatarFallback>
                     </Avatar>
-                    
+
                     <div className="flex-1">
                       <p className="text-sm">
-                        <span className="font-medium">{notification.user}</span>
-                        {' '}{notification.action}
+                        <span className="font-medium">{notification.user}</span>{' '}
+                        {notification.action}
                       </p>
                       <p className="text-xs text-muted-foreground">{notification.time}</p>
                     </div>
-                    
-                    {notification.unread && (
-                      <div className="w-2 h-2 bg-primary rounded-full" />
-                    )}
+
+                    {notification.unread && <div className="h-2 w-2 rounded-full bg-primary" />}
                   </div>
                 </Card>
               ))}
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 className="w-full"
                 onClick={() => {
                   setUnreadNotifications(0);
                   hapticFeedback('medium');
                   toast({
-                    title: "Notificações Limpas ✅",
-                    description: "Todas as notificações foram marcadas como lidas.",
+                    title: 'Notificações Limpas ✅',
+                    description: 'Todas as notificações foram marcadas como lidas.',
                   });
                 }}
               >
@@ -2548,22 +2713,28 @@ export default function CommunityPage() {
 
       {/* Stories Viewer */}
       <Dialog open={!!selectedStory} onOpenChange={() => setSelectedStory(null)}>
-        <DialogContent className="max-w-md h-[90vh] p-0 bg-black">
+        <DialogContent className="h-[90vh] max-w-md bg-black p-0">
           <DialogHeader>
             <DialogTitle className="sr-only">Visualizador de Histórias</DialogTitle>
-            <DialogDescription className="sr-only">A visualizar a história de um utilizador.</DialogDescription>
+            <DialogDescription className="sr-only">
+              A visualizar a história de um utilizador.
+            </DialogDescription>
           </DialogHeader>
           {selectedStory && (
             <div className="relative h-full">
               {/* Progress bars */}
-              <div className="absolute top-2 left-2 right-2 z-50 flex gap-1">
+              <div className="absolute left-2 right-2 top-2 z-50 flex gap-1">
                 {stories.map((_, index) => (
-                  <div key={index} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
-                    <div 
+                  <div key={index} className="h-1 flex-1 overflow-hidden rounded-full bg-white/30">
+                    <div
                       className="h-full bg-white transition-all duration-100"
-                      style={{ 
-                        width: index < storyIndex ? '100%' : 
-                               index === storyIndex ? `${storyProgress}%` : '0%'
+                      style={{
+                        width:
+                          index < storyIndex
+                            ? '100%'
+                            : index === storyIndex
+                              ? `${storyProgress}%`
+                              : '0%',
                       }}
                     />
                   </div>
@@ -2571,18 +2742,18 @@ export default function CommunityPage() {
               </div>
 
               {/* Header */}
-              <div className="absolute top-6 left-4 right-4 z-40 flex items-center justify-between">
+              <div className="absolute left-4 right-4 top-6 z-40 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border-2 border-white">
                     <AvatarImage src={selectedStory.author.avatar} data-ai-hint="story avatar" />
                     <AvatarFallback>{selectedStory.author.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <span className="text-white font-medium">{selectedStory.author.name}</span>
-                    <p className="text-white/80 text-sm">{selectedStory.timestamp}</p>
+                    <span className="font-medium text-white">{selectedStory.author.name}</span>
+                    <p className="text-sm text-white/80">{selectedStory.timestamp}</p>
                   </div>
                 </div>
-                
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -2596,17 +2767,17 @@ export default function CommunityPage() {
               {/* Story Content */}
               <div className="h-full">
                 {selectedStory.content.type === 'image' && selectedStory.content.url && (
-                  <img 
-                    src={selectedStory.content.url} 
+                  <img
+                    src={selectedStory.content.url}
                     alt="Story"
                     data-ai-hint="story content"
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 )}
-                
+
                 {selectedStory.content.type === 'text' && (
-                  <div className="h-full flex items-center justify-center p-8 bg-gradient-to-br from-primary/20 to-accent/20">
-                    <p className="text-white text-xl font-medium text-center leading-relaxed">
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20 p-8">
+                    <p className="text-center text-xl font-medium leading-relaxed text-white">
                       {selectedStory.content.text}
                     </p>
                   </div>
@@ -2615,18 +2786,12 @@ export default function CommunityPage() {
 
               {/* Navigation areas */}
               <div className="absolute inset-0 flex">
-                <div 
-                  className="flex-1 cursor-pointer"
-                  onClick={previousStory}
-                />
-                <div 
+                <div className="flex-1 cursor-pointer" onClick={previousStory} />
+                <div
                   className="flex-1 cursor-pointer"
                   onClick={() => setIsStoryPlaying(!isStoryPlaying)}
                 />
-                <div 
-                  className="flex-1 cursor-pointer"
-                  onClick={nextStory}
-                />
+                <div className="flex-1 cursor-pointer" onClick={nextStory} />
               </div>
 
               {/* Controls */}
@@ -2641,19 +2806,11 @@ export default function CommunityPage() {
                 </Button>
 
                 <div className="flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/20"
-                  >
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
                     <Heart className="h-4 w-4" />
                   </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/20"
-                  >
+
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -2668,7 +2825,7 @@ export default function CommunityPage() {
         <SheetContent className="w-full max-w-md p-0">
           {selectedUser && (
             <>
-              <SheetHeader className="p-6 border-b bg-gradient-to-br from-primary/10 to-accent/10">
+              <SheetHeader className="border-b bg-gradient-to-br from-primary/10 to-accent/10 p-6">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-20 w-20 border-4 border-primary">
                     <AvatarImage src={selectedUser.avatar} data-ai-hint="profile avatar" />
@@ -2677,18 +2834,18 @@ export default function CommunityPage() {
                   <div>
                     <SheetTitle className="text-xl">{selectedUser.name}</SheetTitle>
                     <p className="text-muted-foreground">{selectedUser.username}</p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="mt-1 flex items-center gap-2">
                       <Badge variant="secondary">Nível {selectedUser.level}</Badge>
                       {selectedUser.verified && (
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                        <Star className="h-4 w-4 fill-current text-yellow-500" />
                       )}
                     </div>
                   </div>
                 </div>
-                
-                <p className="text-sm text-muted-foreground mt-4">{selectedUser.bio}</p>
-                
-                <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+
+                <p className="mt-4 text-sm text-muted-foreground">{selectedUser.bio}</p>
+
+                <div className="mt-4 grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-xl font-bold text-primary">{selectedUser.pixelsOwned}</div>
                     <div className="text-xs text-muted-foreground">Pixels</div>
@@ -2698,42 +2855,43 @@ export default function CommunityPage() {
                     <div className="text-xs text-muted-foreground">Seguidores</div>
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-green-500">{selectedUser.achievements}</div>
+                    <div className="text-xl font-bold text-green-500">
+                      {selectedUser.achievements}
+                    </div>
                     <div className="text-xs text-muted-foreground">Conquistas</div>
                   </div>
                 </div>
               </SheetHeader>
-              
-              <div className="p-6 space-y-4">
+
+              <div className="space-y-4 p-6">
                 <div className="flex gap-2">
-                  <Button 
+                  <Button
                     onClick={() => followUser(selectedUser.id)}
                     variant={followingUsers.includes(selectedUser.id) ? 'outline' : 'default'}
                     className="flex-1"
                   >
                     {followingUsers.includes(selectedUser.id) ? (
                       <>
-                        <Users className="h-4 w-4 mr-2" />
-                        A Seguir
+                        <Users className="mr-2 h-4 w-4" />A Seguir
                       </>
                     ) : (
                       <>
-                        <UserPlus className="h-4 w-4 mr-2" />
+                        <UserPlus className="mr-2 h-4 w-4" />
                         Seguir
                       </>
                     )}
                   </Button>
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => sendPrivateMessage(selectedUser.id, selectedUser.name)}
                   >
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                    <MessageCircle className="mr-2 h-4 w-4" />
                     Mensagem
                   </Button>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-3">
                   <h3 className="font-semibold">Informações</h3>
                   <div className="space-y-2 text-sm">
@@ -2758,73 +2916,73 @@ export default function CommunityPage() {
         <SheetContent className="w-full max-w-md p-0">
           {selectedGroup && (
             <>
-              <SheetHeader className="p-6 border-b">
+              <SheetHeader className="border-b p-6">
                 <div className="flex items-center gap-4">
-                  <img 
-                    src={selectedGroup.avatar} 
+                  <img
+                    src={selectedGroup.avatar}
                     alt={selectedGroup.name}
                     data-ai-hint="group logo"
-                    className="w-16 h-16 rounded-full"
+                    className="h-16 w-16 rounded-full"
                   />
                   <div>
                     <SheetTitle>{selectedGroup.name}</SheetTitle>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="mt-1 flex items-center gap-2">
                       <Badge variant="outline">{selectedGroup.category}</Badge>
-                      {selectedGroup.isPrivate && (
-                        <Badge variant="secondary">Privado</Badge>
-                      )}
+                      {selectedGroup.isPrivate && <Badge variant="secondary">Privado</Badge>}
                     </div>
                   </div>
                 </div>
-                
-                <p className="text-sm text-muted-foreground mt-4">{selectedGroup.description}</p>
+
+                <p className="mt-4 text-sm text-muted-foreground">{selectedGroup.description}</p>
               </SheetHeader>
-              
-              <div className="p-6 space-y-6">
+
+              <div className="space-y-6 p-6">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold text-primary">{selectedGroup.members}</div>
                     <div className="text-sm text-muted-foreground">Membros</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-accent">{selectedGroup.moderators.length}</div>
+                    <div className="text-2xl font-bold text-accent">
+                      {selectedGroup.moderators.length}
+                    </div>
                     <div className="text-sm text-muted-foreground">Moderadores</div>
                   </div>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={() => joinGroup(selectedGroup.id)}
                   variant={selectedGroup.isJoined ? 'outline' : 'default'}
                   className="w-full"
                 >
                   {selectedGroup.isJoined ? (
                     <>
-                      <Users className="h-4 w-4 mr-2" />
+                      <Users className="mr-2 h-4 w-4" />
                       Sair do Grupo
                     </>
                   ) : (
                     <>
-                      <UserPlus className="h-4 w-4 mr-2" />
+                      <UserPlus className="mr-2 h-4 w-4" />
                       Juntar-se ao Grupo
                     </>
                   )}
                 </Button>
-                
+
                 <div className="space-y-3">
                   <h3 className="font-semibold">Atividade Recente</h3>
                   <div className="space-y-2">
-                    <div className="p-3 bg-muted/20 rounded-lg">
+                    <div className="rounded-lg bg-muted/20 p-3">
                       <p className="text-sm">{selectedGroup.recentActivity}</p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <h3 className="font-semibold">Regras do Grupo</h3>
                   <div className="space-y-2">
                     {selectedGroup.rules.map((rule, index) => (
                       <div key={index} className="flex items-start gap-2">
-                        <span className="text-primary font-bold text-sm">{index + 1}.</span>
+                        <span className="text-sm font-bold text-primary">{index + 1}.</span>
                         <span className="text-sm">{rule}</span>
                       </div>
                     ))}
@@ -2838,10 +2996,10 @@ export default function CommunityPage() {
 
       {/* Chat Dialog */}
       <Dialog open={!!selectedChat} onOpenChange={() => setSelectedChat(null)}>
-        <DialogContent className="max-w-md h-[80vh] p-0">
+        <DialogContent className="h-[80vh] max-w-md p-0">
           {selectedChat && (
             <>
-              <DialogHeader className="p-4 border-b">
+              <DialogHeader className="border-b p-4">
                 <DialogTitle>Conversa com {selectedChat.name}</DialogTitle>
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -2850,7 +3008,7 @@ export default function CommunityPage() {
                       <AvatarFallback>{selectedChat.name[0]}</AvatarFallback>
                     </Avatar>
                     {selectedChat.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                      <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
                     )}
                   </div>
                   <div>
@@ -2860,30 +3018,34 @@ export default function CommunityPage() {
                   </div>
                 </div>
               </DialogHeader>
-              
+
               <ScrollArea className="flex-1 p-4" ref={chatScrollRef}>
                 <div className="space-y-3">
                   {chatMessages.map(message => (
-                    <div 
-                      key={message.id} 
+                    <div
+                      key={message.id}
                       className={cn(
-                        "flex",
+                        'flex',
                         message.sender === 'Você' ? 'justify-end' : 'justify-start'
                       )}
                     >
-                      <div className={cn(
-                        "max-w-[80%] p-3 rounded-lg",
-                        message.sender === 'Você' 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted'
-                      )}>
+                      <div
+                        className={cn(
+                          'max-w-[80%] rounded-lg p-3',
+                          message.sender === 'Você'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        )}
+                      >
                         <p className="text-sm">{message.content}</p>
-                        <p className={cn(
-                          "text-xs mt-1",
-                          message.sender === 'Você' 
-                            ? 'text-primary-foreground/70' 
-                            : 'text-muted-foreground'
-                        )}>
+                        <p
+                          className={cn(
+                            'mt-1 text-xs',
+                            message.sender === 'Você'
+                              ? 'text-primary-foreground/70'
+                              : 'text-muted-foreground'
+                          )}
+                        >
                           {message.timestamp}
                         </p>
                       </div>
@@ -2891,14 +3053,14 @@ export default function CommunityPage() {
                   ))}
                 </div>
               </ScrollArea>
-              
-              <div className="p-4 border-t">
+
+              <div className="border-t p-4">
                 <div className="flex gap-2">
                   <Input
                     placeholder="Escrever mensagem..."
                     value={newChatMessage}
-                    onChange={(e) => setNewChatMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                    onChange={e => setNewChatMessage(e.target.value)}
+                    onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
                     className="flex-1"
                   />
                   <Button onClick={sendChatMessage} disabled={!newChatMessage.trim()}>
@@ -2913,35 +3075,39 @@ export default function CommunityPage() {
 
       {/* Event Details Dialog */}
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh]">
+        <DialogContent className="max-h-[90vh] max-w-2xl">
           {selectedEvent && (
             <>
               <DialogHeader>
-                <img 
-                  src={selectedEvent.imageUrl} 
+                <img
+                  src={selectedEvent.imageUrl}
                   alt={selectedEvent.title}
                   data-ai-hint="event poster"
-                  className="w-full h-48 object-cover rounded-lg mb-4"
+                  className="mb-4 h-48 w-full rounded-lg object-cover"
                 />
                 <DialogTitle className="text-2xl">{selectedEvent.title}</DialogTitle>
                 <DialogDescription>{selectedEvent.description}</DialogDescription>
               </DialogHeader>
-              
+
               <ScrollArea className="max-h-[50vh]">
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-muted/20 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">{selectedEvent.participants}</div>
+                    <div className="rounded-lg bg-muted/20 p-3 text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {selectedEvent.participants}
+                      </div>
                       <div className="text-sm text-muted-foreground">Participantes</div>
                     </div>
-                    <div className="text-center p-3 bg-muted/20 rounded-lg">
-                      <div className="text-2xl font-bold text-accent">{selectedEvent.prize.split(' ')[0]}</div>
+                    <div className="rounded-lg bg-muted/20 p-3 text-center">
+                      <div className="text-2xl font-bold text-accent">
+                        {selectedEvent.prize.split(' ')[0]}
+                      </div>
                       <div className="text-sm text-muted-foreground">Prémio</div>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h3 className="font-semibold mb-2">Requisitos</h3>
+                    <h3 className="mb-2 font-semibold">Requisitos</h3>
                     <ul className="space-y-1">
                       {selectedEvent.requirements.map((req, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm">
@@ -2951,20 +3117,20 @@ export default function CommunityPage() {
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div>
-                    <h3 className="font-semibold mb-2">Regras</h3>
+                    <h3 className="mb-2 font-semibold">Regras</h3>
                     <ul className="space-y-1">
                       {selectedEvent.rules.map((rule, index) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
-                          <span className="text-primary font-bold">{index + 1}.</span>
+                          <span className="font-bold text-primary">{index + 1}.</span>
                           {rule}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
+
+                  <div className="flex items-center justify-between rounded-lg bg-muted/20 p-4">
                     <div>
                       <p className="font-medium">Organizado por</p>
                       <p className="text-sm text-muted-foreground">{selectedEvent.organizer}</p>
@@ -2976,27 +3142,27 @@ export default function CommunityPage() {
                   </div>
                 </div>
               </ScrollArea>
-              
-              <div className="flex gap-3 pt-4 border-t">
-                <Button 
+
+              <div className="flex gap-3 border-t pt-4">
+                <Button
                   onClick={() => participateInEvent(selectedEvent.id)}
                   variant={selectedEvent.isParticipating ? 'outline' : 'default'}
                   className="flex-1"
                 >
                   {selectedEvent.isParticipating ? (
                     <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4" />
                       Participando
                     </>
                   ) : (
                     <>
-                      <Trophy className="h-4 w-4 mr-2" />
+                      <Trophy className="mr-2 h-4 w-4" />
                       Participar
                     </>
                   )}
                 </Button>
                 <Button variant="outline">
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Share2 className="mr-2 h-4 w-4" />
                   Partilhar
                 </Button>
               </div>
@@ -3007,17 +3173,17 @@ export default function CommunityPage() {
 
       {/* Tutorial Dialog */}
       <Dialog open={!!selectedTutorial} onOpenChange={() => setSelectedTutorial(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh]">
+        <DialogContent className="max-h-[90vh] max-w-2xl">
           {selectedTutorial && (
             <>
               <DialogHeader>
                 <DialogTitle>{selectedTutorial.title}</DialogTitle>
                 <DialogDescription>{selectedTutorial.description}</DialogDescription>
-                <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
+                <div className="mb-4 flex aspect-video items-center justify-center rounded-lg bg-muted">
                   <Play className="h-16 w-16 text-muted-foreground" />
                 </div>
               </DialogHeader>
-              
+
               <ScrollArea className="max-h-[40vh]">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-sm">
@@ -3034,13 +3200,13 @@ export default function CommunityPage() {
                       {selectedTutorial.views}
                     </span>
                   </div>
-                  
+
                   <div>
-                    <h3 className="font-semibold mb-2">O que vai aprender:</h3>
+                    <h3 className="mb-2 font-semibold">O que vai aprender:</h3>
                     <ul className="space-y-1">
                       {selectedTutorial.steps.map((step, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm">
-                          <span className="w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-bold">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
                             {index + 1}
                           </span>
                           {step}
@@ -3048,7 +3214,7 @@ export default function CommunityPage() {
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-2">
                     {selectedTutorial.tags.map(tag => (
                       <Badge key={tag} variant="outline" className="text-xs">
@@ -3058,23 +3224,19 @@ export default function CommunityPage() {
                   </div>
                 </div>
               </ScrollArea>
-              
-              <div className="flex gap-3 pt-4 border-t">
-                <Button 
-                  onClick={() => startTutorial(selectedTutorial.id)}
-                  className="flex-1"
-                >
-                  <Play className="h-4 w-4 mr-2" />
+
+              <div className="flex gap-3 border-t pt-4">
+                <Button onClick={() => startTutorial(selectedTutorial.id)} className="flex-1">
+                  <Play className="mr-2 h-4 w-4" />
                   Começar Tutorial
                 </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => saveTutorial(selectedTutorial.id)}
-                >
-                  <Bookmark className={cn(
-                    "h-4 w-4",
-                    selectedTutorial.isSaved && "fill-current text-blue-500"
-                  )} />
+                <Button variant="outline" onClick={() => saveTutorial(selectedTutorial.id)}>
+                  <Bookmark
+                    className={cn(
+                      'h-4 w-4',
+                      selectedTutorial.isSaved && 'fill-current text-blue-500'
+                    )}
+                  />
                 </Button>
                 <Button variant="outline">
                   <Share2 className="h-4 w-4" />
@@ -3084,7 +3246,6 @@ export default function CommunityPage() {
           )}
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

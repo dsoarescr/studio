@@ -20,6 +20,7 @@ import { SoundEffect, SOUND_EFFECTS } from '@/components/ui/sound-effect';
 import { Confetti } from '@/components/ui/confetti';
 import { useHapticFeedback } from '@/components/mobile/HapticFeedback';
 import { cn, formatDate, timeAgo } from '@/lib/utils';
+import EnhancedPixelPurchaseModal from './EnhancedPixelPurchaseModal';
 import {
   MapPin,
   Eye,
@@ -190,10 +191,11 @@ export default function DetailedPixelModal({
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [bookmarkCategory, setBookmarkCategory] = useState('investimento');
   const [bookmarkNote, setBookmarkNote] = useState('');
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   
   const { toast } = useToast();
   const { user } = useAuth();
-  const { addXp } = useUserStore();
+  const { addXp, credits } = useUserStore();
   const { vibrate } = useHapticFeedback();
 
   useEffect(() => {
@@ -821,7 +823,7 @@ export default function DetailedPixelModal({
                          Este pixel ainda não tem proprietário. Seja o primeiro a adquiri-lo!
                        </p>
                        <Button 
-                         onClick={onPurchase}
+                         onClick={() => setShowPurchaseModal(true)}
                          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                          size="lg"
                        >
@@ -1112,7 +1114,7 @@ export default function DetailedPixelModal({
              {/* Botão de Compra Principal */}
              {(!pixelData.owner || !pixelData.isOwnedByCurrentUser) && (
                <Button 
-                 onClick={onPurchase}
+                 onClick={() => setShowPurchaseModal(true)}
                  className="w-full bg-primary text-primary-foreground h-12 text-lg font-semibold hover:bg-primary/90 transition-colors"
                  size="lg"
                >
@@ -1128,6 +1130,43 @@ export default function DetailedPixelModal({
            </div>
         </div>
       </DialogContent>
+
+      {/* Enhanced Pixel Purchase Modal */}
+      {showPurchaseModal && pixelData && (
+        <EnhancedPixelPurchaseModal
+          isOpen={showPurchaseModal}
+          onClose={() => setShowPurchaseModal(false)}
+          pixelData={{
+            x: pixelData.x,
+            y: pixelData.y,
+            owner: pixelData.owner?.id,
+            price: pixelData.price,
+            region: pixelData.region,
+            rarity: pixelData.rarity as any,
+            color: pixelData.color,
+            title: pixelData.title,
+            description: pixelData.description,
+            isOwnedByCurrentUser: pixelData.isOwnedByCurrentUser,
+            isForSaleBySystem: pixelData.isForSaleBySystem,
+            specialCreditsPrice: pixelData.specialCreditsPrice,
+            history: (pixelData.history || []).map(h => ({
+              owner: h.user,
+              date: h.date,
+              price: h.price
+            })),
+            views: pixelData.views,
+            likes: pixelData.likes,
+            isProtected: pixelData.isProtected
+          }}
+          userCredits={credits}
+          onPurchase={async (pixelId, price) => {
+            // Executar a compra original
+            onPurchase();
+            setShowPurchaseModal(false);
+            return true;
+          }}
+        />
+      )}
     </Dialog>
   );
 }

@@ -59,9 +59,9 @@ export const useUserStore = create<UserState>()(
       totalEarned: 890,
       favoriteColor: '#D4A757',
       joinDate: '2024-01-15',
-      
-      addCredits: (amount) => {
-        set((state) => ({ credits: state.credits + amount }));
+
+      addCredits: amount => {
+        set(state => ({ credits: state.credits + amount }));
         // Sync with Firebase if user is logged in
         const syncToFirebase = async () => {
           try {
@@ -72,91 +72,92 @@ export const useUserStore = create<UserState>()(
           }
         };
       },
-      
-      removeCredits: (amount) => {
-        set((state) => ({ credits: Math.max(0, state.credits - amount) }));
+
+      removeCredits: amount => {
+        set(state => ({ credits: Math.max(0, state.credits - amount) }));
       },
-      
-      addSpecialCredits: (amount) => {
-        set((state) => ({ specialCredits: state.specialCredits + amount }));
+
+      addSpecialCredits: amount => {
+        set(state => ({ specialCredits: state.specialCredits + amount }));
       },
-      
-      removeSpecialCredits: (amount) => {
-        set((state) => ({ specialCredits: Math.max(0, state.specialCredits - amount) }));
+
+      removeSpecialCredits: amount => {
+        set(state => ({ specialCredits: Math.max(0, state.specialCredits - amount) }));
       },
-      
-      addXp: (amount) => {
-        set((state) => {
+
+      addXp: amount => {
+        set(state => {
           let newXp = state.xp + amount;
           let newLevel = state.level;
           let newXpMax = state.xpMax;
-          
+
           // Level up logic
           while (newXp >= newXpMax) {
             newXp -= newXpMax;
             newLevel++;
             newXpMax = Math.floor(newXpMax * 1.2); // 20% increase per level
-            
+
             // Add bonus credits for leveling up
             const bonusCredits = newLevel * 10;
             setTimeout(() => {
               get().addCredits(bonusCredits);
             }, 0);
           }
-          
+
           return {
             xp: newXp,
             level: newLevel,
-            xpMax: newXpMax
+            xpMax: newXpMax,
           };
         });
       },
-      
-      addPixel: () => set((state) => ({ pixels: state.pixels + 1 })),
-      removePixel: () => set((state) => ({ pixels: Math.max(0, state.pixels - 1) })),
-      unlockAchievement: () => set((state) => ({ achievements: state.achievements + 1 })),
-      addNotification: () => set((state) => ({ notifications: state.notifications + 1 })),
+
+      addPixel: () => set(state => ({ pixels: state.pixels + 1 })),
+      removePixel: () => set(state => ({ pixels: Math.max(0, state.pixels - 1) })),
+      unlockAchievement: () => set(state => ({ achievements: state.achievements + 1 })),
+      addNotification: () => set(state => ({ notifications: state.notifications + 1 })),
       clearNotifications: () => set({ notifications: 0 }),
-      
-      updateStreak: () => set((state) => {
-        const today = new Date().toISOString().split('T')[0];
-        const lastLogin = state.lastLoginDate;
-        
-        if (!lastLogin) {
-          return { streak: 1, lastLoginDate: today };
-        }
-        
-        const lastLoginDate = new Date(lastLogin);
-        const todayDate = new Date(today);
-        const diffTime = todayDate.getTime() - lastLoginDate.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays === 1) {
-          // Consecutive day
-          return { streak: state.streak + 1, lastLoginDate: today };
-        } else if (diffDays === 0) {
-          // Same day, no change
-          return state;
-        } else {
-          // Streak broken
-          return { streak: 1, lastLoginDate: today };
-        }
-      }),
-      
-      addSpent: (amount) => set((state) => ({ totalSpent: state.totalSpent + amount })),
-      addEarned: (amount) => set((state) => ({ totalEarned: state.totalEarned + amount })),
-      setFavoriteColor: (color) => set({ favoriteColor: color }),
-      
+
+      updateStreak: () =>
+        set(state => {
+          const today = new Date().toISOString().split('T')[0];
+          const lastLogin = state.lastLoginDate;
+
+          if (!lastLogin) {
+            return { streak: 1, lastLoginDate: today };
+          }
+
+          const lastLoginDate = new Date(lastLogin);
+          const todayDate = new Date(today);
+          const diffTime = todayDate.getTime() - lastLoginDate.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays === 1) {
+            // Consecutive day
+            return { streak: state.streak + 1, lastLoginDate: today };
+          } else if (diffDays === 0) {
+            // Same day, no change
+            return state;
+          } else {
+            // Streak broken
+            return { streak: 1, lastLoginDate: today };
+          }
+        }),
+
+      addSpent: amount => set(state => ({ totalSpent: state.totalSpent + amount })),
+      addEarned: amount => set(state => ({ totalEarned: state.totalEarned + amount })),
+      setFavoriteColor: color => set({ favoriteColor: color }),
+
       syncWithFirebase: async (userId: string) => {
         try {
           if (!db) {
             console.warn('Firebase not available for sync');
             return;
           }
-          
+
           const state = get();
           const userRef = doc(db, 'users', userId);
-          
+
           await updateDoc(userRef, {
             credits: state.credits,
             specialCredits: state.specialCredits,
@@ -176,17 +177,17 @@ export const useUserStore = create<UserState>()(
           console.error('Failed to sync with Firebase:', error);
         }
       },
-      
+
       loadFromFirebase: async (userId: string) => {
         try {
           if (!db) {
             console.warn('Firebase not available for loading');
             return;
           }
-          
+
           const userRef = doc(db, 'users', userId);
           const userSnap = await getDoc(userRef);
-          
+
           if (userSnap.exists()) {
             const userData = userSnap.data();
             set({
@@ -204,7 +205,9 @@ export const useUserStore = create<UserState>()(
               favoriteColor: userData.favoriteColor || '#D4A757',
               streak: userData.streak || 0,
               lastLoginDate: userData.lastLoginDate || null,
-              joinDate: userData.createdAt ? new Date(userData.createdAt.toDate()).toISOString().split('T')[0] : '2024-01-15',
+              joinDate: userData.createdAt
+                ? new Date(userData.createdAt.toDate()).toISOString().split('T')[0]
+                : '2024-01-15',
             });
           }
         } catch (error) {
@@ -214,7 +217,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'pixel-universe-user-store',
-      partialize: (state) => ({
+      partialize: state => ({
         credits: state.credits,
         specialCredits: state.specialCredits,
         level: state.level,
@@ -259,30 +262,30 @@ export const usePixelStore = create<PixelState>()(
   persist(
     (set, get) => ({
       soldPixels: [],
-      
-      addSoldPixel: (pixel) => {
-        set((state) => ({
+
+      addSoldPixel: pixel => {
+        set(state => ({
           soldPixels: [
             ...state.soldPixels.filter(p => !(p.x === pixel.x && p.y === pixel.y)),
-            { ...pixel, timestamp: new Date() }
-          ]
+            { ...pixel, timestamp: new Date() },
+          ],
         }));
       },
-      
+
       removeSoldPixel: (x, y) => {
-        set((state) => ({
-          soldPixels: state.soldPixels.filter(p => !(p.x === x && p.y === y))
+        set(state => ({
+          soldPixels: state.soldPixels.filter(p => !(p.x === x && p.y === y)),
         }));
       },
-      
+
       getPixelAt: (x, y) => {
         return get().soldPixels.find(p => p.x === x && p.y === y);
       },
-      
-      getPixelById: (id) => {
+
+      getPixelById: id => {
         return get().soldPixels.find(p => p.id === id);
       },
-      
+
       clearPixels: () => {
         set({ soldPixels: [] });
       },
@@ -315,7 +318,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    set => ({
       isOnline: true,
       isDarkMode: false,
       performanceMode: false,
@@ -324,15 +327,16 @@ export const useAppStore = create<AppState>()(
       soundEffects: true,
       notifications: true,
       language: 'pt-PT',
-      
-      setIsOnline: (online) => set({ isOnline: online }),
-      toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
-      togglePerformanceMode: () => set((state) => ({ performanceMode: !state.performanceMode })),
-      toggleHighQualityRendering: () => set((state) => ({ highQualityRendering: !state.highQualityRendering })),
-      toggleAnimations: () => set((state) => ({ animations: !state.animations })),
-      toggleSoundEffects: () => set((state) => ({ soundEffects: !state.soundEffects })),
-      toggleNotifications: () => set((state) => ({ notifications: !state.notifications })),
-      setLanguage: (lang) => set({ language: lang }),
+
+      setIsOnline: online => set({ isOnline: online }),
+      toggleDarkMode: () => set(state => ({ isDarkMode: !state.isDarkMode })),
+      togglePerformanceMode: () => set(state => ({ performanceMode: !state.performanceMode })),
+      toggleHighQualityRendering: () =>
+        set(state => ({ highQualityRendering: !state.highQualityRendering })),
+      toggleAnimations: () => set(state => ({ animations: !state.animations })),
+      toggleSoundEffects: () => set(state => ({ soundEffects: !state.soundEffects })),
+      toggleNotifications: () => set(state => ({ notifications: !state.notifications })),
+      setLanguage: lang => set({ language: lang }),
     }),
     {
       name: 'pixel-universe-app-store',
@@ -360,7 +364,7 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    set => ({
       performanceMode: false,
       highQualityRendering: true,
       animations: true,
@@ -368,14 +372,15 @@ export const useSettingsStore = create<SettingsState>()(
       notifications: true,
       language: 'pt-PT',
       theme: 'system',
-      
-      togglePerformanceMode: () => set((state) => ({ performanceMode: !state.performanceMode })),
-      toggleHighQualityRendering: () => set((state) => ({ highQualityRendering: !state.highQualityRendering })),
-      toggleAnimations: () => set((state) => ({ animations: !state.animations })),
-      toggleSoundEffects: () => set((state) => ({ soundEffects: !state.soundEffects })),
-      toggleNotifications: () => set((state) => ({ notifications: !state.notifications })),
-      setLanguage: (lang) => set({ language: lang }),
-      setTheme: (theme) => set({ theme: theme }),
+
+      togglePerformanceMode: () => set(state => ({ performanceMode: !state.performanceMode })),
+      toggleHighQualityRendering: () =>
+        set(state => ({ highQualityRendering: !state.highQualityRendering })),
+      toggleAnimations: () => set(state => ({ animations: !state.animations })),
+      toggleSoundEffects: () => set(state => ({ soundEffects: !state.soundEffects })),
+      toggleNotifications: () => set(state => ({ notifications: !state.notifications })),
+      setLanguage: lang => set({ language: lang }),
+      setTheme: theme => set({ theme: theme }),
     }),
     {
       name: 'pixel-universe-settings-store',
